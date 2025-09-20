@@ -1,12 +1,12 @@
-import { EllipsisVertical } from 'lucide-react';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import { EllipsisVertical } from "lucide-react";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   AccordionMenu,
   AccordionMenuGroup,
   AccordionMenuItem,
-} from '@/components/ui/accordion-menu';
-import { Button } from '@/components/ui/button';
-import { SearchDocsItem } from './types';
+} from "@/components/ui/accordion-menu";
+import { Button } from "@/components/ui/button";
+import { SearchDocsItem } from "./types";
 
 export function SearchDocs({ items }: { items: SearchDocsItem[] }) {
   // Example items moved inside the component
@@ -15,7 +15,7 @@ export function SearchDocs({ items }: { items: SearchDocsItem[] }) {
       type="single"
       collapsible
       classNames={{
-        separator: '-mx-2 mb-2.5',
+        separator: "-mx-2 mb-2.5",
       }}
     >
       <AccordionMenuGroup>
@@ -45,7 +45,7 @@ export function SearchDocs({ items }: { items: SearchDocsItem[] }) {
             </AccordionMenuItem>
           ))}
         </div>
-        <AccordionMenuItem className="px-4 pt-2.5" value={''}>
+        <AccordionMenuItem className="px-4 pt-2.5" value={""}>
           <Button variant="outline" className="mx-auto w-full max-w-full">
             Go to Users
           </Button>

@@ -1,9 +1,9 @@
-import { ChevronDown } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { MenuConfig } from '@/config/types';
-import { cn } from '@/lib/utils';
-import { useMenu } from '@/hooks/use-menu';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ChevronDown } from "lucide-react";
+import { MenuConfig } from "@/config/types";
+import { cn } from "@/lib/utils";
+import { useMenu } from "@/hooks/use-menu";
 import {
   Menubar,
   MenubarContent,
@@ -13,7 +13,7 @@ import {
   MenubarSubContent,
   MenubarSubTrigger,
   MenubarTrigger,
-} from '@/components/ui/menubar';
+} from "@/components/ui/menubar";
 
 const NavbarMenu = ({ items }: { items: MenuConfig }) => {
   const pathname = usePathname();
@@ -26,12 +26,12 @@ const NavbarMenu = ({ items }: { items: MenuConfig }) => {
           <MenubarMenu key={index}>
             <MenubarTrigger
               className={cn(
-                'flex items-center gap-1.5 px-3 py-3.5 text-sm text-secondary-foreground',
-                'rounded-none border-b-2 border-transparent bg-transparent!',
-                'hover:text-primary hover:bg-transparent',
-                'focus:text-primary focus:bg-transparent',
-                'data-[state=open]:bg-transparent data-[state=open]:text-primary',
-                'data-[here=true]:text-primary data-[here=true]:border-primary',
+                "flex items-center gap-1.5 px-3 py-3.5 text-sm text-secondary-foreground",
+                "rounded-none border-b-2 border-transparent bg-transparent!",
+                "hover:text-primary hover:bg-transparent",
+                "focus:text-primary focus:bg-transparent",
+                "data-[state=open]:bg-transparent data-[state=open]:text-primary",
+                "data-[here=true]:text-primary data-[here=true]:border-primary",
               )}
               data-active={isActive(item.path) || undefined}
               data-here={hasActiveChild(item.children) || undefined}
@@ -50,15 +50,15 @@ const NavbarMenu = ({ items }: { items: MenuConfig }) => {
             <MenubarTrigger
               asChild
               className={cn(
-                'flex items-center py-3.5 text-sm text-secondary-foreground px-3',
-                'rounded-none border-b-2 border-transparent bg-transparent!',
-                'hover:text-primary hover:bg-transparent',
-                'focus:text-primary focus:bg-transparent',
-                'data-[active=true]:text-primary data-[active=true]:border-primary',
+                "flex items-center py-3.5 text-sm text-secondary-foreground px-3",
+                "rounded-none border-b-2 border-transparent bg-transparent!",
+                "hover:text-primary hover:bg-transparent",
+                "focus:text-primary focus:bg-transparent",
+                "data-[active=true]:text-primary data-[active=true]:border-primary",
               )}
             >
               <Link
-                href={item.path || ''}
+                href={item.path || ""}
                 data-active={isActive(item.path) || undefined}
                 data-here={hasActiveChild(item.children) || undefined}
               >
@@ -95,7 +95,7 @@ const NavbarMenu = ({ items }: { items: MenuConfig }) => {
             data-active={isActive(item.path) || undefined}
             data-here={hasActiveChild(item.children) || undefined}
           >
-            <Link href={item.path || ''}>{item.title}</Link>
+            <Link href={item.path || ""}>{item.title}</Link>
           </MenubarItem>
         );
       }

@@ -1,6 +1,6 @@
-import { createContext, ReactNode, useContext, useEffect } from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { createContext, ReactNode, useContext, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const HEADER_HEIGHT = "108px";
 const HEADER_HEIGHT_MOBILE = "60px";
@@ -24,14 +24,18 @@ interface LayoutProviderProps {
   bodyClassName?: string;
 }
 
-export function LayoutProvider({ children, style: customStyle, bodyClassName = '' }: LayoutProviderProps) {
+export function LayoutProvider({
+  children,
+  style: customStyle,
+  bodyClassName = "",
+}: LayoutProviderProps) {
   const isMobile = useIsMobile();
 
   const defaultStyle: React.CSSProperties = {
-    '--sidebar-width': SIDEBAR_WIDTH,
-    '--sidebar-width-mobile': SIDEBAR_WIDTH_MOBILE,
-    '--header-height': HEADER_HEIGHT,
-    '--header-height-mobile': HEADER_HEIGHT_MOBILE,
+    "--sidebar-width": SIDEBAR_WIDTH,
+    "--sidebar-width-mobile": SIDEBAR_WIDTH_MOBILE,
+    "--header-height": HEADER_HEIGHT,
+    "--header-height-mobile": HEADER_HEIGHT_MOBILE,
   } as React.CSSProperties;
 
   const style: React.CSSProperties = {
@@ -60,17 +64,11 @@ export function LayoutProvider({ children, style: customStyle, bodyClassName = '
       value={{
         bodyClassName,
         style,
-        isMobile
+        isMobile,
       }}
     >
-      <div
-        data-slot="layout-wrapper"
-        className="flex grow"
-        style={style}
-      >
-        <TooltipProvider delayDuration={0}>
-          {children}
-        </TooltipProvider>
+      <div data-slot="layout-wrapper" className="flex grow" style={style}>
+        <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
       </div>
     </LayoutContext.Provider>
   );
@@ -80,7 +78,7 @@ export function LayoutProvider({ children, style: customStyle, bodyClassName = '
 export const useLayout = () => {
   const context = useContext(LayoutContext);
   if (!context) {
-    throw new Error('useLayout must be used within a LayoutProvider');
+    throw new Error("useLayout must be used within a LayoutProvider");
   }
   return context;
 };

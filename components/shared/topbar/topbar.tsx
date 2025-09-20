@@ -1,10 +1,10 @@
-import { Heart, Search, ShoppingCart, UserCircle } from 'lucide-react';
-import { usePathname } from 'next/navigation';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { UserDropdownMenu } from './user-dropdown-menu';
-import { useStoreClient } from './context';
+import { usePathname } from "next/navigation";
+import { Heart, Search, ShoppingCart, UserCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useStoreClient } from "./context";
+import { UserDropdownMenu } from "./user-dropdown-menu";
 
 export function StoreClientTopbar() {
   const pathname = usePathname();
@@ -13,11 +13,11 @@ export function StoreClientTopbar() {
   return (
     <>
       <div className="flex items-center gap-1">
-        {!pathname.includes('store-client/home') &&
-          !pathname.includes('store-client/wishlist') &&
-          !pathname.includes('store-client/search-results-grid') &&
-          !pathname.includes('store-client/search-results-list') &&
-          !pathname.includes('store-client/product-details') && (
+        {!pathname.includes("store-client/home") &&
+          !pathname.includes("store-client/wishlist") &&
+          !pathname.includes("store-client/search-results-grid") &&
+          !pathname.includes("store-client/search-results-list") &&
+          !pathname.includes("store-client/product-details") && (
             <div className="relative lg:w-[240px] me-3">
               <Search className="size-4 text-muted-foreground absolute top-1/2 -translate-y-1/2 start-2" />
               <Input type="text" className="px-7" placeholder="Search shop" />

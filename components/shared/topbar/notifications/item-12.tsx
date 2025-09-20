@@ -1,14 +1,14 @@
-import { Heart, Mail } from 'lucide-react';
-import Link from 'next/link';
+import Link from "next/link";
+import { Heart, Mail } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+} from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 
 export default function Item12() {
   return (
@@ -24,12 +24,15 @@ export default function Item12() {
       <div className="flex flex-col gap-3.5">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               Selene Silverleaf
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              created message to{' '}
+              {" "}
+              created message to{" "}
             </span>
             <Link href="#" className="hover:text-primary text-primary">
               SiteSculpt

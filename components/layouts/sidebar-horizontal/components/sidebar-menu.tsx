@@ -1,14 +1,14 @@
 import { useCallback } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MENU_SIDEBAR } from "@/config/layout-18.config";
 import {
   AccordionMenu,
   AccordionMenuGroup,
   AccordionMenuItem,
   AccordionMenuLabel,
-} from '@/components/ui/accordion-menu';
+} from "@/components/ui/accordion-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 
 export function SidebarMenu() {
   const pathname = usePathname();
@@ -16,7 +16,8 @@ export function SidebarMenu() {
   // Memoize matchPath to prevent unnecessary re-renders
   const matchPath = useCallback(
     (path: string): boolean =>
-      path === pathname || (path.length > 1 && pathname.startsWith(path) && path !== '/layout-18'),
+      path === pathname ||
+      (path.length > 1 && pathname.startsWith(path) && path !== "/layout-18"),
     [pathname],
   );
 
@@ -28,30 +29,28 @@ export function SidebarMenu() {
         type="multiple"
         className="space-y-7.5"
         classNames={{
-          separator: '-mx-2 mb-2.5',
-          label: 'text-xs font-normal text-muted-foreground',
-          item: 'h-8.5 px-2.5 text-sm font-normal text-foreground hover:text-primary data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground [&[data-selected=true]_svg]:opacity-100',
-          group: '',
+          separator: "-mx-2 mb-2.5",
+          label: "text-xs font-normal text-muted-foreground",
+          item: "h-8.5 px-2.5 text-sm font-normal text-foreground hover:text-primary data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground [&[data-selected=true]_svg]:opacity-100",
+          group: "",
         }}
       >
         {MENU_SIDEBAR.map((item, index) => {
           return (
             <AccordionMenuGroup key={index}>
-              <AccordionMenuLabel>
-                {item.title}
-              </AccordionMenuLabel>
+              <AccordionMenuLabel>{item.title}</AccordionMenuLabel>
               {item.children?.map((child, index) => {
                 return (
-                  <AccordionMenuItem key={index} value={child.path || '#'}>
-                    <Link href={child.path || '#'}>
+                  <AccordionMenuItem key={index} value={child.path || "#"}>
+                    <Link href={child.path || "#"}>
                       {child.icon && <child.icon />}
                       <span>{child.title}</span>
-                    </Link>          
+                    </Link>
                   </AccordionMenuItem>
-                )
+                );
               })}
             </AccordionMenuGroup>
-          )
+          );
         })}
       </AccordionMenu>
     </ScrollArea>

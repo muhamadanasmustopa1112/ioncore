@@ -1,6 +1,6 @@
-import { Metadata } from 'next';
-import { LayoutProvider } from './components/context';
-import { Wrapper } from './components/wrapper';
+import { Metadata } from "next";
+import { LayoutProvider } from "./components/context";
+import { Wrapper } from "./components/wrapper";
 
 // Generate metadata for the layout
 export async function generateMetadata(): Promise<Metadata> {
@@ -8,8 +8,8 @@ export async function generateMetadata(): Promise<Metadata> {
   // const { params } = props;
 
   return {
-    title: 'Dashboard',
-    description: '',
+    title: "Dashboard",
+    description: "",
   };
 }
 
@@ -22,11 +22,11 @@ export function SidebarVerticalLayout({
     <LayoutProvider
       style={
         {
-          '--sidebar-width': '300px',
-          '--sidebar-collapsed-width': '60px',
-          '--sidebar-header-height': '54px',
-          '--header-height': '60px',
-          '--header-height-mobile': '60px',
+          "--sidebar-width": "300px",
+          "--sidebar-collapsed-width": "60px",
+          "--sidebar-header-height": "54px",
+          "--header-height": "60px",
+          "--header-height-mobile": "60px",
         } as React.CSSProperties
       }
     >

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 export interface ScrollspyMenuItem {
   title: string;
@@ -23,8 +23,8 @@ const ScrollspyMenu = ({ items }: ScrollspyMenuProps) => {
         key={index}
         data-scrollspy-anchor={item.target}
         className={cn(
-          'cursor-pointer flex items-center rounded-lg ps-2.5 pe-2.5 py-1.5 border border-transparent text-accent-foreground hover:text-primary data-[active=true]:bg-accent data-[active=true]:text-primary data-[active=true]:font-medium',
-          indent ? 'gap-3.5' : 'gap-1.5',
+          "cursor-pointer flex items-center rounded-lg ps-2.5 pe-2.5 py-1.5 border border-transparent text-accent-foreground hover:text-primary data-[active=true]:bg-accent data-[active=true]:text-primary data-[active=true]:font-medium",
+          indent ? "gap-3.5" : "gap-1.5",
         )}
       >
         <span className="flex w-1.5 relative before:absolute start-px rtl:-start-[5px] before:top-0 before:size-1.5 before:rounded-full before:-translate-x-2/4 before:-translate-y-2/4 [[data-active=true]>&]:before:bg-primary"></span>

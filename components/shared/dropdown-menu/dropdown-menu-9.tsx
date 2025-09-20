@@ -1,15 +1,15 @@
-import { ReactNode, useState } from 'react';
-import { Award, Coffee, Info, TrendingUp } from 'lucide-react';
+import { ReactNode, useState } from "react";
+import { Award, Coffee, Info, TrendingUp } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Switch } from '@/components/ui/switch';
-import { GiveAwardDialog } from '../dialogs/give-award-dialog';
-import { ReportUserDialog } from '../dialogs/report-user-dialog';
-import { ShareProfileDialog } from '../dialogs/share-profile';
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
+import { GiveAwardDialog } from "../dialogs/give-award-dialog";
+import { ReportUserDialog } from "../dialogs/report-user-dialog";
+import { ShareProfileDialog } from "../dialogs/share-profile";
 
 export function DropdownMenu9({ trigger }: { trigger: ReactNode }) {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);

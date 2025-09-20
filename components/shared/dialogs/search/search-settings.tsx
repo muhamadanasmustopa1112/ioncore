@@ -1,9 +1,9 @@
 import {
   AccordionMenu,
   AccordionMenuGroup,
-} from '@/components/ui/accordion-menu';
-import { SearchSettingsItems } from './search-settings-items';
-import { SearchSettingsGroup } from './types';
+} from "@/components/ui/accordion-menu";
+import { SearchSettingsItems } from "./search-settings-items";
+import { SearchSettingsGroup } from "./types";
 
 export function SearchSettings({ items }: { items: SearchSettingsGroup[] }) {
   return (
@@ -11,7 +11,7 @@ export function SearchSettings({ items }: { items: SearchSettingsGroup[] }) {
       type="single"
       collapsible
       classNames={{
-        separator: '-mx-2 mb-2.5',
+        separator: "-mx-2 mb-2.5",
       }}
     >
       <AccordionMenuGroup>

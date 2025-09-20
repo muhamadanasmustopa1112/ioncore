@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Toolbar,
   ToolbarActions,
   ToolbarDescription,
   ToolbarHeading,
   ToolbarPageTitle,
-} from '@/components/layouts/sidebar-horizontal/components/toolbar';
+} from "@/components/layouts/sidebar-horizontal/components/toolbar";
 
 export default function Page() {
   return (

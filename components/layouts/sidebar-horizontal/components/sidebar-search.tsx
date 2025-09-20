@@ -1,7 +1,25 @@
-import { Rows3, Search, Filter, SortAsc, SortDesc, Grid3X3, List, Settings, Download, RefreshCw } from "lucide-react";
-import { Input, InputWrapper } from "@/components/ui/input";
+import {
+  Download,
+  Filter,
+  Grid3X3,
+  List,
+  RefreshCw,
+  Rows3,
+  Search,
+  Settings,
+  SortAsc,
+  SortDesc,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input, InputWrapper } from "@/components/ui/input";
 
 export function SidebarSearch() {
   const handleInputChange = () => {};
@@ -10,7 +28,11 @@ export function SidebarSearch() {
     <div className="p-5 border-b border-border shrink-0 flex items-center justify-between gap-2.5">
       <InputWrapper>
         <Search />
-        <Input type="search" placeholder="Search Billing" onChange={handleInputChange} />
+        <Input
+          type="search"
+          placeholder="Search Billing"
+          onChange={handleInputChange}
+        />
       </InputWrapper>
 
       <DropdownMenu>
@@ -30,12 +52,12 @@ export function SidebarSearch() {
             <List />
             List View
           </DropdownMenuItem>
-          
+
           <DropdownMenuSeparator />
-          
+
           <DropdownMenuLabel>Sort & Filter</DropdownMenuLabel>
           <DropdownMenuItem>
-            <SortAsc/>
+            <SortAsc />
             Sort Ascending
           </DropdownMenuItem>
           <DropdownMenuItem>
@@ -46,9 +68,9 @@ export function SidebarSearch() {
             <Filter />
             Advanced Filters
           </DropdownMenuItem>
-          
+
           <DropdownMenuSeparator />
-          
+
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem>
             <Download />

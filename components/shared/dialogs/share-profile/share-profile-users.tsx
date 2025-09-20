@@ -1,32 +1,32 @@
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 
 export function ShareProfileUsers() {
   const items = [
     {
-      avatar: '300-3.png',
-      userName: 'Tyler Hero',
-      email: 'tyler.hero@gmail.com',
-      role: 'owner',
+      avatar: "300-3.png",
+      userName: "Tyler Hero",
+      email: "tyler.hero@gmail.com",
+      role: "owner",
     },
     {
-      avatar: '300-1.png',
-      userName: 'Esther Howard',
-      email: 'esther.howard@gmail.com',
-      role: 'editor',
+      avatar: "300-1.png",
+      userName: "Esther Howard",
+      email: "esther.howard@gmail.com",
+      role: "editor",
     },
     {
-      avatar: '300-11.png',
-      userName: 'Jacob Jones',
-      email: 'jacob.jones@gmail.com',
-      role: 'viewer',
+      avatar: "300-11.png",
+      userName: "Jacob Jones",
+      email: "jacob.jones@gmail.com",
+      role: "viewer",
     },
   ];
 

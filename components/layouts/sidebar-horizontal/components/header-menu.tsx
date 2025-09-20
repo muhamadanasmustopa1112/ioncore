@@ -1,9 +1,9 @@
-import { useMenu } from "@/hooks/use-menu";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MENU_HEADER } from "@/config/layout-18.config";
+import { cn } from "@/lib/utils";
+import { useMenu } from "@/hooks/use-menu";
 import { Button } from "@/components/ui/button";
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 
 export function HeaderMenu() {
   const pathname = usePathname();
@@ -15,22 +15,20 @@ export function HeaderMenu() {
         {MENU_HEADER.map((item, index) => {
           const active = isActive(item.path);
           return (
-            <Button 
+            <Button
               key={index}
               variant="ghost"
               className={cn(
                 "inline-flex items-center text-sm font-medium",
-                active 
-                  ? "bg-muted text-foreground border" 
-                  : "text-secondary-foreground hover:text-primary"
+                active
+                  ? "bg-muted text-foreground border"
+                  : "text-secondary-foreground hover:text-primary",
               )}
               asChild
             >
-              <Link href={item.path || '#'}>
-                {item.title}
-              </Link>
+              <Link href={item.path || "#"}>{item.title}</Link>
             </Button>
-          )
+          );
         })}
       </nav>
     </div>

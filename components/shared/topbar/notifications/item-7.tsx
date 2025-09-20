@@ -1,4 +1,4 @@
-import { AvatarGroup }  from '@/components/layouts/layout-1/shared/common/avatar-group';
+import Link from "next/link";
 import {
   CalendarDays,
   Lock,
@@ -6,18 +6,18 @@ import {
   NotepadText,
   Timer,
   Users,
-} from 'lucide-react';
-import Link from 'next/link';
+} from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+} from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { AvatarGroup } from "@/components/layouts/layout-1/shared/common/avatar-group";
 
 export default function Item7() {
   return (
@@ -33,12 +33,15 @@ export default function Item7() {
       <div className="flex flex-col gap-3.5 grow">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               Nova Hawthorne
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              sent you an meeting invation{' '}
+              {" "}
+              sent you an meeting invation{" "}
             </span>
           </div>
           <span className="flex items-center text-xs font-medium text-muted-foreground">
@@ -115,12 +118,12 @@ export default function Item7() {
             <AvatarGroup
               size="size-6"
               group={[
-                { path: '/media/avatars/300-4.png' },
-                { path: '/media/avatars/300-1.png' },
-                { path: '/media/avatars/300-2.png' },
+                { path: "/media/avatars/300-4.png" },
+                { path: "/media/avatars/300-1.png" },
+                { path: "/media/avatars/300-2.png" },
                 {
-                  fallback: '+3',
-                  variant: 'text-white size-6 ring-background bg-green-500',
+                  fallback: "+3",
+                  variant: "text-white size-6 ring-background bg-green-500",
                 },
               ]}
             />

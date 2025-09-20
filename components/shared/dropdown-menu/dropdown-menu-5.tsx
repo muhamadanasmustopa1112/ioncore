@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { FileDown, FilePlus, FileUp, Settings } from 'lucide-react';
-import Link from 'next/link';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { FileDown, FilePlus, FileUp, Settings } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export function DropdownMenu5({ trigger }: { trigger: ReactNode }) {
   return (
@@ -21,7 +21,7 @@ export function DropdownMenu5({ trigger }: { trigger: ReactNode }) {
             <FilePlus />
             <span>Add</span>
           </Link>
-        </DropdownMenuItem> 
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="#">
             <FileDown />

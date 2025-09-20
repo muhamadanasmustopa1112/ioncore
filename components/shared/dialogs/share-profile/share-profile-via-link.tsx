@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Copy, Info } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import { Copy, Info } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function ShareProfileViaLink() {
-  const [linkInput, setLinkInput] = useState('');
+  const [linkInput, setLinkInput] = useState("");
   return (
     <div className="flex flex-col px-5 gap-2.5">
       <div className="flex flex-center gap-1">

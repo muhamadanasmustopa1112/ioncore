@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Dialog,
   DialogBody,
@@ -7,7 +7,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 export function WelcomeMessageDialog({
   open,
@@ -26,12 +26,12 @@ export function WelcomeMessageDialog({
         <DialogBody className="flex flex-col items-center pt-10 pb-10">
           <div className="mb-10">
             <img
-              src={toAbsoluteUrl('/media/illustrations/21.svg')}
+              src={toAbsoluteUrl("/media/illustrations/21.svg")}
               className="dark:hidden max-h-[140px]"
               alt="image"
             />
             <img
-              src={toAbsoluteUrl('/media/illustrations/21-dark.svg')}
+              src={toAbsoluteUrl("/media/illustrations/21-dark.svg")}
               className="light:hidden max-h-[140px]"
               alt="image"
             />

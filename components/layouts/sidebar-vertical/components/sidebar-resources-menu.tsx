@@ -1,16 +1,16 @@
 import { useCallback } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { MENU_SIDEBAR_RESOURCES } from "@/config/layout-14.config";
 import {
   AccordionMenu,
   AccordionMenuIndicator,
-  AccordionMenuSub,
-  AccordionMenuSubTrigger,
-  AccordionMenuSubContent,
   AccordionMenuItem,
-} from '@/components/ui/accordion-menu';
-import { Badge } from '@/components/ui/badge';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+  AccordionMenuSub,
+  AccordionMenuSubContent,
+  AccordionMenuSubTrigger,
+} from "@/components/ui/accordion-menu";
+import { Badge } from "@/components/ui/badge";
 
 export function SidebarResourcesMenu() {
   const pathname = usePathname();
@@ -18,7 +18,8 @@ export function SidebarResourcesMenu() {
   // Memoize matchPath to prevent unnecessary re-renders
   const matchPath = useCallback(
     (path: string): boolean =>
-      path === pathname || (path.length > 1 && pathname.startsWith(path) && path !== '/layout-14'),
+      path === pathname ||
+      (path.length > 1 && pathname.startsWith(path) && path !== "/layout-14"),
     [pathname],
   );
 
@@ -31,9 +32,10 @@ export function SidebarResourcesMenu() {
       defaultValue="resource-trigger"
       className="space-y-7.5 px-2.5"
       classNames={{
-        item: 'h-8.5 px-2.5 text-sm font-normal text-foreground hover:text-primary data-[selected=true]:bg-muted data-[selected=true]:text-foreground [&[data-selected=true]_svg]:opacity-100',
-        subTrigger: 'text-xs font-normal text-muted-foreground hover:bg-transparent',
-        subContent: 'ps-0',
+        item: "h-8.5 px-2.5 text-sm font-normal text-foreground hover:text-primary data-[selected=true]:bg-muted data-[selected=true]:text-foreground [&[data-selected=true]_svg]:opacity-100",
+        subTrigger:
+          "text-xs font-normal text-muted-foreground hover:bg-transparent",
+        subContent: "ps-0",
       }}
     >
       {MENU_SIDEBAR_RESOURCES.map((item, index) => (
@@ -43,13 +45,21 @@ export function SidebarResourcesMenu() {
             <AccordionMenuIndicator />
           </AccordionMenuSubTrigger>
 
-          <AccordionMenuSubContent type="single" collapsible parentValue="resource-trigger">
+          <AccordionMenuSubContent
+            type="single"
+            collapsible
+            parentValue="resource-trigger"
+          >
             {item.children?.map((child, index) => (
-              <AccordionMenuItem key={index} value={child.path || '#'}>
-                <Link href={child.path || '#'}>
+              <AccordionMenuItem key={index} value={child.path || "#"}>
+                <Link href={child.path || "#"}>
                   {child.icon && <child.icon />}
                   <span>{child.title}</span>
-                  {child.badge == 'Pro' && <Badge size="sm" variant="success" appearance="light">{child.badge}</Badge>}
+                  {child.badge == "Pro" && (
+                    <Badge size="sm" variant="success" appearance="light">
+                      {child.badge}
+                    </Badge>
+                  )}
                 </Link>
               </AccordionMenuItem>
             ))}

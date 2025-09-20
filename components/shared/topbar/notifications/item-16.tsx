@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 export default function Item16() {
   return (
@@ -23,12 +23,15 @@ export default function Item16() {
       <div className="flex flex-col gap-3 grow">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               Ethan Parker
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              created a new tasks to{' '}
+              {" "}
+              created a new tasks to{" "}
             </span>
             <Link href="#" className="hover:text-primary text-primary">
               Site Sculpt
@@ -56,14 +59,14 @@ export default function Item16() {
             <div className="flex -space-x-2">
               <Avatar className="size-6">
                 <AvatarImage
-                  src={toAbsoluteUrl('/media/avatars/300-3.png')}
+                  src={toAbsoluteUrl("/media/avatars/300-3.png")}
                   alt="image"
                 />
                 <AvatarFallback>CH</AvatarFallback>
               </Avatar>
               <Avatar className="size-6">
                 <AvatarImage
-                  src={toAbsoluteUrl('/media/avatars/300-2.png')}
+                  src={toAbsoluteUrl("/media/avatars/300-2.png")}
                   alt="image"
                 />
                 <AvatarFallback>CH</AvatarFallback>

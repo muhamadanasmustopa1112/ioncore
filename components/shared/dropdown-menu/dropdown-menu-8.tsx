@@ -1,13 +1,13 @@
-import { ReactNode } from 'react';
-import { Copy, FileText, Pencil, Trash2 } from 'lucide-react';
-import Link from 'next/link';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { Copy, FileText, Pencil, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export function DropdownMenu8({ trigger }: { trigger: ReactNode }) {
   return (

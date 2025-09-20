@@ -1,4 +1,5 @@
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
+import Link from "next/link";
 import {
   BetweenHorizontalStart,
   Coffee,
@@ -12,12 +13,11 @@ import {
   SquareCode,
   UserCircle,
   Users,
-} from 'lucide-react';
-import { useTheme } from 'next-themes';
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,33 +29,33 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 
 const I18N_LANGUAGES = [
   {
-    label: 'English',
-    code: 'en',
-    direction: 'ltr',
-    flag: toAbsoluteUrl('/media/flags/united-states.svg'),
+    label: "English",
+    code: "en",
+    direction: "ltr",
+    flag: toAbsoluteUrl("/media/flags/united-states.svg"),
   },
   {
-    label: 'Arabic (Saudi)',
-    code: 'ar',
-    direction: 'rtl',
-    flag: toAbsoluteUrl('/media/flags/saudi-arabia.svg'),
+    label: "Arabic (Saudi)",
+    code: "ar",
+    direction: "rtl",
+    flag: toAbsoluteUrl("/media/flags/saudi-arabia.svg"),
   },
   {
-    label: 'French',
-    code: 'fr',
-    direction: 'ltr',
-    flag: toAbsoluteUrl('/media/flags/france.svg'),
+    label: "French",
+    code: "fr",
+    direction: "ltr",
+    flag: toAbsoluteUrl("/media/flags/france.svg"),
   },
   {
-    label: 'Chinese',
-    code: 'zh',
-    direction: 'ltr',
-    flag: toAbsoluteUrl('/media/flags/china.svg'),
+    label: "Chinese",
+    code: "zh",
+    direction: "ltr",
+    flag: toAbsoluteUrl("/media/flags/china.svg"),
   },
 ];
 
@@ -64,7 +64,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const { theme, setTheme } = useTheme();
 
   const handleThemeToggle = (checked: boolean) => {
-    setTheme(checked ? 'dark' : 'light');
+    setTheme(checked ? "dark" : "light");
   };
 
   return (
@@ -76,7 +76,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           <div className="flex items-center gap-2">
             <img
               className="size-9 rounded-full border-2 border-green-500"
-              src={toAbsoluteUrl('/media/avatars/300-2.png')}
+              src={toAbsoluteUrl("/media/avatars/300-2.png")}
               alt="User avatar"
             />
             <div className="flex flex-col">
@@ -103,19 +103,13 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
 
         {/* Menu Items */}
         <DropdownMenuItem asChild>
-          <Link
-            href="#"
-            className="flex items-center gap-2"
-          >
+          <Link href="#" className="flex items-center gap-2">
             <IdCard />
             Public Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link
-            href="#"
-            className="flex items-center gap-2"
-          >
+          <Link href="#" className="flex items-center gap-2">
             <UserCircle />
             My Profile
           </Link>
@@ -129,55 +123,37 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-48">
             <DropdownMenuItem asChild>
-              <Link
-                href="#"
-                className="flex items-center gap-2"
-              >
+              <Link href="#" className="flex items-center gap-2">
                 <Coffee />
                 Get Started
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link
-                href="#"
-                className="flex items-center gap-2"
-              >
+              <Link href="#" className="flex items-center gap-2">
                 <FileText />
                 My Profile
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link
-                href="#"
-                className="flex items-center gap-2"
-              >
+              <Link href="#" className="flex items-center gap-2">
                 <CreditCard />
                 Billing
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link
-                href="#"
-                className="flex items-center gap-2"
-              >
+              <Link href="#" className="flex items-center gap-2">
                 <Shield />
                 Security
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link
-                href="#"
-                className="flex items-center gap-2"
-              >
+              <Link href="#" className="flex items-center gap-2">
                 <Users />
                 Members & Roles
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link
-                href="#"
-                className="flex items-center gap-2"
-              >
+              <Link href="#" className="flex items-center gap-2">
                 <BetweenHorizontalStart />
                 Integrations
               </Link>
@@ -246,7 +222,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             Dark Mode
             <Switch
               size="sm"
-              checked={theme === 'dark'}
+              checked={theme === "dark"}
               onCheckedChange={handleThemeToggle}
             />
           </div>

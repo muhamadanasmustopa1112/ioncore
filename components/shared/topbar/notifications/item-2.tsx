@@ -1,12 +1,12 @@
-import Link from 'next/link';
+import Link from "next/link";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 
 export default function Item2() {
   return (
@@ -22,12 +22,15 @@ export default function Item2() {
       <div className="flex flex-col gap-3.5">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               Leslie Alexander
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              added new tags to{' '}
+              {" "}
+              added new tags to{" "}
             </span>
             <Link href="#" className="hover:text-primary text-primary">
               Web Redesign 2024

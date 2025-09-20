@@ -1,14 +1,14 @@
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function Item15() {
   return (
@@ -24,12 +24,15 @@ export default function Item15() {
       <div className="flex flex-col gap-3.5 grow">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               Ava Peterson
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              uploaded attachment{' '}
+              {" "}
+              uploaded attachment{" "}
             </span>
           </div>
           <span className="flex items-center text-xs font-medium text-muted-foreground">
@@ -42,7 +45,7 @@ export default function Item15() {
         <Card className="shadow-none flex items-center justify-between flex-row gap-1.5 p-2.5 rounded-lg bg-muted/70">
           <div className="flex items-center gap-1.5">
             <img
-              src={toAbsoluteUrl('/media/file-types/xls.svg')}
+              src={toAbsoluteUrl("/media/file-types/xls.svg")}
               className="h-6"
               alt="image"
             />

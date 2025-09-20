@@ -1,8 +1,8 @@
-import { useLayout } from './context';
-import { HeaderLogo } from './header-logo';
-import { HeaderMenu } from './header-menu';
-import { HeaderToolbar } from './header-toolbar';
-import { Navbar } from './navbar';
+import { useLayout } from "./context";
+import { HeaderLogo } from "./header-logo";
+import { HeaderMenu } from "./header-menu";
+import { HeaderToolbar } from "./header-toolbar";
+import { Navbar } from "./navbar";
 
 export function Header() {
   const { isMobile } = useLayout();

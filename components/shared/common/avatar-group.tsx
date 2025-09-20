@@ -1,6 +1,6 @@
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Avatar {
   path?: string;
@@ -19,7 +19,7 @@ interface AvatarGroupProp {
 }
 
 function AvatarGroup({ size, group, more, className }: AvatarGroupProp) {
-  const avatarSize = size ? size : 'size-7';
+  const avatarSize = size ? size : "size-7";
 
   const renderItem = (each: Avatar, index: number) => {
     return (
@@ -29,7 +29,7 @@ function AvatarGroup({ size, group, more, className }: AvatarGroupProp) {
             src={toAbsoluteUrl(each.path || `/media/avatars/${each.filename}`)}
             alt="image"
             className={cn(
-              ' border-1 border-background hover:z-10',
+              " border-1 border-background hover:z-10",
               each.variant,
             )}
           />
@@ -37,7 +37,7 @@ function AvatarGroup({ size, group, more, className }: AvatarGroupProp) {
         {each.fallback ? (
           <AvatarFallback
             className={cn(
-              'relative border-1 border-background hover:z-10 text-[11px]',
+              "relative border-1 border-background hover:z-10 text-[11px]",
               size,
               each.variant,
             )}
@@ -50,12 +50,12 @@ function AvatarGroup({ size, group, more, className }: AvatarGroupProp) {
   };
 
   return (
-    <div className={cn('flex -space-x-2', className)}>
+    <div className={cn("flex -space-x-2", className)}>
       {group.map((each, index) => renderItem(each, index))}
       {more && (
         <span
           className={cn(
-            'flex items-center cursor-default justify-center relative shrink-0 rounded-full border-1 border-background hover:z-10 font-semibold text-[11px] leading-none',
+            "flex items-center cursor-default justify-center relative shrink-0 rounded-full border-1 border-background hover:z-10 font-semibold text-[11px] leading-none",
             avatarSize,
             more.variant,
           )}

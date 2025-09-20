@@ -1,13 +1,13 @@
-import Link from 'next/link';
+import Link from "next/link";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function Item13() {
   return (
@@ -23,12 +23,15 @@ export default function Item13() {
       <div className="flex flex-col gap-3.5 grow">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               Samuel Lee
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              requested to add user to{' '}
+              {" "}
+              requested to add user to{" "}
             </span>
             <Link
               href="#"

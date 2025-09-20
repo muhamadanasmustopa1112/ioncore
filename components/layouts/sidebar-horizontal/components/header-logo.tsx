@@ -1,20 +1,20 @@
-import { useEffect, useState } from 'react';
-import { Menu } from 'lucide-react';
-import { useLayout } from './context';
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { HeaderMenuMobile } from './header-menu-mobile';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Menu } from "lucide-react";
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetBody,
   SheetContent,
   SheetHeader,
   SheetTrigger,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { SidebarMenu } from './sidebar-menu';
-import { HeaderSecondaryMenuMobile } from './header-secondary-menu-mobile';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+} from "@/components/ui/sheet";
+import { useLayout } from "./context";
+import { HeaderMenuMobile } from "./header-menu-mobile";
+import { HeaderSecondaryMenuMobile } from "./header-secondary-menu-mobile";
+import { SidebarMenu } from "./sidebar-menu";
 
 export function HeaderLogo() {
   const pathname = usePathname();
@@ -38,7 +38,11 @@ export function HeaderLogo() {
             shadow-[0_0_0_1px_#009229]
           "
         >
-          <img src={toAbsoluteUrl('/media/app/logo-33.svg')} alt="image" className="min-w-[18px]" />
+          <img
+            src={toAbsoluteUrl("/media/app/logo-33.svg")}
+            alt="image"
+            className="min-w-[18px]"
+          />
         </div>
         <span className="text-mono text-xl font-medium hidden lg:block">
           Metronic

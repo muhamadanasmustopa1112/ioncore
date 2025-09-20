@@ -88,11 +88,11 @@
 
     .demo1.sidebar-collapse
       .sidebar:not(:hover)
-      [data-slot='accordion-menu-title'],
-    .demo1.sidebar-collapse .sidebar:not(:hover) [data-slot='badge'],
+      [data-slot="accordion-menu-title"],
+    .demo1.sidebar-collapse .sidebar:not(:hover) [data-slot="badge"],
     .demo1.sidebar-collapse
       .sidebar:not(:hover)
-      [data-slot='accordion-menu-sub-indicator'] {
+      [data-slot="accordion-menu-sub-indicator"] {
       display: none !important;
       transition: none !important;
       animation: none !important;
@@ -100,7 +100,7 @@
 
     .demo1.sidebar-collapse
       .sidebar:not(:hover)
-      [data-slot='accordion-menu-sub-content'] {
+      [data-slot="accordion-menu-sub-content"] {
       visibility: hidden;
       position: absolute;
       height: 0;
@@ -109,15 +109,15 @@
 
     .demo1.sidebar-collapse
       .sidebar:not(:hover)
-      [data-slot='accordion-menu-label'] {
+      [data-slot="accordion-menu-label"] {
       visibility: hidden;
       position: relative;
     }
 
     .demo1.sidebar-collapse
       .sidebar:not(:hover)
-      [data-slot='accordion-menu-label']::before {
-      content: '...';
+      [data-slot="accordion-menu-label"]::before {
+      content: "...";
       color: currentColor;
       font-size: inherit;
       position: absolute;

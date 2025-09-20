@@ -1,26 +1,32 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import { motion, MotionProps, useInView, UseInViewOptions, Variants } from 'motion/react';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  MotionProps,
+  useInView,
+  UseInViewOptions,
+  Variants,
+} from "motion/react";
+import { cn } from "@/lib/utils";
 
-interface WordRotateProps extends Omit<MotionProps, 'children'> {
+interface WordRotateProps extends Omit<MotionProps, "children"> {
   words: string[];
   duration?: number; // ms each word is visible
-  animationStyle?: 'fade' | 'slide-up' | 'slide-down' | 'scale' | 'flip';
+  animationStyle?: "fade" | "slide-up" | "slide-down" | "scale" | "flip";
   loop?: boolean;
   pauseDuration?: number; // ms between word transitions
   className?: string;
   containerClassName?: string;
   startOnView?: boolean;
   once?: boolean;
-  inViewMargin?: UseInViewOptions['margin'];
+  inViewMargin?: UseInViewOptions["margin"];
 }
 
 export function WordRotate({
   words,
   duration = 1500,
-  animationStyle = 'fade',
+  animationStyle = "fade",
   loop = true,
   className,
   containerClassName,
@@ -31,7 +37,10 @@ export function WordRotate({
   ...props
 }: WordRotateProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once, margin: inViewMargin as UseInViewOptions['margin'] });
+  const isInView = useInView(ref, {
+    once,
+    margin: inViewMargin as UseInViewOptions["margin"],
+  });
   const [hasAnimated, setHasAnimated] = useState(false);
   const [currentWord, setCurrentWord] = useState(0);
   const [show, setShow] = useState(true);
@@ -55,13 +64,13 @@ export function WordRotate({
         },
       },
     },
-    'slide-up': {
+    "slide-up": {
       initial: { opacity: 0, y: 24 },
       animate: {
         opacity: 1,
         y: 0,
         transition: {
-          type: 'spring',
+          type: "spring",
           stiffness: 300,
           damping: 25,
           mass: 0.8,
@@ -76,13 +85,13 @@ export function WordRotate({
         },
       },
     },
-    'slide-down': {
+    "slide-down": {
       initial: { opacity: 0, y: -24 },
       animate: {
         opacity: 1,
         y: 0,
         transition: {
-          type: 'spring',
+          type: "spring",
           stiffness: 300,
           damping: 25,
           mass: 0.8,
@@ -103,7 +112,7 @@ export function WordRotate({
         opacity: 1,
         scale: 1,
         transition: {
-          type: 'spring',
+          type: "spring",
           stiffness: 400,
           damping: 30,
           mass: 0.6,
@@ -124,7 +133,7 @@ export function WordRotate({
         opacity: 1,
         rotateX: 0,
         transition: {
-          type: 'spring',
+          type: "spring",
           stiffness: 200,
           damping: 20,
           mass: 1,
@@ -164,18 +173,22 @@ export function WordRotate({
   }, [shouldStart, duration, pauseDuration, words.length, loop]);
 
   return (
-    <motion.span ref={ref} className={cn('inline-block overflow-hidden', containerClassName)} {...props}>
+    <motion.span
+      ref={ref}
+      className={cn("inline-block overflow-hidden", containerClassName)}
+      {...props}
+    >
       <motion.span
         key={currentWord}
         initial="initial"
-        animate={show ? 'animate' : 'exit'}
+        animate={show ? "animate" : "exit"}
         exit="exit"
         variants={variants[animationStyle]}
         transition={{ duration: 0.5 }}
         style={{
-          perspective: animationStyle === 'flip' ? 1000 : undefined,
+          perspective: animationStyle === "flip" ? 1000 : undefined,
         }}
-        className={cn('inline-block overflow-hidden', className)}
+        className={cn("inline-block overflow-hidden", className)}
       >
         {words[currentWord]}
       </motion.span>

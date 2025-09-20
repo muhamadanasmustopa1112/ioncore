@@ -1,159 +1,159 @@
-import { MenuConfig } from "@/config/types";
 import {
+  Bell,
+  Blocks,
   ChartLine,
   Cog,
-  GlobeLock,
+  CreditCard,
+  Download,
+  FileChartLine,
   Gauge,
+  GlobeLock,
+  Key,
   LockKeyholeOpen,
   Mailbox,
   OctagonAlert,
-  Settings,
-  Users,
-  Download,
-  FileChartLine,
-  SquareActivity,
   Rocket,
-  CreditCard,
-  Blocks,
-  Bell,
-  Key
+  Settings,
+  SquareActivity,
+  Users,
 } from "lucide-react";
+import { MenuConfig } from "@/config/types";
 
 export const MENU_SIDEBAR: MenuConfig = [
   {
-    title: 'Configuration',
+    title: "Configuration",
     children: [
       {
-        title: 'API Setup',
-        path: '#',
-        icon: Settings
+        title: "API Setup",
+        path: "#",
+        icon: Settings,
       },
       {
-        title: 'Team Settings',
-        path: '/layout-18',
-        icon: Users
+        title: "Team Settings",
+        path: "/layout-18",
+        icon: Users,
       },
       {
-        title: 'Authentication',
-        path: '#',
-        icon: Mailbox
+        title: "Authentication",
+        path: "#",
+        icon: Mailbox,
       },
       {
-        title: 'Endpoints Configs',
-        path: '#',
-        icon: Cog
+        title: "Endpoints Configs",
+        path: "#",
+        icon: Cog,
       },
       {
-        title: 'Rate Limiting',
-        path: '#',
-        icon: ChartLine
+        title: "Rate Limiting",
+        path: "#",
+        icon: ChartLine,
       },
     ],
   },
   {
-    title: 'Security',
+    title: "Security",
     children: [
       {
-        title: 'Data Encryption',
-        path: '#',
-        icon: GlobeLock
+        title: "Data Encryption",
+        path: "#",
+        icon: GlobeLock,
       },
       {
-        title: 'Rate Limiting',
-        path: '#',
-        icon: Gauge
+        title: "Rate Limiting",
+        path: "#",
+        icon: Gauge,
       },
       {
-        title: 'Access Control',
-        path: '#',
-        icon: LockKeyholeOpen
+        title: "Access Control",
+        path: "#",
+        icon: LockKeyholeOpen,
       },
       {
-        title: 'Incident Response',
-        path: '#',
-        icon: OctagonAlert
+        title: "Incident Response",
+        path: "#",
+        icon: OctagonAlert,
       },
     ],
   },
   {
-    title: 'Analytics',
+    title: "Analytics",
     children: [
       {
-        title: 'Fetching Data',
-        path: '#',
-        icon: Download
+        title: "Fetching Data",
+        path: "#",
+        icon: Download,
       },
       {
-        title: 'Custom Reports',
-        path: '#',
-        icon: FileChartLine
+        title: "Custom Reports",
+        path: "#",
+        icon: FileChartLine,
       },
       {
-        title: 'Real Time Analytics',
-        path: '#',
-        icon: SquareActivity
+        title: "Real Time Analytics",
+        path: "#",
+        icon: SquareActivity,
       },
     ],
-  }
+  },
 ];
 
 export const MENU_HEADER: MenuConfig = [
   {
-    title: 'Dashboards',
-    path: '#'
+    title: "Dashboards",
+    path: "#",
   },
   {
-    title: 'My Account',
-    path: '/layout-18'
+    title: "My Account",
+    path: "/layout-18",
   },
   {
-    title: 'Public Profile',
-    path: '#'
+    title: "Public Profile",
+    path: "#",
   },
   {
-    title: 'Network',
-    path: '#'
+    title: "Network",
+    path: "#",
   },
   {
-    title: 'Authentication',
-    path: '#'
+    title: "Authentication",
+    path: "#",
   },
 ];
 
 export const MENU_NAVBAR: MenuConfig = [
   {
-    title: 'Account Starter',
-    path: '#',
-    icon: Rocket
+    title: "Account Starter",
+    path: "#",
+    icon: Rocket,
   },
   {
-    title: 'Billing',
-    path: '/layout-18',
-    icon: CreditCard
+    title: "Billing",
+    path: "/layout-18",
+    icon: CreditCard,
   },
   {
-    title: 'Security',
-    path: '#',
-    icon: LockKeyholeOpen
+    title: "Security",
+    path: "#",
+    icon: LockKeyholeOpen,
   },
   {
-    title: 'Members & Roles',
-    path: '#',
-    icon: Users
+    title: "Members & Roles",
+    path: "#",
+    icon: Users,
   },
   {
-    title: 'Integrations',
-    path: '#',
-    icon: Blocks
+    title: "Integrations",
+    path: "#",
+    icon: Blocks,
   },
   {
-    title: 'Notifications',
-    path: '#',
-    icon: Bell
+    title: "Notifications",
+    path: "#",
+    icon: Bell,
   },
   {
-    title: 'API Keys',
-    path: '#',
-    icon: Key
+    title: "API Keys",
+    path: "#",
+    icon: Key,
   },
 ];

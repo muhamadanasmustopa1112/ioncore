@@ -1,14 +1,14 @@
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function Item11() {
   return (
@@ -24,12 +24,15 @@ export default function Item11() {
       <div className="flex flex-col gap-3.5 grow">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               Skylar Frost
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              uploaded 2 attachments{' '}
+              {" "}
+              uploaded 2 attachments{" "}
             </span>
           </div>
           <span className="flex items-center text-xs font-medium text-muted-foreground">
@@ -42,7 +45,7 @@ export default function Item11() {
         <Card className="shadow-none flex items-center justify-between flex-row gap-1.5 p-2.5 rounded-lg bg-muted/70">
           <div className="flex items-center gap-1.5">
             <img
-              src={toAbsoluteUrl('/media/file-types/word.svg')}
+              src={toAbsoluteUrl("/media/file-types/word.svg")}
               className="h-6"
               alt="image"
             />
@@ -93,7 +96,7 @@ export default function Item11() {
         <Card className="shadow-none flex items-center justify-between flex-row gap-1.5 p-2.5 rounded-lg bg-muted/70">
           <div className="flex items-center gap-1.5">
             <img
-              src={toAbsoluteUrl('/media/file-types/svg.svg')}
+              src={toAbsoluteUrl("/media/file-types/svg.svg")}
               className="h-6"
               alt="image"
             />

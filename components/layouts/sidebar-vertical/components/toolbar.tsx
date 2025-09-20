@@ -1,7 +1,9 @@
-import { Fragment, ReactNode } from 'react';
-import { MENU_SIDEBAR_MAIN } from '@/config/layout-14.config';
-import { useMenu } from '@/hooks/use-menu';
-import { MenuItem } from '@/config/types';
+import { Fragment, ReactNode } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { MENU_SIDEBAR_MAIN } from "@/config/layout-14.config";
+import { MenuItem } from "@/config/types";
+import { useMenu } from "@/hooks/use-menu";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,9 +11,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+} from "@/components/ui/breadcrumb";
 
 export interface ToolbarHeadingProps {
   title?: string | ReactNode;
@@ -52,16 +52,20 @@ function ToolbarBreadcrumbs() {
 
           return (
             <Fragment key={index}>
-              {index !== items.length - 1 && <BreadcrumbSeparator className="text-xs text-muted-foreground">/</BreadcrumbSeparator>}
+              {index !== items.length - 1 && (
+                <BreadcrumbSeparator className="text-xs text-muted-foreground">
+                  /
+                </BreadcrumbSeparator>
+              )}
               <BreadcrumbItem>
                 {!isLast ? (
                   <BreadcrumbLink asChild>
-                    <Link href={item.path || '#'}>{item.title}</Link>
+                    <Link href={item.path || "#"}>{item.title}</Link>
                   </BreadcrumbLink>
                 ) : (
                   <BreadcrumbPage>{item.title}</BreadcrumbPage>
                 )}
-              </BreadcrumbItem>              
+              </BreadcrumbItem>
             </Fragment>
           );
         })}
@@ -70,29 +74,33 @@ function ToolbarBreadcrumbs() {
   );
 }
 
-function ToolbarHeading ({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col md:flex-row md:items-center flex-wrap gap-1 lg:gap-5">{children}</div>;
+function ToolbarHeading({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-col md:flex-row md:items-center flex-wrap gap-1 lg:gap-5">
+      {children}
+    </div>
+  );
 }
 
-function ToolbarPageTitle ({ children }: { children?: string }) {
+function ToolbarPageTitle({ children }: { children?: string }) {
   const pathname = usePathname();
   const { getCurrentItem } = useMenu(pathname);
   const item = getCurrentItem(MENU_SIDEBAR_MAIN);
 
   return (
     <h1 className="text-base font-medium leading-none text-foreground">
-      {children ? children : item?.title || 'Untitled'}
+      {children ? children : item?.title || "Untitled"}
     </h1>
   );
-};
+}
 
-function ToolbarDescription ({ children }: { children: ReactNode }) {
+function ToolbarDescription({ children }: { children: ReactNode }) {
   return (
     <div className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
       {children}
     </div>
   );
-};
+}
 
 export {
   Toolbar,
@@ -100,5 +108,5 @@ export {
   ToolbarBreadcrumbs,
   ToolbarHeading,
   ToolbarPageTitle,
-  ToolbarDescription
+  ToolbarDescription,
 };

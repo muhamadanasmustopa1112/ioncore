@@ -1,13 +1,13 @@
-import { CircleCheck } from 'lucide-react';
-import Link from 'next/link';
+import Link from "next/link";
+import { CircleCheck } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 export default function Item20() {
   return (
@@ -30,8 +30,8 @@ export default function Item20() {
               Gabriel Bennett
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              started connect you{' '}
+              {" "}
+              started connect you{" "}
             </span>
           </div>
           <span className="flex items-center text-xs font-medium text-muted-foreground">

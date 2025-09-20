@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   AccordionMenu,
   AccordionMenuGroup,
   AccordionMenuItem,
-} from '@/components/ui/accordion-menu';
-import { Button } from '@/components/ui/button';
-import { AvatarGroup } from '../../common/avatar-group';
-import { SearchIntegrationsItem } from './types';
+} from "@/components/ui/accordion-menu";
+import { Button } from "@/components/ui/button";
+import { AvatarGroup } from "../../common/avatar-group";
+import { SearchIntegrationsItem } from "./types";
 
 export function SearchIntegrations({
   items,
@@ -21,7 +21,7 @@ export function SearchIntegrations({
       type="single"
       collapsible
       classNames={{
-        separator: '-mx-2 mb-2.5',
+        separator: "-mx-2 mb-2.5",
       }}
     >
       <AccordionMenuGroup>
@@ -62,7 +62,7 @@ export function SearchIntegrations({
           ))}
         </div>
         {!more || (
-          <AccordionMenuItem className="px-4 pt-2" value={''}>
+          <AccordionMenuItem className="px-4 pt-2" value={""}>
             <Button variant="outline" className="mx-auto w-full max-w-full">
               Go to Users
             </Button>

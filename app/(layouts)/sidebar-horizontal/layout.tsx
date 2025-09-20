@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { ReactNode, useEffect, useState } from 'react';
-import { SidebarHorizontalLayout } from '@/components/layouts/sidebar-horizontal';
-import { ScreenLoader } from '@/components/screen-loader';
+import { ReactNode, useEffect, useState } from "react";
+import { SidebarHorizontalLayout } from "@/components/layouts/sidebar-horizontal";
+import { ScreenLoader } from "@/components/screen-loader";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);

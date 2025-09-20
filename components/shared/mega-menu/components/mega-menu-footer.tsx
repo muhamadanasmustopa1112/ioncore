@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { NavigationMenuLink } from '@/components/ui/navigation-menu';
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { NavigationMenuLink } from "@/components/ui/navigation-menu";
 
 const MegaMenuFooter = () => {
   return (

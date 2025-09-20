@@ -1,15 +1,15 @@
 import {
   AccordionMenu,
   AccordionMenuGroup,
-} from '@/components/ui/accordion-menu';
-import { SearchIntegrations } from './search-integrations';
-import { SearchSettingsItems } from './search-settings-items';
-import { SearchUsers } from './search-users';
+} from "@/components/ui/accordion-menu";
+import { SearchIntegrations } from "./search-integrations";
+import { SearchSettingsItems } from "./search-settings-items";
+import { SearchUsers } from "./search-users";
 import {
   SearchIntegrationsItem,
   SearchSettingsItem,
   SearchUsersItem,
-} from './types';
+} from "./types";
 
 export interface SearchMixedProps {
   settings: SearchSettingsItem[];
@@ -32,7 +32,7 @@ export function SearchMixed({
             type="single"
             collapsible
             classNames={{
-              separator: '-mx-2 mb-2.5',
+              separator: "-mx-2 mb-2.5",
             }}
           >
             <AccordionMenuGroup>

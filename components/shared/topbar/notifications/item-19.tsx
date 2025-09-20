@@ -1,13 +1,13 @@
-import { UserRoundCheck } from 'lucide-react';
-import Link from 'next/link';
+import Link from "next/link";
+import { UserRoundCheck } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Card } from '@/components/ui/card';
+} from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 
 export default function Item19() {
   return (
@@ -23,12 +23,15 @@ export default function Item19() {
       <div className="flex flex-col gap-2.5 grow">
         <div className="flex flex-col gap-1 mb-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               Aaron Foster
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              requested to view{' '}
+              {" "}
+              requested to view{" "}
             </span>
           </div>
           <span className="flex items-center text-xs font-medium text-muted-foreground">

@@ -1,6 +1,6 @@
-import { Metadata } from 'next';
-import { LayoutProvider } from './components/context';
-import { Wrapper } from './components/wrapper';
+import { Metadata } from "next";
+import { LayoutProvider } from "./components/context";
+import { Wrapper } from "./components/wrapper";
 
 // Generate metadata for the layout
 export async function generateMetadata(): Promise<Metadata> {
@@ -8,8 +8,8 @@ export async function generateMetadata(): Promise<Metadata> {
   // const { params } = props;
 
   return {
-    title: 'Dashboard',
-    description: '',
+    title: "Dashboard",
+    description: "",
   };
 }
 
@@ -23,10 +23,10 @@ export function SidebarHorizontalLayout({
       bodyClassName="bg-muted lg:overflow-hidden"
       style={
         {
-          '--sidebar-width': '260px',
-          '--sidebar-width-mobile': '260px',
-          '--header-height': '108px',
-          '--header-height-mobile': '108px',
+          "--sidebar-width": "260px",
+          "--sidebar-width-mobile": "260px",
+          "--header-height": "108px",
+          "--header-height-mobile": "108px",
         } as React.CSSProperties
       }
     >

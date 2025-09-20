@@ -4,13 +4,13 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   ShareProfileSettings,
   ShareProfileUsers,
   ShareProfileViaEmail,
   ShareProfileViaLink,
-} from './';
+} from "./";
 
 export function ShareProfileDialog({
   open,

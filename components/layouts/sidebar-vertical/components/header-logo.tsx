@@ -1,21 +1,35 @@
-import { useEffect, useState } from 'react';
-import { Check, ChevronsUpDown, Gem, Hexagon, Layers2, Menu, PanelRight, Zap } from 'lucide-react';
-import { useLayout } from './context';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Check,
+  ChevronsUpDown,
+  Gem,
+  Hexagon,
+  Layers2,
+  Menu,
+  PanelRight,
+  Zap,
+} from "lucide-react";
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sheet,
   SheetBody,
   SheetContent,
   SheetHeader,
   SheetTrigger,
-} from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { SidebarPrimary } from './sidebar-primary';
-import { SidebarSecondary } from './sidebar-secondary';
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+} from "@/components/ui/sheet";
+import { useLayout } from "./context";
+import { SidebarPrimary } from "./sidebar-primary";
+import { SidebarSecondary } from "./sidebar-secondary";
 
 interface Team {
   icon: React.ElementType;
@@ -34,26 +48,26 @@ export function HeaderLogo() {
       icon: Zap,
       name: "Thunder AI",
       color: "bg-teal-600 text-white",
-      members: 8
+      members: 8,
     },
     {
       icon: Gem,
       name: "Clarity AI",
       color: "bg-fuchsia-600 text-white",
-      members: 6
+      members: 6,
     },
     {
       icon: Hexagon,
       name: "Lightning AI",
       color: "bg-yellow-600 text-white",
-      members: 12
+      members: 12,
     },
     {
       icon: Layers2,
       name: "Bold AI",
       color: "bg-blue-600 text-white",
-      members: 4
-    }
+      members: 4,
+    },
   ];
 
   const [selectedTeam, setSelectedTeam] = useState<Team>(teams[0]);
@@ -71,12 +85,12 @@ export function HeaderLogo() {
         <div className="flex items-center justify-center shrink-0 border-e border-border w-(--sidebar-collapsed-width) h-(--header-height) bg-muted">
           <Link href="/layout-14">
             <img
-              src={toAbsoluteUrl('/media/app/mini-logo-gray.svg')}
+              src={toAbsoluteUrl("/media/app/mini-logo-gray.svg")}
               className="dark:hidden min-h-[30px]"
               alt="Thunder AI Logo"
             />
             <img
-              src={toAbsoluteUrl('/media/app/mini-logo-gray-dark.svg')}
+              src={toAbsoluteUrl("/media/app/mini-logo-gray-dark.svg")}
               className="hidden dark:block min-h-[30px]"
               alt="Thunder AI Logo"
             />
@@ -113,7 +127,12 @@ export function HeaderLogo() {
                 variant="ghost"
                 className="inline-flex text-muted-foreground hover:text-foreground px-1.5 -ms-1.5"
               >
-                <div className={cn("size-6 flex items-center justify-center rounded-md", selectedTeam.color)}>
+                <div
+                  className={cn(
+                    "size-6 flex items-center justify-center rounded-md",
+                    selectedTeam.color,
+                  )}
+                >
                   <selectedTeam.icon className="size-4" />
                 </div>
 
@@ -131,11 +150,22 @@ export function HeaderLogo() {
               alignOffset={-80}
             >
               {teams.map((team) => (
-                <DropdownMenuItem key={team.name} onClick={() => setSelectedTeam(team)} data-active={selectedTeam.name === team.name}>
-                  <div className={cn("size-6 rounded-md flex items-center justify-center", team.color)}>
+                <DropdownMenuItem
+                  key={team.name}
+                  onClick={() => setSelectedTeam(team)}
+                  data-active={selectedTeam.name === team.name}
+                >
+                  <div
+                    className={cn(
+                      "size-6 rounded-md flex items-center justify-center",
+                      team.color,
+                    )}
+                  >
                     <team.icon className="size-4" />
                   </div>
-                  <span className="text-mono text-sm font-medium">{team.name}</span>
+                  <span className="text-mono text-sm font-medium">
+                    {team.name}
+                  </span>
                   {selectedTeam.name === team.name && (
                     <Check className="ms-auto size-4 text-primary" />
                   )}
@@ -153,7 +183,7 @@ export function HeaderLogo() {
           >
             <PanelRight className="-rotate-180 in-data-[sidebar-open=false]:rotate-0 opacity-100" />
           </Button>
-        </div>        
+        </div>
       </div>
     </div>
   );

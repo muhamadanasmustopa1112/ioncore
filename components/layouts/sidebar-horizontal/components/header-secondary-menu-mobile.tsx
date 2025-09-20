@@ -1,15 +1,15 @@
-import { useMenu } from "@/hooks/use-menu";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { MENU_NAVBAR } from "@/config/layout-18.config";
+import { useMenu } from "@/hooks/use-menu";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 
 export function HeaderSecondaryMenuMobile() {
   const pathname = usePathname();
@@ -31,14 +31,14 @@ export function HeaderSecondaryMenuMobile() {
               <DropdownMenuItem
                 key={index}
                 asChild
-                {...(active && { 'data-here': 'true' })}
+                {...(active && { "data-here": "true" })}
               >
-                <Link href={item.path || '#'}>
-                  {item.icon && <item.icon className="size-4"/>}
+                <Link href={item.path || "#"}>
+                  {item.icon && <item.icon className="size-4" />}
                   <span>{item.title}</span>
                 </Link>
               </DropdownMenuItem>
-            )
+            );
           })}
         </DropdownMenuContent>
       </DropdownMenu>

@@ -1,6 +1,6 @@
-import { useLayout } from './context';
-import { Header } from './header';
-import { Sidebar } from './sidebar';
+import { useLayout } from "./context";
+import { Header } from "./header";
+import { Sidebar } from "./sidebar";
 
 export function Wrapper({ children }: { children: React.ReactNode }) {
   const { isMobile } = useLayout();

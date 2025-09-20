@@ -1,14 +1,14 @@
-import { EllipsisVertical } from 'lucide-react';
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { EllipsisVertical } from "lucide-react";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   AccordionMenu,
   AccordionMenuGroup,
   AccordionMenuItem,
-} from '@/components/ui/accordion-menu';
-import { Badge, BadgeDot } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { SearchUsersItem } from './types';
+} from "@/components/ui/accordion-menu";
+import { Badge, BadgeDot } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { SearchUsersItem } from "./types";
 
 export function SearchUsers({
   items,
@@ -22,7 +22,7 @@ export function SearchUsers({
       type="single"
       collapsible
       classNames={{
-        separator: '-mx-2 mb-2.5',
+        separator: "-mx-2 mb-2.5",
       }}
     >
       <AccordionMenuGroup>
@@ -71,7 +71,7 @@ export function SearchUsers({
         </div>
         {/* Conditional "Go to Users" button */}
         {!more || (
-          <AccordionMenuItem className="px-4 pt-2" value={''}>
+          <AccordionMenuItem className="px-4 pt-2" value={""}>
             <Button variant="outline" className="mx-auto w-full max-w-full">
               Go to Users
             </Button>

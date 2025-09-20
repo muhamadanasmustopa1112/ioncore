@@ -1,5 +1,5 @@
-import { MenuConfig, MenuItem } from '@/config/types';
-import { MegaMenuSubDefault, MegaMenuSubHighlighted } from './components';
+import { MenuConfig, MenuItem } from "@/config/types";
+import { MegaMenuSubDefault, MegaMenuSubHighlighted } from "./components";
 
 const MegaMenuSubAccount = ({ items }: { items: MenuConfig }) => {
   const myAccountItem = items[2];

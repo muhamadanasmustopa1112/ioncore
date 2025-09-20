@@ -1,13 +1,13 @@
-import { ReactNode } from 'react';
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { Button } from '@/components/ui/button';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Switch } from '@/components/ui/switch';
+} from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 
 interface DropdownAppsItem {
   logo: string;
@@ -19,33 +19,33 @@ interface DropdownAppsItem {
 export function AppsDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const items: DropdownAppsItem[] = [
     {
-      logo: 'jira.svg',
-      title: 'Jira',
-      description: 'Project management',
+      logo: "jira.svg",
+      title: "Jira",
+      description: "Project management",
       checkbox: false,
     },
     {
-      logo: 'inferno.svg',
-      title: 'Inferno',
-      description: 'Ensures healthcare app',
+      logo: "inferno.svg",
+      title: "Inferno",
+      description: "Ensures healthcare app",
       checkbox: true,
     },
     {
-      logo: 'evernote.svg',
-      title: 'Evernote',
-      description: 'Notes management app',
+      logo: "evernote.svg",
+      title: "Evernote",
+      description: "Notes management app",
       checkbox: true,
     },
     {
-      logo: 'gitlab.svg',
-      title: 'Gitlab',
-      description: 'DevOps platform',
+      logo: "gitlab.svg",
+      title: "Gitlab",
+      description: "DevOps platform",
       checkbox: false,
     },
     {
-      logo: 'google-webdev.svg',
-      title: 'Google webdev',
-      description: 'Building web experiences',
+      logo: "google-webdev.svg",
+      title: "Google webdev",
+      description: "Building web experiences",
       checkbox: true,
     },
   ];

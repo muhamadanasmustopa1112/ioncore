@@ -1,12 +1,12 @@
-import { ReactNode } from 'react';
-import { CloudCog, FileInput, Settings, ThumbsDown } from 'lucide-react';
-import Link from 'next/link';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { CloudCog, FileInput, Settings, ThumbsDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export function DropdownMenu2({ trigger }: { trigger: ReactNode }) {
   return (

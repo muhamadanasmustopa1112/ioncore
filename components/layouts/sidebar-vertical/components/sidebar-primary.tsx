@@ -1,40 +1,39 @@
-import { useEffect, useState } from 'react';
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { cn } from '@/lib/utils';
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Bell,
+  Building2,
   CheckSquare,
+  Clock,
+  Download,
+  ExternalLink,
   FolderCode,
+  LogOut,
   Mails,
   NotepadText,
   ScrollText,
   Settings,
+  Shield,
   ShieldUser,
+  Target,
+  User,
   UserCircle,
   Users,
-  User,
-  Clock,
-  Shield,
-  Building2,
-  LogOut,
-  Download,
-  ExternalLink,
   Zap,
-  Target,
-} from 'lucide-react';
+} from "lucide-react";
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { cn } from "@/lib/utils";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,67 +43,68 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const menuItems = [
   {
     icon: UserCircle,
-    tooltip: 'Profile',
-    path: '#',
-    rootPath: '#',
+    tooltip: "Profile",
+    path: "#",
+    rootPath: "#",
   },
   {
     icon: BarChart3,
-    tooltip: 'Dashboard',
-    path: '/layout-14',
-    rootPath: '/layout-14'
+    tooltip: "Dashboard",
+    path: "/layout-14",
+    rootPath: "/layout-14",
   },
   {
     icon: Settings,
-    tooltip: 'Account',
-    path: '#',
-    rootPath: '#',
+    tooltip: "Account",
+    path: "#",
+    rootPath: "#",
   },
   {
     icon: Users,
-    tooltip: 'Network',
-    path: '#',
-    rootPath: '#',
+    tooltip: "Network",
+    path: "#",
+    rootPath: "#",
   },
   {
     icon: ShieldUser,
-    tooltip: 'Authentication',
-    path: '#',
-    rootPath: '#',
+    tooltip: "Authentication",
+    path: "#",
+    rootPath: "#",
   },
   {
     icon: FolderCode,
-    tooltip: 'Security Logs',
-    path: '#',
-    rootPath: '#',
+    tooltip: "Security Logs",
+    path: "#",
+    rootPath: "#",
   },
   {
     icon: ScrollText,
-    tooltip: 'Files',
-    path: '#',
-    rootPath: '#',
+    tooltip: "Files",
+    path: "#",
+    rootPath: "#",
   },
   {
     icon: Bell,
-    tooltip: 'Notifications',
-    path: '#',
-    rootPath: '#',
+    tooltip: "Notifications",
+    path: "#",
+    rootPath: "#",
   },
   {
     icon: CheckSquare,
-    tooltip: 'ACL',
-    path: '#',
-    rootPath: '#',
+    tooltip: "ACL",
+    path: "#",
+    rootPath: "#",
   },
 ];
 
@@ -136,12 +136,12 @@ export function SidebarPrimary() {
                   variant="ghost"
                   mode="icon"
                   {...(item === selectedMenuItem
-                    ? { 'data-state': 'open' }
+                    ? { "data-state": "open" }
                     : {})}
                   className={cn(
-                    'shrink-0 rounded-md size-9',
-                    'data-[state=open]:bg-primary data-[state=open]:text-primary-foreground',
-                    'hover:text-foreground',
+                    "shrink-0 rounded-md size-9",
+                    "data-[state=open]:bg-primary data-[state=open]:text-primary-foreground",
+                    "hover:text-foreground",
                   )}
                 >
                   <Link href={item.path}>
@@ -157,47 +157,81 @@ export function SidebarPrimary() {
 
       {/* Footer */}
       <div className="flex flex-col items-center gap-2.5 shrink-0">
-        <Button variant="ghost" mode="icon" className="text-muted-foreground hover:text-foreground">
-          <Mails className="opacity-100"/>
+        <Button
+          variant="ghost"
+          mode="icon"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Mails className="opacity-100" />
         </Button>
 
-        <Button variant="ghost" mode="icon" className="text-muted-foreground hover:text-foreground">
-          <NotepadText className="opacity-100"/>
+        <Button
+          variant="ghost"
+          mode="icon"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <NotepadText className="opacity-100" />
         </Button>
-        
-        <Button variant="ghost" mode="icon" className="text-muted-foreground hover:text-foreground">
-          <Settings className="opacity-100"/>
+
+        <Button
+          variant="ghost"
+          mode="icon"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Settings className="opacity-100" />
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger className="cursor-pointer mb-2.5">
             <Avatar className="size-7">
-              <AvatarImage src={toAbsoluteUrl('/media/avatars/300-2.png')} alt="@reui" />
+              <AvatarImage
+                src={toAbsoluteUrl("/media/avatars/300-2.png")}
+                alt="@reui"
+              />
               <AvatarFallback>CH</AvatarFallback>
               <AvatarIndicator className="-end-2 -top-2">
                 <AvatarStatus variant="online" className="size-2.5" />
               </AvatarIndicator>
             </Avatar>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64 mb-4" side="right" align="start" sideOffset={11}>
+          <DropdownMenuContent
+            className="w-64 mb-4"
+            side="right"
+            align="start"
+            sideOffset={11}
+          >
             {/* User Information Section */}
             <div className="flex items-center gap-3 px-3 py-2">
               <Avatar>
-                <AvatarImage src={toAbsoluteUrl('/media/avatars/300-2.png')} alt="@reui" />
+                <AvatarImage
+                  src={toAbsoluteUrl("/media/avatars/300-2.png")}
+                  alt="@reui"
+                />
                 <AvatarFallback>CH</AvatarFallback>
                 <AvatarIndicator className="-end-1.5 -top-1.5">
                   <AvatarStatus variant="online" className="size-2.5" />
                 </AvatarIndicator>
               </Avatar>
               <div className="flex flex-col items-start">
-                <span className="text-sm font-semibold text-foreground">Chris Harris</span>
-                <span className="text-xs text-muted-foreground">Senior Developer</span>
-                <Badge variant="success" appearance="outline" size="sm" className="mt-1">Pro Plan</Badge>
+                <span className="text-sm font-semibold text-foreground">
+                  Chris Harris
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Senior Developer
+                </span>
+                <Badge
+                  variant="success"
+                  appearance="outline"
+                  size="sm"
+                  className="mt-1"
+                >
+                  Pro Plan
+                </Badge>
               </div>
             </div>
-            
+
             <DropdownMenuItem className="cursor-pointer py-1 rounded-md border border-border hover:bg-muted">
-              <Clock/>
+              <Clock />
               <span>Set availability</span>
             </DropdownMenuItem>
 
@@ -205,18 +239,25 @@ export function SidebarPrimary() {
 
             {/* Core Actions */}
             <DropdownMenuItem>
-              <Target/>
+              <Target />
               <span>My Projects</span>
-              <Badge variant="info" size="sm" appearance="outline" className="ms-auto">3</Badge>
+              <Badge
+                variant="info"
+                size="sm"
+                appearance="outline"
+                className="ms-auto"
+              >
+                3
+              </Badge>
             </DropdownMenuItem>
 
             <DropdownMenuItem>
-              <Users/>
+              <Users />
               <span>Team Management</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem>
-              <Building2/>
+              <Building2 />
               <span>Organization</span>
             </DropdownMenuItem>
 
@@ -224,17 +265,17 @@ export function SidebarPrimary() {
 
             {/* Settings */}
             <DropdownMenuItem>
-              <User/>
+              <User />
               <span>Profile Settings</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem>
-              <Settings/>
+              <Settings />
               <span>Preferences</span>
             </DropdownMenuItem>
 
             <DropdownMenuItem>
-              <Shield/>
+              <Shield />
               <span>Security</span>
             </DropdownMenuItem>
 
@@ -243,7 +284,7 @@ export function SidebarPrimary() {
             {/* Developer Tools */}
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
-                <Zap/>
+                <Zap />
                 <span>Developer Tools</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-48">
@@ -254,7 +295,7 @@ export function SidebarPrimary() {
             </DropdownMenuSub>
 
             <DropdownMenuItem>
-              <Download/>
+              <Download />
               <span>Download SDK</span>
               <ExternalLink className="size-3 ms-auto" />
             </DropdownMenuItem>
@@ -263,7 +304,7 @@ export function SidebarPrimary() {
 
             {/* Action Items */}
             <DropdownMenuItem>
-              <LogOut/>
+              <LogOut />
               <span>Sign out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

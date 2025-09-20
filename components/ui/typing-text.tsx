@@ -1,22 +1,28 @@
-'use client';
+"use client";
 
-import React, { useEffect, useRef, useState } from 'react';
-import { motion, MotionProps, useInView, UseInViewOptions, Variants } from 'motion/react';
-import { cn } from '@/lib/utils';
+import React, { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  MotionProps,
+  useInView,
+  UseInViewOptions,
+  Variants,
+} from "motion/react";
+import { cn } from "@/lib/utils";
 
 type AnimationVariant =
-  | 'fadeIn'
-  | 'blurIn'
-  | 'blurInUp'
-  | 'blurInDown'
-  | 'slideUp'
-  | 'slideDown'
-  | 'slideLeft'
-  | 'slideRight'
-  | 'scaleUp'
-  | 'scaleDown';
+  | "fadeIn"
+  | "blurIn"
+  | "blurInUp"
+  | "blurInDown"
+  | "slideUp"
+  | "slideDown"
+  | "slideLeft"
+  | "slideRight"
+  | "scaleUp"
+  | "scaleDown";
 
-interface TypingTextProps extends Omit<MotionProps, 'children'> {
+interface TypingTextProps extends Omit<MotionProps, "children"> {
   /** Text to animate */
   text?: string;
   /** Array of texts to cycle through */
@@ -46,7 +52,7 @@ interface TypingTextProps extends Omit<MotionProps, 'children'> {
   /** The animation preset to use */
   animation?: AnimationVariant;
   /** Margin for in-view detection (rootMargin) */
-  inViewMargin?: UseInViewOptions['margin'];
+  inViewMargin?: UseInViewOptions["margin"];
 }
 
 const cursorVariants: Variants = {
@@ -56,7 +62,7 @@ const cursorVariants: Variants = {
       duration: 1,
       repeat: Infinity,
       repeatDelay: 0,
-      ease: 'linear',
+      ease: "linear",
       times: [0, 0.5, 0.5, 1],
     },
   },
@@ -68,8 +74,8 @@ export function TypingText({
   speed = 100,
   delay = 0,
   showCursor = true,
-  cursorClassName = '',
-  cursor = '|',
+  cursorClassName = "",
+  cursor = "|",
   loop = false,
   pauseDuration = 2000,
   className,
@@ -80,9 +86,12 @@ export function TypingText({
   ...props
 }: TypingTextProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once, margin: inViewMargin as UseInViewOptions['margin'] });
+  const isInView = useInView(ref, {
+    once,
+    margin: inViewMargin as UseInViewOptions["margin"],
+  });
   const [hasAnimated, setHasAnimated] = useState(false);
-  const [displayText, setDisplayText] = useState('');
+  const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
@@ -91,7 +100,7 @@ export function TypingText({
   const shouldStart = !startOnView || (isInView && (!once || !hasAnimated));
 
   const textArray = texts && texts.length > 0 ? texts : [text];
-  const currentText = textArray[currentTextIndex] ?? '';
+  const currentText = textArray[currentTextIndex] ?? "";
 
   useEffect(() => {
     if (!shouldStart) return;
@@ -119,7 +128,7 @@ export function TypingText({
 
       if (loop && texts && texts.length > 1) {
         const timeout = setTimeout(() => {
-          setDisplayText('');
+          setDisplayText("");
           setCurrentIndex(0);
           setCurrentTextIndex((prev) => (prev + 1) % texts.length);
         }, pauseDuration);
@@ -127,7 +136,16 @@ export function TypingText({
         return () => clearTimeout(timeout);
       }
     }
-  }, [currentIndex, currentText, isTyping, speed, loop, texts, pauseDuration, onComplete]);
+  }, [
+    currentIndex,
+    currentText,
+    isTyping,
+    speed,
+    loop,
+    texts,
+    pauseDuration,
+    onComplete,
+  ]);
 
   // Animation variants for container (fadeIn by default, extendable)
   const finalVariants = {
@@ -144,20 +162,23 @@ export function TypingText({
       ref={ref}
       variants={finalVariants.container as Variants}
       initial="hidden"
-      whileInView={startOnView ? 'show' : undefined}
-      animate={startOnView ? undefined : 'show'}
+      whileInView={startOnView ? "show" : undefined}
+      animate={startOnView ? undefined : "show"}
       exit="exit"
-      className={cn('whitespace-pre-wrap', className)}
+      className={cn("whitespace-pre-wrap", className)}
       viewport={{ once }}
       {...props}
     >
-      <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+      <span style={{ display: "inline-flex", alignItems: "center" }}>
         {displayText}
         {showCursor && (
           <motion.span
             variants={cursorVariants}
             animate="blinking"
-            className={cn('inline-block ms-1 font-normal text-foreground select-none w-px', cursorClassName)}
+            className={cn(
+              "inline-block ms-1 font-normal text-foreground select-none w-px",
+              cursorClassName,
+            )}
           >
             {cursor}
           </motion.span>

@@ -1,19 +1,20 @@
 import {
-  BellDot,
-  Settings,
-  Clock,
-  User,
   Bell,
-  Keyboard,
-  Gift,
-  HelpCircle,
-  LogOut,
-  VolumeX,
+  BellDot,
+  Clock,
   Download,
   ExternalLink,
-  Sun,
+  Gift,
+  HelpCircle,
+  Keyboard,
+  LogOut,
   Moon,
+  Settings,
+  Sun,
+  User,
+  VolumeX,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Avatar,
@@ -21,20 +22,19 @@ import {
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
+} from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,  
+  DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useTheme } from "next-themes";
+} from "@/components/ui/dropdown-menu";
 
 export function HeaderToolbar() {
   const { theme, setTheme } = useTheme();
@@ -46,41 +46,62 @@ export function HeaderToolbar() {
   return (
     <nav className="flex items-center gap-2.5">
       <div className="flex items-center gap-1">
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-foreground"
+        >
           <BellDot className="opacity-100" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-foreground"
+        >
           <Settings className="opacity-100" />
         </Button>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger className="cursor-pointer">
           <Avatar className="size-7">
-            <AvatarImage  src={toAbsoluteUrl('/media/avatars/300-2.png')} alt="@reui" />
+            <AvatarImage
+              src={toAbsoluteUrl("/media/avatars/300-2.png")}
+              alt="@reui"
+            />
             <AvatarFallback>CH</AvatarFallback>
             <AvatarIndicator className="-end-2 -top-2">
               <AvatarStatus variant="online" className="size-2.5" />
             </AvatarIndicator>
           </Avatar>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-64" side="bottom" align="end" sideOffset={11}>
+        <DropdownMenuContent
+          className="w-64"
+          side="bottom"
+          align="end"
+          sideOffset={11}
+        >
           {/* User Information Section */}
           <div className="flex items-center gap-3 p-3">
             <Avatar>
-              <AvatarImage  src={toAbsoluteUrl('/media/avatars/300-2.png')} alt="@reui" />
+              <AvatarImage
+                src={toAbsoluteUrl("/media/avatars/300-2.png")}
+                alt="@reui"
+              />
               <AvatarFallback>S</AvatarFallback>
               <AvatarIndicator className="-end-1.5 -top-1.5">
                 <AvatarStatus variant="online" className="size-2.5" />
               </AvatarIndicator>
             </Avatar>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-foreground">Sean</span>
+              <span className="text-sm font-semibold text-foreground">
+                Sean
+              </span>
               <span className="text-xs text-muted-foreground">Online</span>
             </div>
           </div>
-          
+
           <DropdownMenuItem className="cursor-pointer py-1 rounded-md border border-border hover:bg-muted">
-            <Clock/>
+            <Clock />
             <span>Set status</span>
           </DropdownMenuItem>
 
@@ -89,7 +110,7 @@ export function HeaderToolbar() {
           {/* Notification and Settings Section */}
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <VolumeX/>
+              <VolumeX />
               <span>Mute notifications</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent className="w-48">
@@ -103,17 +124,17 @@ export function HeaderToolbar() {
           </DropdownMenuSub>
 
           <DropdownMenuItem>
-            <User/>
+            <User />
             <span>Profile</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem>
-            <Settings/>
+            <Settings />
             <span>Settings</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem>
-            <Bell/>
+            <Bell />
             <span>Notification settings</span>
           </DropdownMenuItem>
 
@@ -121,7 +142,11 @@ export function HeaderToolbar() {
 
           {/* Theme Toggle */}
           <DropdownMenuItem onClick={toggleTheme}>
-            {theme === "light" ? <Moon className="size-4" /> : <Sun className="size-4" />}
+            {theme === "light" ? (
+              <Moon className="size-4" />
+            ) : (
+              <Sun className="size-4" />
+            )}
             <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
           </DropdownMenuItem>
 
@@ -129,24 +154,26 @@ export function HeaderToolbar() {
 
           {/* Business-Focused Application Section */}
           <DropdownMenuItem>
-            <Keyboard/>
+            <Keyboard />
             <span>Keyboard shortcuts</span>
           </DropdownMenuItem>
 
           <DropdownMenuItem>
-            <Gift/>
+            <Gift />
             <span>Referrals</span>
-            <Badge variant="info" appearance="light" className="ms-auto">New</Badge>
+            <Badge variant="info" appearance="light" className="ms-auto">
+              New
+            </Badge>
           </DropdownMenuItem>
 
-          <DropdownMenuItem >
-            <Download/>
+          <DropdownMenuItem>
+            <Download />
             <span>Download apps</span>
             <ExternalLink className="size-3 ms-auto" />
           </DropdownMenuItem>
 
           <DropdownMenuItem>
-            <HelpCircle/>
+            <HelpCircle />
             <span>Help</span>
             <ExternalLink className="size-3 ms-auto" />
           </DropdownMenuItem>
@@ -155,7 +182,7 @@ export function HeaderToolbar() {
 
           {/* Action Items */}
           <DropdownMenuItem>
-            <LogOut/>
+            <LogOut />
             <span>Log out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

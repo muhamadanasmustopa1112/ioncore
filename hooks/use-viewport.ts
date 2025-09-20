@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 type UseViewport = [number, number];
 
@@ -14,10 +14,10 @@ export function useViewport(): UseViewport {
       setDimensions([window.innerHeight, window.innerWidth]);
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 

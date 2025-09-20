@@ -1,5 +1,5 @@
-import { LucideIcon } from 'lucide-react';
-import { Avatars } from '../../common/avatar-group';
+import { LucideIcon } from "lucide-react";
+import { Avatars } from "../../common/avatar-group";
 
 export interface SearchDocsItem {
   image: string;
@@ -36,12 +36,12 @@ export interface SearchUsersItem {
   email: string;
   label: string;
   color:
-    | 'success'
-    | 'destructive'
-    | 'primary'
-    | 'secondary'
-    | 'warning'
-    | 'info'
+    | "success"
+    | "destructive"
+    | "primary"
+    | "secondary"
+    | "warning"
+    | "info"
     | null
     | undefined;
 }

@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Card } from '@/components/ui/card';
+} from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 
 interface IItem18Item {
   image: string;
@@ -19,14 +19,14 @@ type IItem18Items = Array<IItem18Item>;
 export default function Item18() {
   const items: IItem18Items = [
     {
-      image: '6.jpg',
-      title: 'Geometric Patterns',
-      id: '81023',
+      image: "6.jpg",
+      title: "Geometric Patterns",
+      id: "81023",
     },
     {
-      image: '1.jpg',
-      title: 'Artistic Expressions',
-      id: '67890',
+      image: "1.jpg",
+      title: "Artistic Expressions",
+      id: "67890",
     },
   ];
 
@@ -81,8 +81,8 @@ export default function Item18() {
               Jane Perez
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              added 2 new works to{' '}
+              {" "}
+              added 2 new works to{" "}
             </span>
             <Link
               href="#"

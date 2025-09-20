@@ -1,4 +1,5 @@
-import { ReactNode } from 'react';
+import { ReactNode } from "react";
+import Link from "next/link";
 import {
   Bell,
   FileText,
@@ -7,8 +8,7 @@ import {
   Pencil,
   Send,
   Trash2,
-} from 'lucide-react';
-import Link from 'next/link';
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +17,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 
 export function DropdownMenu6({ trigger }: { trigger: ReactNode }) {
   return (

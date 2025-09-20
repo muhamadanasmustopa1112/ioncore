@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Image as ImageIcon } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import Link from "next/link";
+import { Image as ImageIcon } from "lucide-react";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface ItemProps {
   userName: string;
@@ -32,7 +32,7 @@ export default function Item1({
   specialist,
   text,
 }: ItemProps) {
-  const [emailInput, setEmailInput] = useState('');
+  const [emailInput, setEmailInput] = useState("");
   return (
     <div className="flex grow gap-2.5 px-5">
       <Avatar>
@@ -46,7 +46,10 @@ export default function Item1({
       <div className="flex flex-col gap-3.5">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               {userName}
             </Link>
             <span className="text-secondary-foreground"> {description} </span>
@@ -65,8 +68,11 @@ export default function Item1({
 
         <Card className="shadow-none flex flex-col gap-2.5 p-3.5 rounded-lg bg-muted/70">
           <div className="text-sm font-semibold text-secondary-foreground mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
-              @Cody{' '}
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
+              @Cody{" "}
             </Link>
             <span className="text-secondary-foreground font-medium">
               {text}

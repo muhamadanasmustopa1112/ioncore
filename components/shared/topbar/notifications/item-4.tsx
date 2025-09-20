@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Card } from '@/components/ui/card';
+} from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 
 export default function Item4() {
   return (
@@ -23,12 +23,15 @@ export default function Item4() {
       <div className="flex flex-col gap-3.5 grow">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
               Jane Perez
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              invites you to review a file.{' '}
+              {" "}
+              invites you to review a file.{" "}
             </span>
           </div>
 
@@ -41,7 +44,7 @@ export default function Item4() {
 
         <Card className="shadow-none flex items-center flex-row gap-1.5 p-2.5 rounded-lg bg-muted/70">
           <img
-            src={toAbsoluteUrl('/media/file-types/pdf.svg')}
+            src={toAbsoluteUrl("/media/file-types/pdf.svg")}
             className="h-5"
             alt="image"
           />

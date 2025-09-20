@@ -1,17 +1,17 @@
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { Button } from '@/components/ui/button';
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { Button } from "@/components/ui/button";
 
 export function SearchEmpty() {
   return (
     <div className="flex flex-col text-center py-9 gap-5">
       <div className="flex justify-center">
         <img
-          src={toAbsoluteUrl('/media/illustrations/33.svg')}
+          src={toAbsoluteUrl("/media/illustrations/33.svg")}
           className="dark:hidden max-h-[113px]"
           alt="image"
         />
         <img
-          src={toAbsoluteUrl('/media/illustrations/33-dark.svg')}
+          src={toAbsoluteUrl("/media/illustrations/33-dark.svg")}
           className="light:hidden max-h-[113px]"
           alt="image"
         />

@@ -1,10 +1,10 @@
-import { MenuConfig, MenuItem } from '@/config/types';
-import { Badge } from '@/components/ui/badge';
+import { MenuConfig, MenuItem } from "@/config/types";
+import { Badge } from "@/components/ui/badge";
 import {
   MegaMenuFooter,
   MegaMenuSubDefault,
   MegaMenuSubHighlighted,
-} from './components';
+} from "./components";
 
 const MegaMenuSubAuth = ({ items }: { items: MenuConfig }) => {
   const authItem = items[4];

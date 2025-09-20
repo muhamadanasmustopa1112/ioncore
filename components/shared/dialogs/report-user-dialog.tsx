@@ -1,16 +1,16 @@
-import { useId, useState } from 'react';
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { Button } from '@/components/ui/button';
+import { useId, useState } from "react";
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export function ReportUserDialog({
   open,
@@ -19,7 +19,7 @@ export function ReportUserDialog({
   open: boolean;
   onOpenChange: () => void;
 }) {
-  const [selectedReason, setSelectedReason] = useState('Impersonation');
+  const [selectedReason, setSelectedReason] = useState("Impersonation");
   const id = useId();
 
   const buildNotice = () => {
@@ -27,7 +27,7 @@ export function ReportUserDialog({
       <div className="grid place-items-center gap-1 px-5">
         <div className="flex justify-center items-center rounded-full">
           <img
-            src={toAbsoluteUrl('/media/avatars/300-1.png')}
+            src={toAbsoluteUrl("/media/avatars/300-1.png")}
             className="rounded-full max-h-[55px] max-w-full"
             alt="image"
           />
@@ -62,26 +62,26 @@ export function ReportUserDialog({
   const buildOptions = () => {
     const items = [
       {
-        name: 'Impersonation',
+        name: "Impersonation",
         description:
-          'It looks like this profile might be impersonating someone else',
+          "It looks like this profile might be impersonating someone else",
         checked: true,
       },
       {
-        name: 'Spammy',
+        name: "Spammy",
         description:
-          'This person profile, comments or posts contain misleading text',
+          "This person profile, comments or posts contain misleading text",
         checked: false,
       },
       {
-        name: 'Off bumble behavior',
+        name: "Off bumble behavior",
         description:
-          'This person has engaged in behavior that is abusive, bullying',
+          "This person has engaged in behavior that is abusive, bullying",
         checked: false,
       },
       {
-        name: 'Something else',
-        description: 'None of the reasons listed above are suitable',
+        name: "Something else",
+        description: "None of the reasons listed above are suitable",
         checked: false,
       },
     ];
@@ -118,7 +118,7 @@ export function ReportUserDialog({
   const buildFooter = () => {
     return (
       <div className="text-sm font-medium text-center text-foreground p-x">
-        Don't worry, your report is completely anonymous; the person you're{' '}
+        Don't worry, your report is completely anonymous; the person you're{" "}
         <br />
         reporting will not be informed that you've submitted it
       </div>

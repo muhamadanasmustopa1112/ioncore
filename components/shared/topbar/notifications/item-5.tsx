@@ -1,16 +1,16 @@
-import Link from 'next/link';
+import Link from "next/link";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
+} from "@/components/ui/avatar";
 
 interface Item5Props {
   userName: string;
   avatar: string;
-  badgeColor: 'online' | 'offline' | 'busy' | 'away' | null | undefined;
+  badgeColor: "online" | "offline" | "busy" | "away" | null | undefined;
   description: string;
   day: string;
   link: string;
@@ -46,7 +46,7 @@ export default function Item5({
           <span className="text-secondary-foreground"> {description} </span>
           <Link href="#" className="hover:text-primary text-primary">
             {link}
-          </Link>{' '}
+          </Link>{" "}
           {day}
         </div>
 

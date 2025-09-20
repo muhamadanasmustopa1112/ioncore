@@ -1,4 +1,5 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState } from "react";
+import Link from "next/link";
 import {
   Calendar,
   CheckCheck,
@@ -7,18 +8,17 @@ import {
   Shield,
   Upload,
   Users,
-} from 'lucide-react';
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { cn } from '@/lib/utils';
+} from "lucide-react";
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { cn } from "@/lib/utils";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+} from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,8 +28,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetBody,
@@ -38,8 +38,8 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
-import { AvatarGroup }  from '@/components/layouts/layout-1/shared/common/avatar-group';
+} from "@/components/ui/sheet";
+import { AvatarGroup } from "@/components/layouts/layout-1/shared/common/avatar-group";
 
 interface Message {
   avatar: string;
@@ -51,52 +51,52 @@ interface Message {
 }
 
 export function ChatSheet({ trigger }: { trigger: ReactNode }) {
-  const [emailInput, setEmailInput] = useState('');
+  const [emailInput, setEmailInput] = useState("");
 
   const messages: Message[] = [
     {
-      avatar: '/media/avatars/300-5.png',
-      time: '14:04',
-      text: 'Hello! <br> Next week we are closing the project. Do You have questions?',
+      avatar: "/media/avatars/300-5.png",
+      time: "14:04",
+      text: "Hello! <br> Next week we are closing the project. Do You have questions?",
       in: true,
     },
     {
-      avatar: '/media/avatars/300-2.png',
-      text: 'This is excellent news!',
-      time: '14:08',
+      avatar: "/media/avatars/300-2.png",
+      text: "This is excellent news!",
+      time: "14:08",
       read: true,
       out: true,
     },
     {
-      avatar: '/media/avatars/300-4.png',
-      time: '14:26',
-      text: 'I have checked the features, can not wait to demo them!',
+      avatar: "/media/avatars/300-4.png",
+      time: "14:26",
+      text: "I have checked the features, can not wait to demo them!",
       in: true,
     },
     {
-      avatar: '/media/avatars/300-1.png',
-      time: '15:09',
-      text: 'I have looked over the rollout plan, and everything seems spot on. I am ready on my end and can not wait for the user feedback.',
+      avatar: "/media/avatars/300-1.png",
+      time: "15:09",
+      text: "I have looked over the rollout plan, and everything seems spot on. I am ready on my end and can not wait for the user feedback.",
       in: true,
     },
     {
-      avatar: '/media/avatars/300-2.png',
+      avatar: "/media/avatars/300-2.png",
       text: "Haven't seen the build yet, I'll look now.",
-      time: '15:52',
+      time: "15:52",
       read: false,
       out: true,
     },
     {
-      avatar: '/media/avatars/300-2.png',
-      text: 'Checking the build now',
-      time: '15:52',
+      avatar: "/media/avatars/300-2.png",
+      text: "Checking the build now",
+      time: "15:52",
       read: false,
       out: true,
     },
     {
-      avatar: '/media/avatars/300-4.png',
-      time: '17:40',
-      text: 'Tomorrow, I will send the link for the meeting',
+      avatar: "/media/avatars/300-4.png",
+      time: "17:40",
+      text: "Tomorrow, I will send the link for the meeting",
       in: true,
     },
   ];
@@ -114,7 +114,7 @@ export function ChatSheet({ trigger }: { trigger: ReactNode }) {
               <div className="flex items-center gap-2">
                 <div className="w-11 h-11 rounded-full bg-accent/60 border border-border flex items-center justify-center">
                   <img
-                    src={toAbsoluteUrl('/media/brand-logos/gitlab.svg')}
+                    src={toAbsoluteUrl("/media/brand-logos/gitlab.svg")}
                     className="w-7 h-7"
                     alt=""
                   />
@@ -135,12 +135,12 @@ export function ChatSheet({ trigger }: { trigger: ReactNode }) {
                 <AvatarGroup
                   size="size-8"
                   group={[
-                    { path: '/media/avatars/300-4.png' },
-                    { path: '/media/avatars/300-1.png' },
-                    { path: '/media/avatars/300-2.png' },
+                    { path: "/media/avatars/300-4.png" },
+                    { path: "/media/avatars/300-1.png" },
+                    { path: "/media/avatars/300-2.png" },
                     {
-                      fallback: '+10',
-                      variant: 'bg-green-500 text-white',
+                      fallback: "+10",
+                      variant: "bg-green-500 text-white",
                     },
                   ]}
                 />
@@ -215,10 +215,10 @@ export function ChatSheet({ trigger }: { trigger: ReactNode }) {
                     </span>
                     <CheckCheck
                       className={cn(
-                        'w-4 h-4',
+                        "w-4 h-4",
                         message.read
-                          ? 'text-green-500'
-                          : 'text-muted-foreground',
+                          ? "text-green-500"
+                          : "text-muted-foreground",
                       )}
                     />
                   </div>
@@ -226,7 +226,7 @@ export function ChatSheet({ trigger }: { trigger: ReactNode }) {
                 <div className="relative">
                   <Avatar className="size-9">
                     <AvatarImage
-                      src={toAbsoluteUrl('/media/avatars//300-2.png')}
+                      src={toAbsoluteUrl("/media/avatars//300-2.png")}
                       alt=""
                     />
                     <AvatarFallback>CH</AvatarFallback>
@@ -259,7 +259,7 @@ export function ChatSheet({ trigger }: { trigger: ReactNode }) {
           <div className="p-4 bg-accent/50 flex gap-2">
             <Avatar className="size-9">
               <AvatarImage
-                src={toAbsoluteUrl('/media/avatars//300-14.png')}
+                src={toAbsoluteUrl("/media/avatars//300-14.png")}
                 alt=""
               />
               <AvatarFallback>CH</AvatarFallback>
@@ -296,7 +296,7 @@ export function ChatSheet({ trigger }: { trigger: ReactNode }) {
           </div>
           <div className="p-5 flex items-center gap-2 relative">
             <img
-              src={toAbsoluteUrl('/media/avatars/300-2.png')}
+              src={toAbsoluteUrl("/media/avatars/300-2.png")}
               className="w-8 h-8 rounded-full absolute left-7 top-1/2 -translate-y-1/2"
               alt=""
             />

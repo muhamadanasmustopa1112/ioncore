@@ -1,5 +1,5 @@
-import { SidebarMenu } from './sidebar-menu';
-import { SidebarSearch } from './sidebar-search';
+import { SidebarMenu } from "./sidebar-menu";
+import { SidebarSearch } from "./sidebar-search";
 
 export function Sidebar() {
   return (

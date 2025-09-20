@@ -1,4 +1,4 @@
-import { MenuItem } from '@/config/types';
+import { MenuItem } from "@/config/types";
 
 type MenuConfig = MenuItem[];
 
@@ -13,7 +13,7 @@ interface UseMenuReturn {
 
 export const useMenu = (pathname: string): UseMenuReturn => {
   const isActive = (path: string | undefined): boolean => {
-    if (path && path === '/') {
+    if (path && path === "/") {
       return path === pathname;
     } else {
       return !!path && pathname.startsWith(path);
@@ -92,8 +92,8 @@ export const useMenu = (pathname: string): UseMenuReturn => {
         if (
           (item.path &&
             (item.path === pathname ||
-              (item.path !== '/' &&
-                item.path !== '' &&
+              (item.path !== "/" &&
+                item.path !== "" &&
                 pathname.startsWith(item.path)))) ||
           (item.children && hasActiveChildAtLevel(item.children))
         ) {
@@ -128,8 +128,8 @@ export const useMenu = (pathname: string): UseMenuReturn => {
           targetLevel === currentLevel &&
           item.path &&
           (item.path === pathname ||
-            (item.path !== '/' &&
-              item.path !== '' &&
+            (item.path !== "/" &&
+              item.path !== "" &&
               pathname.startsWith(item.path)))
         ) {
           return items;

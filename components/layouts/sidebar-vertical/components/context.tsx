@@ -2,10 +2,11 @@ import {
   createContext,
   ReactNode,
   useContext,
-  useEffect,useState
-} from 'react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { TooltipProvider } from '@/components/ui/tooltip';
+  useEffect,
+  useState,
+} from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const HEADER_HEIGHT = "60px";
 const SIDEBAR_WIDTH = "300px";
@@ -31,15 +32,19 @@ interface LayoutProviderProps {
   bodyClassName?: string;
 }
 
-export function LayoutProvider({ children, style: customStyle, bodyClassName = '' }: LayoutProviderProps) {
+export function LayoutProvider({
+  children,
+  style: customStyle,
+  bodyClassName = "",
+}: LayoutProviderProps) {
   const isMobile = useIsMobile();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const defaultStyle: React.CSSProperties = {
-    '--sidebar-width': SIDEBAR_WIDTH,
-    '--sidebar-collapsed-width': SIDEBAR_COLLAPSED_WIDTH,
-    '--header-height': HEADER_HEIGHT,
-    '--toolbar-height': TOOLBAR_HEIGHT,
+    "--sidebar-width": SIDEBAR_WIDTH,
+    "--sidebar-collapsed-width": SIDEBAR_COLLAPSED_WIDTH,
+    "--header-height": HEADER_HEIGHT,
+    "--toolbar-height": TOOLBAR_HEIGHT,
   } as React.CSSProperties;
 
   const style: React.CSSProperties = {
@@ -73,7 +78,7 @@ export function LayoutProvider({ children, style: customStyle, bodyClassName = '
         style,
         isMobile,
         isSidebarOpen,
-        sidebarToggle
+        sidebarToggle,
       }}
     >
       <div
@@ -82,9 +87,7 @@ export function LayoutProvider({ children, style: customStyle, bodyClassName = '
         data-sidebar-open={isSidebarOpen}
         style={style}
       >
-        <TooltipProvider delayDuration={0}>
-          {children}
-        </TooltipProvider>
+        <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
       </div>
     </LayoutContext.Provider>
   );
@@ -94,7 +97,7 @@ export function LayoutProvider({ children, style: customStyle, bodyClassName = '
 export const useLayout = () => {
   const context = useContext(LayoutContext);
   if (!context) {
-    throw new Error('useLayout must be used within a LayoutProvider');
+    throw new Error("useLayout must be used within a LayoutProvider");
   }
   return context;
 };

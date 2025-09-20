@@ -1,11 +1,11 @@
-import { ReactNode } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { MenuConfig } from '@/config/types';
-import { cn } from '@/lib/utils';
-import { useMenu } from '@/hooks/use-menu';
-import { Badge } from '@/components/ui/badge';
-import { NavigationMenuLink } from '@/components/ui/navigation-menu';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { MenuConfig } from "@/config/types";
+import { cn } from "@/lib/utils";
+import { useMenu } from "@/hooks/use-menu";
+import { Badge } from "@/components/ui/badge";
+import { NavigationMenuLink } from "@/components/ui/navigation-menu";
 
 const MegaMenuSubDefault = (items: MenuConfig) => {
   const pathname = usePathname();
@@ -28,11 +28,11 @@ const MegaMenuSubDefault = (items: MenuConfig) => {
         return (
           <NavigationMenuLink key={index} asChild>
             <Link
-              {...(isActive(item.path) && { 'data-active': true })}
-              href={item.path || ''}
+              {...(isActive(item.path) && { "data-active": true })}
+              href={item.path || ""}
               className={cn(
-                'flex flex-row items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent/50 text-sm',
-                '[&_svg]:text-muted-foreground hover:[&_svg]:text-primary [&[data-active=true]_svg]:text-primary',
+                "flex flex-row items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent/50 text-sm",
+                "[&_svg]:text-muted-foreground hover:[&_svg]:text-primary [&[data-active=true]_svg]:text-primary",
               )}
             >
               {item.icon && <item.icon className="size-4" />}

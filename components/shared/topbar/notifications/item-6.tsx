@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
   AvatarIndicator,
   AvatarStatus,
-} from '@/components/ui/avatar';
-import { Card } from '@/components/ui/card';
+} from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
 
 export default function Item6() {
   return (
@@ -23,12 +23,15 @@ export default function Item6() {
       <div className="flex flex-col gap-3.5 grow">
         <div className="flex flex-col gap-1">
           <div className="text-sm font-medium mb-px">
-            <Link href="#" className="hover:text-primary text-mono font-semibold">
-              Tyler Hero{' '}
+            <Link
+              href="#"
+              className="hover:text-primary text-mono font-semibold"
+            >
+              Tyler Hero{" "}
             </Link>
             <span className="text-secondary-foreground">
-              {' '}
-              wants to view your design project{' '}
+              {" "}
+              wants to view your design project{" "}
             </span>
           </div>
           <span className="flex items-center text-xs font-medium text-muted-foreground">
@@ -41,7 +44,7 @@ export default function Item6() {
         <Card className="shadow-none flex items-center flex-row gap-1.5 p-2.5 rounded-lg bg-muted/70">
           <div className="flex items-center justify-center w-[26px] h-[30px] shrink-0 bg-background rounded-sm border border-border">
             <img
-              src={toAbsoluteUrl('/media/file-types/figma.svg')}
+              src={toAbsoluteUrl("/media/file-types/figma.svg")}
               className="h-5"
               alt="image"
             />
