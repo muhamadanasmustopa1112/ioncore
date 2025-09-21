@@ -23,12 +23,19 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   return (
-    <html className="h-full" suppressHydrationWarning>
+    <html
+      className="h-full"
+      data-theme-brand="wit"
+      data-theme-radius="none"
+      data-theme-scale="md"
+      suppressHydrationWarning
+    >
       <body
         className={cn(
-          "antialiased flex h-full text-base text-foreground bg-background",
+          "antialiased flex h-full text-base text-foreground bg-background group/layout",
           inter.className,
         )}
+        data-theme-content-layout="centered"
       >
         <ThemeProvider
           attribute="class"

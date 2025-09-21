@@ -64,6 +64,81 @@
   --ring: var(--color-zinc-600);
 }
 
+/* Brand Colors */
+[data-theme-brand="wit"] {
+  --primary: oklch(72.65% 69.19 30.24);
+  --secondary: oklch(47.86% 25.15 13.12);
+}
+
+/* Radius */
+[data-theme-radius="sm"] {
+  --radius: 0.3rem;
+}
+
+[data-theme-radius="md"] {
+  --radius: 0.5rem;
+}
+
+[data-theme-radius="lg"] {
+  --radius: 1rem;
+}
+
+[data-theme-radius="xl"] {
+  --radius: 1.5rem;
+}
+
+/* Scale */
+[data-theme-scale="xs"] {
+  --text-lg: 1.05rem;
+  --text-base: 0.85rem;
+  --text-sm: 0.75rem;
+  --spacing: 0.222222rem;
+}
+
+[data-theme-scale="lg"] {
+  --text-lg: 1.55rem;
+  --text-base: 1.35rem;
+  --text-sm: 1rem;
+  --spacing: 0.262222rem;
+}
+
+/* Centered */
+@media (min-width: 40rem) {
+  .xl\:group-data-\[theme-content-layout\=centered\]\/layout\:container:is(
+    :where(.group\/layout)[data-theme-content-layout="centered"] *
+  ) {
+    max-width: 40rem;
+  }
+}
+@media (min-width: 48rem) {
+  .xl\:group-data-\[theme-content-layout\=centered\]\/layout\:container:is(
+    :where(.group\/layout)[data-theme-content-layout="centered"] *
+  ) {
+    max-width: 48rem;
+  }
+}
+@media (min-width: 64rem) {
+  .xl\:group-data-\[theme-content-layout\=centered\]\/layout\:container:is(
+    :where(.group\/layout)[data-theme-content-layout="centered"] *
+  ) {
+    max-width: 64rem;
+  }
+}
+@media (min-width: 80rem) {
+  .xl\:group-data-\[theme-content-layout\=centered\]\/layout\:container:is(
+    :where(.group\/layout)[data-theme-content-layout="centered"] *
+  ) {
+    max-width: 80rem;
+  }
+}
+@media (min-width: 96rem) {
+  .xl\:group-data-\[theme-content-layout\=centered\]\/layout\:container:is(
+    :where(.group\/layout)[data-theme-content-layout="centered"] *
+  ) {
+    max-width: 96rem;
+  }
+}
+
 /** Theme Setup **/
 @theme inline {
   /** Base Colors **/

@@ -19,7 +19,7 @@ export function Navbar() {
   return (
     <div
       className={cn(
-        "flex items-stretch w-full h-[46px] px-5 gap-5",
+        "flex items-stretch w-full h-[46px] px-5 gap-5 xl:group-data-[theme-content-layout=centered]/layout:container xl:group-data-[theme-content-layout=centered]/layout:mx-auto",
         isMobile ? "justify-end" : "justify-between",
       )}
     >
