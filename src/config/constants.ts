@@ -26,13 +26,17 @@ export const responses = {
 
 // services
 export const services = {
-  auth: "/auth-service",
-  hr: "/hr-services",
-  product: "/product-service",
-  cms: "/cms-service",
-  approval: "/approval-service",
-  media: "/media-service",
-  transaction: "/transaction-service",
+  // mwx version
+  // auth: "/auth-service",
+  // hr: "/hr-services",
+  // product: "/product-service",
+  // cms: "/cms-service",
+  // approval: "/approval-service",
+  // media: "/media-service",
+  // transaction: "/transaction-service",
+
+  // alaya version
+  auth: "/authorization",
 };
 
 // devices

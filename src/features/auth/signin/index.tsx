@@ -67,8 +67,8 @@ export function SigninForm() {
   const form = useForm<LoginInput>({
     resolver: zodResolver(loginInputSchema),
     defaultValues: {
-      identifier: "superadmin@gmail.com",
-      password: "12341234",
+      username: "demo.account@gmail.com",
+      password: "01012000",
     },
   });
 
@@ -136,7 +136,7 @@ export function SigninForm() {
 
         <FormField
           control={form.control}
-          name="identifier"
+          name="username"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>

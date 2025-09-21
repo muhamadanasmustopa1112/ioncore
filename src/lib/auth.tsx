@@ -15,14 +15,14 @@ import { api } from "./api-client";
 import { getCookie } from "./cookies";
 
 export const loginInputSchema = z.object({
-  identifier: z.string().min(1, "Required"),
+  username: z.string().min(1, "Required"),
   password: z.string().min(1, "Required"),
 });
 
 export type LoginInput = z.infer<typeof loginInputSchema>;
 
 const login = (data: LoginInput): Promise<BaseResponse<AuthUser>> => {
-  return api.post(`${services.auth}/authentication/back-office/login`, data);
+  return api.post(`${services.auth}/authentication/login`, data);
 };
 
 const getUser = (): Promise<BaseResponse<AuthUser>> => {
