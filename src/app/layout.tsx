@@ -2,11 +2,12 @@ import { ReactNode, Suspense } from "react";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import "@/styles/globals.css";
 import Provider from "@/components/layouts/context/provider";
+import "@/styles/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -37,21 +38,23 @@ export default async function RootLayout({
         )}
         data-theme-content-layout="centered"
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          storageKey="nextjs-theme"
-          enableSystem
-          disableTransitionOnChange
-          enableColorScheme
-        >
-          <TooltipProvider delayDuration={0}>
-            <Suspense>
-              <Provider>{children}</Provider>
-            </Suspense>
-            <Toaster />
-          </TooltipProvider>
-        </ThemeProvider>
+        <NuqsAdapter>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            storageKey="nextjs-theme"
+            enableSystem
+            disableTransitionOnChange
+            enableColorScheme
+          >
+            <TooltipProvider delayDuration={0}>
+              <Suspense>
+                <Provider>{children}</Provider>
+              </Suspense>
+              <Toaster />
+            </TooltipProvider>
+          </ThemeProvider>
+        </NuqsAdapter>
       </body>
     </html>
   );

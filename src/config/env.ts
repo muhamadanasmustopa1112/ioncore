@@ -11,6 +11,7 @@ const createEnv = () => {
     // commenting due security reason
     SECRET_KEY: z.string(),
     PASSPHRASE: z.string(),
+    SIDEBAR: z.string(),
   });
 
   const envVars = {
@@ -21,6 +22,7 @@ const createEnv = () => {
     // commenting due security reason
     SECRET_KEY: process.env.NEXT_PUBLIC_SECRET_KEY,
     PASSPHRASE: process.env.NEXT_PUBLIC_PASSPHRASE,
+    SIDEBAR: process.env.NEXT_PUBLIC_SIDEBAR,
   };
 
   const parsedEnv = EnvSchema.safeParse(envVars);

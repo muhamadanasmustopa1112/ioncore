@@ -37,10 +37,16 @@ export const services = {
 
   // alaya version
   auth: "/authorization",
+  hr: "/hr-services",
 };
 
 // devices
 export const devices = {
   web: "web",
   mobile: "mobile",
+};
+
+export const sidebarSide = {
+  horizontal: "horizontal",
+  vertical: "vertical",
 };
