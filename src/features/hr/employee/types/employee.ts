@@ -45,7 +45,7 @@ export type Employee = {
 };
 
 export type Job = {
-  join_date?: Date;
+  join_date?: string;
   nik?: null;
   job_id?: string;
   job_name?: string;

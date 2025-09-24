@@ -81,7 +81,11 @@ export function SigninForm() {
   useLayoutEffect(() => {
     const isLoggedIn = getCookie(auth.logged_in);
     if (isLoggedIn === state.loggedIn) {
-      router.push(paths.home.getHref(redirectTo || undefined));
+      if (redirectTo) {
+        router.push(redirectTo);
+        return;
+      }
+      router.push(paths.dashboard.employee.list.getHref());
     }
   }, [redirectTo]);
 

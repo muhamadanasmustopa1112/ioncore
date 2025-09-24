@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { RiFilePdf2Line } from "@remixicon/react";
 import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Employee } from "../../types";
 import { ActionsCell } from "./data-table-actions-cell";
 
@@ -10,13 +14,15 @@ export const columns: ColumnDef<Employee>[] = [
     accessorKey: "id",
     accessorFn: (row) => row.guid,
     header: ({ column }) => <DataGridColumnHeader title="ID" column={column} />,
-    cell: () => <></>,
+    cell: ({ row }) => (
+      <div className="text-primary cursor-pointer">{row.original.guid}</div>
+    ),
     enableSorting: false,
     enableHiding: false,
     enableResizing: false,
-    size: 51,
     meta: {
       cellClassName: "",
+      skeleton: <Skeleton className="w-[70px] h-5" />,
     },
   },
   {
@@ -27,19 +33,18 @@ export const columns: ColumnDef<Employee>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex items-center gap-2.5">
-        <img
-          src={row.original.url_profile_picture}
-          className="rounded-full size-7 shrink-0"
-          alt={`${row.original.fullname}`}
-        />
+        <Avatar>
+          <AvatarImage src={row.original.url_profile_picture} />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
         <div className="flex flex-col">
           <Link
             href="#"
-            className="text-sm font-medium text-mono hover:text-primary-active mb-px"
+            className="text-sm font-bold text-mono hover:text-primary-active mb-px"
           >
             {row.original.fullname}
           </Link>
-          <span className="text-sm text-secondary-foreground font-normal">
+          <span className="text-sm text-muted-foreground font-normal">
             {row.original.job?.job_name}
           </span>
         </div>
@@ -50,108 +55,98 @@ export const columns: ColumnDef<Employee>[] = [
     meta: {
       headerTitle: "Full Name",
       headerClassName: "",
+      skeleton: (
+        <div className="flex items-center gap-2.5">
+          <Skeleton className="size-10 rounded-full" />
+          <div className="flex flex-col gap-1">
+            <Skeleton className="w-[90px] h-5" />
+            <Skeleton className="w-[70px] h-5" />
+          </div>
+        </div>
+      ),
     },
   },
-  // {
-  //   id: 'total',
-  //   accessorFn: (row) => row.total,
-  //   header: ({ column }) => (
-  //     <DataGridColumnHeader title="Earnings" column={column} />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <span className="font-normal text-foreground">
-  //       {row.original.total}
-  //     </span>
-  //   ),
-  //   enableSorting: true,
-  //   size: 150,
-  //   meta: {
-  //     headerClassName: '',
-  //   },
-  // },
-  // {
-  //   id: 'team',
-  //   accessorFn: (row) => row.team,
-  //   header: ({ column }) => (
-  //     <DataGridColumnHeader title="Team" column={column} />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <div className="flex items-center text-foreground font-normal gap-1.5">
-  //       <img
-  //         src={toAbsoluteUrl(
-  //           `/media/brand-logos/${row.original.team.logo}`,
-  //         )}
-  //         className="w-5 shrink-0"
-  //         alt="image"
-  //       />
-  //       {row.original.team.label}
-  //     </div>
-  //   ),
-  //   enableSorting: true,
-  //   size: 175,
-  //   meta: {
-  //     headerClassName: '',
-  //   },
-  // },
-  // {
-  //   id: 'products',
-  //   accessorFn: (row) => row.products,
-  //   header: ({ column }) => (
-  //     <DataGridColumnHeader title="Products" column={column} />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <span className="font-normal text-foreground">
-  //       {row.original.products}
-  //     </span>
-  //   ),
-  //   enableSorting: true,
-  //   size: 140,
-  //   meta: {
-  //     headerClassName: '',
-  //   },
-  // },
-  // {
-  //   id: 'rating',
-  //   accessorFn: (row) => row.rating,
-  //   header: ({ column }) => (
-  //     <DataGridColumnHeader title="Rating" column={column} />
-  //   ),
-  //   cell: ({ row }) => (
-  //     <Rating
-  //       rating={row.original.rating.value}
-  //       round={row.original.rating.round}
-  //     />
-  //   ),
-  //   enableSorting: true,
-  //   size: 150,
-  //   meta: {
-  //     headerClassName: '',
-  //   },
-  // },
-  // {
-  //   id: 'social',
-  //   header: ({ column }) => (
-  //     <DataGridColumnHeader title="Social Profiles" column={column} />
-  //   ),
-  //   cell: () => (
-  //     <div className="flex items-center gap-2.5">
-  //       <Link href="#">
-  //         <Facebook size={16} className="text-muted-foreground text-lg" />
-  //       </Link>
-  //       <Link href="#">
-  //         <Dribbble size={16} className="text-muted-foreground text-lg" />
-  //       </Link>
-  //       <Link href="#">
-  //         <Music2 size={16} className="text-muted-foreground text-lg" />
-  //       </Link>
-  //     </div>
-  //   ),
-  //   enableSorting: true,
-  //   size: 150,
-  //   meta: {
-  //     headerClassName: '',
-  //   },
-  // },
+  {
+    id: "account_info",
+    accessorFn: (row) => row.nickname,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Account Info" column={column} />
+    ),
+    cell: ({ row }) => (
+      <div>
+        <div className="font-bold">{row.original.nickname}</div>
+        <div className="text-muted-foreground">{row.original.email}</div>
+      </div>
+    ),
+    enableSorting: true,
+    size: 150,
+    meta: {
+      headerTitle: "Account Info",
+      headerClassName: "",
+      skeleton: (
+        <div className="flex flex-col gap-1">
+          <Skeleton className="w-[90px] h-5" />
+          <Skeleton className="w-[70px] h-5" />
+        </div>
+      ),
+    },
+  },
+  {
+    id: "outlet",
+    accessorFn: (row) => row.outlet?.outlet_name,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Outlet" column={column} />
+    ),
+    cell: ({ row }) => (
+      <div>
+        <div className="font-bold">{row.original.outlet?.outlet_name}</div>
+        <div className="text-muted-foreground">
+          {row.original.job?.join_date
+            ? format(row.original.job?.join_date, "dd MMMM yyyy")
+            : "-"}
+        </div>
+      </div>
+    ),
+    enableSorting: true,
+    size: 150,
+    meta: {
+      headerClassName: "",
+      skeleton: (
+        <div className="flex flex-col gap-1">
+          <Skeleton className="w-[90px] h-5" />
+          <Skeleton className="w-[70px] h-5" />
+        </div>
+      ),
+    },
+  },
+  {
+    id: "cv",
+    accessorFn: (row) => row.cv_file_url,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Outlet" column={column} />
+    ),
+    cell: ({ row }) => {
+      if (row.original.cv_file_url) {
+        return (
+          <a
+            href={row.original.cv_file_url}
+            target="_blank"
+            className="flex items-center justify-center"
+          >
+            <RiFilePdf2Line className="w-8 h-8 text-muted-foreground" />
+          </a>
+        );
+      }
+      return "";
+    },
+    enableSorting: true,
+    size: 150,
+    meta: {
+      headerTitle: "CV",
+      headerClassName: "",
+      skeleton: <Skeleton className="w-[70px] h-5" />,
+    },
+  },
   {
     id: "actions",
     header: "",
@@ -160,6 +155,7 @@ export const columns: ColumnDef<Employee>[] = [
     size: 60,
     meta: {
       headerClassName: "",
+      skeleton: <Skeleton className="w-[70px] h-5" />,
     },
   },
 ];

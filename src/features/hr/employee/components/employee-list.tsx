@@ -102,7 +102,7 @@ export function EmployeeList() {
     };
   }, [filter]);
 
-  const { data: userData, isLoading } = useEmployees({ request });
+  const { data: userData, isLoading, isFetching } = useEmployees({ request });
 
   const data = useMemo(() => {
     return userData?.response?.data ?? [];
@@ -120,7 +120,7 @@ export function EmployeeList() {
     state: {
       pagination: {
         pageIndex: filter.page - 1 || 0,
-        pageSize: filter.limit ?? 0,
+        pageSize: filter.limit ?? 10,
       },
       columnOrder,
       // sorting,
@@ -149,7 +149,7 @@ export function EmployeeList() {
           columnsVisibility: true,
           cellBorder: true,
         }}
-        isLoading={isLoading}
+        isLoading={isLoading || isFetching}
       >
         <Card>
           <CardHeader>

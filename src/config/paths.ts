@@ -16,6 +16,12 @@ export const paths = {
       path: "/dashboard",
       getHref: () => "/dashboard",
     },
+    employee: {
+      list: {
+        path: "/human-resources/employee/list",
+        getHref: () => "/human-resources/employee/list",
+      },
+    },
     application: {
       path: "/dashboard/application",
       getHref: () => "/dashboard/application",
