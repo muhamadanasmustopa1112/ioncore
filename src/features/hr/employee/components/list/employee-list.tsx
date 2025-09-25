@@ -1,7 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { RiFilePdf2Line } from "@remixicon/react";
 import {
+  ColumnDef,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -10,8 +13,10 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { format } from "date-fns";
 import { Filter, Search, X } from "lucide-react";
 import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +28,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataGrid } from "@/components/ui/data-grid";
+import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
@@ -33,12 +39,186 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { EmployeeRequest, useEmployees } from "../api/get-users";
-import { Employee } from "../types";
-import { columns } from "./table/columns";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmployeeRequest, useEmployees } from "../../api/get-users";
+import { useEmployeeStore } from "../../store/employee";
+import { Employee } from "../../types";
+import { EmployeeDetailsSheet } from "../details/employee-details-sheet";
+import { EmployeeFormSheet } from "../form/employee-form-sheet";
+import { ActionsCell } from "./table/data-table-actions-cell";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 
 export function EmployeeList() {
+  const columns: ColumnDef<Employee>[] = useMemo(() => {
+    return [
+      {
+        id: "id",
+        accessorKey: "id",
+        accessorFn: (row) => row.guid,
+        header: ({ column }) => (
+          <DataGridColumnHeader title="ID" column={column} />
+        ),
+        cell: ({ row }) => (
+          <div
+            className="text-primary cursor-pointer"
+            onClick={handleEmployeeDetailsOpen}
+          >
+            {row.original.guid}
+          </div>
+        ),
+        enableSorting: false,
+        enableHiding: false,
+        enableResizing: true,
+        size: 200,
+        meta: {
+          cellClassName: "",
+          skeleton: <Skeleton className="w-[70px] h-5" />,
+        },
+      },
+      {
+        id: "fullname",
+        accessorFn: (row) => row.fullname,
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Fullname" column={column} />
+        ),
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2.5">
+            <Avatar>
+              <AvatarImage src={row.original.url_profile_picture} />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <Link
+                href="#"
+                className="text-sm font-bold text-mono hover:text-primary-active mb-px"
+              >
+                {row.original.fullname}
+              </Link>
+              <span className="text-sm text-muted-foreground font-normal">
+                {row.original.job?.job_name}
+              </span>
+            </div>
+          </div>
+        ),
+        enableSorting: true,
+        size: 260,
+        meta: {
+          headerTitle: "Full Name",
+          headerClassName: "",
+          skeleton: (
+            <div className="flex items-center gap-2.5">
+              <Skeleton className="size-10 rounded-full" />
+              <div className="flex flex-col gap-1">
+                <Skeleton className="w-[90px] h-5" />
+                <Skeleton className="w-[70px] h-5" />
+              </div>
+            </div>
+          ),
+        },
+      },
+      {
+        id: "account_info",
+        accessorFn: (row) => row.nickname,
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Account Info" column={column} />
+        ),
+        cell: ({ row }) => (
+          <div>
+            <div className="font-bold">{row.original.nickname}</div>
+            <div className="text-muted-foreground">{row.original.email}</div>
+          </div>
+        ),
+        enableSorting: true,
+        size: 250,
+        meta: {
+          headerTitle: "Account Info",
+          headerClassName: "",
+          skeleton: (
+            <div className="flex flex-col gap-1">
+              <Skeleton className="w-[90px] h-5" />
+              <Skeleton className="w-[70px] h-5" />
+            </div>
+          ),
+        },
+      },
+      {
+        id: "outlet",
+        accessorFn: (row) => row.outlet?.outlet_name,
+        header: ({ column }) => (
+          <DataGridColumnHeader title="Outlet" column={column} />
+        ),
+        cell: ({ row }) => (
+          <div>
+            <div className="font-bold">{row.original.outlet?.outlet_name}</div>
+            <div className="text-muted-foreground">
+              {row.original.job?.join_date
+                ? format(row.original.job?.join_date, "dd MMMM yyyy")
+                : "-"}
+            </div>
+          </div>
+        ),
+        enableSorting: true,
+        size: 250,
+        meta: {
+          headerClassName: "",
+          skeleton: (
+            <div className="flex flex-col gap-1">
+              <Skeleton className="w-[90px] h-5" />
+              <Skeleton className="w-[70px] h-5" />
+            </div>
+          ),
+        },
+      },
+      {
+        id: "cv",
+        accessorFn: (row) => row.cv_file_url,
+        header: ({ column }) => (
+          <DataGridColumnHeader title="CV" column={column} />
+        ),
+        cell: ({ row }) => {
+          if (row.original.cv_file_url) {
+            return (
+              <a
+                href={row.original.cv_file_url}
+                target="_blank"
+                className="flex items-center justify-center"
+              >
+                <RiFilePdf2Line className="w-8 h-8 text-muted-foreground" />
+              </a>
+            );
+          }
+          return "";
+        },
+        enableSorting: true,
+        size: 80,
+        meta: {
+          headerTitle: "CV",
+          headerClassName: "",
+          skeleton: <Skeleton className="w-[70px] h-5" />,
+        },
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => <ActionsCell row={row} />,
+        enableSorting: false,
+        size: 60,
+        meta: {
+          headerClassName: "",
+          skeleton: <Skeleton className="w-[70px] h-5" />,
+        },
+      },
+    ];
+  }, []);
+
+  const {
+    form,
+    setForm,
+    employeeSheetOpen,
+    closeEmployeeFormSheet,
+    openEmployeeFormSheet,
+  } = useEmployeeStore();
+
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -52,6 +232,23 @@ export function EmployeeList() {
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
+  const [isEmployeeSheetOpen, setIsEmployeeSheetOpen] = useState(false);
+
+  const handleEmployeeDetailsOpen = () => {
+    setIsEmployeeSheetOpen(true);
+  };
+
+  const handleEmployeeDetailsClose = () => {
+    setIsEmployeeSheetOpen(false);
+  };
+
+  const handleEditFromEmployeeDetails = () => {
+    openEmployeeFormSheet("edit");
+  };
+
+  const handleEmployeeFormClose = () => {
+    closeEmployeeFormSheet();
+  };
 
   const request = useMemo<EmployeeRequest>(() => {
     return {
@@ -235,6 +432,20 @@ export function EmployeeList() {
           </CardFooter>
         </Card>
       </DataGrid>
+
+      {/* Customer Details Sheet */}
+      <EmployeeDetailsSheet
+        open={isEmployeeSheetOpen}
+        onOpenChange={handleEmployeeDetailsClose}
+        onEditClick={handleEditFromEmployeeDetails}
+      />
+
+      {/* Customer Form Sheet */}
+      <EmployeeFormSheet
+        mode={form ?? "new"}
+        open={employeeSheetOpen}
+        onOpenChange={handleEmployeeFormClose}
+      />
     </>
   );
 }

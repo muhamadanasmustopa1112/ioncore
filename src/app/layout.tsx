@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Provider from "@/components/layouts/context/provider";
 import "@/styles/globals.css";
+import { JotaiProvider } from "@/components/layouts/context/jotai-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 

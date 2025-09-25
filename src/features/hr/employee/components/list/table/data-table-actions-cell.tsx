@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Employee } from "../../types";
+import { Employee } from "../../../types";
 
 export function ActionsCell({ row }: { row: Row<Employee> }) {
   const { copyToClipboard } = useCopyToClipboard();

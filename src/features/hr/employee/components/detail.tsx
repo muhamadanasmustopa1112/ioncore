@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { paths } from "@/config/paths";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -15,11 +18,15 @@ import {
   ToolbarHeading,
   ToolbarTitle,
 } from "@/components/common/toolbar";
-import { useEmployeeStore } from "../store/employee";
-import { EmployeeList } from "./list/employee-list";
+import { EmployeeDetails } from "./details/employee-details";
 
-export function EmployeeListPage() {
-  const { openEmployeeFormSheet } = useEmployeeStore();
+export function EmployeeDetail() {
+  const router = useRouter();
+
+  const onBackClick = () => {
+    router.push(paths.dashboard.employee.list.getHref());
+  };
+
   return (
     <>
       <Toolbar>
@@ -38,17 +45,22 @@ export function EmployeeListPage() {
               <BreadcrumbItem>
                 <BreadcrumbPage>Employee</BreadcrumbPage>
               </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>John Doe</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </ToolbarHeading>
         <ToolbarActions>
-          <Button type="button" onClick={() => openEmployeeFormSheet("new")}>
-            Add New
+          <Button variant="outline" onClick={onBackClick}>
+            <ArrowLeft />
+            Back
           </Button>
         </ToolbarActions>
       </Toolbar>
 
-      <EmployeeList />
+      <EmployeeDetails />
     </>
   );
 }
