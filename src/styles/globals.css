@@ -67,6 +67,7 @@
 /* Brand Colors */
 [data-theme-brand="wit"] {
   --primary: oklch(72.65% 69.19 30.24);
+  --primary-foreground: var(--color-white);
   --secondary: oklch(47.86% 25.15 13.12);
 }
 
