@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { User, X } from "lucide-react";
 import { toAbsoluteUrl } from "@/lib/helpers";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -297,15 +298,25 @@ export function EmployeeForm() {
   const [companyName, setCompanyName] = useState("");
   const [timeZone, setTimeZone] = useState("");
 
+  const isVerticalSidebar = process.env.NEXT_PUBLIC_SIDEBAR === "vertical";
+
   return (
-    <div className="flex flex-wrap lg:flex-nowrap px-3.5 grow h-full">
+    <div
+      className={cn("flex flex-wrap px-3.5 grow h-full", {
+        "lg:flex-nowrap": !isVerticalSidebar,
+      })}
+    >
       {/* Left Section - Avatar Upload */}
       <div className="w-full shrink-0 lg:w-[280px] py-5 lg:pe-5 lg:ps-2 space-y-4">
         <EmployeeAvatarUpload mode={form ?? "new"} />
       </div>
 
       {/* Right Section - Form Fields */}
-      <div className="grow lg:border-s border-border py-5">
+      <div
+        className={cn("grow py-5", {
+          "lg:border-s border-border": !isVerticalSidebar,
+        })}
+      >
         <ScrollArea className="h-full">
           <div className="space-y-5 lg:ps-5 pe-1 py-1">
             {/* Full Name */}
