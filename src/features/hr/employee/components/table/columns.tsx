@@ -19,7 +19,8 @@ export const columns: ColumnDef<Employee>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
-    enableResizing: false,
+    enableResizing: true,
+    size: 200,
     meta: {
       cellClassName: "",
       skeleton: <Skeleton className="w-[70px] h-5" />,
@@ -79,7 +80,7 @@ export const columns: ColumnDef<Employee>[] = [
       </div>
     ),
     enableSorting: true,
-    size: 150,
+    size: 250,
     meta: {
       headerTitle: "Account Info",
       headerClassName: "",
@@ -108,7 +109,7 @@ export const columns: ColumnDef<Employee>[] = [
       </div>
     ),
     enableSorting: true,
-    size: 150,
+    size: 250,
     meta: {
       headerClassName: "",
       skeleton: (
@@ -122,9 +123,7 @@ export const columns: ColumnDef<Employee>[] = [
   {
     id: "cv",
     accessorFn: (row) => row.cv_file_url,
-    header: ({ column }) => (
-      <DataGridColumnHeader title="Outlet" column={column} />
-    ),
+    header: ({ column }) => <DataGridColumnHeader title="CV" column={column} />,
     cell: ({ row }) => {
       if (row.original.cv_file_url) {
         return (
@@ -140,7 +139,7 @@ export const columns: ColumnDef<Employee>[] = [
       return "";
     },
     enableSorting: true,
-    size: 150,
+    size: 80,
     meta: {
       headerTitle: "CV",
       headerClassName: "",

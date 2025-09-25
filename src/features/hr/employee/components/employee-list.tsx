@@ -147,6 +147,7 @@ export function EmployeeList() {
           columnsPinnable: true,
           columnsMovable: true,
           columnsVisibility: true,
+          columnsResizable: true,
           cellBorder: true,
         }}
         isLoading={isLoading || isFetching}

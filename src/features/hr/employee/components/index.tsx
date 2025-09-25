@@ -6,6 +6,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Button } from "@/components/ui/button";
 import {
   Toolbar,
   ToolbarActions,
@@ -36,7 +37,9 @@ export default async function Employee() {
             </BreadcrumbList>
           </Breadcrumb>
         </ToolbarHeading>
-        <ToolbarActions></ToolbarActions>
+        <ToolbarActions>
+          <Button>Add New</Button>
+        </ToolbarActions>
       </Toolbar>
 
       <EmployeeList />
