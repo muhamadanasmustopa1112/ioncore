@@ -63,7 +63,7 @@ export function Upload() {
             value: (
               <div className="flex items-center gap-1.5">
                 <img
-                  src={toAbsoluteUrl(`/media/brand-logos/netherlands.svg`)}
+                  src={toAbsoluteUrl(`/media/flags/netherlands.svg`)}
                   alt="Netherlands flag"
                   className="w-4 h-4"
                 />

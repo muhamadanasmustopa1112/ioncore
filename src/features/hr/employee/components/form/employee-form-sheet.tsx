@@ -17,7 +17,7 @@ export function EmployeeFormSheet({
   open,
   onOpenChange,
 }: {
-  mode: "new" | "edit";
+  mode: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {

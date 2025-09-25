@@ -83,7 +83,7 @@ const countries = [
 ];
 
 // Customer Avatar Upload Component
-function EmployeeAvatarUpload({ mode }: { mode: "new" | "edit" }) {
+function EmployeeAvatarUpload({ mode }: { mode: string }) {
   const isNewMode = mode === "new";
   const isEditMode = mode === "edit";
 
@@ -320,7 +320,66 @@ export function EmployeeForm() {
                 className="flex-1"
               />
             </div>
-
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="text-xs font-medium w-24 shrink-0">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="text-xs font-medium w-24 shrink-0">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="text-xs font-medium w-24 shrink-0">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="text-xs font-medium w-24 shrink-0">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="text-xs font-medium w-24 shrink-0">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
             {/* Email */}
             <div className="flex items-center gap-10">
               <Label className="text-xs font-medium w-24 shrink-0">Email</Label>
