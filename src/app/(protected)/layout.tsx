@@ -6,6 +6,7 @@ import { env } from "@/config/env";
 import { SidebarHorizontalLayout } from "@/components/layouts/sidebar-horizontal";
 import { SidebarVerticalLayout } from "@/components/layouts/sidebar-vertical";
 import { ScreenLoader } from "@/components/screen-loader";
+import { ConfigSelector } from "@/components/shared/dialogs/config-selector";
 
 export default function Layout({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -29,8 +30,18 @@ export default function Layout({ children }: { children: ReactNode }) {
   }
 
   if (sidebar === sidebarSide.vertical) {
-    return <SidebarVerticalLayout>{children}</SidebarVerticalLayout>;
+    return (
+      <SidebarVerticalLayout>
+        {children}
+        <ConfigSelector />
+      </SidebarVerticalLayout>
+    );
   }
 
-  return <SidebarHorizontalLayout>{children}</SidebarHorizontalLayout>;
+  return (
+    <SidebarHorizontalLayout>
+      {children}
+      <ConfigSelector />
+    </SidebarHorizontalLayout>
+  );
 }

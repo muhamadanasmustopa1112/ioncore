@@ -72,20 +72,24 @@
 }
 
 /* Radius */
+[data-theme-radius="none"] {
+  --radius: 0;
+}
+
 [data-theme-radius="sm"] {
   --radius: 0.3rem;
 }
 
 [data-theme-radius="md"] {
-  --radius: 0.5rem;
+  --radius: 0.7rem;
 }
 
 [data-theme-radius="lg"] {
-  --radius: 1rem;
+  --radius: 1.2rem;
 }
 
 [data-theme-radius="xl"] {
-  --radius: 1.5rem;
+  --radius: 2rem;
 }
 
 /* Scale */
