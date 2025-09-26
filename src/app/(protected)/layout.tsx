@@ -10,7 +10,7 @@ import { ScreenLoader } from "@/components/screen-loader";
 export default function Layout({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
-  const sidebar = env.SIDEBAR;
+  const sidebar = localStorage.getItem("sidebar") || sidebarSide.vertical;
 
   useEffect(() => {
     // Simulate short loading time

@@ -1,7 +1,9 @@
 import { useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MENU_SIDEBAR_MAIN } from "@/config/layout-14.config";
+import { sidebarSide } from "@/config/constants";
+import { MENU_PAGES, MENU_SIDEBAR_MAIN } from "@/config/layout-14.config";
+import { paths } from "@/config/paths";
 import {
   AccordionMenu,
   AccordionMenuGroup,
@@ -33,14 +35,21 @@ export function SidebarPrimaryMenu() {
         group: "",
       }}
     >
-      {MENU_SIDEBAR_MAIN.map((item, index) => {
+      {MENU_PAGES.map((item, index) => {
         return (
           <AccordionMenuGroup key={index}>
             <AccordionMenuLabel>{item.title}</AccordionMenuLabel>
             {item.children?.map((child, index) => {
+              let onClick = undefined;
+              if (child.title === "Switch to Horizontal Sidebar") {
+                onClick = () => {
+                  localStorage.setItem("sidebar", sidebarSide.horizontal);
+                  window.location.reload();
+                };
+              }
               return (
                 <AccordionMenuItem key={index} value={child.path || "#"}>
-                  <Link href={child.path || "#"}>
+                  <Link href={child.path || "#"} onClick={onClick}>
                     {child.icon && <child.icon />}
                     <span>{child.title}</span>
                     {child.badge == "Beta" && (

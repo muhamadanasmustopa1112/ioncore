@@ -17,7 +17,35 @@ import {
   UserRoundCog,
   Users,
 } from "lucide-react";
+import { paths } from "@/config/paths";
 import { MenuConfig } from "@/config/types";
+
+export const MENU_PAGES: MenuConfig = [
+  {
+    children: [
+      {
+        title: "Switch to Horizontal Sidebar",
+        path: "#",
+        icon: Bolt,
+      },
+      {
+        title: "1 Column",
+        path: paths.dashboard.employee.list.getHref(),
+        icon: Bolt,
+      },
+      {
+        title: "2 Column",
+        path: paths.dashboard.employee.twoColumn.getHref(),
+        icon: Bolt,
+      },
+      {
+        title: "2 Column Card",
+        path: paths.dashboard.employee.twoColumnCard.getHref(),
+        icon: Bolt,
+      },
+    ],
+  },
+];
 
 export const MENU_SIDEBAR_MAIN: MenuConfig = [
   {

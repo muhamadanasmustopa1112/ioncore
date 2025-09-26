@@ -21,6 +21,14 @@ export const paths = {
         path: "/human-resources/employee/list",
         getHref: () => "/human-resources/employee/list",
       },
+      twoColumn: {
+        path: "/human-resources/employee/two-column",
+        getHref: () => "/human-resources/employee/list/two-columns",
+      },
+      twoColumnCard: {
+        path: "/human-resources/employee/two-column-card",
+        getHref: () => "/human-resources/employee/list/two-columns/card",
+      },
     },
     application: {
       path: "/dashboard/application",
