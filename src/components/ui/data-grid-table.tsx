@@ -486,7 +486,6 @@ function DataGridTableRowSelectAll({ size }: { size?: "sm" | "md" | "lg" }) {
 function DataGridTable<TData>() {
   const { table, isLoading, props } = useDataGrid();
   const pagination = table.getState().pagination;
-  console.log({ pagination, isLoading, props });
 
   return (
     <DataGridTableBase>

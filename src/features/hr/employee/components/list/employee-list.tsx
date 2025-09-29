@@ -52,30 +52,6 @@ export function EmployeeList() {
   const columns: ColumnDef<Employee>[] = useMemo(() => {
     return [
       {
-        id: "id",
-        accessorKey: "id",
-        accessorFn: (row) => row.guid,
-        header: ({ column }) => (
-          <DataGridColumnHeader title="ID" column={column} />
-        ),
-        cell: ({ row }) => (
-          <div
-            className="text-primary cursor-pointer"
-            onClick={handleEmployeeDetailsOpen}
-          >
-            {row.original.guid}
-          </div>
-        ),
-        enableSorting: false,
-        enableHiding: false,
-        enableResizing: true,
-        size: 200,
-        meta: {
-          cellClassName: "",
-          skeleton: <Skeleton className="w-[70px] h-5" />,
-        },
-      },
-      {
         id: "fullname",
         accessorFn: (row) => row.fullname,
         header: ({ column }) => (
@@ -97,11 +73,17 @@ export function EmployeeList() {
               <span className="text-sm text-muted-foreground font-normal">
                 {row.original.job?.job_name}
               </span>
+              <span
+                className="text-primary cursor-pointer"
+                onClick={handleEmployeeDetailsOpen}
+              >
+                {row.original.guid}
+              </span>
             </div>
           </div>
         ),
         enableSorting: true,
-        size: 260,
+        size: 300,
         meta: {
           headerTitle: "Full Name",
           headerClassName: "",

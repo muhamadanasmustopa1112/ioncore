@@ -14,7 +14,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EmployeeActivity } from "./employee-activity";
+import { EmployeeDetailsBilling } from "./employee-details-billing";
+import { EmployeeDetailsInvoice } from "./employee-details-invoice";
+import { EmployeeDetailsOrders } from "./employee-details-orders";
 import { EmployeeDetailsOverviews } from "./employee-details-overview";
+import { EmployeeDetailsReviews } from "./employee-details-review";
 import { Upload } from "./employee-upload";
 
 export function EmployeeDetailsSheet({
@@ -108,19 +113,19 @@ export function EmployeeDetailsSheet({
                     <EmployeeDetailsOverviews />
                   </TabsContent>
                   <TabsContent value="orders">
-                    <>Tab 2</>
+                    <EmployeeDetailsOrders />
                   </TabsContent>
                   <TabsContent value="invoices">
-                    <>Tab 3</>
+                    <EmployeeDetailsInvoice />
                   </TabsContent>
                   <TabsContent value="billin">
-                    <>Tab 4</>
+                    <EmployeeDetailsBilling />
                   </TabsContent>
                   <TabsContent value="reviews">
-                    <>Tab 5</>
+                    <EmployeeDetailsReviews />
                   </TabsContent>
                   <TabsContent value="activity">
-                    <>Tab 6</>
+                    <EmployeeActivity />
                   </TabsContent>
                 </Tabs>
               </div>

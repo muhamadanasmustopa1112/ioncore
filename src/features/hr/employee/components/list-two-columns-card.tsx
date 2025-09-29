@@ -1,5 +1,6 @@
 "use client";
 
+import { RiAddLine } from "@remixicon/react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -43,6 +44,7 @@ export function EmployeeListTwoColumnsCardPage() {
         </ToolbarHeading>
         <ToolbarActions>
           <Button type="button" onClick={() => openEmployeeFormSheet("new")}>
+            <RiAddLine />
             Add New
           </Button>
         </ToolbarActions>

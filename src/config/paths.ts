@@ -29,6 +29,10 @@ export const paths = {
         path: "/human-resources/employee/two-column-card",
         getHref: () => "/human-resources/employee/list/two-columns/card",
       },
+      detail: {
+        path: "/human-resources/employee/detail/:id",
+        getHref: (id: string) => `/human-resources/employee/detail/${id}`,
+      },
     },
     application: {
       path: "/dashboard/application",

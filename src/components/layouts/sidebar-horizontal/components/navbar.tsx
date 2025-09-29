@@ -1,11 +1,27 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Coffee, MessageSquareCode, Pin, Search } from "lucide-react";
-import { MENU_NAVBAR } from "@/config/layout-18.config";
+import {
+  ChevronDown,
+  Coffee,
+  MessageSquareCode,
+  Pin,
+  Search,
+} from "lucide-react";
+import {
+  MENU_PAGES,
+  MENU_SIDEBAR_MAIN,
+  MENU_SIDEBAR_RESOURCES,
+} from "@/config/layout-14.config";
 import { cn } from "@/lib/utils";
 import { useMenu } from "@/hooks/use-menu";
 import { Button } from "@/components/ui/button";
 import { Input, InputWrapper } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useLayout } from "./context";
 
@@ -26,23 +42,87 @@ export function Navbar() {
       {!isMobile && (
         <ScrollArea>
           <nav className="list-none flex items-stretch overflow-x-auto gap-7.5 h-[46px]">
-            {MENU_NAVBAR.map((item, index) => {
-              const active = isActive(item.path);
+            {[
+              ...MENU_PAGES,
+              ...MENU_SIDEBAR_MAIN,
+              ...MENU_SIDEBAR_RESOURCES,
+            ].map((menu, index) => {
               return (
-                <li key={index} className="flex items-stretch">
-                  <Link
-                    href={item.path || "#"}
-                    className={cn(
-                      "gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-secondary-foreground hover:text-primary py-2.5 lg:py-0",
-                      "[&_svg]:text-muted-foreground",
-                      active &&
-                        "text-primary border-primary [&_svg]:text-primary",
-                    )}
-                  >
-                    {item.icon && <item.icon className="size-4" />}
-                    <span>{item.title}</span>
-                  </Link>
-                </li>
+                <Fragment>
+                  {menu.children?.map((item, index) => {
+                    const active = isActive(item.path);
+                    if (item.children) {
+                      return (
+                        <Fragment>
+                          <li className="flex items-stretch">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  className={cn(
+                                    "h-full rounded-none gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-secondary-foreground hover:text-primary py-2.5 lg:py-0",
+                                    "[&_svg]:text-muted-foreground",
+                                    active &&
+                                      "text-primary border-primary [&_svg]:text-primary",
+                                  )}
+                                >
+                                  {item.icon && (
+                                    <item.icon className="size-4" />
+                                  )}
+                                  <span>{item.title}</span>
+                                  <ChevronDown className="size-4" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-80"
+                                side="bottom"
+                                align="start"
+                              >
+                                <div className="grid gap-4">
+                                  {item.children.map((child, index) => {
+                                    return (
+                                      <Link
+                                        href={child.path || "#"}
+                                        className={cn(
+                                          "gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-secondary-foreground hover:text-primary py-2.5 lg:py-0",
+                                          "[&_svg]:text-muted-foreground",
+                                          active &&
+                                            "text-primary border-primary [&_svg]:text-primary",
+                                        )}
+                                        key={index}
+                                      >
+                                        {child.icon && (
+                                          <child.icon className="size-4" />
+                                        )}
+                                        <span>{child.title}</span>
+                                      </Link>
+                                    );
+                                  })}
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </li>
+                        </Fragment>
+                      );
+                    }
+                    return (
+                      <li key={index} className="flex items-stretch">
+                        <Link
+                          href={item.path || "#"}
+                          className={cn(
+                            "gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-secondary-foreground hover:text-primary py-2.5 lg:py-0",
+                            "[&_svg]:text-muted-foreground",
+                            active &&
+                              "text-primary border-primary [&_svg]:text-primary",
+                          )}
+                        >
+                          {item.icon && <item.icon className="size-4" />}
+                          <span>{item.title}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </Fragment>
               );
             })}
           </nav>

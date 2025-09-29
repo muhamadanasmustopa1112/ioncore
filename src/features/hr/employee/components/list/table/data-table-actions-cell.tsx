@@ -1,7 +1,15 @@
-import { RiCheckboxCircleFill } from "@remixicon/react";
+import { useRouter } from "next/navigation";
+import {
+  RiCheckboxCircleFill,
+  RiDeleteBin7Line,
+  RiEditLine,
+  RiEyeLine,
+  RiFileCopy2Line,
+} from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
 import { toast } from "sonner";
+import { paths } from "@/config/paths";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { Alert, AlertIcon, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -15,6 +23,7 @@ import {
 import { Employee } from "../../../types";
 
 export function ActionsCell({ row }: { row: Row<Employee> }) {
+  const router = useRouter();
   const { copyToClipboard } = useCopyToClipboard();
   const handleCopyId = () => {
     copyToClipboard(String(row.original.guid));
@@ -39,6 +48,12 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
     );
   };
 
+  const handleEditClick = () => {
+    router.push(
+      paths.dashboard.employee.detail.getHref(row.original.guid || ""),
+    );
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -47,10 +62,25 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="end">
-        <DropdownMenuItem onClick={() => {}}>Edit</DropdownMenuItem>
-        <DropdownMenuItem onClick={handleCopyId}>Copy ID</DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer" onClick={handleEditClick}>
+          <RiEditLine />
+          Edit
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer" onClick={handleEditClick}>
+          <RiEyeLine />
+          Detail
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer" onClick={handleCopyId}>
+          <RiFileCopy2Line />
+          Copy ID
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={() => {}}>
+        <DropdownMenuItem
+          variant="destructive"
+          className="cursor-pointer"
+          onClick={() => {}}
+        >
+          <RiDeleteBin7Line />
           Delete
         </DropdownMenuItem>
       </DropdownMenuContent>

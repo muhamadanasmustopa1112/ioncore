@@ -3,8 +3,6 @@
 import { useParams } from "next/navigation";
 import { Badge, BadgeDot } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEmployeeStore } from "../../store/employee";
 import { EmployeeScrollContentTwoColumnsCard } from "./employee-scroll-content-two-columns-card";
 
@@ -12,12 +10,7 @@ export function EmployeeDetailsTwoColumnsCard() {
   const params = useParams();
   const id = params.id as string;
 
-  const {
-    form,
-    employeeSheetOpen,
-    openEmployeeFormSheet,
-    closeEmployeeFormSheet,
-  } = useEmployeeStore();
+  const { openEmployeeFormSheet } = useEmployeeStore();
 
   const onEditClick = () => {
     openEmployeeFormSheet("edit");

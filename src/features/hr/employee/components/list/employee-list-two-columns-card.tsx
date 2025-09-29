@@ -47,36 +47,12 @@ import { useEmployeeStore } from "../../store/employee";
 import { Employee } from "../../types";
 import { EmployeeDetailsTwoColumnsCard } from "../details-two-columns-card/employee-details-two-columns-card";
 import { EmployeeForm } from "../form/employee-form";
-import { ActionsCell } from "./table/data-table-actions-cell";
+import { TwoColumnsActionsCell } from "./table/data-table-actions-two-columns-cell";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 
 export function EmployeeListTwoColumnsCard() {
   const columns: ColumnDef<Employee>[] = useMemo(() => {
     return [
-      {
-        id: "id",
-        accessorKey: "id",
-        accessorFn: (row) => row.guid,
-        header: ({ column }) => (
-          <DataGridColumnHeader title="ID" column={column} />
-        ),
-        cell: ({ row }) => (
-          <div
-            className="text-primary cursor-pointer"
-            onClick={handleEmployeeDetailsOpen}
-          >
-            {row.original.guid}
-          </div>
-        ),
-        enableSorting: false,
-        enableHiding: false,
-        enableResizing: true,
-        size: 200,
-        meta: {
-          cellClassName: "",
-          skeleton: <Skeleton className="w-[70px] h-5" />,
-        },
-      },
       {
         id: "fullname",
         accessorFn: (row) => row.fullname,
@@ -89,7 +65,7 @@ export function EmployeeListTwoColumnsCard() {
               <AvatarImage src={row.original.url_profile_picture} />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col">
+            <div className="flex flex-col relative overflow-hidden">
               <Link
                 href="#"
                 className="text-sm font-bold text-mono hover:text-primary-active mb-px"
@@ -99,6 +75,12 @@ export function EmployeeListTwoColumnsCard() {
               <span className="text-sm text-muted-foreground font-normal">
                 {row.original.job?.job_name}
               </span>
+              <p
+                className="text-primary cursor-pointer"
+                onClick={handleEmployeeDetailsOpen}
+              >
+                {row.original.guid}
+              </p>
             </div>
           </div>
         ),
@@ -202,7 +184,7 @@ export function EmployeeListTwoColumnsCard() {
       {
         id: "actions",
         header: "",
-        cell: ({ row }) => <ActionsCell row={row} />,
+        cell: ({ row }) => <TwoColumnsActionsCell row={row} />,
         enableSorting: false,
         size: 60,
         meta: {

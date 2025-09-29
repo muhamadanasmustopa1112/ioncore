@@ -9,6 +9,9 @@ import {
   AccordionMenuGroup,
   AccordionMenuItem,
   AccordionMenuLabel,
+  AccordionMenuSub,
+  AccordionMenuSubContent,
+  AccordionMenuSubTrigger,
 } from "@/components/ui/accordion-menu";
 import { Badge } from "@/components/ui/badge";
 
@@ -46,6 +49,33 @@ export function SidebarPrimaryMenu() {
                   localStorage.setItem("sidebar", sidebarSide.horizontal);
                   window.location.reload();
                 };
+              }
+              if (child.children) {
+                return (
+                  <AccordionMenuSub key={index} value={child.path || "#"}>
+                    <AccordionMenuSubTrigger value={child.path || "#"}>
+                      {child.icon && <child.icon />}
+                      <span>{child.title}</span>
+                    </AccordionMenuSubTrigger>
+                    <AccordionMenuSubContent
+                      type="multiple"
+                      parentValue={child.path || "#"}
+                    >
+                      {child.children.map((child, index) => {
+                        return (
+                          <AccordionMenuItem
+                            key={index}
+                            value={child.path || "#"}
+                          >
+                            <Link href={child.path || "#"}>
+                              <span>{child.title}</span>
+                            </Link>
+                          </AccordionMenuItem>
+                        );
+                      })}
+                    </AccordionMenuSubContent>
+                  </AccordionMenuSub>
+                );
               }
               return (
                 <AccordionMenuItem key={index} value={child.path || "#"}>

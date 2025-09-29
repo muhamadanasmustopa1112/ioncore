@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useStore } from "@/store/store";
 import { Layout, Palette, Scale, Settings, Square } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ interface ConfigState {
   radius: string;
   scale: string;
   "content-layout": string;
+  layout: "vertical" | "horizontal";
 }
 
 const brandColors = [{ value: "wit", label: "WIT", color: "bg-primary" }];
@@ -35,13 +37,21 @@ export function ConfigSelector() {
     radius: "md",
     scale: "md",
     "content-layout": "centered",
+    layout: "vertical",
   });
+  const { setLayout } = useStore();
 
   const updateConfig = (key: keyof ConfigState, value: string) => {
     setConfig((prev) => ({ ...prev, [key]: value }));
 
     if (key === "content-layout") {
       document.body.setAttribute("data-theme-content-layout", value);
+      return;
+    }
+
+    if (key === "layout") {
+      setLayout(value as "vertical" | "horizontal");
+      localStorage.setItem("sidebar", value);
       return;
     }
 
@@ -53,8 +63,15 @@ export function ConfigSelector() {
     const radius = localStorage.getItem("radius") || "md";
     const scale = localStorage.getItem("scale") || "md";
     const contentLayout = localStorage.getItem("contentLayout") || "centered";
+    const layout = localStorage.getItem("sidebar") || "vertical";
 
-    setConfig({ brand, radius, scale, "content-layout": contentLayout });
+    setConfig({
+      brand,
+      radius,
+      scale,
+      "content-layout": contentLayout,
+      layout: layout as "vertical" | "horizontal",
+    });
   }, []);
 
   return (
@@ -91,6 +108,28 @@ export function ConfigSelector() {
               </CardHeader>
 
               <CardContent className="space-y-6">
+                {/* Layout Config */}
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2 text-sm font-medium">
+                    <Palette className="h-4 w-4" />
+                    Layout
+                  </Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {["vertical", "horizontal"].map((option) => (
+                      <Button
+                        key={option}
+                        variant={
+                          config["layout"] === option ? "primary" : "outline"
+                        }
+                        size="sm"
+                        onClick={() => updateConfig("layout", option)}
+                        className="uppercase"
+                      >
+                        {option === "vertical" ? "Vertical" : "Horizontal"}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
                 {/* Brand Color Config */}
                 <div className="space-y-3">
                   <Label className="flex items-center gap-2 text-sm font-medium">

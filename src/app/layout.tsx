@@ -1,14 +1,13 @@
-import { ReactNode, Suspense } from "react";
-import { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Provider from "@/components/layouts/context/provider";
 import "@/styles/globals.css";
-import { JotaiProvider } from "@/components/layouts/context/jotai-provider";
+import { ReactNode, Suspense } from "react";
+import { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -28,7 +27,7 @@ export default async function RootLayout({
     <html
       className="h-full"
       data-theme-brand="wit"
-      data-theme-radius="none"
+      data-theme-radius="md"
       data-theme-scale="md"
       suppressHydrationWarning
     >

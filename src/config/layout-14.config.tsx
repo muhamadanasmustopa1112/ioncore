@@ -29,19 +29,21 @@ export const MENU_PAGES: MenuConfig = [
         icon: Bolt,
       },
       {
-        title: "1 Column",
-        path: paths.dashboard.employee.list.getHref(),
+        title: "Pages",
+        path: "#",
         icon: Bolt,
-      },
-      {
-        title: "2 Column",
-        path: paths.dashboard.employee.twoColumn.getHref(),
-        icon: Bolt,
-      },
-      {
-        title: "2 Column Card",
-        path: paths.dashboard.employee.twoColumnCard.getHref(),
-        icon: Bolt,
+        children: [
+          {
+            title: "1 Column",
+            path: paths.dashboard.employee.list.getHref(),
+            icon: Bolt,
+          },
+          {
+            title: "2 Column",
+            path: paths.dashboard.employee.twoColumnCard.getHref(),
+            icon: Bolt,
+          },
+        ],
       },
     ],
   },
