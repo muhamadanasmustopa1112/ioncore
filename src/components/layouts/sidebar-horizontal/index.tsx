@@ -25,8 +25,8 @@ export function SidebarHorizontalLayout({
         {
           "--sidebar-width": "260px",
           "--sidebar-width-mobile": "260px",
-          "--header-height": "108px",
-          "--header-height-mobile": "108px",
+          "--header-height": "109px",
+          "--header-height-mobile": "109px",
         } as React.CSSProperties
       }
     >

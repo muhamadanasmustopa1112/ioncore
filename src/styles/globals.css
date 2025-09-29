@@ -35,6 +35,12 @@
   --input: var(--color-zinc-200);
   --ring: var(--color-zinc-400);
   --radius: 0.5rem;
+
+  /* custom */
+  --sidebar-main: var(--color-transparent);
+  --sidebar-main-foreground: var(--foreground);
+  --sidebar-secondary: var(--color-transparent);
+  --sidebar-secondary-foreground: var(--foreground);
 }
 
 .dark {
@@ -62,6 +68,12 @@
   --border: var(--color-zinc-800);
   --input: var(--color-zinc-800);
   --ring: var(--color-zinc-600);
+
+  /* custom */
+  --sidebar-main: var(--color-transparent);
+  --sidebar-main-foreground: var(--foreground);
+  --sidebar-secondary: var(--color-transparent);
+  --sidebar-secondary-foreground: var(--foreground);
 }
 
 /* Brand Colors */
@@ -69,6 +81,11 @@
   --primary: oklch(72.65% 69.19 30.24);
   --primary-foreground: var(--color-white);
   --secondary: oklch(47.86% 25.15 13.12);
+
+  --sidebar-main: var(--color-red-800);
+  --sidebar-main-foreground: var(--color-white);
+  --sidebar-secondary: var(--color-red-900);
+  --sidebar-secondary-foreground: var(--color-white);
 }
 
 /* Radius */
@@ -176,6 +193,12 @@
   /** Animations **/
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+
+  /* Brand Colors */
+  --color-sidebar-main: var(--sidebar-main);
+  --color-sidebar-main-foreground: var(--sidebar-main-foreground);
+  --color-sidebar-secondary: var(--sidebar-secondary);
+  --color-sidebar-secondary-foreground: var(--sidebar-secondary-foreground);
 
   @keyframes marquee {
     from {

@@ -48,20 +48,20 @@ export function Navbar() {
               ...MENU_SIDEBAR_RESOURCES,
             ].map((menu, index) => {
               return (
-                <Fragment>
+                <Fragment key={index}>
                   {menu.children?.map((item, index) => {
                     const active = isActive(item.path);
                     if (item.children) {
                       return (
-                        <Fragment>
+                        <Fragment key={index}>
                           <li className="flex items-stretch">
                             <Popover>
                               <PopoverTrigger asChild>
                                 <Button
                                   variant="ghost"
                                   className={cn(
-                                    "h-full rounded-none gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-secondary-foreground hover:text-primary py-2.5 lg:py-0",
-                                    "[&_svg]:text-muted-foreground",
+                                    "h-full rounded-none gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-sidebar-main-foreground hover:text-primary py-2.5 lg:py-0",
+                                    "[&_svg]:text-sidebar-main-foreground",
                                     active &&
                                       "text-primary border-primary [&_svg]:text-primary",
                                   )}
@@ -110,13 +110,15 @@ export function Navbar() {
                         <Link
                           href={item.path || "#"}
                           className={cn(
-                            "gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-secondary-foreground hover:text-primary py-2.5 lg:py-0",
-                            "[&_svg]:text-muted-foreground",
+                            "gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-sidebar-main-foreground hover:text-primary py-2.5 lg:py-0",
+                            "[&_svg]:text-sidebar-main-foreground",
                             active &&
                               "text-primary border-primary [&_svg]:text-primary",
                           )}
                         >
-                          {item.icon && <item.icon className="size-4" />}
+                          {item.icon && (
+                            <item.icon className="size-4 text-sidebar-main-foreground" />
+                          )}
                           <span>{item.title}</span>
                         </Link>
                       </li>

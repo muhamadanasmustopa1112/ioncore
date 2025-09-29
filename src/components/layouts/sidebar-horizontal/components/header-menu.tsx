@@ -21,8 +21,8 @@ export function HeaderMenu() {
               className={cn(
                 "inline-flex items-center text-sm font-medium",
                 active
-                  ? "bg-muted text-foreground border"
-                  : "text-secondary-foreground hover:text-primary",
+                  ? "bg-muted text-sidebar-main-foreground border"
+                  : "text-sidebar-main-foreground hover:text-primary",
               )}
               asChild
             >
