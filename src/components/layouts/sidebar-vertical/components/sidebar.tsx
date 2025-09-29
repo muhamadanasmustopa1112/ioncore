@@ -3,7 +3,7 @@ import { SidebarSecondary } from "./sidebar-secondary";
 
 export function Sidebar() {
   return (
-    <aside className="fixed overflow-hidden top-(--header-height) start-0 z-20 bottom-0 transition-all duration-300 flex items-stretch flex-shrink-0 w-(--sidebar-width) in-data-[sidebar-open=false]:w-(--sidebar-collapsed-width) border-e border-border">
+    <aside className="fixed overflow-hidden bg-sidebar-secondary top-[calc(var(--header-height)-1px)] start-0 z-20 transition-all duration-300 flex items-stretch flex-shrink-0 w-(--sidebar-width) in-data-[sidebar-open=false]:w-(--sidebar-collapsed-width)">
       <SidebarPrimary />
       <SidebarSecondary />
     </aside>

@@ -34,7 +34,7 @@ export function SidebarPrimaryMenu() {
       className="space-y-7.5 px-2.5"
       classNames={{
         label: "text-xs font-normal text-muted-foreground mb-2",
-        item: "h-8.5 px-2.5 text-sm font-normal text-foreground hover:text-primary data-[selected=true]:bg-muted data-[selected=true]:text-foreground [&[data-selected=true]_svg]:opacity-100",
+        item: "h-8.5 px-2.5 text-sm font-normal text-sidebar-secondary-foreground hover:text-primary data-[selected=true]:bg-muted data-[selected=true]:text-foreground [&[data-selected=true]_svg]:opacity-100",
         group: "",
       }}
     >
@@ -53,7 +53,10 @@ export function SidebarPrimaryMenu() {
               if (child.children) {
                 return (
                   <AccordionMenuSub key={index} value={child.path || "#"}>
-                    <AccordionMenuSubTrigger value={child.path || "#"}>
+                    <AccordionMenuSubTrigger
+                      className="text-sidebar-secondary-foreground"
+                      value={child.path || "#"}
+                    >
                       {child.icon && <child.icon />}
                       <span>{child.title}</span>
                     </AccordionMenuSubTrigger>
@@ -78,7 +81,11 @@ export function SidebarPrimaryMenu() {
                 );
               }
               return (
-                <AccordionMenuItem key={index} value={child.path || "#"}>
+                <AccordionMenuItem
+                  key={index}
+                  value={child.path || "#"}
+                  className="text-sidebar-secondary-foreground"
+                >
                   <Link href={child.path || "#"} onClick={onClick}>
                     {child.icon && <child.icon />}
                     <span>{child.title}</span>

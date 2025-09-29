@@ -8,7 +8,7 @@
 
 /** Colors - https://tailwindcss.com/docs/colors **/
 :root {
-  --background: var(--color-white);
+  --background: var(--color-neutral-50);
   --foreground: var(--color-zinc-950);
   --card: var(--color-white);
   --card-foreground: var(--color-zinc-950);
@@ -82,9 +82,9 @@
   --primary-foreground: var(--color-white);
   --secondary: oklch(47.86% 25.15 13.12);
 
-  --sidebar-main: var(--color-red-800);
+  --sidebar-main: var(--color-neutral-900);
   --sidebar-main-foreground: var(--color-white);
-  --sidebar-secondary: var(--color-red-900);
+  --sidebar-secondary: var(--color-neutral-800);
   --sidebar-secondary-foreground: var(--color-white);
 }
 

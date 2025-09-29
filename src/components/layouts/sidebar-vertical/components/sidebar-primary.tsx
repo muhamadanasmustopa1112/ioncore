@@ -148,7 +148,7 @@ export function SidebarPrimary() {
   const user = useMemo(() => userData?.response?.data, [userData]);
 
   return (
-    <div className="flex flex-col items-center justify-center shrink-0 px-2.5 py-2.5 gap-5 lg:w-(--sidebar-collapsed-width) border-e border-input bg-muted">
+    <div className="flex flex-col items-center justify-center shrink-0 px-2.5 py-2.5 gap-5 lg:w-(--sidebar-collapsed-width) border-e border-input/20 bg-sidebar-main">
       {/* Navigation */}
       <ScrollArea className="grow w-full h-[calc(100vh-13rem)] lg:h-[calc(100vh-5.5rem)]">
         <div className="grow gap-1 shrink-0 flex items-center flex-col">
@@ -165,11 +165,11 @@ export function SidebarPrimary() {
                   className={cn(
                     "shrink-0 rounded-md size-9",
                     "data-[state=open]:bg-primary data-[state=open]:text-primary-foreground",
-                    "hover:text-foreground",
+                    "hover:text-sidebar-main-foreground/60 hover:bg-white/20",
                   )}
                 >
                   <Link href={item.path}>
-                    <item.icon className="size-4.5!" />
+                    <item.icon className="size-4.5! text-sidebar-main-foreground" />
                   </Link>
                 </Button>
               </TooltipTrigger>
@@ -184,7 +184,7 @@ export function SidebarPrimary() {
         <Button
           variant="ghost"
           mode="icon"
-          className="text-muted-foreground hover:text-foreground"
+          className="text-sidebar-main-foreground hover:text-foreground"
         >
           <Mails className="opacity-100" />
         </Button>
@@ -192,7 +192,7 @@ export function SidebarPrimary() {
         <Button
           variant="ghost"
           mode="icon"
-          className="text-muted-foreground hover:text-foreground"
+          className="text-sidebar-main-foreground hover:text-foreground"
         >
           <NotepadText className="opacity-100" />
         </Button>
@@ -200,7 +200,7 @@ export function SidebarPrimary() {
         <Button
           variant="ghost"
           mode="icon"
-          className="text-muted-foreground hover:text-foreground"
+          className="text-sidebar-main-foreground hover:text-foreground"
         >
           <Settings className="opacity-100" />
         </Button>

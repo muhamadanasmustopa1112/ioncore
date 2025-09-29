@@ -78,11 +78,11 @@ export function HeaderLogo() {
   }, [pathname]);
 
   return (
-    <div className="flex border-e border-border items-center gap-2 lg:w-(--sidebar-width)">
+    <div className="flex border-e border-border/20 items-center gap-2 lg:w-(--sidebar-width) bg-sidebar-secondary">
       {/* Brand */}
       <div className="flex items-center w-full">
         {/* Logo */}
-        <div className="flex items-center justify-center shrink-0 border-e border-border w-(--sidebar-collapsed-width) h-(--header-height) bg-muted">
+        <div className="flex items-center justify-center shrink-0 border-e border-border/20 w-(--sidebar-collapsed-width) h-(--header-height) bg-sidebar-main">
           <Link href="/layout-14">
             <img
               src={toAbsoluteUrl("/media/app/mini-logo-gray.svg")}
@@ -125,7 +125,7 @@ export function HeaderLogo() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="inline-flex text-muted-foreground hover:text-foreground px-1.5 -ms-1.5"
+                className="inline-flex text-sidebar-secondary-foreground hover:text-foreground px-1.5 -ms-1.5"
               >
                 <div
                   className={cn(

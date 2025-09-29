@@ -24,11 +24,6 @@ export const MENU_PAGES: MenuConfig = [
   {
     children: [
       {
-        title: "Switch to Horizontal Sidebar",
-        path: "#",
-        icon: Bolt,
-      },
-      {
         title: "Pages",
         path: "#",
         icon: Bolt,
