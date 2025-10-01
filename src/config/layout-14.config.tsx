@@ -1,24 +1,114 @@
 import {
   BarChart2,
+  BarChart3,
   Bolt,
+  Box,
   Briefcase,
   Calendar,
   ChartLine,
   ClipboardList,
   Cog,
+  Columns,
   Download,
   FileChartLine,
+  FileText,
   Grid,
   Handshake,
   Megaphone,
   Newspaper,
   Palette,
+  Settings,
+  Square,
   SquareActivity,
+  StickyNote,
+  User,
   UserRoundCog,
   Users,
 } from "lucide-react";
 import { paths } from "@/config/paths";
 import { MenuConfig } from "@/config/types";
+
+export const MENU: MenuConfig = [
+  {
+    title: "Dashboard",
+    path: paths.dashboard.root.getHref(),
+    icon: BarChart3,
+    children: [
+      {
+        children: [
+          {
+            title: "Dashboard",
+            path: paths.dashboard.root.getHref(),
+            icon: BarChart3,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Master Data",
+    path: paths.dashboard.masterData.root.getHref(),
+    icon: Box,
+    children: [
+      {
+        children: [
+          {
+            title: "Blank Page MD",
+            path: paths.dashboard.masterData.root.getHref(),
+            icon: FileText,
+          },
+        ],
+      },
+      {
+        title: "Pages",
+        path: paths.dashboard.oneColDrawer.root.getHref(),
+        icon: Users,
+        children: [
+          {
+            title: "1 Col Drawer",
+            path: paths.dashboard.oneColDrawer.root.getHref(),
+            icon: Square,
+          },
+          {
+            title: "1 Col New Page",
+            path: "#",
+            icon: StickyNote,
+          },
+          {
+            title: "1 Col to 2 Col",
+            path: "#",
+            icon: Columns,
+          },
+          {
+            title: "2 Col 2 Card",
+            path: "#",
+            icon: Columns,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: "Operasional",
+    path: "#",
+    icon: FileText,
+  },
+  {
+    title: "Report",
+    path: "#",
+    icon: FileChartLine,
+  },
+  {
+    title: "Config",
+    path: "#",
+    icon: Settings,
+  },
+  {
+    title: "IAM",
+    path: "#",
+    icon: User,
+  },
+];
 
 export const MENU_PAGES: MenuConfig = [
   {

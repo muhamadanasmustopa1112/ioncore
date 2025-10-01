@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useUsers } from "@/features/auth/api";
+import { useStore } from "@/store/store";
 import {
   BarChart3,
   Bell,
@@ -25,6 +26,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { MENU } from "@/config/layout-14.config";
 import { paths } from "@/config/paths";
 import { useLogout } from "@/lib/auth";
 import { clearAllCookies } from "@/lib/cookies";
@@ -56,67 +58,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const menuItems = [
-  {
-    icon: UserCircle,
-    tooltip: "Profile",
-    path: "#",
-    rootPath: "#",
-  },
-  {
-    icon: BarChart3,
-    tooltip: "Dashboard",
-    path: "/layout-14",
-    rootPath: "/layout-14",
-  },
-  {
-    icon: Settings,
-    tooltip: "Account",
-    path: "#",
-    rootPath: "#",
-  },
-  {
-    icon: Users,
-    tooltip: "Network",
-    path: "#",
-    rootPath: "#",
-  },
-  {
-    icon: ShieldUser,
-    tooltip: "Authentication",
-    path: "#",
-    rootPath: "#",
-  },
-  {
-    icon: FolderCode,
-    tooltip: "Security Logs",
-    path: "#",
-    rootPath: "#",
-  },
-  {
-    icon: ScrollText,
-    tooltip: "Files",
-    path: "#",
-    rootPath: "#",
-  },
-  {
-    icon: Bell,
-    tooltip: "Notifications",
-    path: "#",
-    rootPath: "#",
-  },
-  {
-    icon: CheckSquare,
-    tooltip: "ACL",
-    path: "#",
-    rootPath: "#",
-  },
-];
-
 export function SidebarPrimary() {
   const pathname = usePathname();
-  const [selectedMenuItem, setSelectedMenuItem] = useState(menuItems[1]);
   const router = useRouter();
+  const { menu, setMenu } = useStore();
 
   const { data: userData } = useUsers();
 
@@ -135,12 +80,12 @@ export function SidebarPrimary() {
   };
 
   useEffect(() => {
-    menuItems.forEach((item) => {
+    MENU.forEach((item) => {
       if (
-        item.rootPath === pathname ||
-        (item.rootPath && pathname.includes(item.rootPath))
+        item.path === pathname ||
+        (item.path && pathname.includes(item.path))
       ) {
-        setSelectedMenuItem(item);
+        setMenu(item);
       }
     });
   }, [pathname]);
@@ -152,30 +97,33 @@ export function SidebarPrimary() {
       {/* Navigation */}
       <ScrollArea className="grow w-full h-[calc(100vh-13rem)] lg:h-[calc(100vh-5.5rem)]">
         <div className="grow gap-1 shrink-0 flex items-center flex-col">
-          {menuItems.map((item, index) => (
-            <Tooltip key={index}>
-              <TooltipTrigger asChild>
-                <Button
-                  asChild
-                  variant="ghost"
-                  mode="icon"
-                  {...(item === selectedMenuItem
-                    ? { "data-state": "open" }
-                    : {})}
-                  className={cn(
-                    "shrink-0 rounded-md size-9",
-                    "data-[state=open]:bg-primary data-[state=open]:text-primary-foreground",
-                    "hover:text-sidebar-main-foreground/60 hover:bg-white/20",
-                  )}
-                >
-                  <Link href={item.path}>
-                    <item.icon className="size-4.5! text-sidebar-main-foreground" />
-                  </Link>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">{item.tooltip}</TooltipContent>
-            </Tooltip>
-          ))}
+          {MENU.map((item, index) => {
+            if (!item.icon) return null;
+            return (
+              <Tooltip key={index}>
+                <TooltipTrigger asChild>
+                  <Button
+                    asChild
+                    variant="ghost"
+                    mode="icon"
+                    {...(item.path === menu.path
+                      ? { "data-state": "open" }
+                      : {})}
+                    className={cn(
+                      "shrink-0 rounded-md size-9",
+                      "data-[state=open]:bg-primary data-[state=open]:text-primary-foreground",
+                      "hover:text-sidebar-main-foreground/60 hover:bg-white/20",
+                    )}
+                  >
+                    <Link href={item.path || "#"}>
+                      <item.icon className="size-4.5! text-sidebar-main-foreground" />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">{item.title}</TooltipContent>
+              </Tooltip>
+            );
+          })}
         </div>
       </ScrollArea>
 

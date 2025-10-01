@@ -16,6 +16,18 @@ export const paths = {
       path: "/dashboard",
       getHref: () => "/dashboard",
     },
+    masterData: {
+      root: {
+        path: "/master-data",
+        getHref: () => "/master-data",
+      },
+    },
+    oneColDrawer: {
+      root: {
+        path: "/master-data/one-col-drawer",
+        getHref: () => "/master-data/one-col-drawer",
+      },
+    },
     employee: {
       list: {
         path: "/human-resources/employee/list",

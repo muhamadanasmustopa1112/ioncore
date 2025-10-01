@@ -1,9 +1,7 @@
 import { useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { sidebarSide } from "@/config/constants";
-import { MENU_PAGES, MENU_SIDEBAR_MAIN } from "@/config/layout-14.config";
-import { paths } from "@/config/paths";
+import { MenuItem } from "@/config/types";
 import {
   AccordionMenu,
   AccordionMenuGroup,
@@ -15,7 +13,11 @@ import {
 } from "@/components/ui/accordion-menu";
 import { Badge } from "@/components/ui/badge";
 
-export function SidebarPrimaryMenu() {
+type Props = {
+  menu: MenuItem;
+};
+
+export function SidebarPrimaryMenu({ menu }: Props) {
   const pathname = usePathname();
 
   // Memoize matchPath to prevent unnecessary re-renders
@@ -38,69 +40,55 @@ export function SidebarPrimaryMenu() {
         group: "",
       }}
     >
-      {MENU_PAGES.map((item, index) => {
-        return (
-          <AccordionMenuGroup key={index}>
-            <AccordionMenuLabel>{item.title}</AccordionMenuLabel>
-            {item.children?.map((child, index) => {
-              let onClick = undefined;
-              if (child.title === "Switch to Horizontal Sidebar") {
-                onClick = () => {
-                  localStorage.setItem("sidebar", sidebarSide.horizontal);
-                  window.location.reload();
-                };
-              }
-              if (child.children) {
-                return (
-                  <AccordionMenuSub key={index} value={child.path || "#"}>
-                    <AccordionMenuSubTrigger
-                      className="text-sidebar-secondary-foreground"
-                      value={child.path || "#"}
-                    >
-                      {child.icon && <child.icon />}
-                      <span>{child.title}</span>
-                    </AccordionMenuSubTrigger>
-                    <AccordionMenuSubContent
-                      type="multiple"
-                      parentValue={child.path || "#"}
-                    >
-                      {child.children.map((child, index) => {
-                        return (
-                          <AccordionMenuItem
-                            key={index}
-                            value={child.path || "#"}
-                          >
-                            <Link href={child.path || "#"}>
-                              <span>{child.title}</span>
-                            </Link>
-                          </AccordionMenuItem>
-                        );
-                      })}
-                    </AccordionMenuSubContent>
-                  </AccordionMenuSub>
-                );
-              }
-              return (
-                <AccordionMenuItem
-                  key={index}
-                  value={child.path || "#"}
+      <AccordionMenuGroup>
+        <AccordionMenuLabel>{menu?.title}</AccordionMenuLabel>
+        {menu.children?.map((child, index) => {
+          if (child.children) {
+            return (
+              <AccordionMenuSub key={index} value={child.path || "#"}>
+                <AccordionMenuSubTrigger
                   className="text-sidebar-secondary-foreground"
+                  value={child.path || "#"}
                 >
-                  <Link href={child.path || "#"} onClick={onClick}>
-                    {child.icon && <child.icon />}
-                    <span>{child.title}</span>
-                    {child.badge == "Beta" && (
-                      <Badge size="sm" variant="destructive" appearance="light">
-                        {child.badge}
-                      </Badge>
-                    )}
-                  </Link>
-                </AccordionMenuItem>
-              );
-            })}
-          </AccordionMenuGroup>
-        );
-      })}
+                  {child.icon && <child.icon />}
+                  <span>{child.title}</span>
+                </AccordionMenuSubTrigger>
+                <AccordionMenuSubContent
+                  type="multiple"
+                  parentValue={child.path || "#"}
+                >
+                  {child.children.map((child, index) => {
+                    return (
+                      <AccordionMenuItem key={index} value={child.path || "#"}>
+                        <Link href={child.path || "#"}>
+                          <span>{child.title}</span>
+                        </Link>
+                      </AccordionMenuItem>
+                    );
+                  })}
+                </AccordionMenuSubContent>
+              </AccordionMenuSub>
+            );
+          }
+          return (
+            <AccordionMenuItem
+              key={index}
+              value={child.path || "#"}
+              className="text-sidebar-secondary-foreground"
+            >
+              <Link href={child.path || "#"}>
+                {child.icon && <child.icon />}
+                <span>{child.title}</span>
+                {child.badge == "Beta" && (
+                  <Badge size="sm" variant="destructive" appearance="light">
+                    {child.badge}
+                  </Badge>
+                )}
+              </Link>
+            </AccordionMenuItem>
+          );
+        })}
+      </AccordionMenuGroup>
     </AccordionMenu>
   );
 }
