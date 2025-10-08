@@ -1,11 +1,11 @@
-import { createCipheriv, createDecipheriv } from "crypto"
+import { createCipheriv, createDecipheriv } from "crypto";
 
 const passphrase = process.env.NEXT_PUBLIC_PASSPHRASE || ""; // Gunakan key yang lebih kompleks di production
 
 const key = Buffer.from(passphrase.substring(0, 32));
 const iv = Buffer.from(passphrase.substring(0, 16));
 
-const algorithm = 'aes-256-cbc';
+const algorithm = "aes-256-cbc";
 
 /**
  * Mengenkripsi data menggunakan AES-256-CBC.
@@ -20,11 +20,11 @@ function encrypt(data: string): string {
 
   const cipher = createCipheriv(algorithm, key, iv);
 
-  let encrypted = cipher.update(data, 'utf8', 'hex');
+  let encrypted = cipher.update(data, "utf8", "hex");
 
-  encrypted += cipher.final('hex');
+  encrypted += cipher.final("hex");
 
-  return Buffer.from(encrypted, 'hex').toString('base64');
+  return Buffer.from(encrypted, "hex").toString("base64");
 }
 
 /**
@@ -37,15 +37,15 @@ function decrypt(data: string): string {
     return "";
   }
 
-  const encryptedHex = Buffer.from(data, 'base64').toString('hex');
+  const encryptedHex = Buffer.from(data, "base64").toString("hex");
 
   const decipher = createDecipheriv(algorithm, key, iv);
 
-  let decrypted = decipher.update(encryptedHex, 'hex', 'utf8');
+  let decrypted = decipher.update(encryptedHex, "hex", "utf8");
 
-  decrypted += decipher.final('utf8');
+  decrypted += decipher.final("utf8");
 
   return decrypted;
 }
 
-export { encrypt, decrypt }
+export { encrypt, decrypt };

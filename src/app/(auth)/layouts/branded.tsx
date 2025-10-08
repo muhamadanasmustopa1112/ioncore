@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { Card, CardContent } from '@/components/ui/card';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function BrandedLayout({ children }: { children: ReactNode }) {
   return (
@@ -9,10 +9,10 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
       <style>
         {`
           .branded-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/1.png')}');
+            background-image: url('${toAbsoluteUrl("/media/images/2600x1600/1.png")}');
           }
           .dark .branded-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1600/1-dark.png')}');
+            background-image: url('${toAbsoluteUrl("/media/images/2600x1600/1-dark.png")}');
           }
         `}
       </style>
@@ -27,7 +27,7 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
           <div className="flex flex-col p-8 lg:p-16 gap-4">
             <Link href="/">
               <img
-                src={toAbsoluteUrl('/media/app/mini-logo.svg')}
+                src={toAbsoluteUrl("/media/app/mini-logo.svg")}
                 className="h-[28px] max-w-none"
                 alt=""
               />

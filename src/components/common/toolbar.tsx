@@ -1,5 +1,5 @@
-import { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 export interface ToolbarActionsProps {
   children?: ReactNode;
@@ -32,7 +32,7 @@ export const ToolbarHeading = ({
   className,
 }: ToolbarHeadingProps) => {
   return (
-    <div className={cn('flex flex-col flex-wrap gap-px', className)}>
+    <div className={cn("flex flex-col flex-wrap gap-px", className)}>
       {children}
     </div>
   );
@@ -40,7 +40,7 @@ export const ToolbarHeading = ({
 
 export const ToolbarTitle = ({ className, children }: ToolbarTitleProps) => {
   return (
-    <h1 className={cn('font-semibold text-foreground text-lg', className)}>
+    <h1 className={cn("font-semibold text-foreground text-lg", className)}>
       {children}
     </h1>
   );

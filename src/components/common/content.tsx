@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { LoaderCircleIcon } from 'lucide-react';
+import { LoaderCircleIcon } from "lucide-react";
 
 export function ContentLoader() {
   return (

@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
-import Link from 'next/link';
-import { toAbsoluteUrl } from '@/lib/helpers';
-import { Card, CardContent } from '@/components/ui/card';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { toAbsoluteUrl } from "@/lib/helpers";
+import { Card, CardContent } from "@/components/ui/card";
 
 export function ClassicLayout({ children }: { children: ReactNode }) {
   return (
@@ -9,10 +9,10 @@ export function ClassicLayout({ children }: { children: ReactNode }) {
       <style>
         {`
           .page-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1200/bg-10.png')}');
+            background-image: url('${toAbsoluteUrl("/media/images/2600x1200/bg-10.png")}');
           }
           .dark .page-bg {
-            background-image: url('${toAbsoluteUrl('/media/images/2600x1200/bg-10-dark.png')}');
+            background-image: url('${toAbsoluteUrl("/media/images/2600x1200/bg-10-dark.png")}');
           }
         `}
       </style>
@@ -20,7 +20,7 @@ export function ClassicLayout({ children }: { children: ReactNode }) {
         <div className="m-5">
           <Link href="/">
             <img
-              src={toAbsoluteUrl('/media/app/mini-logo.svg')}
+              src={toAbsoluteUrl("/media/app/mini-logo.svg")}
               className="h-[35px] max-w-none"
               alt=""
             />

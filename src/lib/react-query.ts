@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { UseMutationOptions, DefaultOptions } from "@tanstack/react-query";
+import { DefaultOptions, UseMutationOptions } from "@tanstack/react-query";
 
 export const queryConfig = {
   queries: {

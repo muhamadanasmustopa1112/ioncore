@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const getPasswordSchema = (minLength = 8) => {
   return z
@@ -7,15 +7,15 @@ export const getPasswordSchema = (minLength = 8) => {
       message: `Password must be at least ${minLength} characters long.`,
     })
     .regex(/[A-Z]/, {
-      message: 'Password must contain at least one uppercase letter.',
+      message: "Password must contain at least one uppercase letter.",
     })
     .regex(/[a-z]/, {
-      message: 'Password must contain at least one lowercase letter.',
+      message: "Password must contain at least one lowercase letter.",
     })
     .regex(/\d/, {
-      message: 'Password must contain at least one number.',
+      message: "Password must contain at least one number.",
     })
     .regex(/[!@#$%^&*(),.?":{}|<>]/, {
-      message: 'Password must contain at least one special character.',
+      message: "Password must contain at least one special character.",
     });
 };
