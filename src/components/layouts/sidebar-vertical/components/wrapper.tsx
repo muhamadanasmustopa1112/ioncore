@@ -40,7 +40,10 @@ export function Wrapper({ children }: { children: React.ReactNode }) {
           </ToolbarActions>
         </Toolbar>
 
-        <main className="grow p-5" role="content">
+        <main
+          className="grow p-5 xl:group-data-[theme-content-layout=centered]/layout:container xl:group-data-[theme-content-layout=centered]/layout:mx-auto"
+          role="content"
+        >
           {isMobile && <HeaderBreadcrumbs />}
           {children}
         </main>
