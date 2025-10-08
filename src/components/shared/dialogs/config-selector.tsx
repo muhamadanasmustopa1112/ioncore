@@ -28,7 +28,14 @@ interface ConfigState {
   layout: "vertical" | "horizontal";
 }
 
-const brandColors = [{ value: "wit", label: "WIT", color: "bg-primary" }];
+const brandColors = [
+  { value: "wit", label: "WIT", color: "bg-primary" },
+  { value: "dark", label: "Dark", color: "bg-zinc-950" },
+  { value: "light", label: "Light", color: "bg-indigo-500" },
+  { value: "red", label: "Red", color: "bg-red-500" },
+  { value: "green", label: "Green", color: "bg-teal-500" },
+  { value: "blue", label: "Blue", color: "bg-blue-500" },
+];
 
 export function ConfigSelector() {
   const [isOpen, setIsOpen] = useState(false);
@@ -166,18 +173,31 @@ export function ConfigSelector() {
                     <Square className="h-4 w-4" />
                     Border Radius
                   </Label>
-                  <div className="grid grid-cols-5 gap-2">
-                    {["none", "sm", "md", "lg", "xl"].map((option) => (
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* "none", "sm", "md", "lg", "xl" */}
+                    {[
+                      { value: "none", label: "None" },
+                      {
+                        value: "sm",
+                        label: "Small",
+                      },
+                      { value: "md", label: "Medium" },
+                      {
+                        value: "lg",
+                        label: "Large",
+                      },
+                      // { value: "xl", label: "Extra Large" },
+                    ].map((option) => (
                       <Button
-                        key={option}
+                        key={option.value}
                         variant={
-                          config.radius === option ? "primary" : "outline"
+                          config.radius === option.value ? "primary" : "outline"
                         }
                         size="sm"
-                        onClick={() => updateConfig("radius", option)}
+                        onClick={() => updateConfig("radius", option.value)}
                         className="uppercase"
                       >
-                        {option}
+                        {option.label}
                       </Button>
                     ))}
                   </div>
@@ -188,18 +208,32 @@ export function ConfigSelector() {
                     <Scale className="h-4 w-4" />
                     Scale
                   </Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {["xs", "md", "lg"].map((option) => (
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* "xs", "md", "lg" */}
+                    {[
+                      {
+                        value: "xs",
+                        label: "Extra Small",
+                      },
+                      {
+                        value: "sm",
+                        label: "Small",
+                      },
+                      {
+                        value: "md",
+                        label: "Medium",
+                      },
+                    ].map((option) => (
                       <Button
-                        key={option}
+                        key={option.value}
                         variant={
-                          config.scale === option ? "primary" : "outline"
+                          config.scale === option.value ? "primary" : "outline"
                         }
                         size="sm"
-                        onClick={() => updateConfig("scale", option)}
+                        onClick={() => updateConfig("scale", option.value)}
                         className="uppercase"
                       >
-                        {option}
+                        {option.label}
                       </Button>
                     ))}
                   </div>

@@ -88,6 +88,71 @@
   --sidebar-secondary-foreground: var(--color-white);
 }
 
+[data-theme-brand="dark"] {
+  --primary: var(--color-zinc-950);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-zinc-100);
+  --secondary-foreground: var(--color-zinc-900);
+  --background: var(--color-zinc-50);
+
+  --sidebar-main: var(--color-zinc-950);
+  --sidebar-main-foreground: var(--color-white);
+  --sidebar-secondary: var(--color-zinc-900);
+  --sidebar-secondary-foreground: var(--color-white);
+}
+
+[data-theme-brand="light"] {
+  --primary: var(--color-indigo-500);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-indigo-50);
+  --secondary-foreground: var(--color-indigo-900);
+  --background: var(--color-indigo-50);
+
+  --sidebar-main: var(--color-zinc-100);
+  --sidebar-main-foreground: var(--color-zinc-900);
+  --sidebar-secondary: var(--color-white);
+  --sidebar-secondary-foreground: var(--color-zinc-900);
+}
+
+[data-theme-brand="red"] {
+  --primary: var(--color-red-500);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-red-50);
+  --secondary-foreground: var(--color-red-900);
+  --background: var(--color-red-50);
+
+  --sidebar-main: oklch(0.3264 0.1317 28.49);
+  --sidebar-main-foreground: var(--color-white);
+  --sidebar-secondary: oklch(0.5544 0.2289 27.33);
+  --sidebar-secondary-foreground: var(--color-white);
+}
+
+[data-theme-brand="green"] {
+  --primary: var(--color-teal-500);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-teal-50);
+  --secondary-foreground: var(--color-teal-900);
+  --background: var(--color-teal-50);
+
+  --sidebar-main: oklch(0.4486 0.0673 209.17);
+  --sidebar-main-foreground: var(--color-white);
+  --sidebar-secondary: oklch(0.5301 0.0775 209.2);
+  --sidebar-secondary-foreground: var(--color-white);
+}
+
+[data-theme-brand="blue"] {
+  --primary: var(--color-blue-500);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-blue-50);
+  --secondary-foreground: var(--color-blue-900);
+  --background: var(--color-blue-50);
+
+  --sidebar-main: oklch(0.2877 0.044 251.97);
+  --sidebar-main-foreground: var(--color-white);
+  --sidebar-secondary: oklch(0.4727 0.1393 258.33);
+  --sidebar-secondary-foreground: var(--color-white);
+}
+
 /* Radius */
 [data-theme-radius="none"] {
   --radius: 0;
