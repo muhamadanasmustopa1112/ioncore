@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { getPasswordSchema } from './password-schema';
+import { z } from "zod";
+import { getPasswordSchema } from "./password-schema";
 
 export const getChangePasswordSchema = () => {
   return z
@@ -8,8 +8,8 @@ export const getChangePasswordSchema = () => {
       confirmPassword: z.string(),
     })
     .refine((data) => data.newPassword === data.confirmPassword, {
-      message: 'Passwords do not match.',
-      path: ['confirmPassword'],
+      message: "Passwords do not match.",
+      path: ["confirmPassword"],
     });
 };
 
@@ -20,7 +20,7 @@ export type ChangePasswordSchemaType = z.infer<
 export const getChangePasswordApiSchema = () => {
   return z.object({
     token: z.string().nonempty({
-      message: 'A valid token is required to change the password.',
+      message: "A valid token is required to change the password.",
     }),
     newPassword: getPasswordSchema(),
   });
