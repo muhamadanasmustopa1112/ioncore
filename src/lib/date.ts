@@ -1,6 +1,6 @@
 function convertUTCToTimezoneDate(
   utcDate: string | Date,
-  timeZone: string
+  timeZone: string,
 ): Date {
   const date = new Date(utcDate);
 
