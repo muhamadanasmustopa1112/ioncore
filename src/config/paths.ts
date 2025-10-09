@@ -28,6 +28,20 @@ export const paths = {
         getHref: () => "/master-data/one-col-drawer",
       },
     },
+    oneColNewPage: {
+      root: {
+        path: "/master-data/one-col-new-page",
+        getHref: () => "/master-data/one-col-new-page",
+      },
+      detail: {
+        path: "/master-data/one-col-new-page/detail/:id",
+        getHref: (id: string) => `/master-data/one-col-new-page/detail/${id}`,
+      },
+      update: {
+        path: "/master-data/one-col-new-page/update/:id",
+        getHref: (id: string) => `/master-data/one-col-new-page/update/${id}`,
+      },
+    },
     employee: {
       list: {
         path: "/human-resources/employee/list",

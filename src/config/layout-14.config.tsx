@@ -71,7 +71,7 @@ export const MENU: MenuConfig = [
           },
           {
             title: "1 Col New Page",
-            path: "#",
+            path: paths.dashboard.oneColNewPage.root.getHref(),
             icon: StickyNote,
           },
           {
