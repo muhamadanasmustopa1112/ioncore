@@ -76,7 +76,7 @@ export const MENU: MenuConfig = [
           },
           {
             title: "1 Col to 2 Col",
-            path: "#",
+            path: paths.dashboard.oneColToTwoCol.root.getHref(),
             icon: Columns,
           },
           {

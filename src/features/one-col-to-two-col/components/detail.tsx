@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { RiAddLine } from "@remixicon/react";
+import { ArrowLeft } from "lucide-react";
 import { paths } from "@/config/paths";
 import {
   Breadcrumb,
@@ -18,13 +18,13 @@ import {
   ToolbarHeading,
   ToolbarTitle,
 } from "@/components/common/toolbar";
-import { EmployeeList } from "./list/employee-list";
+import { EmployeeDetails } from "./details/employee-details";
 
-export function EmployeeListPage() {
+export function EmployeeDetail() {
   const router = useRouter();
 
-  const onAddClick = () => {
-    router.push(paths.dashboard.oneColNewPage.create.getHref());
+  const onBackClick = () => {
+    router.push(paths.dashboard.employee.list.getHref());
   };
 
   return (
@@ -45,18 +45,22 @@ export function EmployeeListPage() {
               <BreadcrumbItem>
                 <BreadcrumbPage>Employee</BreadcrumbPage>
               </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>John Doe</BreadcrumbPage>
+              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
         </ToolbarHeading>
         <ToolbarActions>
-          <Button type="button" onClick={onAddClick}>
-            <RiAddLine />
-            Add New
+          <Button variant="outline" onClick={onBackClick}>
+            <ArrowLeft />
+            Back
           </Button>
         </ToolbarActions>
       </Toolbar>
 
-      <EmployeeList />
+      <EmployeeDetails />
     </>
   );
 }

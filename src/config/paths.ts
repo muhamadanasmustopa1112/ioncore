@@ -37,9 +37,19 @@ export const paths = {
         path: "/master-data/one-col-new-page/detail/:id",
         getHref: (id: string) => `/master-data/one-col-new-page/detail/${id}`,
       },
+      create: {
+        path: "/master-data/one-col-new-page/create",
+        getHref: () => "/master-data/one-col-new-page/create",
+      },
       update: {
         path: "/master-data/one-col-new-page/update/:id",
         getHref: (id: string) => `/master-data/one-col-new-page/update/${id}`,
+      },
+    },
+    oneColToTwoCol: {
+      root: {
+        path: "/master-data/one-col-to-two-col",
+        getHref: () => "/master-data/one-col-to-two-col",
       },
     },
     employee: {

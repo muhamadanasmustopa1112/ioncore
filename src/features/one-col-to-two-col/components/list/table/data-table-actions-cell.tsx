@@ -68,10 +68,7 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
           <RiEditLine />
           Edit
         </DropdownMenuItem>
-        <DropdownMenuItem
-          className="cursor-pointer"
-          onClick={handleDetailClick}
-        >
+        <DropdownMenuItem className="cursor-pointer" onClick={handleDetailClick}>
           <RiEyeLine />
           Detail
         </DropdownMenuItem>
