@@ -1,0 +1,182 @@
+stages:
+    - validate
+    - development-build
+    - production-build
+    - rollback
+
+variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+    RELEASE_TAG: $CI_REGISTRY_IMAGE:latest
+    DOCKER_TLS_CERTDIR: '/certs'
+
+# ========================================
+# ✅ Validasi: MR ke development hanya dari feature/fix/hotfix
+# ========================================
+validate-mr-to-development-source-branch:
+    stage: validate
+    image: bash:latest
+    script:
+        - |
+            echo "🔍 Validating MR source branch to development..."
+            if [[ "$CI_PIPELINE_SOURCE" == "merge_request_event" && "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" == "development" ]]; then
+              if [[ ! "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME" =~ ^(feature|fix|hotfix)/.+$ ]]; then
+                echo "❌ Invalid source branch: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
+                exit 1
+              fi
+            fi
+    rules:
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "development"'
+          when: always
+        - when: never
+
+# ========================================
+# 🔒 Validasi tag *-development hanya dari development
+# ========================================
+validate-dev-tag-source:
+    stage: validate
+    image: alpine:latest
+    script:
+        - apk add --no-cache git
+        - |
+            echo "🔍 Validating tag source for *-development..."
+            git fetch --all
+            TAG_COMMIT=$(git rev-list -n 1 "$CI_COMMIT_TAG")
+            BRANCH_NAME=$(git branch -r --contains "$TAG_COMMIT" | grep "origin/development" || true)
+            if [ -z "$BRANCH_NAME" ]; then
+              echo "❌ ERROR: Tag $CI_COMMIT_TAG not from development branch"
+              exit 1
+            fi
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /.*-development$/'
+          when: always
+        - when: never
+
+# ========================================
+# ✅ Validasi: MR ke master hanya dari development/hotfix
+# ========================================
+validate-mr-to-master-source-branch:
+    stage: validate
+    image: bash:latest
+    script:
+        - |
+            echo "🔍 Validating MR source branch to master..."
+            if [[ "$CI_PIPELINE_SOURCE" == "merge_request_event" && "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" == "master" ]]; then
+              if [[ ! "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME" =~ ^(development|hotfix/.+)$ ]]; then
+                echo "❌ Invalid source branch: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
+                exit 1
+              fi
+            fi
+    rules:
+        - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "master"'
+          when: always
+        - when: never
+
+# ========================================
+# 🔒 Validasi tag *-release hanya dari master
+# ========================================
+validate-release-tag-source:
+    stage: validate
+    image: alpine:latest
+    script:
+        - apk add --no-cache git
+        - |
+            echo "🔍 Validating tag source for *-release..."
+            git fetch --all
+            TAG_COMMIT=$(git rev-list -n 1 "$CI_COMMIT_TAG")
+            BRANCH_NAME=$(git branch -r --contains "$TAG_COMMIT" | grep "origin/master" || true)
+            if [ -z "$BRANCH_NAME" ]; then
+              echo "❌ ERROR: Tag $CI_COMMIT_TAG not from master branch"
+              exit 1
+            fi
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /.*-release$/'
+          when: always
+        - when: never
+
+# ========================================
+# 🛠️ Build image dari tag *-development
+# ========================================
+build-dev-image:
+    stage: development-build
+    image: docker:latest
+    services:
+        - docker:dind
+    script:
+        - touch .env
+        - echo "$DEV_ENV" > .env
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG .
+        - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG $CI_REGISTRY_IMAGE:development
+        - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+        - docker push $CI_REGISTRY_IMAGE:development
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /.*-development$/ && $CI_PIPELINE_SOURCE == "push"'
+          when: always
+        - when: never
+    needs: ['validate-dev-tag-source']
+
+# ========================================
+# 🚀 Build production image dari tag *-release
+# ========================================
+build-prod-image:
+    stage: production-build
+    image: docker:latest
+    services:
+        - docker:dind
+    script:
+        - touch .env
+        - echo "$PROD_ENV" > .env
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG .
+        - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG $CI_REGISTRY_IMAGE:latest
+        - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+        - docker push $CI_REGISTRY_IMAGE:latest
+    rules:
+        - if: '$CI_COMMIT_TAG =~ /.*-release$/ && $CI_PIPELINE_SOURCE == "push"'
+          when: always
+        - when: never
+    needs: ['validate-release-tag-source']
+
+# ========================================
+# 🔁 Manual rollback development
+# ========================================
+rollback-development-image:
+    stage: rollback
+    image: docker:latest
+    services:
+        - docker:dind
+    variables:
+        ROLLBACK_TAG_DEVELOPMENT: '' # Manual input saat trigger pipeline
+    script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - git fetch --all --tags
+        - git checkout $ROLLBACK_TAG_DEVELOPMENT
+        - touch .env
+        - echo "$DEV_ENV" > .env
+        - docker build -t $CI_REGISTRY_IMAGE:development .
+        - docker push $CI_REGISTRY_IMAGE:development
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "development"'
+          when: manual
+
+# ========================================
+# 🔁 Manual rollback production
+# ========================================
+rollback-production-image:
+    stage: rollback
+    image: docker:latest
+    services:
+        - docker:dind
+    variables:
+        ROLLBACK_TAG_PRODUCTION: '' # Manual input saat trigger pipeline
+    script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - git fetch --all --tags
+        - git checkout $ROLLBACK_TAG_PRODUCTION
+        - touch .env
+        - echo "$PROD_ENV" > .env
+        - docker build -t $CI_REGISTRY_IMAGE:latest .
+        - docker push $CI_REGISTRY_IMAGE:latest
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master"'
+          when: manual
