@@ -25,29 +25,29 @@ export function EmployeeDetailsTwoColumns() {
 
   return (
     <>
-      <div className="flex justify-between flex-wrap gap-2 border-b border-border px-5 py-4">
+      <div className="border-border flex flex-wrap justify-between gap-2 border-b px-5 py-4">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2.5">
-            <span className="lg:text-[22px] font-semibold text-foreground leading-none">
+            <span className="text-foreground leading-none font-semibold lg:text-[22px]">
               Jeroen de Jong
             </span>
             <Badge size="sm" variant="success" appearance="light">
               Active
             </Badge>
           </div>
-          <div className="flex items-center flex-wrap gap-2 text-2sm">
-            <span className="font-normal text-muted-foreground">
+          <div className="text-2sm flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground font-normal">
               Customer ID:
             </span>
-            <span className="font-medium text-foreground">583920-XT</span>
+            <span className="text-foreground font-medium">583920-XT</span>
             <BadgeDot className="bg-muted-foreground size-1" />
-            <span className="font-normal text-muted-foreground">Joined</span>
-            <span className="font-medium text-foreground">16 Jan, 2022</span>
+            <span className="text-muted-foreground font-normal">Joined</span>
+            <span className="text-foreground font-medium">16 Jan, 2022</span>
             <BadgeDot className="bg-muted-foreground size-1" />
-            <span className="font-normal text-muted-foreground">
+            <span className="text-muted-foreground font-normal">
               Last Visit
             </span>
-            <span className="font-medium text-foreground">2 days ago</span>
+            <span className="text-foreground font-medium">2 days ago</span>
           </div>
         </div>
         <div className="flex items-center gap-2.5">

@@ -8,10 +8,10 @@ export function Header() {
   const { isMobile } = useLayout();
 
   return (
-    <header className="fixed z-10 top-0 start-0 end-0 shrink-0 bg-muted lg:bg-transparent h-(--header-height-mobile) lg:h-(--header-height) pe-[var(--removed-body-scroll-bar-size,0px)]">
+    <header className="bg-muted fixed start-0 end-0 top-0 z-10 h-(--header-height-mobile) shrink-0 pe-[var(--removed-body-scroll-bar-size,0px)] lg:h-(--header-height) lg:bg-transparent">
       <div className="bg-background">
-        <div className="border-b border-border/20 bg-sidebar-main text-sidebar-main-foreground">
-          <div className="flex justify-between gap-2.5 h-[62px] px-5 xl:group-data-[theme-content-layout=centered]/layout:container xl:group-data-[theme-content-layout=centered]/layout:mx-auto">
+        <div className="border-border/20 bg-sidebar-main text-sidebar-main-foreground border-b">
+          <div className="flex h-[62px] justify-between gap-2.5 px-5 xl:group-data-[theme-content-layout=centered]/layout:container xl:group-data-[theme-content-layout=centered]/layout:mx-auto">
             <div className="flex items-stretch gap-5">
               <HeaderLogo />
               {!isMobile && <HeaderMenu />}

@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 function Toolbar({ children }: { children?: ReactNode }) {
   return (
-    <div className="pb-5 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2.5 pb-5">
       {children}
     </div>
   );
@@ -18,7 +18,7 @@ function ToolbarHeading({ children }: { children: ReactNode }) {
 
 function ToolbarPageTitle({ children }: { children: ReactNode }) {
   return (
-    <h1 className="text-base font-medium leading-none text-foreground">
+    <h1 className="text-foreground text-base leading-none font-medium">
       {children}
     </h1>
   );
@@ -26,7 +26,7 @@ function ToolbarPageTitle({ children }: { children: ReactNode }) {
 
 function ToolbarDescription({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
+    <div className="text-muted-foreground flex items-center gap-2 text-sm font-normal">
       {children}
     </div>
   );

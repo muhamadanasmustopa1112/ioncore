@@ -84,15 +84,15 @@ export function ConfigSelector() {
   return (
     <>
       {/* Floating Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed right-6 bottom-6 z-50">
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button
               size="lg"
               className={cn(
-                "h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200",
+                "h-14 w-14 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl",
                 "bg-primary hover:bg-primary/90 text-primary-foreground",
-                "border-2 border-primary/20",
+                "border-primary/20 border-2",
               )}
             >
               <Settings className="h-6 w-6" />
@@ -103,7 +103,7 @@ export function ConfigSelector() {
           <PopoverContent
             side="top"
             align="end"
-            className="w-80 p-0 shadow-xl border-border/50"
+            className="border-border/50 w-80 p-0 shadow-xl"
             sideOffset={16}
           >
             <Card className="border-0 shadow-none">
@@ -156,7 +156,7 @@ export function ConfigSelector() {
                           <div className="flex items-center gap-2">
                             <div
                               className={cn(
-                                "w-3 h-3 rounded-full",
+                                "h-3 w-3 rounded-full",
                                 color.color,
                               )}
                             />

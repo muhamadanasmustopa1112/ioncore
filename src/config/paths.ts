@@ -28,6 +28,36 @@ export const paths = {
         getHref: () => "/master-data/one-col-drawer",
       },
     },
+    oneColNewPage: {
+      root: {
+        path: "/master-data/one-col-new-page",
+        getHref: () => "/master-data/one-col-new-page",
+      },
+      detail: {
+        path: "/master-data/one-col-new-page/detail/:id",
+        getHref: (id: string) => `/master-data/one-col-new-page/detail/${id}`,
+      },
+      create: {
+        path: "/master-data/one-col-new-page/create",
+        getHref: () => "/master-data/one-col-new-page/create",
+      },
+      update: {
+        path: "/master-data/one-col-new-page/update/:id",
+        getHref: (id: string) => `/master-data/one-col-new-page/update/${id}`,
+      },
+    },
+    oneColToTwoCol: {
+      root: {
+        path: "/master-data/one-col-to-two-col",
+        getHref: () => "/master-data/one-col-to-two-col",
+      },
+    },
+    twoColTwoCard: {
+      root: {
+        path: "/master-data/two-col-two-card",
+        getHref: () => "/master-data/two-col-two-card",
+      }
+    },
     employee: {
       list: {
         path: "/human-resources/employee/list",

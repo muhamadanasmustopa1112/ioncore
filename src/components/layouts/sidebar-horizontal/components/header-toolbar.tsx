@@ -121,14 +121,14 @@ export function HeaderToolbar() {
               </AvatarIndicator>
             </Avatar>
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-foreground">
+              <span className="text-foreground text-sm font-semibold">
                 {user?.username}
               </span>
-              <span className="text-xs text-muted-foreground">Online</span>
+              <span className="text-muted-foreground text-xs">Online</span>
             </div>
           </div>
 
-          <DropdownMenuItem className="cursor-pointer py-1 rounded-md border border-border hover:bg-muted">
+          <DropdownMenuItem className="border-border hover:bg-muted cursor-pointer rounded-md border py-1">
             <Clock />
             <span>Set status</span>
           </DropdownMenuItem>
@@ -197,13 +197,13 @@ export function HeaderToolbar() {
           <DropdownMenuItem>
             <Download />
             <span>Download apps</span>
-            <ExternalLink className="size-3 ms-auto" />
+            <ExternalLink className="ms-auto size-3" />
           </DropdownMenuItem>
 
           <DropdownMenuItem>
             <HelpCircle />
             <span>Help</span>
-            <ExternalLink className="size-3 ms-auto" />
+            <ExternalLink className="ms-auto size-3" />
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />

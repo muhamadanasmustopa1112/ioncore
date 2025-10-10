@@ -20,8 +20,8 @@ const MegaMenuSubHighlighted = (items: MenuConfig) => {
             {...(isActive(item.path) && { "data-active": true })}
             href={item.path || ""}
             className={cn(
-              "border border-transparent hover:border-border hover:bg-background",
-              "flex flex-row items-center gap-2.5 px-2.5 py-2 rounded-md text-sm",
+              "hover:border-border hover:bg-background border border-transparent",
+              "flex flex-row items-center gap-2.5 rounded-md px-2.5 py-2 text-sm",
               "[&_svg]:text-muted-foreground hover:[&_svg]:text-primary [&[data-active=true]_svg]:text-primary",
             )}
           >

@@ -45,7 +45,7 @@ export function SidebarWorkspacesMenu() {
           <AccordionMenuSubTrigger value="workspace-trigger">
             <span>{item.title}</span>
             <AccordionMenuIndicator>
-              <Plus className="size-3.5 shrink-0 transition-transform duration-200 hidden group-data-[state=open]:block" />
+              <Plus className="hidden size-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:block" />
               <Minus className="size-3.5 shrink-0 transition-transform duration-200 group-data-[state=open]:hidden" />
             </AccordionMenuIndicator>
           </AccordionMenuSubTrigger>

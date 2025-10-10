@@ -78,20 +78,20 @@ export function HeaderLogo() {
   }, [pathname]);
 
   return (
-    <div className="flex border-e border-border/20 items-center gap-2 lg:w-(--sidebar-width) bg-sidebar-secondary">
+    <div className="border-border/20 bg-sidebar-secondary flex items-center gap-2 border-e lg:w-(--sidebar-width)">
       {/* Brand */}
-      <div className="flex items-center w-full">
+      <div className="flex w-full items-center">
         {/* Logo */}
-        <div className="flex items-center justify-center shrink-0 border-e border-border/20 w-(--sidebar-collapsed-width) h-(--header-height) bg-sidebar-main">
+        <div className="border-border/20 bg-sidebar-main flex h-(--header-height) w-(--sidebar-collapsed-width) shrink-0 items-center justify-center border-e">
           <Link href="/layout-14">
             <img
               src={toAbsoluteUrl("/media/app/mini-logo-gray.svg")}
-              className="dark:hidden min-h-[30px]"
+              className="min-h-[30px] dark:hidden"
               alt="Thunder AI Logo"
             />
             <img
               src={toAbsoluteUrl("/media/app/mini-logo-gray-dark.svg")}
-              className="hidden dark:block min-h-[30px]"
+              className="hidden min-h-[30px] dark:block"
               alt="Thunder AI Logo"
             />
           </Link>
@@ -106,11 +106,11 @@ export function HeaderLogo() {
               </Button>
             </SheetTrigger>
             <SheetContent
-              className="p-0 gap-0 w-[280px] lg:w-(--sidebar-width)"
+              className="w-[280px] gap-0 p-0 lg:w-(--sidebar-width)"
               side="left"
               close={false}
             >
-              <SheetHeader className="p-0 space-y-0" />
+              <SheetHeader className="space-y-0 p-0" />
               <SheetBody className="flex grow p-0">
                 <SidebarPrimary />
                 <SidebarSecondary />
@@ -120,23 +120,23 @@ export function HeaderLogo() {
         )}
 
         {/* Sidebar header */}
-        <div className="flex w-full grow items-center justify-between px-5 gap-2.5">
+        <div className="flex w-full grow items-center justify-between gap-2.5 px-5">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="inline-flex text-sidebar-secondary-foreground hover:text-foreground px-1.5 -ms-1.5"
+                className="text-sidebar-secondary-foreground hover:text-foreground -ms-1.5 inline-flex px-1.5"
               >
                 <div
                   className={cn(
-                    "size-6 flex items-center justify-center rounded-md",
+                    "flex size-6 items-center justify-center rounded-md",
                     selectedTeam.color,
                   )}
                 >
                   <selectedTeam.icon className="size-4" />
                 </div>
 
-                <span className="text-mono text-sm font-medium hidden lg:block">
+                <span className="text-mono hidden text-sm font-medium lg:block">
                   {selectedTeam.name}
                 </span>
                 <ChevronsUpDown className="opacity-100" />
@@ -157,7 +157,7 @@ export function HeaderLogo() {
                 >
                   <div
                     className={cn(
-                      "size-6 rounded-md flex items-center justify-center",
+                      "flex size-6 items-center justify-center rounded-md",
                       team.color,
                     )}
                   >
@@ -167,7 +167,7 @@ export function HeaderLogo() {
                     {team.name}
                   </span>
                   {selectedTeam.name === team.name && (
-                    <Check className="ms-auto size-4 text-primary" />
+                    <Check className="text-primary ms-auto size-4" />
                   )}
                 </DropdownMenuItem>
               ))}
@@ -179,9 +179,9 @@ export function HeaderLogo() {
             mode="icon"
             variant="ghost"
             onClick={sidebarToggle}
-            className="hidden lg:inline-flex text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground hidden lg:inline-flex"
           >
-            <PanelRight className="-rotate-180 in-data-[sidebar-open=false]:rotate-0 opacity-100" />
+            <PanelRight className="-rotate-180 opacity-100 in-data-[sidebar-open=false]:rotate-0" />
           </Button>
         </div>
       </div>

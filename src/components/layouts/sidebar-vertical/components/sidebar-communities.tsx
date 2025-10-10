@@ -63,7 +63,7 @@ export function SidebarCommunities() {
           <AccordionMenuItem value="add-community" asChild>
             <Button
               variant="ghost"
-              className="flex items-center gap-2 w-full justify-start font-normal text-[13px]"
+              className="flex w-full items-center justify-start gap-2 text-[13px] font-normal"
             >
               <Plus />
               Create a community
@@ -79,7 +79,7 @@ export function SidebarCommunities() {
               <Link href="#">
                 <img
                   src={toAbsoluteUrl(`/media/brand-logos/${community.logo}`)}
-                  className="w-4.5 h-4.5 shrink-0"
+                  className="h-4.5 w-4.5 shrink-0"
                   alt="image"
                 />
                 {community.title}

@@ -16,15 +16,15 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
           }
         `}
       </style>
-      <div className="grid lg:grid-cols-2 grow">
-        <div className="flex justify-center items-center p-8 lg:p-10 order-2 lg:order-1">
+      <div className="grid grow lg:grid-cols-2">
+        <div className="order-2 flex items-center justify-center p-8 lg:order-1 lg:p-10">
           <Card className="w-full max-w-[400px]">
             <CardContent className="p-6">{children}</CardContent>
           </Card>
         </div>
 
-        <div className="lg:rounded-xl lg:border lg:border-border lg:m-5 order-1 lg:order-2 bg-top xxl:bg-center xl:bg-cover bg-no-repeat branded-bg">
-          <div className="flex flex-col p-8 lg:p-16 gap-4">
+        <div className="lg:border-border xxl:bg-center branded-bg order-1 bg-top bg-no-repeat lg:order-2 lg:m-5 lg:rounded-xl lg:border xl:bg-cover">
+          <div className="flex flex-col gap-4 p-8 lg:p-16">
             <Link href="/">
               <img
                 src={toAbsoluteUrl("/media/app/mini-logo.svg")}
@@ -34,10 +34,10 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
             </Link>
 
             <div className="flex flex-col gap-3">
-              <h3 className="text-2xl font-semibold text-mono">
+              <h3 className="text-mono text-2xl font-semibold">
                 Secure Dashboard Access
               </h3>
-              <div className="text-base font-medium text-secondary-foreground">
+              <div className="text-secondary-foreground text-base font-medium">
                 A robust authentication gateway ensuring
                 <br /> secure&nbsp;
                 <span className="text-mono font-semibold">

@@ -5,7 +5,7 @@ export function SidebarSearch() {
   const handleInputChange = () => {};
 
   return (
-    <div className="flex px-5 pt-2.5 shrink-0">
+    <div className="flex shrink-0 px-5 pt-2.5">
       <InputWrapper className="relative">
         <Input
           type="search"

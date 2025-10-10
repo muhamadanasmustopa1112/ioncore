@@ -4,18 +4,18 @@ import { Upload } from "../details/employee-upload";
 
 export function EmployeeScrollContentTwoColumnsCard() {
   return (
-    <div className="flex flex-col grow">
-      <div className="w-full shrink-0 py-5 px-5 space-y-4">
+    <div className="flex grow flex-col">
+      <div className="w-full shrink-0 space-y-4 px-5 py-5">
         <Upload />
       </div>
 
-      <div className="grow lg:border-s border-border space-y-5 py-5 lg:px-5">
+      <div className="border-border grow space-y-5 py-5 lg:border-s lg:px-5">
         <Tabs
           defaultValue="overview"
-          className="w-full text-sm text-muted-foreground"
+          className="text-muted-foreground w-full text-sm"
         >
-          <div className="w-full relative overflow-x-auto overflow-y-hidden">
-            <TabsList className="inline-flex w-auto mb-2.5 overflow-x-auto">
+          <div className="relative w-full overflow-x-auto overflow-y-hidden">
+            <TabsList className="mb-2.5 inline-flex w-auto overflow-x-auto">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="orders">Orders</TabsTrigger>
               <TabsTrigger value="invoices">Invoices</TabsTrigger>

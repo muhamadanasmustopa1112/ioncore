@@ -25,7 +25,7 @@ export function SidebarSearch() {
   const handleInputChange = () => {};
 
   return (
-    <div className="p-5 border-b border-border shrink-0 flex items-center justify-between gap-2.5">
+    <div className="border-border flex shrink-0 items-center justify-between gap-2.5 border-b p-5">
       <InputWrapper>
         <Search />
         <Input

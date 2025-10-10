@@ -32,16 +32,16 @@ export function EmployeePaymentMethods() {
   return (
     <Card className="bg-accent/70 rounded-md shadow-none">
       <CardContent className="p-0">
-        <h3 className="text-sm font-medium text-foreground py-2.5 ps-2">
+        <h3 className="text-foreground py-2.5 ps-2 text-sm font-medium">
           Payment Methods
         </h3>
-        <div className="bg-background rounded-md m-1 mt-0 border border-input py-1 px-3.5">
+        <div className="bg-background border-input m-1 mt-0 rounded-md border px-3.5 py-1">
           {paymentMethods.map((method, index) => (
             <div key={index}>
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center rounded-md bg-background border border-border size-10 shrink-0">
-                    <div className="flex items-center justify-center bg-accent/70 rounded-md size-[34px]">
+                  <div className="bg-background border-border flex size-10 shrink-0 items-center justify-center rounded-md border">
+                    <div className="bg-accent/70 flex size-[34px] items-center justify-center rounded-md">
                       <img
                         src={toAbsoluteUrl(
                           `/media/brand-logos/${method.logo}.svg`,
@@ -57,17 +57,17 @@ export function EmployeePaymentMethods() {
                     <div className="flex items-center gap-2">
                       <Link
                         href={"#"}
-                        className="font-medium text-foreground text-sm hover:text-primary"
+                        className="text-foreground hover:text-primary text-sm font-medium"
                       >
                         {method.name}
                       </Link>
                       {method.isPrimary && (
-                        <Badge className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                        <Badge className="rounded bg-green-100 px-2 py-1 text-xs text-green-800">
                           Primary
                         </Badge>
                       )}
                     </div>
-                    <span className="text-2sm font-normal text-secondary-foreground/70">
+                    <span className="text-2sm text-secondary-foreground/70 font-normal">
                       {method.details}
                     </span>
                   </div>

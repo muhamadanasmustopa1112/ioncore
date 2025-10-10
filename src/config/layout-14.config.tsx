@@ -71,17 +71,17 @@ export const MENU: MenuConfig = [
           },
           {
             title: "1 Col New Page",
-            path: "#",
+            path: paths.dashboard.oneColNewPage.root.getHref(),
             icon: StickyNote,
           },
           {
             title: "1 Col to 2 Col",
-            path: "#",
+            path: paths.dashboard.oneColToTwoCol.root.getHref(),
             icon: Columns,
           },
           {
             title: "2 Col 2 Card",
-            path: "#",
+            path: paths.dashboard.twoColTwoCard.root.getHref(),
             icon: Columns,
           },
         ],

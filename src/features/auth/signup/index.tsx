@@ -115,7 +115,7 @@ export function SignupForm() {
       <Form {...form}>
         <form onSubmit={handleSubmit} className="block w-full space-y-5">
           <div className="space-y-1.5 pb-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-center">
+            <h1 className="text-center text-2xl font-semibold tracking-tight">
               Sign Up to Metronic
             </h1>
           </div>
@@ -131,7 +131,7 @@ export function SignupForm() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-background text-muted-foreground px-2">
                 or
               </span>
             </div>
@@ -192,7 +192,7 @@ export function SignupForm() {
                     mode="icon"
                     size="sm"
                     onClick={() => setPasswordVisible(!passwordVisible)}
-                    className="absolute end-0 top-1/2 -translate-y-1/2 h-7 w-7 me-1.5 bg-transparent!"
+                    className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 bg-transparent!"
                     aria-label={
                       passwordVisible ? "Hide password" : "Show password"
                     }
@@ -231,7 +231,7 @@ export function SignupForm() {
                         !passwordConfirmationVisible,
                       )
                     }
-                    className="absolute end-0 top-1/2 -translate-y-1/2 h-7 w-7 me-1.5 bg-transparent!"
+                    className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 bg-transparent!"
                     aria-label={
                       passwordConfirmationVisible
                         ? "Hide password confirmation"
@@ -265,14 +265,14 @@ export function SignupForm() {
                       />
                       <label
                         htmlFor="accept"
-                        className="text-sm leading-none text-muted-foreground"
+                        className="text-muted-foreground text-sm leading-none"
                       >
                         I agree to the
                       </label>
                       <Link
                         href="/privacy-policy"
                         target="_blank"
-                        className="-ms-0.5 text-sm font-semibold text-foreground hover:text-primary"
+                        className="text-foreground hover:text-primary -ms-0.5 text-sm font-semibold"
                       >
                         Privacy Policy
                       </Link>
@@ -293,11 +293,11 @@ export function SignupForm() {
             </Button>
           </div>
 
-          <div className="text-sm text-muted-foreground text-center">
+          <div className="text-muted-foreground text-center text-sm">
             Already have an account?{" "}
             <Link
               href="/signin"
-              className="text-sm font-semibold text-foreground hover:text-primary"
+              className="text-foreground hover:text-primary text-sm font-semibold"
             >
               Sign In
             </Link>

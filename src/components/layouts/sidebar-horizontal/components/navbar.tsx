@@ -35,13 +35,13 @@ export function Navbar() {
   return (
     <div
       className={cn(
-        "flex items-stretch w-full h-[46px] px-5 gap-5 xl:group-data-[theme-content-layout=centered]/layout:container xl:group-data-[theme-content-layout=centered]/layout:mx-auto",
+        "flex h-[46px] w-full items-stretch gap-5 px-5 xl:group-data-[theme-content-layout=centered]/layout:container xl:group-data-[theme-content-layout=centered]/layout:mx-auto",
         isMobile ? "justify-end" : "justify-between",
       )}
     >
       {!isMobile && (
         <ScrollArea>
-          <nav className="list-none flex items-stretch overflow-x-auto gap-7.5 h-[46px]">
+          <nav className="flex h-[46px] list-none items-stretch gap-7.5 overflow-x-auto">
             {[
               ...MENU_PAGES,
               ...MENU_SIDEBAR_MAIN,
@@ -60,7 +60,7 @@ export function Navbar() {
                                 <Button
                                   variant="ghost"
                                   className={cn(
-                                    "h-full rounded-none gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-sidebar-main-foreground hover:text-primary py-2.5 lg:py-0",
+                                    "text-sidebar-main-foreground hover:text-primary inline-flex h-full items-center gap-2 rounded-none border-b border-transparent py-2.5 text-sm font-normal whitespace-nowrap lg:py-0",
                                     "[&_svg]:text-sidebar-main-foreground",
                                     active &&
                                       "text-primary border-primary [&_svg]:text-primary",
@@ -84,7 +84,7 @@ export function Navbar() {
                                       <Link
                                         href={child.path || "#"}
                                         className={cn(
-                                          "gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-secondary-foreground hover:text-primary py-2.5 lg:py-0",
+                                          "text-secondary-foreground hover:text-primary inline-flex items-center gap-2 border-b border-transparent py-2.5 text-sm font-normal whitespace-nowrap lg:py-0",
                                           "[&_svg]:text-muted-foreground",
                                           active &&
                                             "text-primary border-primary [&_svg]:text-primary",
@@ -110,14 +110,14 @@ export function Navbar() {
                         <Link
                           href={item.path || "#"}
                           className={cn(
-                            "gap-2 inline-flex items-center border-b border-transparent text-sm font-normal whitespace-nowrap text-sidebar-main-foreground hover:text-primary py-2.5 lg:py-0",
+                            "text-sidebar-main-foreground hover:text-primary inline-flex items-center gap-2 border-b border-transparent py-2.5 text-sm font-normal whitespace-nowrap lg:py-0",
                             "[&_svg]:text-sidebar-main-foreground",
                             active &&
                               "text-primary border-primary [&_svg]:text-primary",
                           )}
                         >
                           {item.icon && (
-                            <item.icon className="size-4 text-sidebar-main-foreground" />
+                            <item.icon className="text-sidebar-main-foreground size-4" />
                           )}
                           <span>{item.title}</span>
                         </Link>

@@ -20,7 +20,7 @@ export interface ToolbarHeadingProps {
 
 function Toolbar({ children }: { children?: ReactNode }) {
   return (
-    <div className="py-2.5 lg:py-0 lg:fixed top-(--header-height) start-[calc(var(--sidebar-width))] lg:in-data-[sidebar-open=false]:start-[calc(var(--sidebar-collapsed-width))] transition-all duration-300 end-0 z-10 px-5 flex flex-wrap items-center justify-between gap-2.5 min-h-(--toolbar-height) bg-background border-b border-border shrink-0">
+    <div className="bg-background border-border start-[calc(var(--sidebar-width))] end-0 top-(--header-height) z-10 flex min-h-(--toolbar-height) shrink-0 flex-wrap items-center justify-between gap-2.5 border-b px-5 py-2.5 transition-all duration-300 lg:fixed lg:py-0 lg:in-data-[sidebar-open=false]:start-[calc(var(--sidebar-collapsed-width))]">
       {children}
     </div>
   );
@@ -53,7 +53,7 @@ function ToolbarBreadcrumbs() {
           return (
             <Fragment key={index}>
               {index !== items.length - 1 && (
-                <BreadcrumbSeparator className="text-xs text-muted-foreground">
+                <BreadcrumbSeparator className="text-muted-foreground text-xs">
                   /
                 </BreadcrumbSeparator>
               )}
@@ -76,7 +76,7 @@ function ToolbarBreadcrumbs() {
 
 function ToolbarHeading({ children }: { children: ReactNode }) {
   return (
-    <div className="flex flex-col md:flex-row md:items-center flex-wrap gap-1 lg:gap-5">
+    <div className="flex flex-col flex-wrap gap-1 md:flex-row md:items-center lg:gap-5">
       {children}
     </div>
   );
@@ -88,7 +88,7 @@ function ToolbarPageTitle({ children }: { children?: string }) {
   const item = getCurrentItem(MENU_SIDEBAR_MAIN);
 
   return (
-    <h1 className="text-base font-medium leading-none text-foreground">
+    <h1 className="text-foreground text-base leading-none font-medium">
       {children ? children : item?.title || "Untitled"}
     </h1>
   );
@@ -96,7 +96,7 @@ function ToolbarPageTitle({ children }: { children?: string }) {
 
 function ToolbarDescription({ children }: { children: ReactNode }) {
   return (
-    <div className="flex items-center gap-2 text-sm font-normal text-muted-foreground">
+    <div className="text-muted-foreground flex items-center gap-2 text-sm font-normal">
       {children}
     </div>
   );

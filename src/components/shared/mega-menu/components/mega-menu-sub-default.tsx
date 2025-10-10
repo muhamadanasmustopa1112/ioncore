@@ -17,7 +17,7 @@ const MegaMenuSubDefault = (items: MenuConfig) => {
         return (
           <div key={index}>
             <div className="pt-1">
-              <span className="text-secondary-foreground font-medium text-sm p-2.5">
+              <span className="text-secondary-foreground p-2.5 text-sm font-medium">
                 {item.title}
               </span>
             </div>
@@ -31,7 +31,7 @@ const MegaMenuSubDefault = (items: MenuConfig) => {
               {...(isActive(item.path) && { "data-active": true })}
               href={item.path || ""}
               className={cn(
-                "flex flex-row items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent/50 text-sm",
+                "hover:bg-accent/50 flex flex-row items-center gap-2.5 rounded-md px-2.5 py-2 text-sm",
                 "[&_svg]:text-muted-foreground hover:[&_svg]:text-primary [&[data-active=true]_svg]:text-primary",
               )}
             >

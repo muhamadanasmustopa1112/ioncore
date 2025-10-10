@@ -175,7 +175,7 @@ export function VideoText({
       {/* Hidden video element */}
       <video
         ref={videoRef}
-        className="absolute opacity-0 pointer-events-none"
+        className="pointer-events-none absolute opacity-0"
         autoPlay={autoPlay}
         muted={muted}
         loop={loop}
@@ -205,7 +205,7 @@ export function VideoText({
       {/* Hidden text for measuring and accessibility */}
       <div
         ref={textRef}
-        className="absolute opacity-0 pointer-events-none font-bold"
+        className="pointer-events-none absolute font-bold opacity-0"
         style={{
           fontSize: typeof fontSize === "number" ? `${fontSize}px` : fontSize,
           fontWeight,

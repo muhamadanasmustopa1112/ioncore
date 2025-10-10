@@ -80,7 +80,7 @@ export function VerifyEmailForm() {
         {message && (
           <Alert>
             <AlertIcon>
-              <LoaderCircleIcon className="size-4 animate-spin stroke-muted-foreground" />
+              <LoaderCircleIcon className="stroke-muted-foreground size-4 animate-spin" />
             </AlertIcon>
             <AlertTitle>{message}</AlertTitle>
           </Alert>

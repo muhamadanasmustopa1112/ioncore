@@ -8,7 +8,7 @@ export function EmployeeDetailsBilling() {
   return (
     <div className="space-y-5">
       <EmployeeStatistic3 />
-      <div className="grid lg:grid-cols-2 gap-5 items-stretch">
+      <div className="grid items-stretch gap-5 lg:grid-cols-2">
         <EmployeeBillingDetail />
         <EmployeePaymentMethods />
       </div>
