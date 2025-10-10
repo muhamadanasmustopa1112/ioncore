@@ -94,29 +94,19 @@ export function EmployeeListPage() {
             : "translate-x-full md:pointer-events-none md:w-0 md:translate-x-0 md:border-0 md:bg-transparent",
         )}
       >
-        <div className="relative flex-1 overflow-hidden">
-          {/* Active content slides in from right when open */}
-          <div
-            className={cn(
-              "absolute inset-0 transform-gpu transition-transform duration-300 ease-in-out will-change-transform",
-              employeeSheetOpen ? "translate-x-0" : "translate-x-full",
-            )}
-          >
-            <div className="border-border flex shrink-0 items-center justify-between border-b px-5 py-3.5">
-              <div className="text-base font-medium">
-                {form === "new" && "New Employee"}
-                {form === "edit" && "Edit Employee"}
-                {form === "details" && "Employee Detail"}
-              </div>
-              <Button variant="ghost" onClick={closeEmployeeFormSheet}>
-                Close
-              </Button>
-            </div>
-
-            <div className="flex-1 overflow-auto">
-              {form === "details" ? <EmployeeDetails /> : <EmployeeForm />}
-            </div>
+        <div className="border-border flex shrink-0 items-center justify-between border-b px-5 py-3.5">
+          <div className="text-base font-medium">
+            {form === "new" && "New Employee"}
+            {form === "edit" && "Edit Employee"}
+            {form === "details" && "Employee Detail"}
           </div>
+          <Button variant="ghost" onClick={closeEmployeeFormSheet}>
+            Close
+          </Button>
+        </div>
+
+        <div className="flex-1 overflow-auto">
+          {form === "details" ? <EmployeeDetails /> : <EmployeeForm />}
         </div>
       </aside>
     </div>
