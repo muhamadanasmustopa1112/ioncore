@@ -5,9 +5,9 @@ export function Wrapper({ children }: { children: React.ReactNode }) {
     <>
       <Header />
 
-      <div className="flex flex-col lg:flex-row grow pt-(--header-height)">
-        <div className="flex grow bg-background border border-input mt-0">
-          <div className="grow lg:overflow-y-auto p-5">
+      <div className="flex grow flex-col pt-(--header-height) lg:flex-row">
+        <div className="bg-background border-input mt-0 flex grow border">
+          <div className="grow p-5 lg:overflow-y-auto">
             <main
               className="lg:grow xl:group-data-[theme-content-layout=centered]/layout:container xl:group-data-[theme-content-layout=centered]/layout:mx-auto"
               role="content"

@@ -43,52 +43,52 @@ export function EmployeeRecentOrder() {
   return (
     <TooltipProvider>
       <Card className="bg-accent/70 rounded-md shadow-none">
-        <CardContent className="p-0 flex flex-col h-full">
-          <h3 className="text-sm font-medium text-foreground py-2.5 ps-2">
+        <CardContent className="flex h-full flex-col p-0">
+          <h3 className="text-foreground py-2.5 ps-2 text-sm font-medium">
             Recent Orders
           </h3>
-          <div className="bg-background rounded-md m-1 mt-0 border border-input py-5 px-3.5 flex flex-col justify-between h-full">
-            <div className="space-y-6 mb-6">
+          <div className="bg-background border-input m-1 mt-0 flex h-full flex-col justify-between rounded-md border px-3.5 py-5">
+            <div className="mb-6 space-y-6">
               <div className="flex items-center gap-2.5">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex items-center justify-center rounded-md bg-background border border-border size-[36px] shrink-0">
-                    <div className="flex items-center justify-center bg-accent/50 rounded-md size-[30px]">
-                      <ShoppingCart className="w-5 h-5 fill-indigo-600 text-indigo-600" />
+                  <div className="bg-background border-border flex size-[36px] shrink-0 items-center justify-center rounded-md border">
+                    <div className="bg-accent/50 flex size-[30px] items-center justify-center rounded-md">
+                      <ShoppingCart className="h-5 w-5 fill-indigo-600 text-indigo-600" />
                     </div>
                   </div>
                   <span className="text-2xl leading-[22px] font-semibold">
                     $472
-                    <span className="text-2xl font-semibold text-secondary-foreground/30">
+                    <span className="text-secondary-foreground/30 text-2xl font-semibold">
                       .59
                     </span>
                   </span>
                 </div>
                 <Badge variant="success" size="sm" appearance="light">
-                  <TrendingUp className="w-3 h-3 mr-1" />
+                  <TrendingUp className="mr-1 h-3 w-3" />
                   14.73%
                 </Badge>
-                <span className="text-xs font-normal text-secondary-foreground/70">
+                <span className="text-secondary-foreground/70 text-xs font-normal">
                   vs AOV
                 </span>
               </div>
 
               {/*Progress Bars*/}
               <div className="flex items-center gap-1">
-                <div className="flex flex-col gap-3 flex-1">
-                  <Progress className="w-full h-1.5 bg-secondary-foreground/30 rounded-sm" />
-                  <span className="text-2sm font-medium text-foreground">
+                <div className="flex flex-1 flex-col gap-3">
+                  <Progress className="bg-secondary-foreground/30 h-1.5 w-full rounded-sm" />
+                  <span className="text-2sm text-foreground font-medium">
                     $259.03
                   </span>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <Progress className="w-[120px] h-1.5 bg-secondary-foreground/18 rounded-sm" />
-                  <span className="text-2sm font-medium text-foreground">
+                  <Progress className="bg-secondary-foreground/18 h-1.5 w-[120px] rounded-sm" />
+                  <span className="text-2sm text-foreground font-medium">
                     $125.00
                   </span>
                 </div>
                 <div className="flex flex-col gap-3">
-                  <Progress className="w-[76px] h-1.5 bg-secondary-foreground/10 rounded-sm" />
-                  <span className="text-2sm font-medium text-foreground">
+                  <Progress className="bg-secondary-foreground/10 h-1.5 w-[76px] rounded-sm" />
+                  <span className="text-2sm text-foreground font-medium">
                     $72.56
                   </span>
                 </div>
@@ -101,12 +101,12 @@ export function EmployeeRecentOrder() {
                 <div key={order.id}>
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2.5">
-                      <Card className="flex items-center justify-center rounded-md bg-accent/50 h-[40px] w-[50px] shadow-none shrink-0">
+                      <Card className="bg-accent/50 flex h-[40px] w-[50px] shrink-0 items-center justify-center rounded-md shadow-none">
                         <img
                           src={toAbsoluteUrl(
                             `/media/store/client/1200x1200/${order.image}`,
                           )}
-                          className="cursor-pointer h-[40px]"
+                          className="h-[40px] cursor-pointer"
                           alt="image"
                         />
                       </Card>
@@ -119,7 +119,7 @@ export function EmployeeRecentOrder() {
                               <Link
                                 href="#"
                                 onClick={() => {}}
-                                className="text-sm font-medium text-foreground hover:text-primary leading-3.5 text-left"
+                                className="text-foreground hover:text-primary text-left text-sm leading-3.5 font-medium"
                               >
                                 {order.product}
                               </Link>
@@ -134,17 +134,17 @@ export function EmployeeRecentOrder() {
                         ) : (
                           <Link
                             href="#"
-                            className="text-sm font-medium text-foreground hover:text-primary leading-3.5 text-left"
+                            className="text-foreground hover:text-primary text-left text-sm leading-3.5 font-medium"
                           >
                             {order.product}
                           </Link>
                         )}
 
                         <span className="inline-flex items-center gap-0.5">
-                          <span className="text-xs text-muted-foreground uppercase">
+                          <span className="text-muted-foreground text-xs uppercase">
                             SKU:
                           </span>{" "}
-                          <span className="text-xs font-medium text-secondary-foreground">
+                          <span className="text-secondary-foreground text-xs font-medium">
                             {order.sku}
                           </span>
                         </span>

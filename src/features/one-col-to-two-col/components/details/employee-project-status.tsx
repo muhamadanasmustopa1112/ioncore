@@ -11,10 +11,10 @@ const EmployeeActivitiesProjectStatus = () => {
       line={false}
     >
       <div className="flex flex-col">
-        <div className="text-sm text-foreground font-normal">
+        <div className="text-foreground text-sm font-normal">
           Completed phase one of client project ahead of schedule.
         </div>
-        <span className="text-xs text-muted-foreground/80 font-normal">
+        <span className="text-muted-foreground/80 text-xs font-normal">
           6 days ago, 10:45 AM
         </span>
       </div>

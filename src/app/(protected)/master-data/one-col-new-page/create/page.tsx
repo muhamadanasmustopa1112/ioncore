@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { ScreenLoader } from "@/components/common/screen-loader";
 import { EmployeeCreate } from "@/features/one-col-new-page/components/create";
+import { ScreenLoader } from "@/components/common/screen-loader";
 
 export const metadata: Metadata = {
   title: "Detail Users",

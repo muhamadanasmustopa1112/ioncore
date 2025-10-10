@@ -105,34 +105,34 @@ export function EmployeeOrderDetailsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="gap-0 lg:w-[1080px] sm:max-w-none inset-5 border start-auto h-auto rounded-lg p-0 [&_[data-slot=sheet-close]]:top-4.5 [&_[data-slot=sheet-close]]:end-5">
-        <SheetHeader className="border-b py-3.5 px-5 border-border">
+      <SheetContent className="inset-5 start-auto h-auto gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[1080px] [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5">
+        <SheetHeader className="border-border border-b px-5 py-3.5">
           <SheetTitle className="font-medium">Order Details</SheetTitle>
         </SheetHeader>
 
-        <SheetBody className="p-0 grow">
-          <div className="flex justify-between gap-2 border-b border-border px-5 py-4">
+        <SheetBody className="grow p-0">
+          <div className="border-border flex justify-between gap-2 border-b px-5 py-4">
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2.5">
-                <span className="lg:text-[22px] font-semibold text-foreground leading-none">
+                <span className="text-foreground leading-none font-semibold lg:text-[22px]">
                   Order: SO-FL-5633
                 </span>
                 <Badge size="sm" variant="success" appearance="light">
                   Shipped
                 </Badge>
               </div>
-              <div className="flex items-center flex-wrap gap-1.5 text-2sm">
-                <span className="font-normal text-muted-foreground">
+              <div className="text-2sm flex flex-wrap items-center gap-1.5">
+                <span className="text-muted-foreground font-normal">
                   Created
                 </span>
-                <span className="font-medium text-foreground/80">
+                <span className="text-foreground/80 font-medium">
                   16 Jan, 2025
                 </span>
-                <BadgeDot className="bg-muted-foreground/60 size-1 mx-1" />
-                <span className="font-normal text-muted-foreground">
+                <BadgeDot className="bg-muted-foreground/60 mx-1 size-1" />
+                <span className="text-muted-foreground font-normal">
                   Customer:
                 </span>
-                <span className="font-medium text-foreground/80">
+                <span className="text-foreground/80 font-medium">
                   Jeroen de Jong
                 </span>
               </div>
@@ -153,18 +153,18 @@ export function EmployeeOrderDetailsSheet({
             </div>
           </div>
           <ScrollArea
-            className="flex flex-col h-[calc(100vh-15.8rem)] mx-1.5"
+            className="mx-1.5 flex h-[calc(100vh-15.8rem)] flex-col"
             viewportClassName="[&>div]:h-full [&>div>div]:h-full"
           >
-            <div className="flex flex-wrap lg:flex-nowrap px-3.5 grow">
-              <div className="grow lg:border-e border-border lg:pe-5 space-y-5 pt-5">
+            <div className="flex grow flex-wrap px-3.5 lg:flex-nowrap">
+              <div className="border-border grow space-y-5 pt-5 lg:border-e lg:pe-5">
                 {/* Order Data */}
                 <Card className="rounded-md">
-                  <CardHeader className="min-h-[34px] bg-accent/50">
+                  <CardHeader className="bg-accent/50 min-h-[34px]">
                     <CardTitle className="text-2sm">Order Data</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-start flex-wrap lg:gap-10 gap-5">
+                    <div className="flex flex-wrap items-start gap-5 lg:gap-10">
                       {[
                         { label: "Items", value: "2 Items" },
                         { label: "Total Price", value: "$320.00" },
@@ -172,10 +172,10 @@ export function EmployeeOrderDetailsSheet({
                         { label: "Delivery Method", value: "Express Delivery" },
                       ].map((item) => (
                         <div key={item.label} className="flex flex-col gap-1.5">
-                          <span className="text-2sm font-normal text-secondary-foreground">
+                          <span className="text-2sm text-secondary-foreground font-normal">
                             {item.label}
                           </span>
-                          <span className="text-2sm font-medium text-foreground">
+                          <span className="text-2sm text-foreground font-medium">
                             {item.value}
                           </span>
                         </div>
@@ -186,7 +186,7 @@ export function EmployeeOrderDetailsSheet({
 
                 {/* Team */}
                 <Card className="rounded-md">
-                  <CardHeader className="min-h-[34px] bg-accent/50">
+                  <CardHeader className="bg-accent/50 min-h-[34px]">
                     <CardTitle className="text-2sm">Team</CardTitle>
                   </CardHeader>
 
@@ -194,9 +194,9 @@ export function EmployeeOrderDetailsSheet({
                     {items.map((item, index) => (
                       <React.Fragment key={index}>
                         <div className="flex flex-col p-0">
-                          <div className="flex items-center flex-wrap sm:flex-nowrap w-full justify-between gap-3.5">
-                            <div className="flex md:items-center gap-3.5">
-                              <Card className="flex items-center justify-center bg-accent/50 h-[50px] w-[60px] shadow-none shrink-0 rounded-md">
+                          <div className="flex w-full flex-wrap items-center justify-between gap-3.5 sm:flex-nowrap">
+                            <div className="flex gap-3.5 md:items-center">
+                              <Card className="bg-accent/50 flex h-[50px] w-[60px] shrink-0 items-center justify-center rounded-md shadow-none">
                                 <img
                                   src={toAbsoluteUrl(
                                     `/media/store/client/1200x1200/${item.logo}`,
@@ -206,26 +206,26 @@ export function EmployeeOrderDetailsSheet({
                                 />
                               </Card>
 
-                              <div className="flex flex-col justify-center gap-1.5 -mt-1">
+                              <div className="-mt-1 flex flex-col justify-center gap-1.5">
                                 <Link
                                   href="#"
-                                  className="hover:text-primary text-sm font-medium text-dark leading-5.5"
+                                  className="hover:text-primary text-dark text-sm leading-5.5 font-medium"
                                 >
                                   {item.title}
                                 </Link>
                                 <div className="flex items-center gap-2.5">
-                                  <span className="text-xs font-normal text-secondary-foreground">
+                                  <span className="text-secondary-foreground text-xs font-normal">
                                     SKU:{" "}
-                                    <span className="text-xs font-medium text-foreground">
+                                    <span className="text-foreground text-xs font-medium">
                                       {item.sku}
                                     </span>
                                   </span>
 
                                   <BadgeDot className="bg-muted-foreground size-1 shrink-0" />
 
-                                  <span className="text-xs font-normal text-secondary-foreground">
+                                  <span className="text-secondary-foreground text-xs font-normal">
                                     Color
-                                    <span className="text-xs font-medium text-secondary-foreground ms-1">
+                                    <span className="text-secondary-foreground ms-1 text-xs font-medium">
                                       {item.color}
                                     </span>
                                   </span>
@@ -233,17 +233,17 @@ export function EmployeeOrderDetailsSheet({
                               </div>
                             </div>
 
-                            <div className="flex flex-col text-end gap-2.5">
-                              <span className="text-xs font-medium text-dark">
+                            <div className="flex flex-col gap-2.5 text-end">
+                              <span className="text-dark text-xs font-medium">
                                 Weight
                               </span>
-                              <InputWrapper className="w-[66px] h-[28px]">
+                              <InputWrapper className="h-[28px] w-[66px]">
                                 <Input
                                   type="text"
                                   defaultValue={`${item.weight}`}
                                   placeholder=""
                                 />
-                                <span className="text-2sm font-normal text-muted-foreground">
+                                <span className="text-2sm text-muted-foreground font-normal">
                                   kg
                                 </span>
                               </InputWrapper>
@@ -262,23 +262,23 @@ export function EmployeeOrderDetailsSheet({
                 {/* Shipping Status */}
                 <Card className="rounded-md">
                   <CardContent className="p-0">
-                    <div className="flex items-start flex-wrap gap-5 justify-between bg-accent/50 p-5 border-b border-border">
+                    <div className="bg-accent/50 border-border flex flex-wrap items-start justify-between gap-5 border-b p-5">
                       <div className="relative">
                         <div className="flex items-center space-x-2">
                           <BadgeDot className="bg-secondary-foreground size-1.5 shrink-0" />
-                          <span className="font-medium text-2sm text-secondary-foreground leading-3">
+                          <span className="text-2sm text-secondary-foreground leading-3 font-medium">
                             1234 Industrial Way, Dallas, TX 75201
                           </span>
                         </div>
 
                         <Separator
-                          className="min-h-3.5 ml-[2px] top-0 bottom-0 bg-muted-foreground/30 w-0.5 mt-px"
+                          className="bg-muted-foreground/30 top-0 bottom-0 mt-px ml-[2px] min-h-3.5 w-0.5"
                           orientation="vertical"
                         />
 
                         <div className="flex items-center space-x-2">
                           <BadgeDot className="bg-secondary-foreground size-1.5 shrink-0" />
-                          <span className="font-medium text-2sm text-secondary-foreground leading-3">
+                          <span className="text-2sm text-secondary-foreground leading-3 font-medium">
                             8458 Sunset Blvd #209, Los Angeles, CA 90069
                           </span>
                         </div>
@@ -308,33 +308,33 @@ export function EmployeeOrderDetailsSheet({
                             <StepperItem
                               key={index}
                               step={stepNumber}
-                              className="relative flex-1 flex items-center"
+                              className="relative flex flex-1 items-center"
                             >
-                              <StepperTrigger className="flex flex-col items-center w-full">
-                                <div className="h-1.5 w-full mt-2 rounded-full bg-border relative">
+                              <StepperTrigger className="flex w-full flex-col items-center">
+                                <div className="bg-border relative mt-2 h-1.5 w-full rounded-full">
                                   {index === steps.length - 2 ? (
-                                    <div className="h-full w-1/2 bg-green-500 absolute top-0 left-0 rounded-l-full mb-5" />
+                                    <div className="absolute top-0 left-0 mb-5 h-full w-1/2 rounded-l-full bg-green-500" />
                                   ) : index < steps.length - 2 ? (
-                                    <div className="h-full w-full bg-green-500 absolute top-0 left-0 rounded-full" />
+                                    <div className="absolute top-0 left-0 h-full w-full rounded-full bg-green-500" />
                                   ) : null}
                                 </div>
 
                                 {/* Ikonka */}
-                                <div className="flex items-center gap-0.5 w-full -ms-1">
+                                <div className="-ms-1 flex w-full items-center gap-0.5">
                                   <div className="flex items-center gap-1">
                                     {index === steps.length - 2 ? (
                                       <CircleCheck
-                                        className="text-green-500 border-background border-2"
+                                        className="border-background border-2 text-green-500"
                                         size={18}
                                       />
                                     ) : index < steps.length - 2 ? (
                                       <CircleCheck
-                                        className="fill-green-500 text-background"
+                                        className="text-background fill-green-500"
                                         size={18}
                                       />
                                     ) : isActive ? (
                                       <CircleCheck
-                                        className="fill-green-500 text-background"
+                                        className="text-background fill-green-500"
                                         size={18}
                                       />
                                     ) : (
@@ -366,28 +366,28 @@ export function EmployeeOrderDetailsSheet({
                 </Card>
               </div>
 
-              <div className="w-full shrink-0 lg:w-[320px] py-5 lg:ps-5">
+              <div className="w-full shrink-0 py-5 lg:w-[320px] lg:ps-5">
                 <Card className="rounded-md">
-                  <CardHeader className="min-h-[34px] bg-accent/50">
+                  <CardHeader className="bg-accent/50 min-h-[34px]">
                     <CardTitle className="text-2sm">Summary</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col gap-2">
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-foreground text-sm font-medium">
                         Shipping to Jeroen's Home
                       </span>
-                      <span className="text-2sm font-normal text-secondary-foreground">
+                      <span className="text-2sm text-secondary-foreground font-normal">
                         Prinsengracht 24
                       </span>
-                      <span className="text-2sm font-normal text-secondary-foreground">
+                      <span className="text-2sm text-secondary-foreground font-normal">
                         1015 DV Amsterdam, NL
                       </span>
                     </div>
 
-                    <Separator className="mb-4 mt-4.5" />
+                    <Separator className="mt-4.5 mb-4" />
 
                     <div className="flex flex-col gap-2">
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-foreground text-sm font-medium">
                         Price Details
                       </span>
                       {Object.entries(prices).map(([key, value]) => (
@@ -395,10 +395,10 @@ export function EmployeeOrderDetailsSheet({
                           key={key}
                           className="flex items-center justify-between"
                         >
-                          <span className="text-2sm font-normal text-secondary-foreground">
+                          <span className="text-2sm text-secondary-foreground font-normal">
                             {key}
                           </span>
-                          <span className="text-2sm font-medium text-foreground">
+                          <span className="text-2sm text-foreground font-medium">
                             {value}
                           </span>
                         </div>
@@ -408,10 +408,10 @@ export function EmployeeOrderDetailsSheet({
                     <Separator className="my-4" />
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-normal text-secondary-foreground">
+                      <span className="text-secondary-foreground text-sm font-normal">
                         Total
                       </span>
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-foreground text-sm font-semibold">
                         $22.99
                       </span>
                     </div>
@@ -422,12 +422,12 @@ export function EmployeeOrderDetailsSheet({
           </ScrollArea>
         </SheetBody>
 
-        <SheetFooter className="flex items-center not-only-of-type:justify-between border-t py-5 px-5 border-border gap-2">
-          <div className="text-xs font-medium text-secondary-foreground">
+        <SheetFooter className="border-border flex items-center gap-2 border-t px-5 py-5 not-only-of-type:justify-between">
+          <div className="text-secondary-foreground text-xs font-medium">
             Read Shipping
             <Link
               href="#"
-              className="hover:text-primary text-xs font-medium text-primary ms-1"
+              className="hover:text-primary text-primary ms-1 text-xs font-medium"
             >
               Terms & Conditions
             </Link>

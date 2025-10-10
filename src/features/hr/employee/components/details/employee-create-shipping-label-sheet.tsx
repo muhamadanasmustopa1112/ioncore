@@ -94,47 +94,47 @@ export function EmployeeCreateShippingLabelSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="gap-0 lg:w-[940px] sm:max-w-none inset-5 border start-auto h-auto rounded-lg p-0 [&_[data-slot=sheet-close]]:top-4.5 [&_[data-slot=sheet-close]]:end-5">
-        <SheetHeader className="border-b py-3.5 px-5 border-border">
+      <SheetContent className="inset-5 start-auto h-auto gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[940px] [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5">
+        <SheetHeader className="border-border border-b px-5 py-3.5">
           <SheetTitle className="flex items-center gap-2.5">
             Create Shipping Label
           </SheetTitle>
         </SheetHeader>
 
-        <SheetBody className="p-0 grow px-1.5">
+        <SheetBody className="grow p-0 px-1.5">
           <ScrollArea
-            className="flex flex-col h-[calc(100dvh-10.6rem)]"
+            className="flex h-[calc(100dvh-10.6rem)] flex-col"
             viewportClassName="[&>div]:h-full [&>div>div]:h-full"
           >
-            <div className="flex flex-wrap lg:flex-nowrap px-3.5 grow">
-              <div className="grow lg:border-e border-border lg:pe-5 space-y-5 py-5">
+            <div className="flex grow flex-wrap px-3.5 lg:flex-nowrap">
+              <div className="border-border grow space-y-5 py-5 lg:border-e lg:pe-5">
                 {/* Order Details */}
                 <Card className="rounded-md">
                   <CardContent className="p-0">
-                    <div className="flex items-start flex-wrap gap-5 justify-between bg-accent/50 p-5 border-b border-border">
+                    <div className="bg-accent/50 border-border flex flex-wrap items-start justify-between gap-5 border-b p-5">
                       <div className="relative">
                         <div className="flex items-center space-x-2">
                           <BadgeDot className="bg-secondary-foreground size-1.5 shrink-0" />
-                          <span className="font-medium text-xs text-secondary-foreground leading-3">
+                          <span className="text-secondary-foreground text-xs leading-3 font-medium">
                             1234 Industrial Way, Dallas, TX 75201
                           </span>
                         </div>
 
                         <Separator
-                          className="min-h-3.5 ml-[2px] top-0 bottom-0 bg-muted-foreground/30 w-0.5 mt-px"
+                          className="bg-muted-foreground/30 top-0 bottom-0 mt-px ml-[2px] min-h-3.5 w-0.5"
                           orientation="vertical"
                         />
 
                         <div className="flex items-center space-x-2">
                           <BadgeDot className="bg-secondary-foreground size-1.5 shrink-0" />
-                          <span className="font-medium text-xs text-secondary-foreground leading-3">
+                          <span className="text-secondary-foreground text-xs leading-3 font-medium">
                             8458 Sunset Blvd #209, Los Angeles, CA 90069
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="grid sm:grid-cols-4 gap-5 p-5">
+                    <div className="grid gap-5 p-5 sm:grid-cols-4">
                       {[
                         { label: "Order ID", value: "SO-AMS-4620" },
                         { label: "Placed", value: "28 Jul, 2025" },
@@ -142,10 +142,10 @@ export function EmployeeCreateShippingLabelSheet({
                         { label: "Shipping Priority", value: "High" },
                       ].map((item) => (
                         <div key={item.label} className="flex flex-col gap-1.5">
-                          <span className="text-2sm font-normal text-secondary-foreground">
+                          <span className="text-2sm text-secondary-foreground font-normal">
                             {item.label}
                           </span>
-                          <span className="text-2sm font-medium text-foreground">
+                          <span className="text-2sm text-foreground font-medium">
                             {item.value}
                           </span>
                         </div>
@@ -156,7 +156,7 @@ export function EmployeeCreateShippingLabelSheet({
 
                 {/* Team */}
                 <Card className="rounded-md">
-                  <CardHeader className="min-h-[34px] bg-accent/50">
+                  <CardHeader className="bg-accent/50 min-h-[34px]">
                     <CardTitle className="text-2sm">Team</CardTitle>
                   </CardHeader>
 
@@ -164,9 +164,9 @@ export function EmployeeCreateShippingLabelSheet({
                     {items.map((item, index) => (
                       <React.Fragment key={index}>
                         <CardContent className="flex flex-col p-0">
-                          <div className="flex items-center flex-wrap sm:flex-nowrap w-full justify-between gap-3.5">
-                            <div className="flex md:items-center gap-3.5">
-                              <Card className="flex items-center justify-center bg-accent/50 h-[50px] w-[60px] shadow-none shrink-0 rounded-md">
+                          <div className="flex w-full flex-wrap items-center justify-between gap-3.5 sm:flex-nowrap">
+                            <div className="flex gap-3.5 md:items-center">
+                              <Card className="bg-accent/50 flex h-[50px] w-[60px] shrink-0 items-center justify-center rounded-md shadow-none">
                                 <img
                                   src={toAbsoluteUrl(
                                     `/media/store/client/1200x1200/${item.logo}`,
@@ -176,26 +176,26 @@ export function EmployeeCreateShippingLabelSheet({
                                 />
                               </Card>
 
-                              <div className="flex flex-col justify-center gap-1.5 -mt-1">
+                              <div className="-mt-1 flex flex-col justify-center gap-1.5">
                                 <Link
                                   href="#"
-                                  className="hover:text-primary text-sm font-medium text-dark leading-5.5"
+                                  className="hover:text-primary text-dark text-sm leading-5.5 font-medium"
                                 >
                                   {item.title}
                                 </Link>
                                 <div className="flex items-center gap-2.5">
-                                  <span className="text-xs font-normal text-secondary-foreground">
+                                  <span className="text-secondary-foreground text-xs font-normal">
                                     SKU:{" "}
-                                    <span className="text-xs font-medium text-foreground">
+                                    <span className="text-foreground text-xs font-medium">
                                       {item.sku}
                                     </span>
                                   </span>
 
                                   <BadgeDot className="bg-muted-foreground size-1 shrink-0" />
 
-                                  <span className="text-xs font-normal text-secondary-foreground">
+                                  <span className="text-secondary-foreground text-xs font-normal">
                                     Color
-                                    <span className="text-xs font-medium text-secondary-foreground ms-1">
+                                    <span className="text-secondary-foreground ms-1 text-xs font-medium">
                                       {item.color}
                                     </span>
                                   </span>
@@ -203,16 +203,16 @@ export function EmployeeCreateShippingLabelSheet({
                               </div>
                             </div>
 
-                            <div className="flex flex-col text-end gap-2.5">
-                              <span className="text-xs font-medium text-dark">
+                            <div className="flex flex-col gap-2.5 text-end">
+                              <span className="text-dark text-xs font-medium">
                                 Weight
                               </span>
-                              <InputWrapper className="w-[66px] h-[28px]">
+                              <InputWrapper className="h-[28px] w-[66px]">
                                 <Input
                                   type="text"
                                   defaultValue={`${item.weight}`}
                                 />
-                                <span className="text-2sm font-normal text-muted-foreground">
+                                <span className="text-2sm text-muted-foreground font-normal">
                                   kg
                                 </span>
                               </InputWrapper>
@@ -231,7 +231,7 @@ export function EmployeeCreateShippingLabelSheet({
                 {/* Packaging */}
                 <Card className="rounded-md">
                   <Tabs defaultValue="custom" className="w-full">
-                    <CardHeader className="min-h-[40px] bg-accent/50">
+                    <CardHeader className="bg-accent/50 min-h-[40px]">
                       <CardTitle className="text-sm">Packaging</CardTitle>
                       <TabsList
                         size="xs"
@@ -240,13 +240,13 @@ export function EmployeeCreateShippingLabelSheet({
                       >
                         <TabsTrigger
                           value="custom"
-                          className="flex-1 pb-3 -mb-1.5 data-[state=active]:text-foreground text-muted-foreground data-[state=active]:border-foreground border-b-[1px] hover:text-inherit"
+                          className="data-[state=active]:text-foreground text-muted-foreground data-[state=active]:border-foreground -mb-1.5 flex-1 border-b-[1px] pb-3 hover:text-inherit"
                         >
                           Custom Package
                         </TabsTrigger>
                         <TabsTrigger
                           value="carrier"
-                          className="flex-1 pb-3 -mb-1.5 gap-3 data-[state=active]:text-foreground text-muted-foreground data-[state=active]:border-foreground border-b-[1px] hover:text-inherit"
+                          className="data-[state=active]:text-foreground text-muted-foreground data-[state=active]:border-foreground -mb-1.5 flex-1 gap-3 border-b-[1px] pb-3 hover:text-inherit"
                         >
                           Carrier Package
                         </TabsTrigger>
@@ -260,7 +260,7 @@ export function EmployeeCreateShippingLabelSheet({
                           <Input defaultValue="Mike Anderson – Medium Box|" />
                         </div>
 
-                        <div className="grid sm:grid-cols-2 lg:gap-5 gap-2">
+                        <div className="grid gap-2 sm:grid-cols-2 lg:gap-5">
                           <div className="flex flex-col gap-2.5">
                             <Label className="text-xs">Package Type</Label>
                             <Select
@@ -291,14 +291,14 @@ export function EmployeeCreateShippingLabelSheet({
                             <Label className="text-xs">Total Weight</Label>
                             <InputWrapper>
                               <Input type="email" placeholder="2.1" />
-                              <span className="text-2sm font-normal text-muted-foreground">
+                              <span className="text-2sm text-muted-foreground font-normal">
                                 kg
                               </span>
                             </InputWrapper>
                           </div>
                         </div>
 
-                        <div className="flex flex-row items-center lg:gap-5 gap-2">
+                        <div className="flex flex-row items-center gap-2 lg:gap-5">
                           <div className="flex basis-2/4 flex-col gap-2.5">
                             <Label className="text-xs">Length</Label>
                             <Input type="email" placeholder="48" />
@@ -312,7 +312,7 @@ export function EmployeeCreateShippingLabelSheet({
                             <Input type="email" placeholder="20" />
                           </div>
 
-                          <div className="flex lg:basis-1/4 flex-col gap-2.5">
+                          <div className="flex flex-col gap-2.5 lg:basis-1/4">
                             <Label className="text-xs text-transparent">
                               Height
                             </Label>
@@ -351,7 +351,7 @@ export function EmployeeCreateShippingLabelSheet({
                           <Input defaultValue="Mike Anderson – Medium Box|" />
                         </div>
 
-                        <div className="grid sm:grid-cols-2 lg:gap-5 gap-2">
+                        <div className="grid gap-2 sm:grid-cols-2 lg:gap-5">
                           <div className="flex flex-col gap-2.5">
                             <Label className="text-xs">Package Type</Label>
                             <Select
@@ -382,7 +382,7 @@ export function EmployeeCreateShippingLabelSheet({
                             <Label className="text-xs">Total Weight</Label>
                             <InputWrapper>
                               <Input type="email" placeholder="1.4" />
-                              <span className="text-2sm font-normal text-muted-foreground">
+                              <span className="text-2sm text-muted-foreground font-normal">
                                 kg
                               </span>
                             </InputWrapper>
@@ -439,28 +439,28 @@ export function EmployeeCreateShippingLabelSheet({
               </div>
 
               {/* Summary */}
-              <div className="w-full lg:w-[320px] lg:mt-5 space-y-5 lg:ps-5 shrink-0">
+              <div className="w-full shrink-0 space-y-5 lg:mt-5 lg:w-[320px] lg:ps-5">
                 <Card className="rounded-md">
-                  <CardHeader className="min-h-[34px] bg-accent/50">
+                  <CardHeader className="bg-accent/50 min-h-[34px]">
                     <CardTitle className="text-2sm">Summary</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-col gap-2">
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-foreground text-sm font-medium">
                         Shipping to Jeroen’s Home
                       </span>
-                      <span className="text-2sm font-normal text-secondary-foreground">
+                      <span className="text-2sm text-secondary-foreground font-normal">
                         Prinsengracht 24
                       </span>
-                      <span className="text-2sm font-normal text-secondary-foreground">
+                      <span className="text-2sm text-secondary-foreground font-normal">
                         1015 DV Amsterdam, NL
                       </span>
                     </div>
 
-                    <Separator className="mb-4 mt-4.5" />
+                    <Separator className="mt-4.5 mb-4" />
 
                     <div className="flex flex-col gap-2">
-                      <span className="text-sm font-medium text-foreground">
+                      <span className="text-foreground text-sm font-medium">
                         Price Details
                       </span>
                       {Object.entries(prices).map(([key, value]) => (
@@ -468,10 +468,10 @@ export function EmployeeCreateShippingLabelSheet({
                           key={key}
                           className="flex items-center justify-between"
                         >
-                          <span className="text-2sm font-normal text-secondary-foreground">
+                          <span className="text-2sm text-secondary-foreground font-normal">
                             {key}
                           </span>
-                          <span className="text-2sm font-medium text-foreground">
+                          <span className="text-2sm text-foreground font-medium">
                             {value}
                           </span>
                         </div>
@@ -481,17 +481,17 @@ export function EmployeeCreateShippingLabelSheet({
                     <Separator className="my-4" />
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-normal text-secondary-foreground">
+                      <span className="text-secondary-foreground text-sm font-normal">
                         Total
                       </span>
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-foreground text-sm font-semibold">
                         $22.99
                       </span>
                     </div>
                   </CardContent>
                 </Card>
 
-                <div className="flex flex-col gap-2.5 mb-3.5">
+                <div className="mb-3.5 flex flex-col gap-2.5">
                   <Label className="text-xs">Shipping Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -501,7 +501,7 @@ export function EmployeeCreateShippingLabelSheet({
                             type="button"
                             variant="dim"
                             size="sm"
-                            className="absolute top-1/2 -end-0 -translate-y-1/2"
+                            className="absolute -end-0 top-1/2 -translate-y-1/2"
                             onClick={handleReset}
                           >
                             <X />
@@ -539,11 +539,11 @@ export function EmployeeCreateShippingLabelSheet({
                       setSendShippingInfo(value === true);
                     }}
                   />
-                  <div className="text-xs font-medium text-secondary-foreground">
+                  <div className="text-secondary-foreground text-xs font-medium">
                     Send
                     <Link
                       href="#"
-                      className="hover:text-primary text-xs font-medium text-primary mx-1"
+                      className="hover:text-primary text-primary mx-1 text-xs font-medium"
                     >
                       Shipping Info
                     </Link>
@@ -555,12 +555,12 @@ export function EmployeeCreateShippingLabelSheet({
           </ScrollArea>
         </SheetBody>
 
-        <SheetFooter className="flex items-center not-only-of-type:justify-between border-t py-5 px-5 border-border gap-2">
-          <div className="text-xs font-medium text-secondary-foreground">
+        <SheetFooter className="border-border flex items-center gap-2 border-t px-5 py-5 not-only-of-type:justify-between">
+          <div className="text-secondary-foreground text-xs font-medium">
             Read Shipping
             <Link
               href="#"
-              className="hover:text-primary text-xs font-medium text-primary ms-1"
+              className="hover:text-primary text-primary ms-1 text-xs font-medium"
             >
               Terms & Conditions
             </Link>

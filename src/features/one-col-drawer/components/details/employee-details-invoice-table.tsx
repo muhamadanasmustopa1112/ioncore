@@ -439,7 +439,7 @@ export function EmployeeDetailsInvoiceTable({
         ),
         enableSorting: false,
         cell: () => (
-          <div className="flex grow justify-center items-center gap-1.5">
+          <div className="flex grow items-center justify-center gap-1.5">
             <Button
               variant="ghost"
               size="sm"

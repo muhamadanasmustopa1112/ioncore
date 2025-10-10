@@ -11,9 +11,9 @@ const MegaMenuSubAccount = ({ items }: { items: MenuConfig }) => {
     : {};
 
   return (
-    <div className="flex flex-col lg:flex-row gap-0 w-full lg:w-[1200px] overflow-hidden">
-      <div className="lg:w-[225px] mt-2 lg:mt-0 lg:border-e lg:border-border shrink-0 px-3 py-4 lg:p-7.5 bg-accent/30">
-        <h3 className="text-sm text-foreground font-semibold leading-none ps-2.5 mb-2 lg:mb-5">
+    <div className="flex w-full flex-col gap-0 overflow-hidden lg:w-[1200px] lg:flex-row">
+      <div className="lg:border-border bg-accent/30 mt-2 shrink-0 px-3 py-4 lg:mt-0 lg:w-[225px] lg:border-e lg:p-7.5">
+        <h3 className="text-foreground mb-2 ps-2.5 text-sm leading-none font-semibold lg:mb-5">
           {myAccountItemGeneral.title}
         </h3>
         <div className="flex flex-col">
@@ -21,12 +21,12 @@ const MegaMenuSubAccount = ({ items }: { items: MenuConfig }) => {
             MegaMenuSubHighlighted(myAccountItemGeneral.children)}
         </div>
       </div>
-      <div className="pt-4 pb-2 lg:p-7.5 lg:pb-5 grow">
-        <div className="grid lg:grid-cols-5 gap-4">
+      <div className="grow pt-4 pb-2 lg:p-7.5 lg:pb-5">
+        <div className="grid gap-4 lg:grid-cols-5">
           {myAccountItemOthers.children?.map((item: MenuItem, index) => {
             return (
               <div key={`account-${index}`}>
-                <h3 className="text-sm text-foreground font-semibold leading-none ps-2.5 mb-2 lg:mb-5">
+                <h3 className="text-foreground mb-2 ps-2.5 text-sm leading-none font-semibold lg:mb-5">
                   {item.title}
                 </h3>
                 <div className="space-y-0.5">

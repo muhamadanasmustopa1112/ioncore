@@ -21,7 +21,7 @@ export interface ToolbarHeadingProps {
 
 export const Toolbar = ({ children }: ToolbarProps) => {
   return (
-    <div className="flex items-center justify-between grow gap-2.5 pb-5">
+    <div className="flex grow items-center justify-between gap-2.5 pb-5">
       {children}
     </div>
   );
@@ -40,7 +40,7 @@ export const ToolbarHeading = ({
 
 export const ToolbarTitle = ({ className, children }: ToolbarTitleProps) => {
   return (
-    <h1 className={cn("font-semibold text-foreground text-lg", className)}>
+    <h1 className={cn("text-foreground text-lg font-semibold", className)}>
       {children}
     </h1>
   );
@@ -48,7 +48,7 @@ export const ToolbarTitle = ({ className, children }: ToolbarTitleProps) => {
 
 export const ToolbarActions = ({ children }: ToolbarActionsProps) => {
   return (
-    <div className="flex items-center flex-wrap gap-1.5 lg:gap-3.5">
+    <div className="flex flex-wrap items-center gap-1.5 lg:gap-3.5">
       {children}
     </div>
   );

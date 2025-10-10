@@ -701,7 +701,7 @@ export function EmployeeDetailsOrdersTable({
         ),
         cell: (info) => (
           <div
-            className="cursor-pointer hover:text-primary transition-colors"
+            className="hover:text-primary cursor-pointer transition-colors"
             onClick={() => info.row.getToggleExpandedHandler()()}
           >
             {info.row.original.items} items
@@ -746,9 +746,9 @@ export function EmployeeDetailsOrdersTable({
         ),
         enableSorting: false,
         cell: ({ row }) => (
-          <div className="flex grow justify-center items-center gap-1.5">
+          <div className="flex grow items-center justify-center gap-1.5">
             <Button
-              className="size-6 text-muted-foreground"
+              className="text-muted-foreground size-6"
               onClick={(e) => {
                 e.stopPropagation();
                 row.getToggleExpandedHandler()();
@@ -882,7 +882,7 @@ export function EmployeeDetailsOrdersTable({
 
       {productInfoSheetOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="rounded-lg p-6 w-full mx-4 overflow-y-auto bg-[#FAFAFA]">
+          <div className="mx-4 w-full overflow-y-auto rounded-lg bg-[#FAFAFA] p-6">
             <EmployeeProductInfoSheet mockData={[]} />
           </div>
         </div>
@@ -940,12 +940,12 @@ function OrderListTable({}: OrderListTableProps) {
 
           return (
             <div className="flex items-center gap-2.5">
-              <Card className="flex items-center justify-center rounded-md bg-accent/50 h-[40px] w-[50px] shadow-none shrink-0">
+              <Card className="bg-accent/50 flex h-[40px] w-[50px] shrink-0 items-center justify-center rounded-md shadow-none">
                 <img
                   src={toAbsoluteUrl(
                     `/media/store/client/1200x1200/${productInfo.image}`,
                   )}
-                  className="cursor-pointer h-[40px]"
+                  className="h-[40px] cursor-pointer"
                   alt="image"
                 />
               </Card>
@@ -954,7 +954,7 @@ function OrderListTable({}: OrderListTableProps) {
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <span className="text-sm font-medium text-foreground leading-3.5 truncate max-w-[180px] cursor-pointer hover:text-primary transition-colors">
+                        <span className="text-foreground hover:text-primary max-w-[180px] cursor-pointer truncate text-sm leading-3.5 font-medium transition-colors">
                           {productInfo.title}
                         </span>
                       </TooltipTrigger>
@@ -964,13 +964,13 @@ function OrderListTable({}: OrderListTableProps) {
                     </Tooltip>
                   </TooltipProvider>
                 ) : (
-                  <span className="text-sm font-medium text-foreground leading-3.5 cursor-pointer hover:text-primary transition-colors">
+                  <span className="text-foreground hover:text-primary cursor-pointer text-sm leading-3.5 font-medium transition-colors">
                     {productInfo.title}
                   </span>
                 )}
-                <span className="text-xs text-muted-foreground uppercase">
+                <span className="text-muted-foreground text-xs uppercase">
                   sku:{" "}
-                  <span className="text-xs font-medium text-secondary-foreground">
+                  <span className="text-secondary-foreground text-xs font-medium">
                     {productInfo.label}
                   </span>
                 </span>
@@ -1064,7 +1064,7 @@ function OrderListTable({}: OrderListTableProps) {
                 className="h-6 rounded-full"
                 alt="image"
               />
-              <span className="leading-none text-secondary-foreground">
+              <span className="text-secondary-foreground leading-none">
                 {info.row.original.supplier.name}
               </span>
             </div>
@@ -1091,7 +1091,7 @@ function OrderListTable({}: OrderListTableProps) {
 
   return (
     <div className="bg-muted/30 p-5">
-      <div className="bg-card rounded-lg border border-muted-foreground/22 overflow-x-auto">
+      <div className="bg-card border-muted-foreground/22 overflow-x-auto rounded-lg border">
         <DataGrid
           table={table}
           recordCount={orderItemsMockData.length}

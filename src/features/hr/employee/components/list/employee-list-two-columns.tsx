@@ -74,7 +74,7 @@ export function EmployeeListTwoColumns() {
         size: 200,
         meta: {
           cellClassName: "",
-          skeleton: <Skeleton className="w-[70px] h-5" />,
+          skeleton: <Skeleton className="h-5 w-[70px]" />,
         },
       },
       {
@@ -92,11 +92,11 @@ export function EmployeeListTwoColumns() {
             <div className="flex flex-col">
               <Link
                 href="#"
-                className="text-sm font-bold text-mono hover:text-primary-active mb-px"
+                className="text-mono hover:text-primary-active mb-px text-sm font-bold"
               >
                 {row.original.fullname}
               </Link>
-              <span className="text-sm text-muted-foreground font-normal">
+              <span className="text-muted-foreground text-sm font-normal">
                 {row.original.job?.job_name}
               </span>
             </div>
@@ -111,8 +111,8 @@ export function EmployeeListTwoColumns() {
             <div className="flex items-center gap-2.5">
               <Skeleton className="size-10 rounded-full" />
               <div className="flex flex-col gap-1">
-                <Skeleton className="w-[90px] h-5" />
-                <Skeleton className="w-[70px] h-5" />
+                <Skeleton className="h-5 w-[90px]" />
+                <Skeleton className="h-5 w-[70px]" />
               </div>
             </div>
           ),
@@ -137,8 +137,8 @@ export function EmployeeListTwoColumns() {
           headerClassName: "",
           skeleton: (
             <div className="flex flex-col gap-1">
-              <Skeleton className="w-[90px] h-5" />
-              <Skeleton className="w-[70px] h-5" />
+              <Skeleton className="h-5 w-[90px]" />
+              <Skeleton className="h-5 w-[70px]" />
             </div>
           ),
         },
@@ -165,8 +165,8 @@ export function EmployeeListTwoColumns() {
           headerClassName: "",
           skeleton: (
             <div className="flex flex-col gap-1">
-              <Skeleton className="w-[90px] h-5" />
-              <Skeleton className="w-[70px] h-5" />
+              <Skeleton className="h-5 w-[90px]" />
+              <Skeleton className="h-5 w-[70px]" />
             </div>
           ),
         },
@@ -185,7 +185,7 @@ export function EmployeeListTwoColumns() {
                 target="_blank"
                 className="flex items-center justify-center"
               >
-                <RiFilePdf2Line className="w-8 h-8 text-muted-foreground" />
+                <RiFilePdf2Line className="text-muted-foreground h-8 w-8" />
               </a>
             );
           }
@@ -196,7 +196,7 @@ export function EmployeeListTwoColumns() {
         meta: {
           headerTitle: "CV",
           headerClassName: "",
-          skeleton: <Skeleton className="w-[70px] h-5" />,
+          skeleton: <Skeleton className="h-5 w-[70px]" />,
         },
       },
       {
@@ -207,7 +207,7 @@ export function EmployeeListTwoColumns() {
         size: 60,
         meta: {
           headerClassName: "",
-          skeleton: <Skeleton className="w-[70px] h-5" />,
+          skeleton: <Skeleton className="h-5 w-[70px]" />,
         },
       },
     ];
@@ -352,26 +352,26 @@ export function EmployeeListTwoColumns() {
         isLoading={isLoading || isFetching}
       >
         <Card className="overflow-hidden">
-          <div className="flex flex-col lg:flex-row items-stretch relative overflow-hidden min-h-[500px]">
-            <div className={cn("w-full border-e flex-1")}>
+          <div className="relative flex min-h-[500px] flex-col items-stretch overflow-hidden lg:flex-row">
+            <div className={cn("w-full flex-1 border-e")}>
               <CardHeader>
                 <CardHeading>
                   <div className="flex items-center gap-2.5">
                     <div className="relative">
-                      <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
+                      <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                       <Input
                         placeholder="Search Users..."
                         value={filter.search || ""}
                         onChange={(e) =>
                           setFilter({ ...filter, search: e.target.value })
                         }
-                        className="ps-9 w-40"
+                        className="w-40 ps-9"
                       />
                       {filter.search && (
                         <Button
                           mode="icon"
                           variant="ghost"
-                          className="absolute end-1.5 top-1/2 -translate-y-1/2 h-6 w-6"
+                          className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
                           onClick={() => setFilter({ ...filter, search: "" })}
                         >
                           <X />
@@ -393,7 +393,7 @@ export function EmployeeListTwoColumns() {
                       </PopoverTrigger>
                       <PopoverContent className="w-40 p-3" align="start">
                         <div className="space-y-3">
-                          <div className="text-xs font-medium text-muted-foreground">
+                          <div className="text-muted-foreground text-xs font-medium">
                             Sort By
                           </div>
                           <div className="space-y-3">
@@ -411,7 +411,7 @@ export function EmployeeListTwoColumns() {
                                 />
                                 <Label
                                   htmlFor={order}
-                                  className="grow flex items-center justify-between font-normal gap-1.5"
+                                  className="flex grow items-center justify-between gap-1.5 font-normal"
                                 >
                                   {order.charAt(0).toUpperCase() +
                                     order.slice(1)}
@@ -443,11 +443,11 @@ export function EmployeeListTwoColumns() {
                   animate={{ opacity: 1, x: "0%" }}
                   exit={{ opacity: 0, x: "100%" }}
                   transition={{ duration: 0.3 }}
-                  className="flex-1 relative overflow-hidden"
+                  className="relative flex-1 overflow-hidden"
                 >
                   {(form === "new" || form === "edit") && (
-                    <div className="h-full w-full flex flex-col absolute bottom-0 left-0 right-0 top-0">
-                      <div className="flex justify-end p-5 shrink-0 border-b sticky">
+                    <div className="absolute top-0 right-0 bottom-0 left-0 flex h-full w-full flex-col">
+                      <div className="sticky flex shrink-0 justify-end border-b p-5">
                         <Button
                           variant="outline"
                           onClick={handleEmployeeFormClose}
@@ -461,7 +461,7 @@ export function EmployeeListTwoColumns() {
                     </div>
                   )}
                   {form === "details" && (
-                    <div className="flex-1 overflow-auto absolute bottom-0 left-0 right-0 top-0">
+                    <div className="absolute top-0 right-0 bottom-0 left-0 flex-1 overflow-auto">
                       <EmployeeDetailsTwoColumns />
                     </div>
                   )}

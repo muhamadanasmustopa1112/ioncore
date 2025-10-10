@@ -85,11 +85,11 @@ export function ResetPasswordForm() {
     <Suspense>
       <Form {...form}>
         <form onSubmit={handleSubmit} className="block w-full space-y-5">
-          <div className="text-center space-y-1 pb-3">
+          <div className="space-y-1 pb-3 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               Reset Password
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               Enter your email to receive a password reset link.
             </p>
           </div>

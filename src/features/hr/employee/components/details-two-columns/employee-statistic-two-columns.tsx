@@ -46,27 +46,27 @@ export function EmployeeStatisticTwoColumns({}: object) {
   ];
 
   return (
-    <Card className="rounded-md mb-5 bg-accent/70 p-1">
-      <CardContent className="rounded-md p-0 bg-background border border-border">
+    <Card className="bg-accent/70 mb-5 rounded-md p-1">
+      <CardContent className="bg-background border-border rounded-md border p-0">
         <div className="grid md:grid-cols-2">
           {items.map((item, index) => (
             <div
               key={index}
-              className={`flex flex-col justify-between gap-5 p-4.5 pb-3.5 md:border-b ${index > 0 ? "md:border-s border-border" : ""}`}
+              className={`flex flex-col justify-between gap-5 p-4.5 pb-3.5 md:border-b ${index > 0 ? "border-border md:border-s" : ""}`}
             >
               <div className="flex flex-col gap-0.5">
-                <span className="text-xl lg:text-2xl font-semibold text-foreground">
+                <span className="text-foreground text-xl font-semibold lg:text-2xl">
                   {item.total}
-                  <span className="text-xl lg:text-2xl font-semibold text-secondary-foreground/30">
+                  <span className="text-secondary-foreground/30 text-xl font-semibold lg:text-2xl">
                     {item.number}
                   </span>
                 </span>
-                <span className="text-xs font-normal text-secondary-foreground/70">
+                <span className="text-secondary-foreground/70 text-xs font-normal">
                   {item.label}
                 </span>
               </div>
 
-              <div className="flex items-center flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <Badge
                   variant={item.badgeColor as any}
                   size="sm"
@@ -75,7 +75,7 @@ export function EmployeeStatisticTwoColumns({}: object) {
                 >
                   {item.icon} {item.badgeLabel}%
                 </Badge>
-                <span className="text-xs font-normal text-secondary-foreground">
+                <span className="text-secondary-foreground text-xs font-normal">
                   {item.text}
                 </span>
               </div>

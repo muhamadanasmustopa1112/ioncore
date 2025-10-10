@@ -93,10 +93,10 @@ export function SidebarPrimary() {
   const user = useMemo(() => userData?.response?.data, [userData]);
 
   return (
-    <div className="flex flex-col items-center justify-center shrink-0 px-2.5 py-2.5 gap-5 lg:w-(--sidebar-collapsed-width) border-e border-input/20 bg-sidebar-main">
+    <div className="border-input/20 bg-sidebar-main flex shrink-0 flex-col items-center justify-center gap-5 border-e px-2.5 py-2.5 lg:w-(--sidebar-collapsed-width)">
       {/* Navigation */}
-      <ScrollArea className="grow w-full h-[calc(100vh-13rem)] lg:h-[calc(100vh-5.5rem)]">
-        <div className="grow gap-1 shrink-0 flex items-center flex-col">
+      <ScrollArea className="h-[calc(100vh-13rem)] w-full grow lg:h-[calc(100vh-5.5rem)]">
+        <div className="flex shrink-0 grow flex-col items-center gap-1">
           {MENU.map((item, index) => {
             if (!item.icon) return null;
             return (
@@ -110,13 +110,13 @@ export function SidebarPrimary() {
                       ? { "data-state": "open" }
                       : {})}
                     className={cn(
-                      "shrink-0 rounded-md size-9",
+                      "size-9 shrink-0 rounded-md",
                       "data-[state=open]:bg-primary data-[state=open]:text-primary-foreground",
                       "hover:text-sidebar-main-foreground/60 hover:bg-white/20",
                     )}
                   >
                     <Link href={item.path || "#"}>
-                      <item.icon className="size-4.5! text-sidebar-main-foreground" />
+                      <item.icon className="text-sidebar-main-foreground size-4.5!" />
                     </Link>
                   </Button>
                 </TooltipTrigger>
@@ -128,7 +128,7 @@ export function SidebarPrimary() {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="flex flex-col items-center gap-2.5 shrink-0">
+      <div className="flex shrink-0 flex-col items-center gap-2.5">
         <Button
           variant="ghost"
           mode="icon"
@@ -154,7 +154,7 @@ export function SidebarPrimary() {
         </Button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="cursor-pointer mb-2.5">
+          <DropdownMenuTrigger className="mb-2.5 cursor-pointer">
             <Avatar className="size-7">
               <AvatarImage
                 src={toAbsoluteUrl("/media/avatars/300-2.png")}
@@ -167,7 +167,7 @@ export function SidebarPrimary() {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-64 mb-4"
+            className="mb-4 w-64"
             side="right"
             align="start"
             sideOffset={11}
@@ -185,10 +185,10 @@ export function SidebarPrimary() {
                 </AvatarIndicator>
               </Avatar>
               <div className="flex flex-col items-start">
-                <span className="text-sm font-semibold text-foreground">
+                <span className="text-foreground text-sm font-semibold">
                   {user?.username}
                 </span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   Senior Developer
                 </span>
                 <Badge
@@ -202,7 +202,7 @@ export function SidebarPrimary() {
               </div>
             </div>
 
-            <DropdownMenuItem className="cursor-pointer py-1 rounded-md border border-border hover:bg-muted">
+            <DropdownMenuItem className="border-border hover:bg-muted cursor-pointer rounded-md border py-1">
               <Clock />
               <span>Set availability</span>
             </DropdownMenuItem>
@@ -269,7 +269,7 @@ export function SidebarPrimary() {
             <DropdownMenuItem>
               <Download />
               <span>Download SDK</span>
-              <ExternalLink className="size-3 ms-auto" />
+              <ExternalLink className="ms-auto size-3" />
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />

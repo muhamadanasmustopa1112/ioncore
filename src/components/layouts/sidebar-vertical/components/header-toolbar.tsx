@@ -143,10 +143,10 @@ export function HeaderToolbar() {
               </AvatarIndicator>
             </Avatar>
             <div className="flex flex-col items-start">
-              <span className="text-sm font-semibold text-foreground">
+              <span className="text-foreground text-sm font-semibold">
                 {user?.username}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs">
                 Senior Developer
               </span>
             </div>

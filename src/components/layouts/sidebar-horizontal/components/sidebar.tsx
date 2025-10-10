@@ -3,7 +3,7 @@ import { SidebarSearch } from "./sidebar-search";
 
 export function Sidebar() {
   return (
-    <div className="flex flex-col items-stretch shrink-0 w-(--sidebar-width) border-e border-border">
+    <div className="border-border flex w-(--sidebar-width) shrink-0 flex-col items-stretch border-e">
       <SidebarSearch />
       <SidebarMenu />
     </div>

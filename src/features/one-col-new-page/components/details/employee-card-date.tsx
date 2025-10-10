@@ -96,28 +96,28 @@ const cardData = [
 
 export function EmployeeCardDate() {
   return (
-    <div className="grid xl:grid-cols-2 gap-5">
+    <div className="grid gap-5 xl:grid-cols-2">
       <TooltipProvider>
         {cardData.map((card, cardIndex) => (
           <Card
             key={cardIndex}
-            className="bg-accent/70 rounded-md shadow-none h-full"
+            className="bg-accent/70 h-full rounded-md shadow-none"
           >
-            <CardContent className="p-0 h-full flex flex-col">
-              <h3 className="text-sm font-medium text-foreground py-2.5 ps-2">
+            <CardContent className="flex h-full flex-col p-0">
+              <h3 className="text-foreground py-2.5 ps-2 text-sm font-medium">
                 {card.date}
               </h3>
-              <div className="bg-background h-full rounded-md m-1 mt-0 border border-input p-5 px-3.5">
+              <div className="bg-background border-input m-1 mt-0 h-full rounded-md border p-5 px-3.5">
                 {card.orders.map((order, index) => (
                   <div key={index}>
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5">
-                        <Card className="flex items-center justify-center rounded-md bg-accent/50 h-[40px] w-[50px] shadow-none shrink-0">
+                        <Card className="bg-accent/50 flex h-[40px] w-[50px] shrink-0 items-center justify-center rounded-md shadow-none">
                           <img
                             src={toAbsoluteUrl(
                               `/media/store/client/1200x1200/${order.image}`,
                             )}
-                            className="cursor-pointer h-[40px]"
+                            className="h-[40px] cursor-pointer"
                             alt="image"
                           />
                         </Card>
@@ -129,7 +129,7 @@ export function EmployeeCardDate() {
                               <TooltipTrigger asChild>
                                 <Link
                                   href="#"
-                                  className="text-sm font-medium text-foreground hover:text-primary leading-3.5 text-left"
+                                  className="text-foreground hover:text-primary text-left text-sm leading-3.5 font-medium"
                                 >
                                   {order.product}
                                 </Link>
@@ -144,17 +144,17 @@ export function EmployeeCardDate() {
                           ) : (
                             <Link
                               href="#"
-                              className="text-sm font-medium text-foreground hover:text-primary leading-3.5 text-left"
+                              className="text-foreground hover:text-primary text-left text-sm leading-3.5 font-medium"
                             >
                               {order.product}
                             </Link>
                           )}
 
                           <span className="inline-flex items-center gap-0.5">
-                            <span className="text-xs text-muted-foreground uppercase">
+                            <span className="text-muted-foreground text-xs uppercase">
                               SKU:
                             </span>{" "}
-                            <span className="text-xs font-medium text-secondary-foreground">
+                            <span className="text-secondary-foreground text-xs font-medium">
                               {order.sku}
                             </span>
                           </span>
@@ -164,7 +164,7 @@ export function EmployeeCardDate() {
                     </div>
                     <Separator className="my-3.5" />
 
-                    <p className="text-2sm text-foreground font-normal leading-5">
+                    <p className="text-2sm text-foreground leading-5 font-normal">
                       {order.text}
                     </p>
                   </div>

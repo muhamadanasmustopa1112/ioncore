@@ -19,20 +19,20 @@ const tiers = [
 
 const stats = [
   {
-    icon: <Bolt className="w-5 h-5 text-secondary-foreground/70" />,
+    icon: <Bolt className="text-secondary-foreground/70 h-5 w-5" />,
     title: "Current Points",
     subtitle: "Earned through actions",
     getValue: (currentPoints: number) => currentPoints.toLocaleString(),
   },
   {
-    icon: <Radar className="w-5 h-5 text-secondary-foreground/70" />,
+    icon: <Radar className="text-secondary-foreground/70 h-5 w-5" />,
     title: "Next Tier Goal",
     subtitle: "Path to unlock next benefits",
     getValue: (currentPoints: number, nextGoal?: number | null) =>
       `${currentPoints.toLocaleString()}/${nextGoal?.toLocaleString() || "Max"}`,
   },
   {
-    icon: <FolderSymlink className="w-5 h-5 text-secondary-foreground/70" />,
+    icon: <FolderSymlink className="text-secondary-foreground/70 h-5 w-5" />,
     title: "Progress Percentage",
     subtitle: "Tier growth vs last month",
     getValue: (currentPoints: number, nextGoal?: number | null) => {
@@ -42,10 +42,10 @@ const stats = [
       return (
         <div className="flex items-center gap-1">
           <Badge variant="success" size="sm" appearance="light">
-            <TrendingUp className="w-3 h-3 mr-1" />
+            <TrendingUp className="mr-1 h-3 w-3" />
             4%
           </Badge>
-          <span className="text-sm font-medium text-foreground">
+          <span className="text-foreground text-sm font-medium">
             {progressPercentage}%
           </span>
         </div>
@@ -65,17 +65,17 @@ export function EmployeeLoyaltyTier() {
   };
 
   return (
-    <Card className="bg-accent/50 rounded-md shadow-none h-full">
-      <CardContent className="p-0 h-full flex flex-col">
-        <h3 className="text-sm font-medium text-foreground py-2.5 ps-2">
+    <Card className="bg-accent/50 h-full rounded-md shadow-none">
+      <CardContent className="flex h-full flex-col p-0">
+        <h3 className="text-foreground py-2.5 ps-2 text-sm font-medium">
           Loyalty Tier
         </h3>
-        <div className="flex flex-col justify-between bg-background rounded-md m-1 mt-0 border border-input py-5 px-3.5 h-full">
+        <div className="bg-background border-input m-1 mt-0 flex h-full flex-col justify-between rounded-md border px-3.5 py-5">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex items-center justify-center rounded-md bg-background border border-border size-[36px] shrink-0">
-                  <div className="flex items-center justify-center bg-accent/50 rounded-md size-[30px]">
+                <div className="bg-background border-border flex size-[36px] shrink-0 items-center justify-center rounded-md border">
+                  <div className="bg-accent/50 flex size-[30px] items-center justify-center rounded-md">
                     <img
                       src={toAbsoluteUrl(`/media/brand-logos/abstract-24.svg`)}
                       alt="image"
@@ -83,10 +83,10 @@ export function EmployeeLoyaltyTier() {
                   </div>
                 </div>
                 <div className="flex items-end gap-1.5">
-                  <h3 className="text-2xl font-semibold text-foreground leading-6">
+                  <h3 className="text-foreground text-2xl leading-6 font-semibold">
                     {currentTier.name}
                   </h3>
-                  <span className="text-xs text-muted-foreground font-normal">
+                  <span className="text-muted-foreground text-xs font-normal">
                     Level {currentTierIndex + 1}
                   </span>
                 </div>
@@ -106,10 +106,10 @@ export function EmployeeLoyaltyTier() {
                   max={4}
                   min={0}
                   step={1}
-                  className="relative w-full h-1.5 flex items-center"
+                  className="relative flex h-1.5 w-full items-center"
                 >
                   {/* Full gradient track */}
-                  <div className="absolute w-full h-1.5 rounded-sm bg-gradient-to-r from-pink-500 via-blue-500 via-green-400 via-yellow-400 to-orange-500" />
+                  <div className="absolute h-1.5 w-full rounded-sm bg-gradient-to-r from-pink-500 via-blue-500 via-green-400 via-yellow-400 to-orange-500" />
 
                   <SliderThumb className="bg-primary" />
                 </Slider>
@@ -134,20 +134,20 @@ export function EmployeeLoyaltyTier() {
               <div key={index}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Card className="flex items-center justify-center rounded-md bg-accent/50 h-[36px] w-[36px] shadow-none shrink-0">
+                    <Card className="bg-accent/50 flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-md shadow-none">
                       {stat.icon}
                     </Card>
 
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-medium text-foreground text-2sm">
+                      <span className="text-foreground text-2sm font-medium">
                         {stat.title}
                       </span>
-                      <span className="text-xs text-muted-foreground font-normal">
+                      <span className="text-muted-foreground text-xs font-normal">
                         {stat.subtitle}
                       </span>
                     </div>
                   </div>
-                  <div className="text-sm font-medium text-foreground">
+                  <div className="text-foreground text-sm font-medium">
                     {index === 0 && stat.getValue(currentPoints)}
                     {index === 1 && stat.getValue(currentPoints, nextGoal)}
                     {index === 2 && stat.getValue(currentPoints, nextGoal)}

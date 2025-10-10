@@ -24,17 +24,17 @@ export function EmployeeStatistic3({}: object) {
   ];
 
   return (
-    <Card className="rounded-md mb-5 bg-accent/70 p-1">
-      <CardContent className="rounded-md p-0 bg-background border border-border">
+    <Card className="bg-accent/70 mb-5 rounded-md p-1">
+      <CardContent className="bg-background border-border rounded-md border p-0">
         <div className="flex flex-wrap gap-2">
           {items.map((item, index) => (
             <div
               key={index}
-              className={`${index === 0 ? "flex-2" : "flex-1"} flex flex-col px-4.5 py-3 gap-2 ${index > 0 ? "sm:border-s border-border" : ""}`}
+              className={`${index === 0 ? "flex-2" : "flex-1"} flex flex-col gap-2 px-4.5 py-3 ${index > 0 ? "border-border sm:border-s" : ""}`}
             >
-              <div className="flex items-center flex-wrap gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 <span
-                  className={`font-semibold text-foreground ${item.total === "Prime Plan" ? "text-xl leading-6" : "text-base leading-5"}`}
+                  className={`text-foreground font-semibold ${item.total === "Prime Plan" ? "text-xl leading-6" : "text-base leading-5"}`}
                 >
                   {item.total}
                 </span>
@@ -44,7 +44,7 @@ export function EmployeeStatistic3({}: object) {
                   </Badge>
                 )}
               </div>
-              <span className="text-xs font-normal text-secondary-foreground/70">
+              <span className="text-secondary-foreground/70 text-xs font-normal">
                 {item.label}
               </span>
             </div>

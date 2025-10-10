@@ -59,8 +59,8 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
   if (isLoading) {
     return (
-      <div className="w-screen h-screen flex justify-center items-center">
-        <Loader className="animate-spin text-primary-default" />
+      <div className="flex h-screen w-screen items-center justify-center">
+        <Loader className="text-primary-default animate-spin" />
       </div>
     );
   }

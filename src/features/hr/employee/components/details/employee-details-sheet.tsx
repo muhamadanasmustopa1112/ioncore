@@ -39,39 +39,39 @@ export function EmployeeDetailsSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="gap-0 lg:w-[1160px] sm:max-w-none inset-5 border start-auto h-auto rounded-lg p-0 [&_[data-slot=sheet-close]]:top-4.5 [&_[data-slot=sheet-close]]:end-5">
-        <SheetHeader className="border-b py-3.5 px-5 border-border">
+      <SheetContent className="inset-5 start-auto h-auto gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[1160px] [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5">
+        <SheetHeader className="border-border border-b px-5 py-3.5">
           <SheetTitle className="font-medium">Customer Details</SheetTitle>
         </SheetHeader>
 
-        <SheetBody className="p-0 grow">
-          <div className="flex justify-between flex-wrap gap-2 border-b border-border px-5 py-4">
+        <SheetBody className="grow p-0">
+          <div className="border-border flex flex-wrap justify-between gap-2 border-b px-5 py-4">
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2.5">
-                <span className="lg:text-[22px] font-semibold text-foreground leading-none">
+                <span className="text-foreground leading-none font-semibold lg:text-[22px]">
                   Jeroen de Jong
                 </span>
                 <Badge size="sm" variant="success" appearance="light">
                   Active
                 </Badge>
               </div>
-              <div className="flex items-center flex-wrap gap-2 text-2sm">
-                <span className="font-normal text-muted-foreground">
+              <div className="text-2sm flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground font-normal">
                   Customer ID:
                 </span>
-                <span className="font-medium text-foreground">583920-XT</span>
+                <span className="text-foreground font-medium">583920-XT</span>
                 <BadgeDot className="bg-muted-foreground size-1" />
-                <span className="font-normal text-muted-foreground">
+                <span className="text-muted-foreground font-normal">
                   Joined
                 </span>
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                   16 Jan, 2022
                 </span>
                 <BadgeDot className="bg-muted-foreground size-1" />
-                <span className="font-normal text-muted-foreground">
+                <span className="text-muted-foreground font-normal">
                   Last Visit
                 </span>
-                <span className="font-medium text-foreground">2 days ago</span>
+                <span className="text-foreground font-medium">2 days ago</span>
               </div>
             </div>
             <div className="flex items-center gap-2.5">
@@ -88,20 +88,20 @@ export function EmployeeDetailsSheet({
             </div>
           </div>
           <ScrollArea
-            className="flex flex-col h-[calc(100dvh-15.8rem)] mx-1.5"
+            className="mx-1.5 flex h-[calc(100dvh-15.8rem)] flex-col"
             viewportClassName="[&>div]:h-full [&>div>div]:h-full"
           >
-            <div className="flex flex-wrap lg:flex-nowrap px-3.5 grow">
-              <div className="w-full shrink-0 lg:w-[280px] py-5 lg:pe-5 space-y-4">
+            <div className="flex grow flex-wrap px-3.5 lg:flex-nowrap">
+              <div className="w-full shrink-0 space-y-4 py-5 lg:w-[280px] lg:pe-5">
                 <Upload />
               </div>
 
-              <div className="grow lg:border-s border-border space-y-5 py-5 lg:ps-5">
+              <div className="border-border grow space-y-5 py-5 lg:border-s lg:ps-5">
                 <Tabs
                   defaultValue="overview"
-                  className="w-auto text-sm text-muted-foreground"
+                  className="text-muted-foreground w-auto text-sm"
                 >
-                  <TabsList className="inline-flex w-auto grow-0 mb-2.5">
+                  <TabsList className="mb-2.5 inline-flex w-auto grow-0">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="orders">Orders</TabsTrigger>
                     <TabsTrigger value="invoices">Invoices</TabsTrigger>
@@ -133,7 +133,7 @@ export function EmployeeDetailsSheet({
           </ScrollArea>
         </SheetBody>
 
-        <SheetFooter className="flex-row border-t pb-4 p-5 border-border gap-2.5 lg:gap-0">
+        <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0">
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Close
           </Button>

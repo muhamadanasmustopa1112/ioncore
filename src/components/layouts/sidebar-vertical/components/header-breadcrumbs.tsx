@@ -2,7 +2,7 @@ import { ToolbarBreadcrumbs } from "./toolbar";
 
 export function HeaderBreadcrumbs() {
   return (
-    <div className="flex flex-row items-center flex-wrap gap-1 lg:gap-5 mb-5 lg:mb-0">
+    <div className="mb-5 flex flex-row flex-wrap items-center gap-1 lg:mb-0 lg:gap-5">
       <ToolbarBreadcrumbs />
     </div>
   );

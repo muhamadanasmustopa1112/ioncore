@@ -84,7 +84,7 @@ function DataGridColumnHeader<TData, TValue>({
     return (
       <div
         className={cn(
-          "text-accent-foreground font-normal inline-flex h-full items-center gap-1.5 text-[0.8125rem] leading-[calc(1.125/0.8125)] [&_svg]:size-3.5 [&_svg]:opacity-60",
+          "text-accent-foreground inline-flex h-full items-center gap-1.5 text-[0.8125rem] leading-[calc(1.125/0.8125)] font-normal [&_svg]:size-3.5 [&_svg]:opacity-60",
           className,
         )}
       >
@@ -99,7 +99,7 @@ function DataGridColumnHeader<TData, TValue>({
       <Button
         variant="ghost"
         className={cn(
-          "text-secondary-foreground rounded-md font-normal -ms-2 px-2 h-7 hover:bg-secondary data-[state=open]:bg-secondary hover:text-foreground data-[state=open]:text-foreground",
+          "text-secondary-foreground hover:bg-secondary data-[state=open]:bg-secondary hover:text-foreground data-[state=open]:text-foreground -ms-2 h-7 rounded-md px-2 font-normal",
           className,
         )}
         disabled={isLoading || recordCount === 0}
@@ -119,11 +119,11 @@ function DataGridColumnHeader<TData, TValue>({
 
         {column.getCanSort() &&
           (column.getIsSorted() === "desc" ? (
-            <ArrowDown className="size-[0.7rem]! mt-px" />
+            <ArrowDown className="mt-px size-[0.7rem]!" />
           ) : column.getIsSorted() === "asc" ? (
-            <ArrowUp className="size-[0.7rem]! mt-px" />
+            <ArrowUp className="mt-px size-[0.7rem]!" />
           ) : (
-            <ChevronsUpDown className="size-[0.7rem]! mt-px" />
+            <ChevronsUpDown className="mt-px size-[0.7rem]!" />
           ))}
       </Button>
     );
@@ -147,7 +147,7 @@ function DataGridColumnHeader<TData, TValue>({
 
   const headerControls = () => {
     return (
-      <div className="flex items-center h-full gap-1.5 justify-between">
+      <div className="flex h-full items-center justify-between gap-1.5">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>{headerButton()}</DropdownMenuTrigger>
           <DropdownMenuContent className="w-40" align="start">
@@ -173,7 +173,7 @@ function DataGridColumnHeader<TData, TValue>({
                   <ArrowUp className="size-3.5!" />
                   <span className="grow">Asc</span>
                   {column.getIsSorted() === "asc" && (
-                    <Check className="size-4 opacity-100! text-primary" />
+                    <Check className="text-primary size-4 opacity-100!" />
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -189,7 +189,7 @@ function DataGridColumnHeader<TData, TValue>({
                   <ArrowDown className="size-3.5!" />
                   <span className="grow">Desc</span>
                   {column.getIsSorted() === "desc" && (
-                    <Check className="size-4 opacity-100! text-primary" />
+                    <Check className="text-primary size-4 opacity-100!" />
                   )}
                 </DropdownMenuItem>
               </>
@@ -210,7 +210,7 @@ function DataGridColumnHeader<TData, TValue>({
                   <ArrowLeftToLine className="size-3.5!" aria-hidden="true" />
                   <span className="grow">Pin to left</span>
                   {column.getIsPinned() === "left" && (
-                    <Check className="size-4 opacity-100! text-primary" />
+                    <Check className="text-primary size-4 opacity-100!" />
                   )}
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -223,7 +223,7 @@ function DataGridColumnHeader<TData, TValue>({
                   <ArrowRightToLine className="size-3.5!" aria-hidden="true" />
                   <span className="grow">Pin to right</span>
                   {column.getIsPinned() === "right" && (
-                    <Check className="size-4 opacity-100! text-primary" />
+                    <Check className="text-primary size-4 opacity-100!" />
                   )}
                 </DropdownMenuItem>
               </>
@@ -312,7 +312,7 @@ function DataGridColumnHeader<TData, TValue>({
     column.getCanSort() ||
     (props.tableLayout?.columnsResizable && column.getCanResize())
   ) {
-    return <div className="flex items-center h-full">{headerButton()}</div>;
+    return <div className="flex h-full items-center">{headerButton()}</div>;
   }
 
   return headerLabel();

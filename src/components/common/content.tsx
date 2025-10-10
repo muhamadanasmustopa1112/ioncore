@@ -4,10 +4,10 @@ import { LoaderCircleIcon } from "lucide-react";
 
 export function ContentLoader() {
   return (
-    <div className="flex flex-col items-center justify-center self-center relative top-1/2 -translate-x-1/2">
+    <div className="relative top-1/2 flex -translate-x-1/2 flex-col items-center justify-center self-center">
       <div className="flex items-center gap-2.5">
-        <LoaderCircleIcon className="animate-spin text-muted-foreground opacity-50" />
-        <span className="text-muted-foreground font-medium text-sm">
+        <LoaderCircleIcon className="text-muted-foreground animate-spin opacity-50" />
+        <span className="text-muted-foreground text-sm font-medium">
           Loading...
         </span>
       </div>

@@ -82,13 +82,13 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             <div className="flex flex-col">
               <Link
                 href="#"
-                className="text-sm text-mono hover:text-primary font-semibold"
+                className="text-mono hover:text-primary text-sm font-semibold"
               >
                 Sean
               </Link>
               <a
                 href={`mailto:sean@kt.com`}
-                className="text-xs text-muted-foreground hover:text-primary"
+                className="text-muted-foreground hover:text-primary text-xs"
               >
                 sean@kt.com
               </a>
@@ -173,9 +173,9 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
 
         {/* Language Submenu with Radio Group */}
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center gap-2 [&_[data-slot=dropdown-menu-sub-trigger-indicator]]:hidden hover:[&_[data-slot=badge]]:border-input data-[state=open]:[&_[data-slot=badge]]:border-input">
+          <DropdownMenuSubTrigger className="hover:[&_[data-slot=badge]]:border-input data-[state=open]:[&_[data-slot=badge]]:border-input flex items-center gap-2 [&_[data-slot=dropdown-menu-sub-trigger-indicator]]:hidden">
             <Globe />
-            <span className="flex items-center justify-between gap-2 grow relative">
+            <span className="relative flex grow items-center justify-between gap-2">
               Language
               <Badge
                 variant="outline"
@@ -184,7 +184,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
                 {currenLanguage.label}
                 <img
                   src={currenLanguage.flag}
-                  className="w-3.5 h-3.5 rounded-full"
+                  className="h-3.5 w-3.5 rounded-full"
                   alt={currenLanguage.label}
                 />
               </Badge>
@@ -200,7 +200,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
                 >
                   <img
                     src={item.flag}
-                    className="w-4 h-4 rounded-full"
+                    className="h-4 w-4 rounded-full"
                     alt={item.label}
                   />
                   <span>{item.label}</span>
@@ -218,7 +218,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           onSelect={(event) => event.preventDefault()}
         >
           <Moon />
-          <div className="flex items-center gap-2 justify-between grow">
+          <div className="flex grow items-center justify-between gap-2">
             Dark Mode
             <Switch
               size="sm"
@@ -227,7 +227,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
             />
           </div>
         </DropdownMenuItem>
-        <div className="p-2 mt-1">
+        <div className="mt-1 p-2">
           <Button variant="outline" size="sm" className="w-full">
             Logout
           </Button>

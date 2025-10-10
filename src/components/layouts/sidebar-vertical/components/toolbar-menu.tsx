@@ -11,7 +11,7 @@ export function ToolbarMenu() {
 
   return (
     <div className="flex items-stretch">
-      <nav className="list-none flex items-stretch gap-2">
+      <nav className="flex list-none items-stretch gap-2">
         {MENU_TOOLBAR.map((item, index) => {
           const active = isActive(item.path);
 

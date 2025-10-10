@@ -57,21 +57,21 @@ export function EmployeeFormSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="gap-0 lg:w-[820px] sm:max-w-none inset-5 border start-auto h-auto rounded-lg p-0 [&_[data-slot=sheet-close]]:top-4.5 [&_[data-slot=sheet-close]]:end-5">
+      <SheetContent className="inset-5 start-auto h-auto gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[820px] [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5">
         {/* Header */}
-        <SheetHeader className="border-b py-3.5 px-5 border-border">
+        <SheetHeader className="border-border border-b px-5 py-3.5">
           <SheetTitle className="font-medium">
             {isNewMode ? "New Employee" : "Edit Employee"}
           </SheetTitle>
         </SheetHeader>
 
         {/* Body */}
-        <SheetBody className="p-0 grow">
+        <SheetBody className="grow p-0">
           <EmployeeForm />
         </SheetBody>
 
         {/* Footer */}
-        <SheetFooter className="flex-row border-t pb-4 p-5 border-border gap-2.5 lg:gap-0">
+        <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0">
           <Button variant="ghost" onClick={handleClose}>
             Close
           </Button>

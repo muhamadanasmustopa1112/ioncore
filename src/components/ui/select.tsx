@@ -87,7 +87,7 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDown className="h-4 w-4 opacity-60 -me-0.5" />
+        <ChevronDown className="-me-0.5 h-4 w-4 opacity-60" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   );
@@ -140,7 +140,7 @@ function SelectContent({
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
-          "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover shadow-md shadow-black/5 text-secondary-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+          "border-border bg-popover text-secondary-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border shadow-md shadow-black/5",
           position === "popper" &&
             "data-[side=bottom]:translate-y-1.5 data-[side=left]:-translate-x-1.5 data-[side=right]:translate-x-1.5 data-[side=top]:-translate-y-1.5",
           className,
@@ -172,7 +172,7 @@ function SelectLabel({
     <SelectPrimitive.Label
       data-slot="select-label"
       className={cn(
-        "py-1.5 ps-8 pe-2 text-xs text-muted-foreground font-medium",
+        "text-muted-foreground py-1.5 ps-8 pe-2 text-xs font-medium",
         className,
       )}
       {...props}
@@ -192,8 +192,8 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 text-sm outline-hidden text-foreground hover:bg-accent focus:bg-accent data-disabled:pointer-events-none data-disabled:opacity-50",
-        indicatorPosition === "left" ? "ps-8 pe-2" : "pe-8 ps-2",
+        "text-foreground hover:bg-accent focus:bg-accent relative flex w-full cursor-default items-center rounded-sm py-1.5 text-sm outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50",
+        indicatorPosition === "left" ? "ps-8 pe-2" : "ps-2 pe-8",
         className,
       )}
       {...props}
@@ -209,7 +209,7 @@ function SelectItem({
             )}
           >
             <SelectPrimitive.ItemIndicator>
-              <Check className="h-4 w-4 text-primary" />
+              <Check className="text-primary h-4 w-4" />
             </SelectPrimitive.ItemIndicator>
           </span>
         ))}
@@ -229,7 +229,7 @@ function SelectIndicator({
     <span
       data-slot="select-indicator"
       className={cn(
-        "absolute flex top-1/2 -translate-y-1/2 items-center justify-center",
+        "absolute top-1/2 flex -translate-y-1/2 items-center justify-center",
         indicatorPosition === "left" ? "start-2" : "end-2",
         className,
       )}
@@ -247,7 +247,7 @@ function SelectSeparator({
   return (
     <SelectPrimitive.Separator
       data-slot="select-separator"
-      className={cn("-mx-1.5 my-1.5 h-px bg-border", className)}
+      className={cn("bg-border -mx-1.5 my-1.5 h-px", className)}
       {...props}
     />
   );

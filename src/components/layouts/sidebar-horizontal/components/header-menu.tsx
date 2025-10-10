@@ -11,7 +11,7 @@ export function HeaderMenu() {
 
   return (
     <div className="flex items-stretch">
-      <nav className="list-none flex items-center gap-2">
+      <nav className="flex list-none items-center gap-2">
         {MENU_HEADER.map((item, index) => {
           const active = isActive(item.path);
           return (

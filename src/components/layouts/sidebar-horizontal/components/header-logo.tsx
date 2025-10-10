@@ -29,22 +29,14 @@ export function HeaderLogo() {
   return (
     <div className="flex items-center gap-2.5">
       <Link href="/layout-18" className="flex items-center gap-2">
-        <div
-          className="
-            flex items-center p-[5px]
-            rounded-[6px] border border-[rgba(255,255,255,0.30)]
-            bg-[#007421]
-            bg-[radial-gradient(97.49%_97.49%_at_50%_2.51%,rgba(255,255,255,0.5)_0%,rgba(255,255,255,0)_100%)]
-            shadow-[0_0_0_1px_#009229]
-          "
-        >
+        <div className="flex items-center rounded-[6px] border border-[rgba(255,255,255,0.30)] bg-[#007421] bg-[radial-gradient(97.49%_97.49%_at_50%_2.51%,rgba(255,255,255,0.5)_0%,rgba(255,255,255,0)_100%)] p-[5px] shadow-[0_0_0_1px_#009229]">
           <img
             src={toAbsoluteUrl("/media/app/logo-33.svg")}
             alt="image"
             className="min-w-[18px]"
           />
         </div>
-        <span className="text-mono text-xl font-medium hidden lg:block">
+        <span className="text-mono hidden text-xl font-medium lg:block">
           Metronic
         </span>
       </Link>
@@ -56,12 +48,12 @@ export function HeaderLogo() {
             </Button>
           </SheetTrigger>
           <SheetContent
-            className="p-0 gap-0 w-[225px]"
+            className="w-[225px] gap-0 p-0"
             side="left"
             close={false}
           >
-            <SheetHeader className="p-0 space-y-0" />
-            <SheetBody className="flex flex-col grow p-0">
+            <SheetHeader className="space-y-0 p-0" />
+            <SheetBody className="flex grow flex-col p-0">
               <HeaderMenuMobile />
               <HeaderSecondaryMenuMobile />
               <SidebarMenu />

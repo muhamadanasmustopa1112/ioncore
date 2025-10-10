@@ -106,13 +106,13 @@ function EmployeeAvatarUpload({ mode }: { mode: string }) {
   return (
     <div className="space-y-4">
       <div className="relative">
-        <div className="w-full h-[200px] bg-accent/50 border border-border rounded-lg flex items-center justify-center">
+        <div className="bg-accent/50 border-border flex h-[200px] w-full items-center justify-center rounded-lg border">
           {selectedImage ? (
-            <div className="relative flex items-center justify-center w-full h-full">
+            <div className="relative flex h-full w-full items-center justify-center">
               <img
                 src={selectedImage}
                 alt="Employee Avatar"
-                className="w-full h-full object-cover rounded-lg"
+                className="h-full w-full rounded-lg object-cover"
               />
               {isNewMode && (
                 <Button
@@ -133,7 +133,7 @@ function EmployeeAvatarUpload({ mode }: { mode: string }) {
               />
               <label
                 htmlFor="employee-avatar-upload"
-                className="absolute bottom-3 right-3"
+                className="absolute right-3 bottom-3"
               >
                 <Button size="sm" variant="outline" asChild>
                   <span>{isEditMode ? "Change" : "Upload"}</span>
@@ -141,8 +141,8 @@ function EmployeeAvatarUpload({ mode }: { mode: string }) {
               </label>
             </div>
           ) : (
-            <div className="relative w-full h-full flex items-center justify-center">
-              <User className="size-[35px] text-muted-foreground" />
+            <div className="relative flex h-full w-full items-center justify-center">
+              <User className="text-muted-foreground size-[35px]" />
               <input
                 type="file"
                 accept="image/*"
@@ -152,7 +152,7 @@ function EmployeeAvatarUpload({ mode }: { mode: string }) {
               />
               <label
                 htmlFor="employee-avatar-upload"
-                className="absolute bottom-3 right-3"
+                className="absolute right-3 bottom-3"
               >
                 <Button size="sm" variant="outline" asChild>
                   <span>Upload</span>
@@ -208,7 +208,7 @@ function PhoneNumberInput({
   };
 
   return (
-    <div className="flex items-center w-full">
+    <div className="flex w-full items-center">
       {/* Country Selector */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -257,10 +257,10 @@ function PhoneNumberInput({
                     >
                       <span className="flex items-center gap-1.5 leading-none">
                         <span className="text-sm">{country.flag}</span>
-                        <span className="text-sm text-foreground truncate">
+                        <span className="text-foreground truncate text-sm">
                           {country.name}
                         </span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-muted-foreground text-sm">
                           {country.dialCode}
                         </span>
                       </span>
@@ -282,7 +282,7 @@ function PhoneNumberInput({
         placeholder="Enter phone number"
         value={value.startsWith("+") ? value : value}
         onChange={(e) => handlePhoneChange(e.target.value)}
-        className="rounded-l-none flex-1"
+        className="flex-1 rounded-l-none"
       />
     </div>
   );
@@ -302,26 +302,26 @@ export function EmployeeForm() {
 
   return (
     <div
-      className={cn("flex flex-wrap px-3.5 grow h-fit", {
+      className={cn("flex h-fit grow flex-wrap px-3.5", {
         "lg:flex-nowrap": !isVerticalSidebar,
       })}
     >
       {/* Left Section - Avatar Upload */}
-      <div className="w-full shrink-0 lg:w-[280px] py-5 lg:pe-5 lg:ps-2 space-y-4">
+      <div className="w-full shrink-0 space-y-4 py-5 lg:w-[280px] lg:ps-2 lg:pe-5">
         <EmployeeAvatarUpload mode={form ?? "new"} />
       </div>
 
       {/* Right Section - Form Fields */}
       <div
         className={cn("grow py-5", {
-          "lg:border-s border-border": !isVerticalSidebar,
+          "border-border lg:border-s": !isVerticalSidebar,
         })}
       >
         <ScrollArea className="h-full">
-          <div className="space-y-5 lg:ps-5 pe-1 py-1">
+          <div className="space-y-5 py-1 pe-1 lg:ps-5">
             {/* Full Name */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Full Name
               </Label>
               <Input
@@ -333,7 +333,7 @@ export function EmployeeForm() {
             </div>
             {/* Full Name */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Full Name
               </Label>
               <Input
@@ -345,7 +345,7 @@ export function EmployeeForm() {
             </div>
             {/* Full Name */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Full Name
               </Label>
               <Input
@@ -357,7 +357,7 @@ export function EmployeeForm() {
             </div>
             {/* Full Name */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Full Name
               </Label>
               <Input
@@ -369,7 +369,7 @@ export function EmployeeForm() {
             </div>
             {/* Full Name */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Full Name
               </Label>
               <Input
@@ -381,7 +381,7 @@ export function EmployeeForm() {
             </div>
             {/* Full Name */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Full Name
               </Label>
               <Input
@@ -393,7 +393,7 @@ export function EmployeeForm() {
             </div>
             {/* Email */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">Email</Label>
+              <Label className="w-24 shrink-0 text-xs font-medium">Email</Label>
               <Input
                 placeholder="Email"
                 type="email"
@@ -405,7 +405,7 @@ export function EmployeeForm() {
 
             {/* Phone Number */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Phone Number
               </Label>
               <div className="flex-1">
@@ -418,7 +418,7 @@ export function EmployeeForm() {
 
             {/* Status */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Status
               </Label>
               <Select value={status} onValueChange={setStatus}>
@@ -436,7 +436,7 @@ export function EmployeeForm() {
 
             {/* Company Name */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Company Name
               </Label>
               <Input
@@ -449,7 +449,7 @@ export function EmployeeForm() {
 
             {/* Time Zone */}
             <div className="flex items-center gap-10">
-              <Label className="text-xs font-medium w-24 shrink-0">
+              <Label className="w-24 shrink-0 text-xs font-medium">
                 Time Zone
               </Label>
               <Select value={timeZone} onValueChange={setTimeZone}>

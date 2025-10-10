@@ -8,7 +8,7 @@ export function EmployeeDetailsOverviewsTwoColumns() {
   return (
     <div className="space-y-5">
       <EmployeeStatisticTwoColumns />
-      <div className="grid gap-5 items-stretch">
+      <div className="grid items-stretch gap-5">
         <EmployeeRecentOrder />
         <EmployeeLoyaltyTier />
       </div>

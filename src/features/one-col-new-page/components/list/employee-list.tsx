@@ -66,11 +66,11 @@ export function EmployeeList() {
             <div className="flex flex-col">
               <Link
                 href="#"
-                className="text-sm font-bold text-mono hover:text-primary-active mb-px"
+                className="text-mono hover:text-primary-active mb-px text-sm font-bold"
               >
                 {row.original.fullname}
               </Link>
-              <span className="text-sm text-muted-foreground font-normal">
+              <span className="text-muted-foreground text-sm font-normal">
                 {row.original.job?.job_name}
               </span>
               <span
@@ -91,8 +91,8 @@ export function EmployeeList() {
             <div className="flex items-center gap-2.5">
               <Skeleton className="size-10 rounded-full" />
               <div className="flex flex-col gap-1">
-                <Skeleton className="w-[90px] h-5" />
-                <Skeleton className="w-[70px] h-5" />
+                <Skeleton className="h-5 w-[90px]" />
+                <Skeleton className="h-5 w-[70px]" />
               </div>
             </div>
           ),
@@ -117,8 +117,8 @@ export function EmployeeList() {
           headerClassName: "",
           skeleton: (
             <div className="flex flex-col gap-1">
-              <Skeleton className="w-[90px] h-5" />
-              <Skeleton className="w-[70px] h-5" />
+              <Skeleton className="h-5 w-[90px]" />
+              <Skeleton className="h-5 w-[70px]" />
             </div>
           ),
         },
@@ -145,8 +145,8 @@ export function EmployeeList() {
           headerClassName: "",
           skeleton: (
             <div className="flex flex-col gap-1">
-              <Skeleton className="w-[90px] h-5" />
-              <Skeleton className="w-[70px] h-5" />
+              <Skeleton className="h-5 w-[90px]" />
+              <Skeleton className="h-5 w-[70px]" />
             </div>
           ),
         },
@@ -165,7 +165,7 @@ export function EmployeeList() {
                 target="_blank"
                 className="flex items-center justify-center"
               >
-                <RiFilePdf2Line className="w-8 h-8 text-muted-foreground" />
+                <RiFilePdf2Line className="text-muted-foreground h-8 w-8" />
               </a>
             );
           }
@@ -176,7 +176,7 @@ export function EmployeeList() {
         meta: {
           headerTitle: "CV",
           headerClassName: "",
-          skeleton: <Skeleton className="w-[70px] h-5" />,
+          skeleton: <Skeleton className="h-5 w-[70px]" />,
         },
       },
       {
@@ -187,7 +187,7 @@ export function EmployeeList() {
         size: 60,
         meta: {
           headerClassName: "",
-          skeleton: <Skeleton className="w-[70px] h-5" />,
+          skeleton: <Skeleton className="h-5 w-[70px]" />,
         },
       },
     ];
@@ -336,20 +336,20 @@ export function EmployeeList() {
             <CardHeading>
               <div className="flex items-center gap-2.5">
                 <div className="relative">
-                  <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
+                  <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
                     placeholder="Search Users..."
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
                     }
-                    className="ps-9 w-40"
+                    className="w-40 ps-9"
                   />
                   {filter.search && (
                     <Button
                       mode="icon"
                       variant="ghost"
-                      className="absolute end-1.5 top-1/2 -translate-y-1/2 h-6 w-6"
+                      className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
                       onClick={() => setFilter({ ...filter, search: "" })}
                     >
                       <X />
@@ -371,7 +371,7 @@ export function EmployeeList() {
                   </PopoverTrigger>
                   <PopoverContent className="w-40 p-3" align="start">
                     <div className="space-y-3">
-                      <div className="text-xs font-medium text-muted-foreground">
+                      <div className="text-muted-foreground text-xs font-medium">
                         Sort By
                       </div>
                       <div className="space-y-3">
@@ -389,7 +389,7 @@ export function EmployeeList() {
                             />
                             <Label
                               htmlFor={order}
-                              className="grow flex items-center justify-between font-normal gap-1.5"
+                              className="flex grow items-center justify-between gap-1.5 font-normal"
                             >
                               {order.charAt(0).toUpperCase() + order.slice(1)}
                             </Label>

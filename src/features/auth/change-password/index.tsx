@@ -113,17 +113,17 @@ export function ChangePasswordForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="block w-full space-y-4"
       >
-        <div className="text-center space-y-1 pb-3">
+        <div className="space-y-1 pb-3 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">
             Reset Password
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Enter your new password below.
           </p>
         </div>
 
         {error && (
-          <div className="text-center space-y-6">
+          <div className="space-y-6 text-center">
             <Alert variant="destructive">
               <AlertIcon>
                 <AlertCircle />
@@ -177,7 +177,7 @@ export function ChangePasswordForm() {
                       variant="ghost"
                       mode="icon"
                       onClick={() => setPasswordVisible(!passwordVisible)}
-                      className="absolute end-0 top-1/2 -translate-y-1/2 h-7 w-7 me-1.5 bg-transparent!"
+                      className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 bg-transparent!"
                       aria-label={
                         passwordVisible ? "Hide password" : "Show password"
                       }
@@ -217,7 +217,7 @@ export function ChangePasswordForm() {
                           !passwordConfirmationVisible,
                         )
                       }
-                      className="absolute end-0 top-1/2 -translate-y-1/2 h-7 w-7 me-1.5 bg-transparent!"
+                      className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 bg-transparent!"
                       aria-label={
                         passwordConfirmationVisible
                           ? "Hide password confirmation"

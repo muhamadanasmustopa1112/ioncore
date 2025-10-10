@@ -19,17 +19,17 @@ export function EmployeeTimelineItem({
   className,
 }: EmployeeTimelineItemProps) {
   return (
-    <div className="flex items-start relative">
+    <div className="relative flex items-start">
       {line && (
-        <div className="w-10 start-0 top-10.5 absolute bottom-0 rtl:-translate-x-1/2 translate-x-1/2 border-s-2 border-s-input h-[calc(100%-28px)]"></div>
+        <div className="border-s-input absolute start-0 top-10.5 bottom-0 h-[calc(100%-28px)] w-10 translate-x-1/2 border-s-2 rtl:-translate-x-1/2"></div>
       )}
-      <div className="flex items-center justify-center rounded-md bg-background border border-border size-10 shrink-0">
-        <div className="flex items-center justify-center bg-accent/70 rounded-md size-[34px]">
+      <div className="bg-background border-border flex size-10 shrink-0 items-center justify-center rounded-md border">
+        <div className="bg-accent/70 flex size-[34px] items-center justify-center rounded-md">
           <Icon size={18} className={className || ""} />
         </div>
       </div>
       <div
-        className={`ps-2.5 ${!removeSpace ? "mb-5 pt-0.5" : ""} text-base grow`}
+        className={`ps-2.5 ${!removeSpace ? "mb-5 pt-0.5" : ""} grow text-base`}
       >
         {children}
       </div>

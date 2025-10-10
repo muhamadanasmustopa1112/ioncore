@@ -17,23 +17,23 @@ const EmployeeActivitiesProductWebinar = () => {
       line={true}
     >
       <div className="flex flex-col pb-2.5">
-        <span className="text-sm text-foreground font-normal">
+        <span className="text-foreground text-sm font-normal">
           Jenny attended a webinar on new product features.
         </span>
-        <span className="text-xs text-muted-foreground/80 font-normal">
+        <span className="text-muted-foreground/80 text-xs font-normal">
           3 days ago, 11:45 AM
         </span>
       </div>
-      <Card className="shadow-none p-4">
+      <Card className="p-4 shadow-none">
         <div className="flex flex-wrap gap-2.5">
           <SquareDashedBottomCode size={20} className="text-violet-500" />
-          <div className="flex flex-col gap-5 grow">
+          <div className="flex grow flex-col gap-5">
             <div className="flex flex-wrap items-center justify-between">
               <div className="flex flex-col gap-0.5">
-                <span className="text-base font-medium text-foreground cursor-pointer hover:text-primary mb-1 leading-4">
+                <span className="text-foreground hover:text-primary mb-1 cursor-pointer text-base leading-4 font-medium">
                   Leadership Development Series: Part 1
                 </span>
-                <span className="text-xs text-muted-foreground/80 font-normal">
+                <span className="text-muted-foreground/80 text-xs font-normal">
                   The first installment of a leadership development series.
                 </span>
               </div>
@@ -43,7 +43,7 @@ const EmployeeActivitiesProductWebinar = () => {
             </div>
             <div className="flex flex-wrap gap-7.5">
               <div className="flex items-center gap-1.5">
-                <span className="text-2sm font-normal text-muted-foreground/80">
+                <span className="text-2sm text-muted-foreground/80 font-normal">
                   Code:
                 </span>
                 <span className="text-2sm text-primary medium">
@@ -51,7 +51,7 @@ const EmployeeActivitiesProductWebinar = () => {
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-2sm font-normal text-muted-foreground/80">
+                <span className="text-2sm text-muted-foreground/80 font-normal">
                   Progress:
                 </span>
                 <Progress
@@ -60,8 +60,8 @@ const EmployeeActivitiesProductWebinar = () => {
                   className="h-1"
                 />
               </div>
-              <div className="flex items-center gap-1.5 lg:min-w-24 shrink-0 max-w-auto">
-                <span className="text-2sm font-normal text-muted-foreground/80">
+              <div className="max-w-auto flex shrink-0 items-center gap-1.5 lg:min-w-24">
+                <span className="text-2sm text-muted-foreground/80 font-normal">
                   Guests:
                 </span>
                 <AvatarGroup>

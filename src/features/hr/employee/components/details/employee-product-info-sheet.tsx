@@ -204,10 +204,10 @@ const EmployeeProductInfoSheet = ({ onClose }: ProductInfoSheetProps) => {
           };
           return (
             <div className="flex items-center gap-2.5">
-              <Card className="flex items-center justify-center rounded-md bg-accent/50 h-[40px] w-[50px] shadow-none shrink-0">
+              <Card className="bg-accent/50 flex h-[40px] w-[50px] shrink-0 items-center justify-center rounded-md shadow-none">
                 <img
                   src={`/media/store/client/1200x1200/${productInfo.image}`}
-                  className="cursor-pointer h-[40px]"
+                  className="h-[40px] cursor-pointer"
                   alt="image"
                 />
               </Card>
@@ -220,7 +220,7 @@ const EmployeeProductInfoSheet = ({ onClose }: ProductInfoSheetProps) => {
                       <Link
                         href="#"
                         onClick={() => handleProductClick(info.row.original)}
-                        className="text-sm font-medium text-foreground hover:text-primary leading-3.5 text-left"
+                        className="text-foreground hover:text-primary text-left text-sm leading-3.5 font-medium"
                       >
                         {productInfo.title}
                       </Link>
@@ -235,17 +235,17 @@ const EmployeeProductInfoSheet = ({ onClose }: ProductInfoSheetProps) => {
                 ) : (
                   <Link
                     href="#"
-                    className="text-sm font-medium text-foreground hover:text-primary leading-3.5 text-left"
+                    className="text-foreground hover:text-primary text-left text-sm leading-3.5 font-medium"
                   >
                     {productInfo.title}
                   </Link>
                 )}
 
                 <span className="inline-flex items-center gap-0.5">
-                  <span className="text-xs text-muted-foreground uppercase">
+                  <span className="text-muted-foreground text-xs uppercase">
                     sku:
                   </span>{" "}
-                  <span className="text-xs font-medium text-secondary-foreground">
+                  <span className="text-secondary-foreground text-xs font-medium">
                     {productInfo.label}
                   </span>
                 </span>
@@ -365,7 +365,7 @@ const EmployeeProductInfoSheet = ({ onClose }: ProductInfoSheetProps) => {
                 className="h-6 rounded-full"
                 alt="image"
               />
-              <span className="leading-none text-secondary-foreground">
+              <span className="text-secondary-foreground leading-none">
                 {info.row.original.supplier.name}
               </span>
             </div>
@@ -429,11 +429,11 @@ const EmployeeProductInfoSheet = ({ onClose }: ProductInfoSheetProps) => {
   return (
     <div
       onClick={handleBackgroundClick}
-      className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-lg shadow-xl max-w-7xl w-full max-h-[90vh] overflow-hidden"
+        className="max-h-[90vh] w-full max-w-7xl overflow-hidden rounded-lg bg-white shadow-xl"
       >
         <DataGrid
           table={table}

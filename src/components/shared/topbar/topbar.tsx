@@ -18,11 +18,11 @@ export function StoreClientTopbar() {
           !pathname.includes("store-client/search-results-grid") &&
           !pathname.includes("store-client/search-results-list") &&
           !pathname.includes("store-client/product-details") && (
-            <div className="relative lg:w-[240px] me-3">
-              <Search className="size-4 text-muted-foreground absolute top-1/2 -translate-y-1/2 start-2" />
+            <div className="relative me-3 lg:w-[240px]">
+              <Search className="text-muted-foreground absolute start-2 top-1/2 size-4 -translate-y-1/2" />
               <Input type="text" className="px-7" placeholder="Search shop" />
               <Badge
-                className="absolute top-1/2 -translate-y-1/2 end-2 gap-1"
+                className="absolute end-2 top-1/2 -translate-y-1/2 gap-1"
                 variant="outline"
                 size="sm"
               >
@@ -63,11 +63,11 @@ export function StoreClientTopbar() {
             mode="icon"
             shape="circle"
             onClick={showCartSheet}
-            className="relative hover:text-primary"
+            className="hover:text-primary relative"
           >
             <ShoppingCart className="size-5!" />
             <Badge
-              className="absolute top-0.5 end-0.5"
+              className="absolute end-0.5 top-0.5"
               variant="success"
               size="xs"
               shape="circle"
@@ -76,10 +76,10 @@ export function StoreClientTopbar() {
             </Badge>
           </Button>
           <div className="flex flex-col">
-            <span className="text-xs font-medium text-secondary-foreground">
+            <span className="text-secondary-foreground text-xs font-medium">
               Total
             </span>
-            <span className="text-xs font-medium text-dark">$94.56</span>
+            <span className="text-dark text-xs font-medium">$94.56</span>
           </div>
         </div>
       </div>

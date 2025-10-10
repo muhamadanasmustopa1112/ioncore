@@ -13,7 +13,7 @@ const EmployeeNewArticle = () => {
       line={true}
     >
       <div className="flex flex-col">
-        <div className="text-sm text-foreground font-normal">
+        <div className="text-foreground text-sm font-normal">
           Posted a new article{" "}
           <Button mode="link" asChild>
             <Link href="/public-profile/profiles/blogger">
@@ -21,7 +21,7 @@ const EmployeeNewArticle = () => {
             </Link>
           </Button>
         </div>
-        <span className="text-xs text-muted-foreground/80 font-normal">
+        <span className="text-muted-foreground/80 text-xs font-normal">
           Today, 9:00 AM
         </span>
       </div>

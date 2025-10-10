@@ -23,7 +23,7 @@ export default function Page() {
         </ToolbarActions>
       </Toolbar>
 
-      <Skeleton className="rounded-lg grow h-screen"></Skeleton>
+      <Skeleton className="h-screen grow rounded-lg"></Skeleton>
     </>
   );
 }

@@ -22,7 +22,7 @@ export function SidebarMenu() {
   );
 
   return (
-    <ScrollArea className="grow h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] my-2.5 lg:my-7.5 px-2.5 me-0.5 pe-2">
+    <ScrollArea className="my-2.5 me-0.5 h-[calc(100vh-8rem)] grow px-2.5 pe-2 lg:my-7.5 lg:h-[calc(100vh-4rem)]">
       <AccordionMenu
         selectedValue={pathname}
         matchPath={matchPath}

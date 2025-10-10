@@ -23,18 +23,18 @@ export function EmployeeStatistic4({}: object) {
   ];
 
   return (
-    <Card className="rounded-md mb-5 bg-accent/70 p-1">
-      <CardContent className="rounded-md p-0 bg-background border border-border">
+    <Card className="bg-accent/70 mb-5 rounded-md p-1">
+      <CardContent className="bg-background border-border rounded-md border p-0">
         <div className="grid sm:grid-cols-4 lg:gap-5">
           {items.map((item, index) => (
             <div
               key={index}
-              className={`flex flex-col px-4 py-3 ${index > 0 ? "sm:border-s border-border" : ""}`}
+              className={`flex flex-col px-4 py-3 ${index > 0 ? "border-border sm:border-s" : ""}`}
             >
-              <span className="text-2xl font-semibold text-foreground">
+              <span className="text-foreground text-2xl font-semibold">
                 {item.total}
               </span>
-              <span className="text-xs font-normal text-secondary-foreground/70">
+              <span className="text-secondary-foreground/70 text-xs font-normal">
                 {item.label}
               </span>
             </div>

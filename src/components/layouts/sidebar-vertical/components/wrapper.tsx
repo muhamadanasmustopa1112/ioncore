@@ -16,7 +16,7 @@ export function Wrapper({ children }: { children: React.ReactNode }) {
       <Header />
       {!isMobile && <Sidebar />}
 
-      <div className="grow overflow-y-auto pt-(--header-height-mobile) lg:pt-[calc(var(--header-height)+var(--toolbar-height))] lg:ps-(--sidebar-width) lg:in-data-[sidebar-open=false]:ps-(--sidebar-collapsed-width) transition-all duration-300">
+      <div className="grow overflow-y-auto pt-(--header-height-mobile) transition-all duration-300 lg:ps-(--sidebar-width) lg:pt-[calc(var(--header-height)+var(--toolbar-height))] lg:in-data-[sidebar-open=false]:ps-(--sidebar-collapsed-width)">
         <Toolbar>
           <ToolbarHeading>
             {isMobile ? <ToolbarMenuMobile /> : <ToolbarMenu />}

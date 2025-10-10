@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { paths } from "@/config/paths";
 import { Badge, BadgeDot } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,18 +9,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEmployeeStore } from "../../store/employee";
 import { EmployeeFormSheet } from "../form/employee-form-sheet";
 import { EmployeeScrollContent } from "./employee-scroll-content";
-import { paths } from "@/config/paths";
 
 export function EmployeeDetails() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
 
-  const {
-    form,
-    employeeSheetOpen,
-    closeEmployeeFormSheet,
-  } = useEmployeeStore();
+  const { form, employeeSheetOpen, closeEmployeeFormSheet } =
+    useEmployeeStore();
 
   const onEditClick = () => {
     router.push(paths.dashboard.oneColNewPage.update.getHref(id || ""));
@@ -29,33 +26,33 @@ export function EmployeeDetails() {
     <>
       <Card>
         <CardContent className="p-0">
-          <div className="flex justify-between flex-wrap gap-2 border-b border-border px-5 py-4">
+          <div className="border-border flex flex-wrap justify-between gap-2 border-b px-5 py-4">
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2.5">
-                <span className="lg:text-[22px] font-semibold text-foreground leading-none">
+                <span className="text-foreground leading-none font-semibold lg:text-[22px]">
                   Jeroen de Jong
                 </span>
                 <Badge size="sm" variant="success" appearance="light">
                   Active
                 </Badge>
               </div>
-              <div className="flex items-center flex-wrap gap-2 text-2sm">
-                <span className="font-normal text-muted-foreground">
+              <div className="text-2sm flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground font-normal">
                   Customer ID:
                 </span>
-                <span className="font-medium text-foreground">583920-XT</span>
+                <span className="text-foreground font-medium">583920-XT</span>
                 <BadgeDot className="bg-muted-foreground size-1" />
-                <span className="font-normal text-muted-foreground">
+                <span className="text-muted-foreground font-normal">
                   Joined
                 </span>
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                   16 Jan, 2022
                 </span>
                 <BadgeDot className="bg-muted-foreground size-1" />
-                <span className="font-normal text-muted-foreground">
+                <span className="text-muted-foreground font-normal">
                   Last Visit
                 </span>
-                <span className="font-medium text-foreground">2 days ago</span>
+                <span className="text-foreground font-medium">2 days ago</span>
               </div>
             </div>
             <div className="flex items-center gap-2.5">
@@ -68,7 +65,7 @@ export function EmployeeDetails() {
           {!!id && <EmployeeScrollContent />}
           {!id && (
             <ScrollArea
-              className="flex flex-col h-[calc(100dvh-15.8rem)] mx-1.5"
+              className="mx-1.5 flex h-[calc(100dvh-15.8rem)] flex-col"
               viewportClassName="[&>div]:h-full [&>div>div]:h-full"
             >
               <EmployeeScrollContent />
