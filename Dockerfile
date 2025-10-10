@@ -39,15 +39,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Add Node.js memory optimization and additional flags for build process
 ENV NODE_OPTIONS="--max-old-space-size=4096 --no-warnings"
 
-# Set default environment variables for build process
-ENV NEXT_PUBLIC_APP_NAME="Next Dashboard Template"
-ENV NEXT_PUBLIC_API_URL="http://localhost:8080/api"
-ENV NEXT_PUBLIC_SERVICE_NAME="dashboard-service"
-ENV NEXT_PUBLIC_APP_URL="http://localhost:3000"
-ENV NEXT_PUBLIC_SECRET_KEY="default-secret-key-change-in-production"
-ENV NEXT_PUBLIC_PASSPHRASE="default-passphrase-change-in-production"
-ENV NEXT_PUBLIC_SIDEBAR="vertical"
-
 # Disable ESLint during build to allow template project to build
 ENV ESLINT_NO_DEV_ERRORS=true
 ENV NEXT_IGNORE_ESLINT_DURING_BUILD=true
