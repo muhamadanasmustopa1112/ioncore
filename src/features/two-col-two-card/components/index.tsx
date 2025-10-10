@@ -44,13 +44,8 @@ export function EmployeeListPage() {
   } = useEmployeeStore();
 
   return (
-    <div className="relative flex h-full w-full overflow-hidden">
-      <div
-        className={cn(
-          "flex h-fit min-w-0 flex-1 flex-col transition-[padding] duration-300",
-          employeeSheetOpen && "md:pr-4",
-        )}
-      >
+    <div className="relative grid h-full w-full grid-cols-1 overflow-hidden md:grid-cols-2">
+      <div className="flex h-fit min-w-0 flex-1 flex-col md:pr-4">
         <Toolbar>
           <ToolbarHeading>
             <ToolbarTitle>Employee</ToolbarTitle>
@@ -87,11 +82,13 @@ export function EmployeeListPage() {
         aria-label="Employee panel"
         aria-hidden={!employeeSheetOpen}
         className={cn(
-          "absolute top-0 right-0 z-0 flex h-full w-full flex-col md:relative md:h-auto",
-          "transition-[transform,width] duration-300 ease-in-out",
+          "bg-background border-border flex transform-gpu flex-col border-l transition-all duration-300 ease-in-out will-change-transform",
+          // Desktop (md+): selalu terlihat di grid column kedua
+          "md:pointer-events-auto md:static md:col-start-2 md:row-start-1 md:translate-x-0 md:opacity-100",
+          // Mobile/Tablet: overlay absolute sebagai drawer
           employeeSheetOpen
-            ? "bg-background border-border translate-x-0 border-l md:pointer-events-auto md:w-1/2"
-            : "translate-x-full md:pointer-events-none md:w-0 md:translate-x-0 md:border-0 md:bg-transparent",
+            ? "pointer-events-auto fixed inset-0 z-50 translate-x-0 opacity-100 md:absolute md:top-0 md:right-0 md:z-0 md:h-full md:w-full"
+            : "pointer-events-none fixed inset-0 z-50 translate-x-full opacity-0 md:absolute md:top-0 md:right-0 md:z-0 md:h-full md:w-full",
         )}
       >
         <div className="relative flex-1 overflow-hidden">
@@ -115,6 +112,50 @@ export function EmployeeListPage() {
 
             <div className="flex-1 overflow-auto">
               {form === "details" ? <EmployeeDetails /> : <EmployeeForm />}
+            </div>
+          </div>
+
+          {/* Placeholder shows when idle; fades out when open */}
+          <div
+            className={cn(
+              "absolute inset-0 transition-opacity duration-200 ease-in-out",
+              employeeSheetOpen
+                ? "pointer-events-none opacity-0"
+                : "opacity-100",
+            )}
+          >
+            <div className="flex h-full items-center justify-center p-5">
+              <Empty>
+                <EmptyHeader>
+                  <EmptyMedia variant="icon">
+                    <RiFolderForbidLine />
+                  </EmptyMedia>
+                  <EmptyTitle>No Projects Yet</EmptyTitle>
+                  <EmptyDescription>
+                    You haven&apos;t created any projects yet. Get started by
+                    creating your first project.
+                  </EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <div className="flex gap-2">
+                    <Button onClick={() => openEmployeeFormSheet("new")}>
+                      Create Project
+                    </Button>
+                    <Button variant="outline">Import Project</Button>
+                  </div>
+                </EmptyContent>
+                <Button
+                  mode="link"
+                  underline="dashed"
+                  asChild
+                  className="text-muted-foreground"
+                  size="sm"
+                >
+                  <a href="#">
+                    Learn More <RiArrowRightUpLine />
+                  </a>
+                </Button>
+              </Empty>
             </div>
           </div>
         </div>

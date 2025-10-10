@@ -52,6 +52,12 @@ export const paths = {
         getHref: () => "/master-data/one-col-to-two-col",
       },
     },
+    twoColTwoCard: {
+      root: {
+        path: "/master-data/two-col-two-card",
+        getHref: () => "/master-data/two-col-two-card",
+      }
+    },
     employee: {
       list: {
         path: "/human-resources/employee/list",

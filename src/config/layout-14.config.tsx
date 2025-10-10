@@ -81,7 +81,7 @@ export const MENU: MenuConfig = [
           },
           {
             title: "2 Col 2 Card",
-            path: "#",
+            path: paths.dashboard.twoColTwoCard.root.getHref(),
             icon: Columns,
           },
         ],
