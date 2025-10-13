@@ -214,14 +214,13 @@ export function EmployeeList() {
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
-  const [isEmployeeSheetOpen, setIsEmployeeSheetOpen] = useState(false);
 
   const handleEmployeeDetailsOpen = () => {
-    setIsEmployeeSheetOpen(true);
+    openEmployeeFormSheet("details");
   };
 
   const handleEmployeeDetailsClose = () => {
-    setIsEmployeeSheetOpen(false);
+    closeEmployeeFormSheet();
   };
 
   const handleEditFromEmployeeDetails = () => {
@@ -417,7 +416,7 @@ export function EmployeeList() {
 
       {/* Customer Details Sheet */}
       <EmployeeDetailsSheet
-        open={isEmployeeSheetOpen}
+        open={employeeSheetOpen && form === "details"}
         onOpenChange={handleEmployeeDetailsClose}
         onEditClick={handleEditFromEmployeeDetails}
       />
@@ -425,7 +424,7 @@ export function EmployeeList() {
       {/* Customer Form Sheet */}
       <EmployeeFormSheet
         mode={form ?? "new"}
-        open={employeeSheetOpen}
+        open={employeeSheetOpen && (form === "new" || form === "edit")}
         onOpenChange={handleEmployeeFormClose}
       />
     </>

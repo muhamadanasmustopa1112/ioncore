@@ -53,6 +53,7 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
   };
 
   const handleDetailClick = () => {
+    console.log("detail");
     openEmployeeFormSheet("details");
   };
 

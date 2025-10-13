@@ -32,6 +32,7 @@ import {
 import { useEmployeeStore } from "../store/employee";
 import { EmployeeDetails } from "./details/employee-details";
 import { EmployeeForm } from "./form/employee-form";
+import { EmployeeFormCard } from "./form/employee-form-card";
 import { EmployeeList } from "./list/employee-list";
 
 export function EmployeeListPage() {
@@ -41,6 +42,10 @@ export function EmployeeListPage() {
     closeEmployeeFormSheet,
     form,
   } = useEmployeeStore();
+
+  const handleEmployeeFormClose = () => {
+    closeEmployeeFormSheet();
+  };
 
   return (
     <div className="relative grid h-full w-full grid-cols-1 overflow-hidden md:grid-cols-2">
@@ -109,7 +114,11 @@ export function EmployeeListPage() {
           {form === "details" ? (
             <EmployeeDetails />
           ) : form === "new" || form === "edit" ? (
-            <EmployeeForm />
+            <EmployeeFormCard
+              mode={form || "new"}
+              open={employeeSheetOpen}
+              onOpenChange={handleEmployeeFormClose}
+            />
           ) : (
             <div className="flex h-full items-center justify-center p-5">
               <Empty>
