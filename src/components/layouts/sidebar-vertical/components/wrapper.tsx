@@ -1,4 +1,5 @@
 import { Eye, Funnel, MessageSquareCode, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useLayout } from "./context";
 import { Header } from "./header";
@@ -16,8 +17,14 @@ export function Wrapper({ children }: { children: React.ReactNode }) {
       <Header />
       {!isMobile && <Sidebar />}
 
-      <div className="grow overflow-y-auto pt-(--header-height-mobile) transition-all duration-300 lg:ps-(--sidebar-width) lg:pt-[calc(var(--header-height)+var(--toolbar-height))] lg:in-data-[sidebar-open=false]:ps-(--sidebar-collapsed-width)">
-        <Toolbar>
+      <div
+        className={cn(
+          "grow overflow-y-auto transition-all duration-300",
+          // "pt-(--header-height-mobile) lg:ps-(--sidebar-width) lg:pt-[calc(var(--header-height)+var(--toolbar-height))] lg:in-data-[sidebar-open=false]:ps-(--sidebar-collapsed-width)",
+          "pt-(--header-height-mobile) lg:ps-(--sidebar-width) lg:in-data-[sidebar-open=false]:ps-(--sidebar-collapsed-width)",
+        )}
+      >
+        {/* <Toolbar>
           <ToolbarHeading>
             {isMobile ? <ToolbarMenuMobile /> : <ToolbarMenu />}
           </ToolbarHeading>
@@ -38,7 +45,7 @@ export function Wrapper({ children }: { children: React.ReactNode }) {
               <Search />
             </Button>
           </ToolbarActions>
-        </Toolbar>
+        </Toolbar> */}
 
         <main
           className="grow p-5 group-data-[theme-content-layout=centered]/layout:container group-data-[theme-content-layout=centered]/layout:mx-auto"

@@ -38,6 +38,7 @@ export const services = {
   // alaya version
   auth: "/authorization",
   hr: "/hr-services",
+  iam: "/iam-access",
 };
 
 // devices

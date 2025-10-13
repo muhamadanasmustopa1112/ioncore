@@ -3,7 +3,6 @@
 import {
   RiAddLine,
   RiArrowRightUpLine,
-  RiFileListLine,
   RiFolderForbidLine,
 } from "@remixicon/react";
 import { cn } from "@/lib/utils";
@@ -45,7 +44,11 @@ export function EmployeeListPage() {
 
   return (
     <div className="relative grid h-full w-full grid-cols-1 overflow-hidden md:grid-cols-2">
-      <div className="flex h-fit min-w-0 flex-1 flex-col md:pr-4">
+      <div
+        className={cn(
+          "flex h-fit min-w-0 flex-col transition-[padding] duration-300 md:pr-4",
+        )}
+      >
         <Toolbar>
           <ToolbarHeading>
             <ToolbarTitle>Employee</ToolbarTitle>
@@ -82,23 +85,14 @@ export function EmployeeListPage() {
         aria-label="Employee panel"
         aria-hidden={!employeeSheetOpen}
         className={cn(
-          "bg-background border-border flex transform-gpu flex-col border-l transition-all duration-300 ease-in-out will-change-transform",
-          // Desktop (md+): selalu terlihat di grid column kedua
-          "md:pointer-events-auto md:static md:col-start-2 md:row-start-1 md:translate-x-0 md:opacity-100",
-          // Mobile/Tablet: overlay absolute sebagai drawer
+          "md:bg-background z-0 flex h-full w-full flex-col transition-[transform] duration-300 ease-in-out md:relative md:border-l",
           employeeSheetOpen
-            ? "pointer-events-auto fixed inset-0 z-50 translate-x-0 opacity-100 md:absolute md:top-0 md:right-0 md:z-0 md:h-full md:w-full"
-            : "pointer-events-none fixed inset-0 z-50 translate-x-full opacity-0 md:absolute md:top-0 md:right-0 md:z-0 md:h-full md:w-full",
+            ? "absolute top-0 right-0 translate-x-0 md:translate-x-0"
+            : "absolute top-0 right-0 translate-x-full md:translate-x-0",
         )}
       >
-        <div className="relative flex-1 overflow-hidden">
-          {/* Active content slides in from right when open */}
-          <div
-            className={cn(
-              "absolute inset-0 transform-gpu transition-transform duration-300 ease-in-out will-change-transform",
-              employeeSheetOpen ? "translate-x-0" : "translate-x-full",
-            )}
-          >
+        {form && (
+          <>
             <div className="border-border flex shrink-0 items-center justify-between border-b px-5 py-3.5">
               <div className="text-base font-medium">
                 {form === "new" && "New Employee"}
@@ -109,21 +103,14 @@ export function EmployeeListPage() {
                 Close
               </Button>
             </div>
-
-            <div className="flex-1 overflow-auto">
-              {form === "details" ? <EmployeeDetails /> : <EmployeeForm />}
-            </div>
-          </div>
-
-          {/* Placeholder shows when idle; fades out when open */}
-          <div
-            className={cn(
-              "absolute inset-0 transition-opacity duration-200 ease-in-out",
-              employeeSheetOpen
-                ? "pointer-events-none opacity-0"
-                : "opacity-100",
-            )}
-          >
+          </>
+        )}
+        <div className="flex-1 overflow-auto">
+          {form === "details" ? (
+            <EmployeeDetails />
+          ) : form === "new" || form === "edit" ? (
+            <EmployeeForm />
+          ) : (
             <div className="flex h-full items-center justify-center p-5">
               <Empty>
                 <EmptyHeader>
@@ -157,7 +144,7 @@ export function EmployeeListPage() {
                 </Button>
               </Empty>
             </div>
-          </div>
+          )}
         </div>
       </aside>
     </div>

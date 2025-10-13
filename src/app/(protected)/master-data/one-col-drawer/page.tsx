@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { EmployeeList } from "@/features/one-col-drawer/components/list/employee-list";
 import { ScreenLoader } from "@/components/common/screen-loader";
+import { EmployeeListPage } from "@/features/one-col-drawer/components";
 
 export const metadata: Metadata = {
   title: "Master Data",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <Suspense fallback={<ScreenLoader />}>
-      <EmployeeList />
+      <EmployeeListPage />
     </Suspense>
   );
 }
