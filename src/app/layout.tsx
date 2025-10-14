@@ -33,7 +33,7 @@ export default async function RootLayout({
     >
       <body
         className={cn(
-          "text-foreground bg-body-background group/layout flex text-base antialiased",
+          "text-foreground bg-body-background group/layout flex text-base antialiased h-full",
           inter.className,
         )}
         data-theme-content-layout="centered"
