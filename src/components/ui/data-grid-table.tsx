@@ -1,12 +1,14 @@
-import * as React from "react";
-import { CSSProperties, Fragment, ReactNode } from "react";
+"use client";
+
+import type * as React from "react";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
 import {
-  Cell,
-  Column,
   flexRender,
-  Header,
-  HeaderGroup,
-  Row,
+  type Cell,
+  type Column,
+  type Header,
+  type HeaderGroup,
+  type Row,
 } from "@tanstack/react-table";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
@@ -150,7 +152,7 @@ function DataGridTableHeadRowCell<TData>({
         isLastLeftPinned ? "left" : isFirstRightPinned ? "right" : undefined
       }
       className={cn(
-        "text-accent-foreground relative h-10 text-left align-middle font-normal rtl:text-right [&:has([role=checkbox])]:pe-0",
+        "text-secondary-foreground/80 relative h-10 text-left align-middle font-normal rtl:text-right [&:has([role=checkbox])]:pe-0",
         headerCellSpacing,
         props.tableLayout?.cellBorder && "border-e",
         props.tableLayout?.columnsResizable &&
@@ -185,7 +187,7 @@ function DataGridTableHeadRowCellResize<TData>({
         onMouseDown: header.getResizeHandler(),
         onTouchStart: header.getResizeHandler(),
         className:
-          "absolute top-0 h-full w-4 cursor-col-resize user-select-none touch-none -end-2 z-10 flex justify-center before:absolute before:w-px before:inset-y-0 before:bg-border before:-translate-x-px",
+          "absolute top-0 h-full w-4 cursor-col-resize user-select-none touch-none -end-2 z-10 flex justify-center before:absolute before:w-px before:inset-y-0 before:end-0 before:bg-border",
       }}
     />
   );

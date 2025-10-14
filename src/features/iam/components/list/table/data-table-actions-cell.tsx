@@ -53,7 +53,6 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
   };
 
   const handleDetailClick = () => {
-    console.log("detail");
     openEmployeeFormSheet("details");
   };
 
@@ -76,11 +75,11 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
           <RiEyeLine />
           Detail
         </DropdownMenuItem>
-        {/* <DropdownMenuItem className="cursor-pointer" onClick={handleCopyId}>
+        <DropdownMenuItem className="cursor-pointer" onClick={handleCopyId}>
           <RiFileCopy2Line />
           Copy ID
         </DropdownMenuItem>
-        <DropdownMenuSeparator /> */}
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"
           className="cursor-pointer"

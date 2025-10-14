@@ -73,12 +73,12 @@ export function EmployeeList() {
               <span className="text-muted-foreground text-sm font-normal">
                 {row.original.job?.job_name}
               </span>
-              {/* <span
+              <span
                 className="text-primary cursor-pointer"
                 onClick={handleEmployeeDetailsOpen}
               >
                 {row.original.guid}
-              </span> */}
+              </span>
             </div>
           </div>
         ),
@@ -214,13 +214,14 @@ export function EmployeeList() {
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
+  const [isEmployeeSheetOpen, setIsEmployeeSheetOpen] = useState(false);
 
   const handleEmployeeDetailsOpen = () => {
-    openEmployeeFormSheet("details");
+    setIsEmployeeSheetOpen(true);
   };
 
   const handleEmployeeDetailsClose = () => {
-    closeEmployeeFormSheet();
+    setIsEmployeeSheetOpen(false);
   };
 
   const handleEditFromEmployeeDetails = () => {
@@ -416,7 +417,7 @@ export function EmployeeList() {
 
       {/* Customer Details Sheet */}
       <EmployeeDetailsSheet
-        open={employeeSheetOpen && form === "details"}
+        open={isEmployeeSheetOpen}
         onOpenChange={handleEmployeeDetailsClose}
         onEditClick={handleEditFromEmployeeDetails}
       />
@@ -424,7 +425,7 @@ export function EmployeeList() {
       {/* Customer Form Sheet */}
       <EmployeeFormSheet
         mode={form ?? "new"}
-        open={employeeSheetOpen && (form === "new" || form === "edit")}
+        open={employeeSheetOpen}
         onOpenChange={handleEmployeeFormClose}
       />
     </>

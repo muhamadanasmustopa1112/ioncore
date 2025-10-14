@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { User, X } from "lucide-react";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
@@ -290,8 +289,18 @@ function PhoneNumberInput({
   );
 }
 
-export function EmployeeFormCard() {
-  const router = useRouter();
+export function EmployeeFormCard({
+  mode,
+  open,
+  onOpenChange,
+}: {
+  mode: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const isNewMode = mode === "new";
+  const isEditMode = mode === "edit";
+
   const { form } = useEmployeeStore();
 
   const [fullName, setFullName] = useState("");
@@ -303,16 +312,25 @@ export function EmployeeFormCard() {
 
   const isVerticalSidebar = process.env.NEXT_PUBLIC_SIDEBAR === "vertical";
 
+  // Handle form actions
   const handleSave = () => {
-    router.back();
+    console.log(`${isNewMode ? "Creating" : "Saving"} customer:`, {
+      fullName,
+      email,
+      phoneNumber,
+      status,
+      companyName,
+      timeZone,
+    });
+    onOpenChange(false);
   };
 
   const handleClose = () => {
-    router.back();
+    onOpenChange(false);
   };
 
   return (
-    <Card>
+    <Card className="mx-5 mt-3">
       <CardContent className="p-0">
         <div
           className={cn("flex h-full grow flex-wrap px-3.5", {
@@ -507,7 +525,7 @@ export function EmployeeFormCard() {
             Cancel
           </Button>
           <Button variant="mono" onClick={handleSave}>
-            Create
+            {isNewMode ? "Create" : "Save"}
           </Button>
         </CardFooter>
       </CardContent>

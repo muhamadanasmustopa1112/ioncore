@@ -1,8 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { RiAddLine } from "@remixicon/react";
-import { paths } from "@/config/paths";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,17 +16,13 @@ import {
   ToolbarHeading,
   ToolbarTitle,
 } from "@/components/common/toolbar";
+import { useEmployeeStore } from "../store/employee";
 import { EmployeeList } from "./list/employee-list";
 
 export function EmployeeListPage() {
-  const router = useRouter();
-
-  const onAddClick = () => {
-    router.push(paths.dashboard.oneColNewPage.create.getHref());
-  };
-
+  const { openEmployeeFormSheet } = useEmployeeStore();
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <>
       <Toolbar>
         <ToolbarHeading>
           <ToolbarTitle>Employee</ToolbarTitle>
@@ -49,7 +43,7 @@ export function EmployeeListPage() {
           </Breadcrumb>
         </ToolbarHeading>
         <ToolbarActions>
-          <Button type="button" onClick={onAddClick}>
+          <Button type="button" onClick={() => openEmployeeFormSheet("new")}>
             <RiAddLine />
             Add New
           </Button>
@@ -57,6 +51,6 @@ export function EmployeeListPage() {
       </Toolbar>
 
       <EmployeeList />
-    </div>
+    </>
   );
 }

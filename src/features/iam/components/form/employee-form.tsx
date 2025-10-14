@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { User, X } from "lucide-react";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   Command,
   CommandCheck,
@@ -290,8 +288,7 @@ function PhoneNumberInput({
   );
 }
 
-export function EmployeeFormCard() {
-  const router = useRouter();
+export function EmployeeForm() {
   const { form } = useEmployeeStore();
 
   const [fullName, setFullName] = useState("");
@@ -303,214 +300,184 @@ export function EmployeeFormCard() {
 
   const isVerticalSidebar = process.env.NEXT_PUBLIC_SIDEBAR === "vertical";
 
-  const handleSave = () => {
-    router.back();
-  };
-
-  const handleClose = () => {
-    router.back();
-  };
-
   return (
-    <Card>
-      <CardContent className="p-0">
-        <div
-          className={cn("flex h-full grow flex-wrap px-3.5", {
-            "lg:flex-nowrap": !isVerticalSidebar,
-          })}
-        >
-          {/* Left Section - Avatar Upload */}
-          <div className="w-full shrink-0 space-y-4 py-5 lg:w-[280px] lg:ps-2 lg:pe-5">
-            <EmployeeAvatarUpload mode={form ?? "new"} />
-          </div>
+    <div
+      className={cn("flex h-full grow flex-wrap px-3.5", {
+        "lg:flex-nowrap": !isVerticalSidebar,
+      })}
+    >
+      {/* Left Section - Avatar Upload */}
+      <div className="w-full shrink-0 space-y-4 py-5 lg:w-[280px] lg:ps-2 lg:pe-5">
+        <EmployeeAvatarUpload mode={form ?? "new"} />
+      </div>
 
-          {/* Right Section - Form Fields */}
-          <div
-            className={cn("grow py-5", {
-              "border-border lg:border-s": !isVerticalSidebar,
-            })}
-          >
-            <ScrollArea className="h-full">
-              <div className="space-y-5 py-1 pe-1 lg:ps-5">
-                {/* Full Name */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Full Name
-                  </Label>
-                  <Input
-                    placeholder="Full Name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
-                {/* Full Name */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Full Name
-                  </Label>
-                  <Input
-                    placeholder="Full Name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
-                {/* Full Name */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Full Name
-                  </Label>
-                  <Input
-                    placeholder="Full Name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
-                {/* Full Name */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Full Name
-                  </Label>
-                  <Input
-                    placeholder="Full Name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
-                {/* Full Name */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Full Name
-                  </Label>
-                  <Input
-                    placeholder="Full Name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
-                {/* Full Name */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Full Name
-                  </Label>
-                  <Input
-                    placeholder="Full Name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
-                {/* Email */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Email
-                  </Label>
-                  <Input
-                    placeholder="Email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
+      {/* Right Section - Form Fields */}
+      <div
+        className={cn("grow py-5", {
+          "border-border lg:border-s": !isVerticalSidebar,
+        })}
+      >
+        <ScrollArea className="h-full">
+          <div className="space-y-5 py-1 pe-1 lg:ps-5">
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Full Name */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Full Name
+              </Label>
+              <Input
+                placeholder="Full Name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            {/* Email */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">Email</Label>
+              <Input
+                placeholder="Email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-1"
+              />
+            </div>
 
-                {/* Phone Number */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Phone Number
-                  </Label>
-                  <div className="flex-1">
-                    <PhoneNumberInput
-                      value={phoneNumber}
-                      onChange={setPhoneNumber}
-                    />
-                  </div>
-                </div>
-
-                {/* Status */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Status
-                  </Label>
-                  <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Select Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="banned">Banned</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Company Name */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Company Name
-                  </Label>
-                  <Input
-                    placeholder="Company Name"
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    className="flex-1"
-                  />
-                </div>
-
-                {/* Time Zone */}
-                <div className="flex items-center gap-10">
-                  <Label className="w-24 shrink-0 text-xs font-medium">
-                    Time Zone
-                  </Label>
-                  <Select value={timeZone} onValueChange={setTimeZone}>
-                    <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Select Time Zone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="europe/amsterdam">
-                        Europe/Amsterdam
-                      </SelectItem>
-                      <SelectItem value="america/new_york">
-                        America/New_York
-                      </SelectItem>
-                      <SelectItem value="america/los_angeles">
-                        America/Los_Angeles
-                      </SelectItem>
-                      <SelectItem value="europe/london">
-                        Europe/London
-                      </SelectItem>
-                      <SelectItem value="asia/tokyo">Asia/Tokyo</SelectItem>
-                      <SelectItem value="asia/singapore">
-                        Asia/Singapore
-                      </SelectItem>
-                      <SelectItem value="australia/sydney">
-                        Australia/Sydney
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            {/* Phone Number */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Phone Number
+              </Label>
+              <div className="flex-1">
+                <PhoneNumberInput
+                  value={phoneNumber}
+                  onChange={setPhoneNumber}
+                />
               </div>
-            </ScrollArea>
-          </div>
-        </div>
+            </div>
 
-        <CardFooter className="border-border flex-row justify-end gap-2.5 border-t p-5 pb-4 lg:gap-2">
-          <Button variant="ghost" onClick={handleClose}>
-            Close
-          </Button>
-          <Button variant="outline" onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button variant="mono" onClick={handleSave}>
-            Create
-          </Button>
-        </CardFooter>
-      </CardContent>
-    </Card>
+            {/* Status */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Status
+              </Label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="banned">Banned</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Company Name */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Company Name
+              </Label>
+              <Input
+                placeholder="Company Name"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+
+            {/* Time Zone */}
+            <div className="flex items-center gap-10">
+              <Label className="w-24 shrink-0 text-xs font-medium">
+                Time Zone
+              </Label>
+              <Select value={timeZone} onValueChange={setTimeZone}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select Time Zone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="europe/amsterdam">
+                    Europe/Amsterdam
+                  </SelectItem>
+                  <SelectItem value="america/new_york">
+                    America/New_York
+                  </SelectItem>
+                  <SelectItem value="america/los_angeles">
+                    America/Los_Angeles
+                  </SelectItem>
+                  <SelectItem value="europe/london">Europe/London</SelectItem>
+                  <SelectItem value="asia/tokyo">Asia/Tokyo</SelectItem>
+                  <SelectItem value="asia/singapore">Asia/Singapore</SelectItem>
+                  <SelectItem value="australia/sydney">
+                    Australia/Sydney
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </ScrollArea>
+      </div>
+    </div>
   );
 }

@@ -68,17 +68,7 @@ export function HeaderToolbar() {
   const user = useMemo(() => userData?.response?.data, [userData]);
 
   return (
-    <nav className="flex items-center gap-2.5">
-      <Button mode="icon" variant="outline">
-        <Coffee />
-      </Button>
-      <Button mode="icon" variant="outline">
-        <MessageSquareCode />
-      </Button>
-      <Button mode="icon" variant="outline">
-        <Pin />
-      </Button>
-
+    <nav className="flex items-center justify-between gap-2.5 lg:w-full">
       {!isMobile && (
         <InputWrapper className="w-full lg:w-40">
           <Search />
@@ -89,107 +79,118 @@ export function HeaderToolbar() {
           />
         </InputWrapper>
       )}
+      <div className="flex items-center gap-2.5">
+        <Button mode="icon" variant="outline">
+          <Coffee />
+        </Button>
+        <Button mode="icon" variant="outline">
+          <MessageSquareCode />
+        </Button>
+        <Button mode="icon" variant="outline">
+          <Pin />
+        </Button>
 
-      {isMobile ? (
-        <>
-          <Button variant="outline" mode="icon">
-            <ClipboardList />
-          </Button>
-          <Button variant="mono" mode="icon">
+        {isMobile ? (
+          <>
+            <Button variant="outline" mode="icon">
+              <ClipboardList />
+            </Button>
+            {/* <Button variant="mono" mode="icon">
             <Plus />
-          </Button>
-        </>
-      ) : (
-        <>
-          <Button variant="outline">
-            <ClipboardList /> Reports
-          </Button>
-          <Button variant="mono">
+          </Button> */}
+          </>
+        ) : (
+          <>
+            <Button variant="outline">
+              <ClipboardList /> Reports
+            </Button>
+            {/* <Button variant="mono">
             <Plus /> Add
-          </Button>
-        </>
-      )}
+          </Button> */}
+          </>
+        )}
 
-      {/* User Dropdown Menu */}
-      <DropdownMenu>
-        <DropdownMenuTrigger className="cursor-pointer">
-          <Avatar className="size-7">
-            <AvatarImage
-              src={toAbsoluteUrl("/media/avatars/300-2.png")}
-              alt="@reui"
-            />
-            <AvatarFallback>CH</AvatarFallback>
-            <AvatarIndicator className="-end-2 -top-2">
-              <AvatarStatus variant="online" className="size-2.5" />
-            </AvatarIndicator>
-          </Avatar>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          className="w-56"
-          side="bottom"
-          align="end"
-          sideOffset={11}
-        >
-          {/* User Information Section */}
-          <div className="flex items-center gap-3 px-3 py-2">
-            <Avatar>
+        {/* User Dropdown Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger className="cursor-pointer">
+            <Avatar className="size-7">
               <AvatarImage
                 src={toAbsoluteUrl("/media/avatars/300-2.png")}
                 alt="@reui"
               />
               <AvatarFallback>CH</AvatarFallback>
-              <AvatarIndicator className="-end-1.5 -top-1.5">
+              <AvatarIndicator className="-end-2 -top-2">
                 <AvatarStatus variant="online" className="size-2.5" />
               </AvatarIndicator>
             </Avatar>
-            <div className="flex flex-col items-start">
-              <span className="text-foreground text-sm font-semibold">
-                {user?.username}
-              </span>
-              <span className="text-muted-foreground text-xs">
-                Senior Developer
-              </span>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-56"
+            side="bottom"
+            align="end"
+            sideOffset={11}
+          >
+            {/* User Information Section */}
+            <div className="flex items-center gap-3 px-3 py-2">
+              <Avatar>
+                <AvatarImage
+                  src={toAbsoluteUrl("/media/avatars/300-2.png")}
+                  alt="@reui"
+                />
+                <AvatarFallback>CH</AvatarFallback>
+                <AvatarIndicator className="-end-1.5 -top-1.5">
+                  <AvatarStatus variant="online" className="size-2.5" />
+                </AvatarIndicator>
+              </Avatar>
+              <div className="flex flex-col items-start overflow-hidden">
+                <span className="text-foreground w-full truncate overflow-hidden text-sm font-semibold text-ellipsis">
+                  {user?.username}
+                </span>
+                <span className="text-muted-foreground text-xs">
+                  Senior Developer
+                </span>
+              </div>
             </div>
-          </div>
 
-          <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-          {/* User Actions */}
-          <DropdownMenuItem>
-            <User />
-            <span>Profile</span>
-          </DropdownMenuItem>
+            {/* User Actions */}
+            <DropdownMenuItem>
+              <User />
+              <span>Profile</span>
+            </DropdownMenuItem>
 
-          <DropdownMenuItem>
-            <Settings />
-            <span>Settings</span>
-          </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Settings />
+              <span>Settings</span>
+            </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-          {/* Theme Toggle */}
-          <DropdownMenuItem onClick={toggleTheme}>
-            {theme === "light" ? (
-              <Moon className="size-4" />
-            ) : (
-              <Sun className="size-4" />
-            )}
-            <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
-          </DropdownMenuItem>
+            {/* Theme Toggle */}
+            <DropdownMenuItem onClick={toggleTheme}>
+              {theme === "light" ? (
+                <Moon className="size-4" />
+              ) : (
+                <Sun className="size-4" />
+              )}
+              <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
+            </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+            <DropdownMenuSeparator />
 
-          {/* Action Items */}
-          <DropdownMenuItem onClick={logout}>
-            {isPending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <LogOut />
-            )}
-            <span>Sign out</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {/* Action Items */}
+            <DropdownMenuItem onClick={logout}>
+              {isPending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <LogOut />
+              )}
+              <span>Sign out</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </nav>
   );
 }
