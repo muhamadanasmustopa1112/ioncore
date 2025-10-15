@@ -26,7 +26,7 @@ export default async function RootLayout({
   return (
     <html
       className="h-full"
-      data-theme-brand="wit"
+      data-theme-brand="default"
       data-theme-radius="md"
       data-theme-scale="md"
       suppressHydrationWarning

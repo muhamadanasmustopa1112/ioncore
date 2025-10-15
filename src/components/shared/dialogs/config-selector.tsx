@@ -29,7 +29,7 @@ interface ConfigState {
 }
 
 const brandColors = [
-  { value: "wit", label: "WIT", color: "bg-primary" },
+  { value: "default", label: "Default", color: "bg-primary" },
   { value: "dark", label: "Dark", color: "bg-zinc-950" },
   { value: "light", label: "Light", color: "bg-indigo-500" },
   { value: "red", label: "Red", color: "bg-red-500" },
@@ -40,7 +40,7 @@ const brandColors = [
 export function ConfigSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [config, setConfig] = useState<ConfigState>({
-    brand: "wit",
+    brand: "default",
     radius: "md",
     scale: "md",
     "content-layout": "centered",
@@ -66,7 +66,7 @@ export function ConfigSelector() {
   };
 
   useEffect(() => {
-    const brand = localStorage.getItem("brand") || "wit";
+    const brand = localStorage.getItem("brand") || "default";
     const radius = localStorage.getItem("radius") || "md";
     const scale = localStorage.getItem("scale") || "md";
     const contentLayout = localStorage.getItem("contentLayout") || "centered";
