@@ -95,7 +95,7 @@ export function EmployeeListPage() {
           "absolute top-0 right-0 z-0 flex h-full w-full flex-col md:relative md:h-auto",
           "transition-[transform,width] duration-300 ease-in-out",
           employeeSheetOpen
-            ? "bg-background border-border translate-x-0 border-l md:pointer-events-auto md:w-1/2"
+            ? "bg-body-background border-border translate-x-0 border-l md:pointer-events-auto md:w-1/2"
             : "translate-x-full md:pointer-events-none md:w-0 md:translate-x-0 md:border-0 md:bg-transparent",
         )}
       >

@@ -90,7 +90,7 @@ export function EmployeeListPage() {
         aria-label="Employee panel"
         aria-hidden={!employeeSheetOpen}
         className={cn(
-          "md:bg-background z-0 flex h-full w-full flex-col transition-[transform] duration-300 ease-in-out md:relative md:border-l",
+          "md:bg-body-background z-0 flex h-full w-full flex-col transition-[transform] duration-300 ease-in-out md:relative md:border-l",
           employeeSheetOpen
             ? "absolute top-0 right-0 translate-x-0 md:translate-x-0"
             : "absolute top-0 right-0 translate-x-full md:translate-x-0",
