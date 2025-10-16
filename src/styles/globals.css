@@ -42,7 +42,8 @@
   --sidebar-secondary: var(--color-zinc-100);
   --sidebar-secondary-foreground: var(--foreground);
 
-  --body-background: var(--color-white);
+  --body-background: var(--color-neutral-50);
+  --header-background: var(--color-white);
 }
 
 .dark {
@@ -78,6 +79,7 @@
   --sidebar-secondary-foreground: var(--foreground);
 
   --body-background: var(--color-zinc-950);
+  --header-background: var(--color-zinc-900);
 }
 
 /* Brand Colors */
@@ -98,6 +100,7 @@
   --secondary: var(--color-zinc-100);
   --secondary-foreground: var(--color-zinc-900);
   --body-background: var(--color-zinc-50);
+  --header-background: var(--color-white);
 
   --sidebar-main: var(--color-zinc-950);
   --sidebar-main-foreground: var(--color-white);
@@ -111,6 +114,7 @@
   --secondary: var(--color-indigo-50);
   --secondary-foreground: var(--color-indigo-900);
   --body-background: oklch(0.9877 0.0057 264.53);
+  --header-background: var(--color-white);
 
   --sidebar-main: var(--color-zinc-100);
   --sidebar-main-foreground: var(--color-zinc-900);
@@ -124,6 +128,7 @@
   --secondary: var(--color-red-50);
   --secondary-foreground: var(--color-red-900);
   --body-background: oklch(0.9911 0.0043 17.23);
+  --header-background: var(--color-white);
 
   --sidebar-main: oklch(0.4264 0.1582 24.36);
   --sidebar-main-foreground: var(--color-white);
@@ -137,6 +142,7 @@
   --secondary: var(--color-teal-50);
   --secondary-foreground: var(--color-teal-900);
   --body-background: oklch(0.9937 0.0044 179.74);
+  --header-background: var(--color-white);
 
   --sidebar-main: oklch(0.4532 0.0653 209.64);
   --sidebar-main-foreground: var(--color-white);
@@ -150,11 +156,93 @@
   --secondary: var(--color-blue-50);
   --secondary-foreground: var(--color-blue-900);
   --body-background: oklch(0.9885 0.0054 274.97);
+  --header-background: var(--color-white);
 
   --sidebar-main: oklch(0.3774 0.1065 258.57);
   --sidebar-main-foreground: var(--color-white);
   --sidebar-secondary: oklch(0.439 0.1275 258.44);
   --sidebar-secondary-foreground: var(--color-white);
+}
+
+.dark[data-theme-brand="default"] {
+  --primary: var(--color-blue-600);
+  --primary-foreground: var(--color-white);
+  --secondary: var(--color-blue-100);
+
+  --sidebar-main: var(--color-zinc-950);
+  --sidebar-main-foreground: var(--color-white);
+  --sidebar-secondary: var(--color-zinc-800);
+  --sidebar-secondary-foreground: var(--color-zinc-100);
+}
+
+.dark[data-theme-brand="light"] {
+  --primary: oklch(0.75 0.17 275);
+  --primary-foreground: oklch(0.14 0 0);
+  --secondary: oklch(0.28 0.03 275);
+  --secondary-foreground: oklch(0.98 0 0);
+  --sidebar: oklch(0.2 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+
+  --body-background: var(--color-zinc-950);
+  --header-background: var(--color-zinc-900);
+}
+
+.dark[data-theme-brand="red"] {
+  --primary: oklch(0.68 0.24 24);
+  --primary-foreground: oklch(0.14 0 0);
+  --secondary: oklch(0.28 0.05 24);
+  --secondary-foreground: oklch(0.98 0 0);
+  --sidebar: oklch(0.2 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+
+  --body-background: var(--color-zinc-950);
+  --header-background: var(--color-zinc-900);
+}
+
+.dark[data-theme-brand="green"] {
+  --primary: oklch(0.75 0.13 180);
+  --primary-foreground: oklch(0.14 0 0);
+  --secondary: oklch(0.3 0.03 180);
+  --secondary-foreground: oklch(0.98 0 0);
+  --sidebar: oklch(0.2 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+
+  --body-background: var(--color-zinc-950);
+  --header-background: var(--color-zinc-900);
+}
+
+.dark[data-theme-brand="blue"] {
+  --primary: oklch(0.72 0.18 260);
+  --primary-foreground: oklch(0.14 0 0);
+  --secondary: oklch(0.29 0.03 260);
+  --secondary-foreground: oklch(0.98 0 0);
+  --sidebar: oklch(0.2 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+
+  --body-background: var(--color-zinc-950);
+  --header-background: var(--color-zinc-900);
+}
+
+.dark[data-theme-brand="dark"] {
+  --primary: oklch(0.82 0.04 260);
+  --primary-foreground: oklch(0.16 0 0);
+  --secondary: oklch(0.22 0 0);
+  --secondary-foreground: oklch(0.98 0 0);
+  --sidebar: oklch(0.16 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+
+  --body-background: var(--color-zinc-950);
+  --header-background: var(--color-zinc-900);
 }
 
 /* Radius */
@@ -270,6 +358,7 @@
   --color-sidebar-secondary-foreground: var(--sidebar-secondary-foreground);
 
   --color-body-background: var(--body-background);
+  --color-header-background: var(--header-background);
 
   @keyframes marquee {
     from {

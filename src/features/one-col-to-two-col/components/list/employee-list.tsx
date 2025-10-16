@@ -73,12 +73,12 @@ export function EmployeeList() {
               <span className="text-muted-foreground text-sm font-normal">
                 {row.original.job?.job_name}
               </span>
-              <span
+              {/* <span
                 className="text-primary cursor-pointer"
                 onClick={handleEmployeeDetailsOpen}
               >
                 {row.original.guid}
-              </span>
+              </span> */}
             </div>
           </div>
         ),

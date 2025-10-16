@@ -6,8 +6,8 @@ import "@/styles/globals.css";
 import { ReactNode, Suspense } from "react";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "next-themes";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { ThemeProvider } from "@/components/layouts/context/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -33,7 +33,7 @@ export default async function RootLayout({
     >
       <body
         className={cn(
-          "text-foreground bg-body-background group/layout flex text-base antialiased h-full",
+          "text-foreground bg-body-background group/layout flex h-full text-base antialiased",
           inter.className,
         )}
         data-theme-content-layout="centered"
@@ -43,10 +43,8 @@ export default async function RootLayout({
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
-            storageKey="nextjs-theme"
             enableSystem
             disableTransitionOnChange
-            enableColorScheme
           >
             <TooltipProvider delayDuration={0}>
               <Suspense>

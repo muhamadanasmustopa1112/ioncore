@@ -81,10 +81,10 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
           <RiEyeLine />
           Detail
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer" onClick={handleCopyId}>
+        {/* <DropdownMenuItem className="cursor-pointer" onClick={handleCopyId}>
           <RiFileCopy2Line />
           Copy ID
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           variant="destructive"

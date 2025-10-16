@@ -2,7 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useStore } from "@/store/store";
-import { Layout, Palette, Scale, Settings, Square } from "lucide-react";
+import {
+  Layout,
+  Monitor,
+  Moon,
+  Palette,
+  Scale,
+  Settings,
+  Square,
+  Sun,
+} from "lucide-react";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +47,19 @@ const brandColors = [
   { value: "blue", label: "Blue", color: "bg-blue-500" },
 ];
 
+const borderRadii = [
+  { value: "none", label: "None" },
+  { value: "sm", label: "Small" },
+  { value: "md", label: "Medium" },
+  { value: "lg", label: "Large" },
+];
+
+const scales = [
+  { value: "xs", label: "Extra Small" },
+  { value: "sm", label: "Small" },
+  { value: "md", label: "Medium" },
+];
+
 export function ConfigSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [config, setConfig] = useState<ConfigState>({
@@ -47,22 +70,45 @@ export function ConfigSelector() {
     layout: "vertical",
   });
   const { setLayout } = useStore();
+  const { theme, resolvedTheme, setTheme } = useTheme();
 
-  const updateConfig = (key: keyof ConfigState, value: string) => {
-    setConfig((prev) => ({ ...prev, [key]: value }));
+  const setHtmlAttr = (key: "brand" | "radius" | "scale", value: string) => {
+    document.documentElement.setAttribute(`data-theme-${key}`, value);
+  };
+  const setBodyAttr = (value: string) => {
+    document.body.setAttribute("data-theme-content-layout", value);
+  };
 
+  const persist = (key: keyof ConfigState, value: string) => {
+    // store keys aligned with existing reader keys
     if (key === "content-layout") {
-      document.body.setAttribute("data-theme-content-layout", value);
+      localStorage.setItem("contentLayout", value);
       return;
     }
-
     if (key === "layout") {
-      setLayout(value as "vertical" | "horizontal");
       localStorage.setItem("sidebar", value);
       return;
     }
+    if (key === "brand") localStorage.setItem("brand", value);
+    if (key === "radius") localStorage.setItem("radius", value);
+    if (key === "scale") localStorage.setItem("scale", value);
+  };
 
-    document.documentElement.setAttribute(`data-theme-${key}`, value);
+  const updateConfig = (key: keyof ConfigState, value: string) => {
+    setConfig((prev) => ({ ...prev, [key]: value }));
+    persist(key, value);
+
+    if (key === "content-layout") {
+      setBodyAttr(value);
+      return;
+    }
+    if (key === "layout") {
+      setLayout(value as "vertical" | "horizontal");
+      return;
+    }
+
+    // brand / radius / scale
+    setHtmlAttr(key as "brand" | "radius" | "scale", value);
   };
 
   useEffect(() => {
@@ -70,14 +116,22 @@ export function ConfigSelector() {
     const radius = localStorage.getItem("radius") || "md";
     const scale = localStorage.getItem("scale") || "md";
     const contentLayout = localStorage.getItem("contentLayout") || "centered";
-    const layout = localStorage.getItem("sidebar") || "vertical";
+    const layout =
+      (localStorage.getItem("sidebar") as "vertical" | "horizontal") ||
+      "vertical";
+
+    // sync DOM attributes on first mount so tokens apply instantly
+    setHtmlAttr("brand", brand);
+    setHtmlAttr("radius", radius);
+    setHtmlAttr("scale", scale);
+    setBodyAttr(contentLayout);
 
     setConfig({
       brand,
       radius,
       scale,
       "content-layout": contentLayout,
-      layout: layout as "vertical" | "horizontal",
+      layout,
     });
   }, []);
 
@@ -115,6 +169,44 @@ export function ConfigSelector() {
               </CardHeader>
 
               <CardContent className="space-y-6">
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2 text-sm font-medium">
+                    <Sun className="h-4 w-4" />
+                    Theme
+                  </Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <Button
+                      variant={
+                        resolvedTheme === "light" ? "primary" : "outline"
+                      }
+                      size="sm"
+                      onClick={() => setTheme("light")}
+                      className="capitalize"
+                    >
+                      <Sun className="mr-2 h-4 w-4" />
+                      Light
+                    </Button>
+                    <Button
+                      variant={resolvedTheme === "dark" ? "primary" : "outline"}
+                      size="sm"
+                      onClick={() => setTheme("dark")}
+                      className="capitalize"
+                    >
+                      <Moon className="mr-2 h-4 w-4" />
+                      Dark
+                    </Button>
+                    <Button
+                      variant={theme === "system" ? "primary" : "outline"}
+                      size="sm"
+                      onClick={() => setTheme("system")}
+                      className="capitalize"
+                    >
+                      <Monitor className="mr-2 h-4 w-4" />
+                      System
+                    </Button>
+                  </div>
+                </div>
+
                 {/* Layout Config */}
                 <div className="space-y-3">
                   <Label className="flex items-center gap-2 text-sm font-medium">
@@ -137,6 +229,7 @@ export function ConfigSelector() {
                     ))}
                   </div>
                 </div>
+
                 {/* Brand Color Config */}
                 <div className="space-y-3">
                   <Label className="flex items-center gap-2 text-sm font-medium">
@@ -168,26 +261,14 @@ export function ConfigSelector() {
                   </Select>
                 </div>
 
+                {/* Border Radius Config */}
                 <div className="space-y-3">
                   <Label className="flex items-center gap-2 text-sm font-medium">
                     <Square className="h-4 w-4" />
                     Border Radius
                   </Label>
                   <div className="grid grid-cols-2 gap-2">
-                    {/* "none", "sm", "md", "lg", "xl" */}
-                    {[
-                      { value: "none", label: "None" },
-                      {
-                        value: "sm",
-                        label: "Small",
-                      },
-                      { value: "md", label: "Medium" },
-                      {
-                        value: "lg",
-                        label: "Large",
-                      },
-                      // { value: "xl", label: "Extra Large" },
-                    ].map((option) => (
+                    {borderRadii.map((option) => (
                       <Button
                         key={option.value}
                         variant={
@@ -203,27 +284,14 @@ export function ConfigSelector() {
                   </div>
                 </div>
 
+                {/* Scale Config */}
                 <div className="space-y-3">
                   <Label className="flex items-center gap-2 text-sm font-medium">
                     <Scale className="h-4 w-4" />
                     Scale
                   </Label>
                   <div className="grid grid-cols-2 gap-2">
-                    {/* "xs", "md", "lg" */}
-                    {[
-                      {
-                        value: "xs",
-                        label: "Extra Small",
-                      },
-                      {
-                        value: "sm",
-                        label: "Small",
-                      },
-                      {
-                        value: "md",
-                        label: "Medium",
-                      },
-                    ].map((option) => (
+                    {scales.map((option) => (
                       <Button
                         key={option.value}
                         variant={
@@ -239,10 +307,11 @@ export function ConfigSelector() {
                   </div>
                 </div>
 
+                {/* Content Layout Config */}
                 <div className="space-y-3">
                   <Label className="flex items-center gap-2 text-sm font-medium">
                     <Layout className="h-4 w-4" />
-                    Layout
+                    Content Layout
                   </Label>
                   <div className="grid grid-cols-2 gap-2">
                     {["centered", "boxed"].map((option) => (
