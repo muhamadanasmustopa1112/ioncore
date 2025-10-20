@@ -66,11 +66,11 @@ export function EmployeeList() {
             <div className="flex flex-col">
               <Link
                 href="#"
-                className="text-mono hover:text-primary-active mb-px text-sm font-bold"
+                className="text-mono hover:text-primary-active mb-px text-sm font-medium"
               >
                 {row.original.fullname}
               </Link>
-              <span className="text-muted-foreground text-sm font-normal">
+              <span className="text-muted-foreground text-xs font-normal">
                 {row.original.job?.job_name}
               </span>
               {/* <span
@@ -106,8 +106,10 @@ export function EmployeeList() {
         ),
         cell: ({ row }) => (
           <div>
-            <div className="font-bold">{row.original.nickname}</div>
-            <div className="text-muted-foreground">{row.original.email}</div>
+            <div className="font-semibold">{row.original.nickname}</div>
+            <div className="text-muted-foreground text-xs">
+              {row.original.email}
+            </div>
           </div>
         ),
         enableSorting: true,

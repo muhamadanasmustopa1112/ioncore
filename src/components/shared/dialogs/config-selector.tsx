@@ -56,8 +56,8 @@ const borderRadii = [
 
 const scales = [
   { value: "xs", label: "Extra Small" },
-  { value: "sm", label: "Small" },
   { value: "md", label: "Medium" },
+  { value: "lg", label: "Large" },
 ];
 
 export function ConfigSelector() {
@@ -181,7 +181,7 @@ export function ConfigSelector() {
                       }
                       size="sm"
                       onClick={() => setTheme("light")}
-                      className="capitalize"
+                      className="text-xs capitalize"
                     >
                       <Sun className="mr-2 h-4 w-4" />
                       Light
@@ -190,7 +190,7 @@ export function ConfigSelector() {
                       variant={resolvedTheme === "dark" ? "primary" : "outline"}
                       size="sm"
                       onClick={() => setTheme("dark")}
-                      className="capitalize"
+                      className="text-xs capitalize"
                     >
                       <Moon className="mr-2 h-4 w-4" />
                       Dark
@@ -199,7 +199,7 @@ export function ConfigSelector() {
                       variant={theme === "system" ? "primary" : "outline"}
                       size="sm"
                       onClick={() => setTheme("system")}
-                      className="capitalize"
+                      className="text-xs capitalize"
                     >
                       <Monitor className="mr-2 h-4 w-4" />
                       System
@@ -213,7 +213,7 @@ export function ConfigSelector() {
                     <Palette className="h-4 w-4" />
                     Layout
                   </Label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {["vertical", "horizontal"].map((option) => (
                       <Button
                         key={option}
@@ -222,7 +222,7 @@ export function ConfigSelector() {
                         }
                         size="sm"
                         onClick={() => updateConfig("layout", option)}
-                        className="uppercase"
+                        className="text-xs capitalize"
                       >
                         {option === "vertical" ? "Vertical" : "Horizontal"}
                       </Button>
@@ -241,7 +241,7 @@ export function ConfigSelector() {
                     onValueChange={(value) => updateConfig("brand", value)}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue />
+                      <SelectValue className="text-xs" />
                     </SelectTrigger>
                     <SelectContent>
                       {brandColors.map((color) => (
@@ -267,7 +267,7 @@ export function ConfigSelector() {
                     <Square className="h-4 w-4" />
                     Border Radius
                   </Label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {borderRadii.map((option) => (
                       <Button
                         key={option.value}
@@ -276,7 +276,7 @@ export function ConfigSelector() {
                         }
                         size="sm"
                         onClick={() => updateConfig("radius", option.value)}
-                        className="uppercase"
+                        className="text-xs capitalize"
                       >
                         {option.label}
                       </Button>
@@ -290,7 +290,7 @@ export function ConfigSelector() {
                     <Scale className="h-4 w-4" />
                     Scale
                   </Label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {scales.map((option) => (
                       <Button
                         key={option.value}
@@ -299,7 +299,7 @@ export function ConfigSelector() {
                         }
                         size="sm"
                         onClick={() => updateConfig("scale", option.value)}
-                        className="uppercase"
+                        className="text-xs capitalize"
                       >
                         {option.label}
                       </Button>
@@ -313,7 +313,7 @@ export function ConfigSelector() {
                     <Layout className="h-4 w-4" />
                     Content Layout
                   </Label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     {["centered", "boxed"].map((option) => (
                       <Button
                         key={option}
@@ -324,7 +324,7 @@ export function ConfigSelector() {
                         }
                         size="sm"
                         onClick={() => updateConfig("content-layout", option)}
-                        className="capitalize"
+                        className="text-xs capitalize"
                       >
                         {option}
                       </Button>
