@@ -58,6 +58,18 @@ export const paths = {
         getHref: () => "/master-data/two-col-two-card",
       }
     },
+    project: {
+      root: {
+        path: "/project",
+        getHref: () => "/project",
+      },
+    },
+    kanban: {
+      root: {
+        path: "/project/kanban",
+        getHref: () => "/project/kanban",
+      },
+    },
     employee: {
       list: {
         path: "/human-resources/employee/list",

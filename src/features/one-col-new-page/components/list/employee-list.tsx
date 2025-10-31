@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { RiFilePdf2Line } from "@remixicon/react";
 import {
@@ -47,10 +47,18 @@ import { EmployeeDetailsSheet } from "../details/employee-details-sheet";
 import { EmployeeFormSheet } from "../form/employee-form-sheet";
 import { ActionsCell } from "./table/data-table-actions-cell";
 import { DataTableToolbar } from "./table/data-table-toolbar";
+import { DataGridTableDndRowHandle, DataGridTableDndRows } from "@/components/ui/data-grid-table-dnd-rows";
+import { DragEndEvent, UniqueIdentifier } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 
 export function EmployeeList() {
   const columns: ColumnDef<Employee>[] = useMemo(() => {
     return [
+      {
+        id: 'drag',
+        cell: ({ row }) => <DataGridTableDndRowHandle rowId={row.id} />,
+        size: 50,
+      },
       {
         id: "fullname",
         accessorFn: (row) => row.fullname,
@@ -284,10 +292,17 @@ export function EmployeeList() {
   }, [filter]);
 
   const { data: userData, isLoading, isFetching } = useEmployees({ request });
+  const [data, setData] = useState<Employee[]>([])
 
-  const data = useMemo(() => {
-    return userData?.response?.data ?? [];
-  }, [userData]);
+  const dataIds = useMemo<UniqueIdentifier[]>(() => data?.map(({ guid }) => guid as UniqueIdentifier), [data]);
+
+  // const data = useMemo(() => {
+  //   return userData?.response?.data ?? [];
+  // }, [userData]);
+
+  useEffect(() => {
+    setData(userData?.response?.data ?? [])
+  }, [userData?.response?.data])
 
   const meta = useMemo(() => {
     return userData?.response ?? {};
@@ -319,6 +334,17 @@ export function EmployeeList() {
     manualPagination: true,
   });
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+      setData((data) => {
+        const oldIndex = dataIds.indexOf(active.id);
+        const newIndex = dataIds.indexOf(over.id);
+        return arrayMove(data, oldIndex, newIndex);
+      });
+    }
+  };
+
   return (
     <>
       <DataGrid
@@ -330,6 +356,7 @@ export function EmployeeList() {
           columnsVisibility: true,
           columnsResizable: true,
           cellBorder: true,
+          rowsDraggable: true
         }}
         isLoading={isLoading || isFetching}
       >
@@ -407,7 +434,7 @@ export function EmployeeList() {
           </CardHeader>
           <CardTable>
             <ScrollArea>
-              <DataGridTable />
+              <DataGridTableDndRows handleDragEnd={handleDragEnd} dataIds={dataIds}/>
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </CardTable>

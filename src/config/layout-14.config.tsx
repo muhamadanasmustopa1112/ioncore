@@ -17,9 +17,11 @@ import {
   Megaphone,
   Newspaper,
   Palette,
+  Presentation,
   Settings,
   Square,
   SquareActivity,
+  SquareKanban,
   StickyNote,
   User,
   UserRoundCog,
@@ -87,6 +89,25 @@ export const MENU: MenuConfig = [
         ],
       },
     ],
+  },
+  {
+    title: "Project",
+    path: paths.dashboard.project.root.getHref(),
+    icon: Presentation,
+    children: [
+      {
+        title: "Task Board",
+        path: paths.dashboard.project.root.getHref(),
+        icon: SquareKanban,
+        children: [
+          {
+            title: "Kanban",
+            path: paths.dashboard.kanban.root.getHref(),
+            icon: SquareKanban,
+          }
+        ]
+      }
+    ]
   },
   {
     title: "Operasional",
