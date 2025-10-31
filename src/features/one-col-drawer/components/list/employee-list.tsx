@@ -47,6 +47,9 @@ import { EmployeeDetailsSheet } from "../details/employee-details-sheet";
 import { EmployeeFormSheet } from "../form/employee-form-sheet";
 import { ActionsCell } from "./table/data-table-actions-cell";
 import { DataTableToolbar } from "./table/data-table-toolbar";
+import { DragEndEvent } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
+import { DataGridTableDnd } from "@/components/ui/data-grid-table-dnd";
 
 export function EmployeeList() {
   const columns: ColumnDef<Employee>[] = useMemo(() => {
@@ -318,6 +321,17 @@ export function EmployeeList() {
     manualPagination: true,
   });
 
+  const handleDragColumn = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+      setColumnOrder((columnOrder) => {
+        const oldIndex = columnOrder.indexOf(active.id as string);
+        const newIndex = columnOrder.indexOf(over.id as string);
+        return arrayMove(columnOrder, oldIndex, newIndex);
+      });
+    }
+  };
+
   return (
     <>
       <DataGrid
@@ -329,6 +343,7 @@ export function EmployeeList() {
           columnsVisibility: true,
           columnsResizable: true,
           cellBorder: true,
+          columnsDraggable: true,
         }}
         isLoading={isLoading || isFetching}
       >
@@ -406,7 +421,8 @@ export function EmployeeList() {
           </CardHeader>
           <CardTable>
             <ScrollArea>
-              <DataGridTable />
+              {/* <DataGridTable /> */}
+              <DataGridTableDnd handleDragEnd={handleDragColumn} />
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </CardTable>
