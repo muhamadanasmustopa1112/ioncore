@@ -412,7 +412,7 @@ export function EmployeeList() {
             </ScrollArea>
           </CardTable>
           <CardFooter className="py-2.5">
-            <DataGridPagination />
+            <DataGridPagination setFilter={setFilter} filter={filter} />
           </CardFooter>
         </Card>
       </DataGrid>

@@ -23,10 +23,13 @@ interface DataGridPaginationProps {
   info?: string;
   infoSkeleton?: ReactNode;
   className?: string;
+  filter?: any
+  setFilter?: any
 }
 
 function DataGridPagination(props: DataGridPaginationProps) {
   const { table, recordCount, isLoading } = useDataGrid();
+  const { setFilter, filter } = props
 
   const defaultProps: Partial<DataGridPaginationProps> = {
     sizes: [5, 10, 25, 50, 100],
@@ -83,7 +86,7 @@ function DataGridPagination(props: DataGridPaginationProps) {
           })}
           onClick={() => {
             if (pageIndex !== i) {
-              table.setPageIndex(i);
+              setFilter((prevState: any) => ({...prevState, page: i + 1}))
             }
           }}
         >
@@ -149,7 +152,7 @@ function DataGridPagination(props: DataGridPaginationProps) {
               indicatorPosition="right"
               onValueChange={(value) => {
                 const newPageSize = Number(value);
-                table.setPageSize(newPageSize);
+                setFilter((prevState: any) => ({...prevState, limit: newPageSize}))
               }}
             >
               <SelectTrigger className="w-fit" size="sm">
@@ -181,7 +184,7 @@ function DataGridPagination(props: DataGridPaginationProps) {
                   mode="icon"
                   variant="ghost"
                   className={btnArrowClasses}
-                  onClick={() => table.previousPage()}
+                  onClick={() => setFilter((prevState: any) => ({...prevState, page: filter.page - 1}))}
                   disabled={!table.getCanPreviousPage()}
                 >
                   <span className="sr-only">Go to previous page</span>
@@ -199,7 +202,7 @@ function DataGridPagination(props: DataGridPaginationProps) {
                   mode="icon"
                   variant="ghost"
                   className={btnArrowClasses}
-                  onClick={() => table.nextPage()}
+                  onClick={() => setFilter((prevState: any) => ({...prevState, page: filter.page + 1}))}
                   disabled={!table.getCanNextPage()}
                 >
                   <span className="sr-only">Go to next page</span>

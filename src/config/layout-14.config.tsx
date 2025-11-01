@@ -17,6 +17,8 @@ import {
   Megaphone,
   Newspaper,
   Palette,
+  PanelsTopLeft,
+  PanelTop,
   Presentation,
   Settings,
   Square,
@@ -53,36 +55,27 @@ export const MENU: MenuConfig = [
     icon: Box,
     children: [
       {
-        children: [
-          {
-            title: "Blank Page MD",
-            path: paths.dashboard.masterData.root.getHref(),
-            icon: FileText,
-          },
-        ],
-      },
-      {
-        title: "Pages",
+        title: "Layout Experiences",
         path: paths.dashboard.oneColDrawer.root.getHref(),
         icon: Users,
         children: [
           {
-            title: "1 Col Drawer",
+            title: "1 Col with Pop Up Drawer",
             path: paths.dashboard.oneColDrawer.root.getHref(),
-            icon: Square,
+            icon: PanelTop,
           },
           {
-            title: "1 Col New Page",
+            title: "1 Col with New Page",
             path: paths.dashboard.oneColNewPage.root.getHref(),
             icon: StickyNote,
           },
           {
-            title: "1 Col to 2 Col",
+            title: "1 Col to 2 Col Drawer",
             path: paths.dashboard.oneColToTwoCol.root.getHref(),
-            icon: Columns,
+            icon: PanelsTopLeft,
           },
           {
-            title: "2 Col 2 Card",
+            title: "2 Col Section",
             path: paths.dashboard.twoColTwoCard.root.getHref(),
             icon: Columns,
           },

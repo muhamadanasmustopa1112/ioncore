@@ -439,7 +439,7 @@ export function EmployeeList() {
             </ScrollArea>
           </CardTable>
           <CardFooter>
-            <DataGridPagination />
+            <DataGridPagination setFilter={setFilter} filter={filter} />
           </CardFooter>
         </Card>
       </DataGrid>

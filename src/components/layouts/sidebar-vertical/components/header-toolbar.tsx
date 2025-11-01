@@ -2,15 +2,10 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUsers } from "@/features/auth/api";
 import {
-  ClipboardList,
-  Coffee,
   Loader2,
   LogOut,
-  MessageSquareCode,
+  MessageSquareDot,
   Moon,
-  Pin,
-  Plus,
-  Search,
   Settings,
   Sun,
   User,
@@ -35,8 +30,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Input, InputWrapper } from "@/components/ui/input";
 import { useLayout } from "./context";
+import { Badge } from "@/components/ui/badge";
 
 export function HeaderToolbar() {
   const { isMobile } = useLayout();
@@ -69,46 +73,57 @@ export function HeaderToolbar() {
 
   return (
     <nav className="flex items-center justify-between gap-2.5 lg:w-full">
-      {!isMobile && (
-        <InputWrapper className="w-full lg:w-40">
-          <Search />
+      <div>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Human Resources</BreadcrumbPage>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Employee</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+      <div className="flex items-center gap-2.5">
+        <InputWrapper className="relative">
           <Input
             type="search"
-            placeholder="Search"
+            placeholder="Search Menu"
             onChange={handleInputChange}
           />
+          <Badge className="absolute end-3 gap-1" variant="outline" size="sm">
+            ⌘ K
+          </Badge>
         </InputWrapper>
-      )}
-      <div className="flex items-center gap-2.5">
         <Button mode="icon" variant="outline">
-          <Coffee />
-        </Button>
-        <Button mode="icon" variant="outline">
-          <MessageSquareCode />
-        </Button>
-        <Button mode="icon" variant="outline">
-          <Pin />
+          <MessageSquareDot />
         </Button>
 
-        {isMobile ? (
+        {/* {isMobile ? (
           <>
             <Button variant="outline" mode="icon">
               <ClipboardList />
             </Button>
-            {/* <Button variant="mono" mode="icon">
+            <Button variant="mono" mode="icon">
             <Plus />
-          </Button> */}
+          </Button>
           </>
         ) : (
           <>
             <Button variant="outline">
               <ClipboardList /> Reports
             </Button>
-            {/* <Button variant="mono">
+            <Button variant="mono">
             <Plus /> Add
-          </Button> */}
+          </Button>
           </>
-        )}
+        )} */}
 
         {/* User Dropdown Menu */}
         <DropdownMenu>

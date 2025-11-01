@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { RiFilePdf2Line } from "@remixicon/react";
 import {
@@ -427,7 +427,7 @@ export function EmployeeList() {
             </ScrollArea>
           </CardTable>
           <CardFooter>
-            <DataGridPagination />
+            <DataGridPagination setFilter={setFilter} filter={filter} />
           </CardFooter>
         </Card>
       </DataGrid>
