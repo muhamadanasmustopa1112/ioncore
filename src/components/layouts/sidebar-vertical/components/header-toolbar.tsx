@@ -97,9 +97,6 @@ export function HeaderToolbar() {
             placeholder="Search Menu"
             onChange={handleInputChange}
           />
-          <Badge className="absolute end-3 gap-1" variant="outline" size="sm">
-            ⌘ K
-          </Badge>
         </InputWrapper>
         <Button mode="icon" variant="outline">
           <MessageSquareDot />

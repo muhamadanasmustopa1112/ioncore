@@ -50,6 +50,9 @@ import { DataTableToolbar } from "./table/data-table-toolbar";
 import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { DataGridTableDnd } from "@/components/ui/data-grid-table-dnd";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export function EmployeeList() {
   const columns: ColumnDef<Employee>[] = useMemo(() => {
@@ -109,7 +112,7 @@ export function EmployeeList() {
         ),
         cell: ({ row }) => (
           <div>
-            <div className="font-semibold">{row.original.nickname}</div>
+            <div className="font-normal">{row.original.nickname}</div>
             <div className="text-muted-foreground text-xs">
               {row.original.email}
             </div>
@@ -136,7 +139,7 @@ export function EmployeeList() {
         ),
         cell: ({ row }) => (
           <div>
-            <div className="font-bold">{row.original.outlet?.outlet_name}</div>
+            <div className="font-normal">{row.original.outlet?.outlet_name}</div>
             <div className="text-muted-foreground">
               {row.original.job?.join_date
                 ? format(row.original.job?.join_date, "dd MMMM yyyy")
@@ -210,6 +213,7 @@ export function EmployeeList() {
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
     search: parseAsString,
+    status: parseAsString
   });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [sortOrder, setSortOrder] = useState<string>("latest");
@@ -219,6 +223,7 @@ export function EmployeeList() {
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
+  const [openFilter, setOpenFilter] = useState<boolean>(false)
 
   const handleEmployeeDetailsOpen = () => {
     openEmployeeFormSheet("details");
@@ -269,8 +274,8 @@ export function EmployeeList() {
         group_id: "",
         set_brand_id: false,
         brand_id: "",
-        set_status: true,
-        status: "all",
+        set_status: Boolean(filter.status),
+        status: filter.status || "all",
         set_outlet_id: false,
         outlet_id: "0d049ef3-a3b0-4bdd-995d-e62db54ad26f",
         set_is_perbantuan: false,
@@ -344,79 +349,149 @@ export function EmployeeList() {
           columnsResizable: true,
           cellBorder: true,
           columnsDraggable: true,
+          
         }}
         isLoading={isLoading || isFetching}
       >
         <Card>
           <CardHeader>
-            <CardHeading>
-              <div className="flex items-center gap-2.5">
-                <div className="relative">
-                  <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
-                  <Input
-                    placeholder="Search Users..."
-                    value={filter.search || ""}
-                    onChange={(e) =>
-                      setFilter({ ...filter, search: e.target.value })
-                    }
-                    className="w-40 ps-9"
-                  />
-                  {filter.search && (
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-                      onClick={() => setFilter({ ...filter, search: "" })}
+            <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
+              <CardHeading className="py-[15px]">
+                <div className="flex items-center gap-2.5">
+                  <div>
+                    <CollapsibleTrigger asChild>
+                      <Button variant="outline">
+                        <Filter />
+                        {sortOrder !== "latest" && (
+                          <Badge size="sm" variant="outline">
+                            {sortOrder.charAt(0).toUpperCase() +
+                              sortOrder.slice(1)}
+                          </Badge>
+                        )}
+                      </Button>
+                    </CollapsibleTrigger>
+                  </div>
+                  <div className="relative">
+                    <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
+                    <Input
+                      placeholder="Search..."
+                      value={filter.search || ""}
+                      onChange={(e) =>
+                        setFilter({ ...filter, search: e.target.value })
+                      }
+                      className="w-40 ps-9"
+                    />
+                    {filter.search && (
+                      <Button
+                        mode="icon"
+                        variant="ghost"
+                        className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
+                        onClick={() => setFilter({ ...filter, search: "" })}
+                      >
+                        <X />
+                      </Button>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Outlet" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="outlet_1">Outlet 1</SelectItem>
+                        <SelectItem value="outlet_2">Outlet 2</SelectItem>
+                        <SelectItem value="outlet_3">Outlet 3</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="relative">
+                    <ToggleGroup value={filter.status || "all"} type="single" variant="outline" 
+                      onValueChange={(value) => setFilter({ ...filter, status: value || "all" })}
                     >
-                      <X />
-                    </Button>
-                  )}
+                      <ToggleGroupItem value="all">All</ToggleGroupItem>
+                      <ToggleGroupItem value="active">Active</ToggleGroupItem>
+                      <ToggleGroupItem value="inactive">Not Active</ToggleGroupItem>
+                    </ToggleGroup>
+                  </div>
                 </div>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline">
-                      <Filter />
-                      Sort Order
-                      {sortOrder !== "latest" && (
-                        <Badge size="sm" variant="outline">
-                          {sortOrder.charAt(0).toUpperCase() +
-                            sortOrder.slice(1)}
-                        </Badge>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-40 p-3" align="start">
-                    <div className="space-y-3">
-                      <div className="text-muted-foreground text-xs font-medium">
-                        Sort By
-                      </div>
-                      <div className="space-y-3">
-                        {["latest", "older", "oldest"].map((order) => (
-                          <div
-                            key={order}
-                            className="flex items-center gap-2.5"
-                          >
-                            <Checkbox
-                              id={order}
-                              checked={sortOrder === order}
-                              onCheckedChange={(checked) =>
-                                checked && setSortOrder(order)
-                              }
-                            />
-                            <Label
-                              htmlFor={order}
-                              className="flex grow items-center justify-between gap-1.5 font-normal"
-                            >
-                              {order.charAt(0).toUpperCase() + order.slice(1)}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
+                <CollapsibleContent>
+                  <div className="flex items-center gap-2.5 py-[10px]">
+                    <div className="relative">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Brand" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="brand_1">Brand 1</SelectItem>
+                          <SelectItem value="brand_2">Brand 2</SelectItem>
+                          <SelectItem value="brand_3">Brand 3</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </CardHeading>
+                    <div className="relative">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Sub Brand" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="sub_brand_1">Sub Brand 1</SelectItem>
+                          <SelectItem value="sub_brand_2">Sub Brand 2</SelectItem>
+                          <SelectItem value="sub_brand_3">Sub Brand 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Job" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="job_1">Job 1</SelectItem>
+                          <SelectItem value="job_2">Job 2</SelectItem>
+                          <SelectItem value="job_3">Job 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Department" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="department_1">Department 1</SelectItem>
+                          <SelectItem value="department_2">Department 2</SelectItem>
+                          <SelectItem value="department_3">Department 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gender_1">Gender 1</SelectItem>
+                          <SelectItem value="gender_2">Gender 2</SelectItem>
+                          <SelectItem value="gender_3">Gender 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="relative">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Marital" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="marital_1">Marital 1</SelectItem>
+                          <SelectItem value="marital_2">Marital 2</SelectItem>
+                          <SelectItem value="marital_3">Marital 3</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </CardHeading>
+            </Collapsible>
             <DataTableToolbar />
           </CardHeader>
           <CardTable>
