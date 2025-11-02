@@ -46,25 +46,25 @@ export function HeaderLogo() {
   const teams: Team[] = [
     {
       icon: Zap,
-      name: "Thunder AI",
+      name: "App Name",
       color: "bg-teal-600 text-white",
       members: 8,
     },
     {
       icon: Gem,
-      name: "Clarity AI",
+      name: "App Name",
       color: "bg-fuchsia-600 text-white",
       members: 6,
     },
     {
       icon: Hexagon,
-      name: "Lightning AI",
+      name: "App Name",
       color: "bg-yellow-600 text-white",
       members: 12,
     },
     {
       icon: Layers2,
-      name: "Bold AI",
+      name: "App Name",
       color: "bg-blue-600 text-white",
       members: 4,
     },
@@ -78,21 +78,21 @@ export function HeaderLogo() {
   }, [pathname]);
 
   return (
-    <div className="border-border/20 bg-sidebar-secondary flex items-center gap-2 border-e lg:w-(--sidebar-width)">
+    <div className="border-e bg-sidebar-secondary flex items-center gap-2 border-e lg:w-(--sidebar-width)">
       {/* Brand */}
       <div className="flex w-full items-center">
         {/* Logo */}
         <div className="border-border/20 bg-sidebar-main flex h-(--header-height) w-(--sidebar-collapsed-width) shrink-0 items-center justify-center border-e">
           <Link href="/layout-14">
             <img
-              src={toAbsoluteUrl("/media/app/mini-logo-gray.svg")}
-              className="min-h-[30px] dark:hidden"
-              alt="Thunder AI Logo"
+              src={toAbsoluteUrl("/media/app/logo-wit.png")}
+              className="min-h-[40px] w-[40px] dark:hidden"
+              alt="WIT.ID"
             />
             <img
-              src={toAbsoluteUrl("/media/app/mini-logo-gray-dark.svg")}
-              className="hidden min-h-[30px] dark:block"
-              alt="Thunder AI Logo"
+              src={toAbsoluteUrl("/media/app/logo-wit.png")}
+              className="hidden min-h-[40px] w-[40px] dark:block"
+              alt="WIT.ID"
             />
           </Link>
         </div>

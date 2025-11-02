@@ -9,16 +9,12 @@ export const DataTableToolbar = () => {
 
   return (
     <CardToolbar>
-      <Button>
-        <Settings2 size={16} />
-        Filters
-      </Button>
       <DataGridColumnVisibility
         table={table}
         trigger={
           <Button variant="outline">
             <Settings2 />
-            Columns
+            View
           </Button>
         }
       />

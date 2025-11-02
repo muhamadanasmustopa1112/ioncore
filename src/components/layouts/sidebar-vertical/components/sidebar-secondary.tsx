@@ -10,8 +10,8 @@ import { SidebarSearch } from "./sidebar-search";
 export function SidebarSecondary() {
   const { menu } = useStore();
   return (
-    <ScrollArea className="bg-sidebar-secondary mt-0 mb-2.5 h-[calc(100vh-1rem)] shrink-0 grow lg:h-[calc(100vh-4rem)]">
-      <SidebarSearch />
+    <ScrollArea className="bg-sidebar-secondary border-e mt-0 mb-2.5 h-[calc(100vh-1rem)] shrink-0 grow lg:h-[calc(100vh-4rem)]">
+      {/* <SidebarSearch /> */}
       {menu.children?.map((item, index) => {
         return (
           <Fragment key={index}>
