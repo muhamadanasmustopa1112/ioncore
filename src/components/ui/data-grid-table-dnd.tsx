@@ -63,12 +63,12 @@ function DataGridTableDndHeader<TData>({
 
   const style: CSSProperties = {
     opacity: isDragging ? 0.8 : 1,
-    position: "relative",
+    // position: "relative",
     transform: CSS.Translate.toString(transform),
     transition,
     whiteSpace: "nowrap",
     width: header.column.getSize(),
-    zIndex: isDragging ? 1 : 0,
+    // zIndex: isDragging ? 1 : 0,
   };
 
   return (
@@ -107,11 +107,11 @@ function DataGridTableDndCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
 
   const style: CSSProperties = {
     opacity: isDragging ? 0.8 : 1,
-    position: "relative",
+    // position: "relative",
     transform: CSS.Translate.toString(transform),
     transition,
     width: cell.column.getSize(),
-    zIndex: isDragging ? 1 : 0,
+    // zIndex: isDragging ? 1 : 0,
   };
 
   return (
