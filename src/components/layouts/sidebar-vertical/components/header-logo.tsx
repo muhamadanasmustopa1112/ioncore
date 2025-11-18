@@ -82,7 +82,7 @@ export function HeaderLogo() {
       {/* Brand */}
       <div className="flex w-full items-center">
         {/* Logo */}
-        <div className="border-border/20 bg-sidebar-main flex h-(--header-height) w-(--sidebar-collapsed-width) shrink-0 items-center justify-center border-e">
+        {/* <div className="border-border/20 bg-sidebar-main flex h-(--header-height) w-(--sidebar-collapsed-width) shrink-0 items-center justify-center border-e">
           <Link href="/layout-14">
             <img
               src={toAbsoluteUrl("/media/app/logo-wit.png")}
@@ -95,7 +95,7 @@ export function HeaderLogo() {
               alt="WIT.ID"
             />
           </Link>
-        </div>
+        </div> */}
 
         {/* Mobile sidebar toggle */}
         {isMobile && (

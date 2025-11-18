@@ -1,6 +1,8 @@
 import { Metadata } from "next";
-import { LayoutProvider } from "./components/context";
 import { Wrapper } from "./components/wrapper";
+import { LayoutProvider } from "@/components/layouts/context/layout-context";
+import { LayoutProvider as SidebarLayoutProvider } from "./components/context";
+import { MAIN_NAV } from "@/config/layout-15.config";
 
 // Generate metadata for the layout
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,17 +22,20 @@ export function SidebarVerticalLayout({
 }) {
   return (
     <LayoutProvider
-      style={
-        {
-          "--sidebar-width": "300px",
-          "--sidebar-collapsed-width": "60px",
-          "--sidebar-header-height": "54px",
-          "--header-height": "60px",
-          "--header-height-mobile": "60px",
-        } as React.CSSProperties
-      }
+      // style={
+      //   {
+      //     "--sidebar-width": "300px",
+      //     "--sidebar-collapsed-width": "60px",
+      //     "--sidebar-header-height": "54px",
+      //     "--header-height": "60px",
+      //     "--header-height-mobile": "60px",
+      //   } as React.CSSProperties
+      // }
+      sidebarNavItems={MAIN_NAV}
     >
-      <Wrapper>{children}</Wrapper>
+      <SidebarLayoutProvider>
+        <Wrapper>{children}</Wrapper>
+      </SidebarLayoutProvider>
     </LayoutProvider>
   );
 }
