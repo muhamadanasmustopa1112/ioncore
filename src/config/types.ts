@@ -17,3 +17,23 @@ export interface MenuItem {
 }
 
 export type MenuConfig = MenuItem[];
+
+export interface NavItem {
+  id: string;
+  title?: string;
+  icon?: LucideIcon;
+  path?: string;
+  badge?: string;
+  pinnable?: boolean;
+  pinned?: boolean;
+  soon?: boolean;
+  new?: {
+    tooltip: string;
+    path: string;
+  };
+  more?: true;
+  dropdown?: true;
+}
+
+export type NavConfig = NavItem[];
+
