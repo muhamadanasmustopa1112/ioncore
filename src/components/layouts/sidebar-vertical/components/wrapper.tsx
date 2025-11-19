@@ -10,6 +10,8 @@ import { Toolbar, ToolbarActions, ToolbarHeading } from "./toolbar";
 import { ToolbarMenu } from "./toolbar-menu";
 import { ToolbarMenuMobile } from "./toolbar-menu-mobile";
 import { HeaderThin } from "@/components/layouts/sidebar-vertical/components/header-thin";
+import { ContentHeader } from "@/components/common/content-header";
+import { ToolbarTitle } from "@/components/common/toolbar";
 
 export function Wrapper({ children }: { children: React.ReactNode }) {
   const { sidebarCollapse } = useLayoutContext();

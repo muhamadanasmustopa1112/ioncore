@@ -18,12 +18,13 @@ import {
 } from "@/components/common/toolbar";
 import { useEmployeeStore } from "../store/employee";
 import { EmployeeList } from "./list/employee-list";
+import { ContentHeader } from "@/components/common/content-header";
 
 export function EmployeeListPage() {
   const { openEmployeeFormSheet } = useEmployeeStore();
   return (
     <>
-      <Toolbar>
+      {/* <Toolbar>
         <ToolbarHeading>
           <ToolbarTitle>Employee</ToolbarTitle>
           <Breadcrumb>
@@ -48,7 +49,20 @@ export function EmployeeListPage() {
             Add New
           </Button>
         </ToolbarActions>
-      </Toolbar>
+      </Toolbar> */}
+      <ContentHeader>
+        <Toolbar>
+          <ToolbarHeading>
+            <ToolbarTitle>Employee</ToolbarTitle>
+          </ToolbarHeading>
+          <ToolbarActions>
+            <Button type="button" onClick={() => openEmployeeFormSheet("new")}>
+              <RiAddLine />
+              Add New
+            </Button>
+          </ToolbarActions>
+        </Toolbar>
+      </ContentHeader>
 
       <EmployeeList />
     </>
