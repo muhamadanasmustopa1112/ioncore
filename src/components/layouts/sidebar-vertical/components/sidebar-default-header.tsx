@@ -70,7 +70,7 @@ export function SidebarDefaultHeader() {
                 K
               </span>
               <span className="text-foreground text-sm font-medium in-data-[sidebar-collapsed]:hidden">
-                Keenthemes
+                App Name
               </span>
               <ChevronDown className="size-4 text-muted-foreground in-data-[sidebar-collapsed]:hidden" />
             </Button>

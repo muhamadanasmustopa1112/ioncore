@@ -50,20 +50,6 @@ export function EmployeeListPage() {
           </Button>
         </ToolbarActions>
       </Toolbar> */}
-      <ContentHeader>
-        <Toolbar>
-          <ToolbarHeading>
-            <ToolbarTitle>Employee</ToolbarTitle>
-          </ToolbarHeading>
-          <ToolbarActions>
-            <Button type="button" onClick={() => openEmployeeFormSheet("new")}>
-              <RiAddLine />
-              Add New
-            </Button>
-          </ToolbarActions>
-        </Toolbar>
-      </ContentHeader>
-
       <EmployeeList />
     </>
   );

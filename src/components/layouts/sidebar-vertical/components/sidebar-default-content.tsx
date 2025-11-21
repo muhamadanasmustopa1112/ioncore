@@ -8,7 +8,7 @@ export function SidebarDefaultContent() {
       <ScrollArea className="h-[calc(100vh-(var(--header-height))-(var(--content-header-height))-(var(--sidebar-footer-height)))] in-data-[sidebar-collapsed]:h-[calc(100vh-(var(--header-height))-(var(--content-header-height))-(var(--sidebar-footer-collapsed-height)))]">
         <div className="py-3.5 space-y-3.5">
           <SidebarDefaultNav />
-          <SidebarDefaultFavorites />
+          {/* <SidebarDefaultFavorites /> */}
         </div>
       </ScrollArea>
     </div>

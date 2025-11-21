@@ -1,7 +1,7 @@
 import { Fragment, ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MENU_SIDEBAR_MAIN } from "@/config/layout-14.config";
+import { MENU, MENU_SIDEBAR_MAIN } from "@/config/layout-14.config";
 import { MenuItem } from "@/config/types";
 import { useMenu } from "@/hooks/use-menu";
 import {
@@ -33,7 +33,7 @@ function ToolbarActions({ children }: { children?: ReactNode }) {
 function ToolbarBreadcrumbs() {
   const pathname = usePathname();
   const { getBreadcrumb } = useMenu(pathname);
-  const items: MenuItem[] = getBreadcrumb(MENU_SIDEBAR_MAIN);
+  const items: MenuItem[] = getBreadcrumb(MENU);
 
   if (items.length === 0) {
     return null;
