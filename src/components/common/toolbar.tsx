@@ -32,7 +32,7 @@ export const ToolbarHeading = ({
   className,
 }: ToolbarHeadingProps) => {
   return (
-    <div className={cn("flex flex-col flex-wrap gap-px", className)}>
+    <div className={cn("flex flex-col", className)}>
       {children}
     </div>
   );

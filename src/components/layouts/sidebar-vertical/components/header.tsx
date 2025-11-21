@@ -1,20 +1,62 @@
+import { ContentHeader } from "@/components/common/content-header";
 import { useLayout } from "./context";
 import { HeaderBreadcrumbs } from "./header-breadcrumbs";
 import { HeaderLogo } from "./header-logo";
 import { HeaderToolbar } from "./header-toolbar";
+import {
+  Toolbar,
+  ToolbarActions,
+  ToolbarHeading,
+  ToolbarTitle,
+} from "@/components/common/toolbar";
+import { RiAddLine } from "@remixicon/react";
+import { ToolbarBreadcrumbs } from "./toolbar";
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetHeader,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { SidebarContent } from "./sidebar-content";
 
 export function Header() {
   const { isMobile } = useLayout();
+  const pathname = usePathname();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
-    <header className="bg-header-background border-border supports-backdrop-filter:bg-header-background fixed start-0 end-0 top-0 z-10 flex h-(--header-height-mobile) shrink-0 items-stretch border-b pe-[var(--removed-body-scroll-bar-size,0px)] lg:h-(--header-height)">
-      <div className="@container flex grow items-stretch justify-between gap-2.5 lg:gap-0 pe-5">
-        <div className="flex items-stretch gap-x-6">
-          <HeaderLogo />
-          {!isMobile && <HeaderBreadcrumbs />}
-        </div>
-        <HeaderToolbar />
-      </div>
+    <header>
+      <ContentHeader>
+        <Toolbar>
+          {
+            isMobile && (
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="dim" mode="icon" className="hover:text-white">
+                    <Menu />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  className="p-0 gap-0 w-(--sidebar-width)"
+                  side="left"
+                  close={false}
+                >
+                  <SheetHeader className="p-0 space-y-0" />
+                  <SheetBody className="flex flex-col grow p-0 [--sidebar-space-x:calc(var(--spacing)*2.5)]">
+                    <SidebarContent />
+                  </SheetBody>
+                </SheetContent>
+              </Sheet>
+            )
+          }
+          <HeaderToolbar />
+        </Toolbar>
+      </ContentHeader>
     </header>
   );
 }

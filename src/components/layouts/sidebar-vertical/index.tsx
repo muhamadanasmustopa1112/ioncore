@@ -3,6 +3,7 @@ import { Wrapper } from "./components/wrapper";
 import { LayoutProvider } from "@/components/layouts/context/layout-context";
 import { LayoutProvider as SidebarLayoutProvider } from "./components/context";
 import { MAIN_NAV } from "@/config/layout-15.config";
+import { MENU } from "@/config/menu";
 
 // Generate metadata for the layout
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,7 +32,7 @@ export function SidebarVerticalLayout({
       //     "--header-height-mobile": "60px",
       //   } as React.CSSProperties
       // }
-      sidebarNavItems={MAIN_NAV}
+      sidebarNavItems={MENU}
     >
       <SidebarLayoutProvider>
         <Wrapper>{children}</Wrapper>

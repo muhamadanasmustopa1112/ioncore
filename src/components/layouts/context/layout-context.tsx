@@ -1,6 +1,6 @@
 'use client';
 
-import { NavConfig } from '@/config/types';
+import { MenuConfig, NavConfig } from '@/config/types';
 import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
 
 // Define the shape of the layout state
@@ -11,7 +11,7 @@ interface LayoutState {
   pinSidebarNavItem: (id: string) => void;
   unpinSidebarNavItem: (id: string) => void;
   isSidebarNavItemPinned: (id: string) => boolean;
-  getSidebarNavItems: () => NavConfig;
+  getSidebarNavItems: () => MenuConfig;
 }
 
 // Create the context
@@ -20,7 +20,7 @@ const LayoutContext = createContext<LayoutState | undefined>(undefined);
 // Provider component
 interface LayoutProviderProps {
   children: ReactNode;
-  sidebarNavItems: NavConfig;
+  sidebarNavItems: MenuConfig;
 }
 
 export function LayoutProvider({
@@ -28,9 +28,7 @@ export function LayoutProvider({
   sidebarNavItems,
 }: LayoutProviderProps) {
   const [sidebarCollapse, setSidebarCollapse] = useState(false);
-  const initialPinned = sidebarNavItems
-    .filter((item) => item.pinned)
-    .map((item) => item.id);
+  const initialPinned = sidebarNavItems.map((item) => item.title);
   const [sidebarPinnedNavItems, setSidebarPinnedNavItems] =
     useState<string[]>(initialPinned);
 
@@ -49,12 +47,6 @@ export function LayoutProvider({
   // Memoize the processed navigation items to prevent duplicate object creation
   const processedNavItems = useMemo(() => {
     return sidebarNavItems.map((item) => {
-      if (item.pinnable) {
-        return {
-          ...item,
-          pinned: sidebarPinnedNavItems.includes(item.id),
-        };
-      }
       return item;
     });
   }, [sidebarNavItems, sidebarPinnedNavItems]);
