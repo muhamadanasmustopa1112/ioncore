@@ -37,17 +37,6 @@ export const MENU: MenuConfig = [
     title: "Dashboard",
     path: paths.dashboard.root.getHref(),
     icon: BarChart3,
-    children: [
-      {
-        children: [
-          {
-            title: "Dashboard",
-            path: paths.dashboard.root.getHref(),
-            icon: BarChart3,
-          },
-        ],
-      },
-    ],
   },
   {
     title: "Master Data",
@@ -126,58 +115,163 @@ export const MENU: MenuConfig = [
 
 export const MENU_PAGES: MenuConfig = [
   {
+    title: "Dashboard",
+    path: paths.dashboard.root.getHref(),
+    icon: BarChart3,
+  },
+  {
+    title: "Master Data",
+    path: paths.dashboard.masterData.root.getHref(),
+    icon: Box,
     children: [
       {
-        title: "Pages",
-        path: "#",
-        icon: Bolt,
+        title: "Layout Experiences",
+        path: paths.dashboard.oneColDrawer.root.getHref(),
+        icon: Users,
         children: [
           {
-            title: "1 Column",
-            path: paths.dashboard.employee.list.getHref(),
-            icon: Bolt,
+            title: "1 Col with Pop Up Drawer",
+            path: paths.dashboard.oneColDrawer.root.getHref(),
+            icon: PanelTop,
           },
           {
-            title: "2 Column",
-            path: paths.dashboard.employee.twoColumnCard.getHref(),
-            icon: Bolt,
+            title: "1 Col with New Page",
+            path: paths.dashboard.oneColNewPage.root.getHref(),
+            icon: StickyNote,
+          },
+          {
+            title: "1 Col to 2 Col Drawer",
+            path: paths.dashboard.oneColToTwoCol.root.getHref(),
+            icon: PanelsTopLeft,
+          },
+          {
+            title: "2 Col Section",
+            path: paths.dashboard.twoColTwoCard.root.getHref(),
+            icon: Columns,
           },
         ],
       },
     ],
   },
+  {
+    title: "Project",
+    path: paths.dashboard.project.root.getHref(),
+    icon: Presentation,
+    children: [
+      {
+        title: "Task Board",
+        path: paths.dashboard.project.root.getHref(),
+        icon: SquareKanban,
+        children: [
+          {
+            title: "Kanban",
+            path: paths.dashboard.kanban.root.getHref(),
+            icon: SquareKanban,
+          }
+        ]
+      }
+    ]
+  },
+  {
+    title: "Operasional",
+    path: "#",
+    icon: FileText,
+  },
+  {
+    title: "Report",
+    path: "#",
+    icon: FileChartLine,
+  },
+  {
+    title: "Config",
+    path: "#",
+    icon: Settings,
+  },
+  {
+    title: "IAM",
+    path: "#",
+    icon: User,
+  },
 ];
 
 export const MENU_SIDEBAR_MAIN: MenuConfig = [
   {
+    title: "Dashboard",
+    path: paths.dashboard.root.getHref(),
+    icon: BarChart3,
+  },
+  {
+    title: "Master Data",
+    path: paths.dashboard.masterData.root.getHref(),
+    icon: Box,
     children: [
       {
-        title: "Home",
-        path: "#",
-        icon: Bolt,
-      },
-      {
-        title: "Updates",
-        path: "/layout-14",
+        title: "Layout Experiences",
+        path: paths.dashboard.oneColDrawer.root.getHref(),
         icon: Users,
-      },
-      {
-        title: "Inbox",
-        path: "#",
-        icon: UserRoundCog,
-      },
-      {
-        title: "Clients",
-        path: "#",
-        icon: Cog,
-        badge: "Beta",
-      },
-      {
-        title: "My Tasks",
-        path: "#",
-        icon: ChartLine,
+        children: [
+          {
+            title: "1 Col with Pop Up Drawer",
+            path: paths.dashboard.oneColDrawer.root.getHref(),
+            icon: PanelTop,
+          },
+          {
+            title: "1 Col with New Page",
+            path: paths.dashboard.oneColNewPage.root.getHref(),
+            icon: StickyNote,
+          },
+          {
+            title: "1 Col to 2 Col Drawer",
+            path: paths.dashboard.oneColToTwoCol.root.getHref(),
+            icon: PanelsTopLeft,
+          },
+          {
+            title: "2 Col Section",
+            path: paths.dashboard.twoColTwoCard.root.getHref(),
+            icon: Columns,
+          },
+        ],
       },
     ],
+  },
+  {
+    title: "Project",
+    path: paths.dashboard.project.root.getHref(),
+    icon: Presentation,
+    children: [
+      {
+        title: "Task Board",
+        path: paths.dashboard.project.root.getHref(),
+        icon: SquareKanban,
+        children: [
+          {
+            title: "Kanban",
+            path: paths.dashboard.kanban.root.getHref(),
+            icon: SquareKanban,
+          }
+        ]
+      }
+    ]
+  },
+  {
+    title: "Operasional",
+    path: "#",
+    icon: FileText,
+  },
+  {
+    title: "Report",
+    path: "#",
+    icon: FileChartLine,
+  },
+  {
+    title: "Config",
+    path: "#",
+    icon: Settings,
+  },
+  {
+    title: "IAM",
+    path: "#",
+    icon: User,
   },
 ];
 
