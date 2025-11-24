@@ -331,7 +331,7 @@ export function EmployeeList() {
         }}
         isLoading={isLoading || isFetching}
       >
-        <Card>
+        <Card className="mt-[10px]">
           <CardHeader>
             <CardHeading>
               <div className="flex items-center gap-2.5">

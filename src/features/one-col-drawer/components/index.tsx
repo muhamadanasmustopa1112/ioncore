@@ -14,7 +14,7 @@ import { EmployeeList } from "./list/employee-list";
 export function EmployeeListPage() {
   const { openEmployeeFormSheet } = useEmployeeStore();
   return (
-    <>
+    <div className="relative h-full w-full overflow-hidden">
       <Toolbar>
         <ToolbarHeading>
           <ToolbarTitle>Employee</ToolbarTitle>
@@ -28,6 +28,6 @@ export function EmployeeListPage() {
       </Toolbar>
 
       <EmployeeList />
-    </>
+    </div>
   );
 }
