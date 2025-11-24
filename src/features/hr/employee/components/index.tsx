@@ -24,24 +24,9 @@ export function EmployeeListPage() {
   const { openEmployeeFormSheet } = useEmployeeStore();
   return (
     <>
-      {/* <Toolbar>
+      <Toolbar>
         <ToolbarHeading>
           <ToolbarTitle>Employee</ToolbarTitle>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Human Resources</BreadcrumbPage>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Employee</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
         </ToolbarHeading>
         <ToolbarActions>
           <Button type="button" onClick={() => openEmployeeFormSheet("new")}>
@@ -49,7 +34,7 @@ export function EmployeeListPage() {
             Add New
           </Button>
         </ToolbarActions>
-      </Toolbar> */}
+      </Toolbar>
       <EmployeeList />
     </>
   );

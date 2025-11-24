@@ -69,7 +69,7 @@ export function SidebarDefaultHeader() {
               <span className="rounded-md bg-emerald-500 text-white text-sm shrink-0 size-6 flex items-center justify-center">
                 K
               </span>
-              <span className="text-foreground text-sm font-medium in-data-[sidebar-collapsed]:hidden">
+              <span className="text-sidebar-main-foreground text-sm font-medium in-data-[sidebar-collapsed]:hidden">
                 App Name
               </span>
               <ChevronDown className="size-4 text-muted-foreground in-data-[sidebar-collapsed]:hidden" />

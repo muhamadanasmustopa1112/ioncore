@@ -13,7 +13,7 @@ function DefaultContent() {
     <div className="shrink-0 border-t border-border flex items-center justify-between h-(--sidebar-footer-height) gap-(--sidebar-space-x) px-(--sidebar-space-x) overflow-hidden transition-all duration-1000 ease-in-out">
       <Button
         variant="ghost"
-        className="grow shrink-0 transition-all duration-200 ease-in-out"
+        className="grow shrink-0 transition-all duration-200 ease-in-out text-sidebar-main-foreground"
       >
         <UserRoundPlus />
         <span>Invite</span>
@@ -21,7 +21,7 @@ function DefaultContent() {
       <Separator orientation="vertical" />
       <Button
         variant="ghost"
-        className="grow shrink-0 transition-all duration-200 ease-in-out"
+        className="grow shrink-0 transition-all duration-200 ease-in-out text-sidebar-main-foreground"
       >
         <CircleHelp />
         <span>Help</span>

@@ -11,7 +11,7 @@ export function Sidebar() {
     // </aside>
     <aside
       className={cn(
-        'flex flex-col fixed z-[10] start-0 top-[var(--header-height)] bottom-0 w-(--sidebar-width) in-data-[sidebar-collapsed]:w-(--sidebar-width-collapsed) bg-background border-e border-border',
+        'flex flex-col fixed z-[10] start-0 top-[var(--header-height)] bottom-0 w-(--sidebar-width) in-data-[sidebar-collapsed]:w-(--sidebar-width-collapsed) bg-sidebar-main text-sidebar-main-foreground border-e border-border',
         '[--sidebar-space-x:calc(var(--spacing)*2.5)]',
         'transition-[width] duration-200 ease-in-out',
       )}

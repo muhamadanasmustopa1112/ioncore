@@ -125,82 +125,7 @@ function MoreDropdownMenu({ item }: { item: MenuItem }) {
           </TooltipContent>
         </Tooltip>
       </PopoverTrigger>
-      <PopoverContent side='right' sideOffset={22}>
-        {pinnableNavItems?.map((selectedMenuItem) => (
-          <div key={selectedMenuItem.title}>
-            {
-              selectedMenuItem.children ? (
-                <AccordionMenuGroup key={selectedMenuItem.title}>
-                  <AccordionMenuSub key={selectedMenuItem.title} value={selectedMenuItem.path || selectedMenuItem.title}>
-                    <AccordionMenuSubTrigger>
-                      {selectedMenuItem.icon && <selectedMenuItem.icon />}
-                      <span>{selectedMenuItem.title}</span>
-                      <AccordionMenuIndicator />
-                    </AccordionMenuSubTrigger>
-                    <AccordionMenuSubContent type="multiple" parentValue={selectedMenuItem.path || selectedMenuItem.title} defaultValue={selectedMenuItem.children[0].title}>
-                      <AccordionMenuGroup>
-                        {selectedMenuItem.children.map((grandchild) => (
-                          <AccordionMenuItem key={grandchild.title} asChild value={grandchild.path || grandchild.title}>
-                            <div>
-                              <NavItem item={grandchild} />
-                            </div>
-                          </AccordionMenuItem>
-                        ))}
-                      </AccordionMenuGroup>
-                    </AccordionMenuSubContent>
-                  </AccordionMenuSub>
-                </AccordionMenuGroup>
-              ) : (
-                <div className="flex items-center gap-2.5">
-                    {selectedMenuItem.icon && <selectedMenuItem.icon />}
-                  <span>{item.title}</span>
-                </div>
-              )
-            }
-          </div>
-        ))}
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function MoreDropdownMenuProject({ item }: { item: MenuItem }) {
-  const {
-    isSidebarNavItemPinned,
-    unpinSidebarNavItem,
-    pinSidebarNavItem,
-    sidebarCollapse,
-    getSidebarNavItems,
-  } = useLayout();
-
-  // Memoize the pinnable nav items to prevent unnecessary re-computations
-  const pinnableNavItems = useMemo(() => {
-    const navItems = getSidebarNavItems().find((menu) => item == menu)?.children;
-    return navItems;
-  }, [getSidebarNavItems]);
-
-  const handlePin = (id: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isSidebarNavItemPinned(id)) {
-      unpinSidebarNavItem(id);
-    } else {
-      pinSidebarNavItem(id);
-    }
-  };
-
-  return (
-    <Popover>
-      <PopoverTrigger>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span>{item.icon && <item.icon />}</span>
-          </TooltipTrigger>
-          <TooltipContent align="center" side="right" sideOffset={28}>
-            {item.title}
-          </TooltipContent>
-        </Tooltip>
-      </PopoverTrigger>
-      <PopoverContent side='right' sideOffset={22}>
+      <PopoverContent className='bg-sidebar-main text-sidebar-main-foreground' side='right' sideOffset={22}>
         {pinnableNavItems?.map((selectedMenuItem) => (
             <div key={selectedMenuItem.title}>
               {
@@ -213,7 +138,7 @@ function MoreDropdownMenuProject({ item }: { item: MenuItem }) {
                       </div>
                       <ChevronRight className='size-4 shrink-0 transition-transform duration-200' />
                     </PopoverTrigger>
-                    <PopoverContent side='right' sideOffset={22}>
+                    <PopoverContent className='bg-sidebar-main text-sidebar-main-foreground' side='right' sideOffset={22}>
                       {selectedMenuItem.children.map((child) => (
                         <div key={child.title}>
                           <NavItem item={child} />
@@ -323,11 +248,7 @@ function NavItemCollapsed({ item }: { item: MenuItem }) {
 
   // More case
   if (item.children) {
-    if (item.title === 'Master Data') {
-      return <MoreDropdownMenu item={item} />;
-    } else {
-      return <MoreDropdownMenuProject item={item} />;
-    }
+    return <MoreDropdownMenu item={item} />;
   }
 
   return (
@@ -372,7 +293,7 @@ export function SidebarDefaultNav() {
         {filteredNavItems.map((item) => (
           <AccordionMenuGroup key={item.title}>
             {sidebarCollapse ? (
-              <AccordionMenuItem key={item.title} asChild value={item.path || item.title}>
+              <AccordionMenuItem key={item.title} asChild value={item.path || item.title} className='text-sidebar-main-foreground hover:text-primary'>
                 <div>
                   <NavItemCollapsed item={item} />
                 </div>
@@ -382,7 +303,7 @@ export function SidebarDefaultNav() {
                 {
                   item.children ? (
                     <AccordionMenuSub value={item.path || item.title}>
-                      <AccordionMenuSubTrigger>
+                      <AccordionMenuSubTrigger className='text-sidebar-main-foreground hover:text-primary'>
                         {item.icon && <item.icon />}
                         <span>{item.title}</span>
                         <AccordionMenuIndicator />
@@ -393,7 +314,7 @@ export function SidebarDefaultNav() {
                               if (child.children) {
                                 return (
                                   <AccordionMenuSub key={child.title} value={child.path || child.title}>
-                                    <AccordionMenuSubTrigger>
+                                    <AccordionMenuSubTrigger className='text-sidebar-main-foreground hover:text-primary'>
                                       {child.icon && <child.icon />}
                                       <span>{child.title}</span>
                                       <AccordionMenuIndicator />
@@ -401,7 +322,7 @@ export function SidebarDefaultNav() {
                                     <AccordionMenuSubContent type="multiple" parentValue={child.path || child.title} defaultValue={child.children[0].title}>
                                       <AccordionMenuGroup>
                                         {child.children.map((grandchild) => (
-                                          <AccordionMenuItem key={grandchild.title} asChild value={grandchild.path || grandchild.title}>
+                                          <AccordionMenuItem key={grandchild.title} asChild value={grandchild.path || grandchild.title} className='text-sidebar-main-foreground hover:text-primary'>
                                             <div>
                                               <NavItem item={grandchild} />
                                             </div>
@@ -413,7 +334,7 @@ export function SidebarDefaultNav() {
                                 )
                               } else {
                                 return (
-                                  <AccordionMenuItem key={child.title} asChild value={child.path || child.title}>
+                                  <AccordionMenuItem key={child.title} asChild value={child.path || child.title} className='text-sidebar-main-foreground hover:text-primary'>
                                     <div>
                                       <NavItem item={child} />
                                     </div>
@@ -426,7 +347,7 @@ export function SidebarDefaultNav() {
                       </AccordionMenuSubContent>
                     </AccordionMenuSub>
                   ) : (
-                    <AccordionMenuItem key={item.title} asChild value={item.path || item.title}>
+                    <AccordionMenuItem key={item.title} asChild value={item.path || item.title} className='text-sidebar-main-foreground hover:text-primary'>
                       <div>
                         <NavItem item={item} />
                       </div>
