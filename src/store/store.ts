@@ -11,7 +11,9 @@ interface StoreState {
 const useStore = create<StoreState>((set) => ({
   layout: "vertical",
   setLayout: (layout: "horizontal" | "vertical") => set({ layout }),
-  menu: [],
+  menu: {
+    title: "Dashboard",
+  },
   setMenu: (menu: MenuItem) => set({ menu }),
 }));
 

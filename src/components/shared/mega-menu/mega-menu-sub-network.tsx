@@ -18,16 +18,16 @@ const MegaMenuSubNetwork = ({ items }: { items: MenuConfig }) => {
       <div className="flex flex-col lg:flex-row">
         <div className="lg:border-border bg-accent/30 mt-2 flex shrink-0 flex-col gap-5 px-3 py-4 lg:mt-0 lg:w-[250px] lg:border-e lg:p-7.5">
           <h3 className="text-foreground h-3.5 ps-2.5 text-sm leading-none font-semibold">
-            {networkItemGeneral.title}
+            {/* {networkItemGeneral.title} */}
           </h3>
           <div className="flex flex-col">
-            {networkItemGeneral.children &&
-              MegaMenuSubHighlighted(networkItemGeneral.children)}
+            {/* {networkItemGeneral.children &&
+              MegaMenuSubHighlighted(networkItemGeneral.children)} */}
           </div>
         </div>
         <div className="grow pt-4 pb-2 lg:p-7.5 lg:pb-5">
           <div className="grid gap-5 lg:grid-cols-2">
-            {networkItemOthers.children?.map((item: MenuItem, index) => {
+            {/* {networkItemOthers.children?.map((item: MenuItem, index) => {
               return (
                 <div key={`network-${index}`} className="flex flex-col gap-5">
                   <h3 className="text-foreground flex h-3.5 items-center gap-1.5 ps-2.5 text-sm leading-none font-semibold">
@@ -43,7 +43,7 @@ const MegaMenuSubNetwork = ({ items }: { items: MenuConfig }) => {
                   </div>
                 </div>
               );
-            })}
+            })} */}
           </div>
         </div>
       </div>

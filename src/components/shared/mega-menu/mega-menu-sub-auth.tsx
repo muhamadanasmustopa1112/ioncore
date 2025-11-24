@@ -16,7 +16,7 @@ const MegaMenuSubAuth = ({ items }: { items: MenuConfig }) => {
       <div className="flex flex-col lg:flex-row">
         <div className="grow pt-4 pb-2 lg:p-7.5 lg:pb-5">
           <div className="grid gap-5 lg:grid-cols-2">
-            {authItemGeneral.children?.map((item: MenuItem, index) => {
+            {/* {authItemGeneral.children?.map((item: MenuItem, index) => {
               return (
                 <div key={`auth-${index}`} className="flex flex-col">
                   <h3 className="text-foreground mb-2 ps-2.5 text-sm leading-none font-semibold lg:mb-5">
@@ -32,16 +32,16 @@ const MegaMenuSubAuth = ({ items }: { items: MenuConfig }) => {
                   </div>
                 </div>
               );
-            })}
+            })} */}
           </div>
         </div>
         <div className="lg:border-border bg-accent/50 mb-4 shrink-0 px-3 py-4 lg:mb-0 lg:w-[250px] lg:border-s lg:p-7.5">
           <h3 className="text-foreground mb-5 ps-2.5 text-sm leading-none font-semibold">
-            {authItemOthers.title}
+            {/* {authItemOthers.title} */}
           </h3>
           <div className="flex flex-col gap-1">
-            {authItemOthers.children &&
-              MegaMenuSubHighlighted(authItemOthers.children)}
+            {/* {authItemOthers.children &&
+              MegaMenuSubHighlighted(authItemOthers.children)} */}
           </div>
         </div>
       </div>
