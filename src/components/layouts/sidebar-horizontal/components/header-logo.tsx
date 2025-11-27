@@ -37,7 +37,7 @@ export function HeaderLogo() {
           />
         </div>
         <span className="text-mono hidden text-xl font-medium lg:block">
-          Metronic
+          App Name
         </span>
       </Link>
       {isMobile && (

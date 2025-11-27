@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useLayout } from "./context";
+import { MENU } from "@/config/menu";
+import { Menu, MenuContent, MenuGroup, MenuItem, MenuSubmenuRoot, MenuSubmenuTrigger, MenuTrigger } from "@/components/ui/base-menu";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -41,51 +43,62 @@ export function Navbar() {
     >
       {!isMobile && (
         <ScrollArea>
-          <nav className="flex h-[46px] list-none items-stretch gap-7.5 overflow-x-auto">
-            {[
-              ...MENU_PAGES,
-              ...MENU_SIDEBAR_MAIN,
-              ...MENU_SIDEBAR_RESOURCES,
-            ].map((menu, index) => {
+          <nav className="flex h-[46px] list-none items-stretch overflow-x-auto">
+            {MENU.map((menu, index) => {
+              const active = isActive(menu.path);
               return (
                 <Fragment key={index}>
-                  {menu.children?.map((item, index) => {
-                    const active = isActive(item.path);
-                    if (item.children) {
-                      return (
-                        <Fragment key={index}>
-                          <li className="flex items-stretch">
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  className={cn(
-                                    "text-sidebar-main-foreground hover:text-primary inline-flex h-full items-center gap-2 rounded-none border-b border-transparent py-2.5 text-sm font-normal whitespace-nowrap lg:py-0",
-                                    "[&_svg]:text-sidebar-main-foreground",
-                                    active &&
-                                      "text-primary border-primary [&_svg]:text-primary",
-                                  )}
-                                >
-                                  {item.icon && (
-                                    <item.icon className="size-4" />
-                                  )}
-                                  <span>{item.title}</span>
-                                  <ChevronDown className="size-4" />
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-80"
-                                side="bottom"
-                                align="start"
-                              >
-                                <div className="grid gap-4">
-                                  {item.children.map((child, index) => {
-                                    return (
+                  {
+                    menu.children ? (
+                      <Menu>
+                        <MenuTrigger>
+                          <Button
+                            variant="ghost"
+                            className={cn(
+                              "text-sidebar-main-foreground hover:text-primary inline-flex h-full items-center gap-2 rounded-none border-b border-transparent py-2.5 text-sm font-normal whitespace-nowrap lg:py-0",
+                              "[&_svg]:text-sidebar-main-foreground hover:[&_svg]:text-primary",
+                              active &&
+                                "bg-accent text-primary border-primary [&_svg]:text-primary",
+                            )}
+                          >
+                            {menu.icon && (
+                              <menu.icon className="size-4" />
+                            )}
+                            <span>{menu.title}</span>
+                            <ChevronDown className="size-4" />
+                          </Button>
+                        </MenuTrigger>
+                        <MenuContent className="bg-sidebar-secondary">
+                          {
+                            menu.children.map((child, index) => (
+                              <MenuGroup key={child.title}>
+                                {
+                                  child.children ? (
+                                    <MenuSubmenuRoot>
+                                      <MenuSubmenuTrigger className="text-sidebar-main-foreground hover:text-primary hover:bg-accent [&_svg]:text-sidebar-main-foreground hover:[&_svg]:text-primary">
+                                        {child.icon && (
+                                          <child.icon className="size-4" />
+                                        )}
+                                        <span>{child.title}</span>
+                                      </MenuSubmenuTrigger>
+                                      <MenuContent sideOffset={10} alignOffset={-8} className="bg-sidebar-secondary">
+                                        {
+                                          child.children.map((grandchild, index) => (
+                                            <MenuItem key={grandchild.title} className="text-sidebar-main-foreground hover:text-primary hover:bg-accent [&_svg]:text-sidebar-main-foreground hover:[&_svg]:text-primary">
+                                              <Link href={grandchild.path || "#"}>
+                                                <span>{grandchild.title}</span>
+                                              </Link>
+                                            </MenuItem>
+                                          ))
+                                        }
+                                      </MenuContent>
+                                    </MenuSubmenuRoot>
+                                  ) : (
+                                    <MenuItem className="text-sidebar-main-foreground hover:text-primary hover:bg-accent [&_svg]:text-sidebar-main-foreground hover:[&_svg]:text-primary p-0">
                                       <Link
                                         href={child.path || "#"}
                                         className={cn(
-                                          "text-secondary-foreground hover:text-primary inline-flex items-center gap-2 border-b border-transparent py-2.5 text-sm font-normal whitespace-nowrap lg:py-0",
-                                          "[&_svg]:text-muted-foreground",
+                                          "px-2 py-1.5 inline-flex w-full h-full items-center gap-2 border-b border-transparent py-2.5 text-sm font-normal whitespace-nowrap",
                                           active &&
                                             "text-primary border-primary [&_svg]:text-primary",
                                         )}
@@ -96,34 +109,33 @@ export function Navbar() {
                                         )}
                                         <span>{child.title}</span>
                                       </Link>
-                                    );
-                                  })}
-                                </div>
-                              </PopoverContent>
-                            </Popover>
-                          </li>
-                        </Fragment>
-                      );
-                    }
-                    return (
-                      <li key={index} className="flex items-stretch">
-                        <Link
-                          href={item.path || "#"}
-                          className={cn(
-                            "text-sidebar-main-foreground hover:text-primary inline-flex items-center gap-2 border-b border-transparent py-2.5 text-sm font-normal whitespace-nowrap lg:py-0",
-                            "[&_svg]:text-sidebar-main-foreground",
-                            active &&
-                              "text-primary border-primary [&_svg]:text-primary",
-                          )}
-                        >
-                          {item.icon && (
-                            <item.icon className="text-sidebar-main-foreground size-4" />
-                          )}
-                          <span>{item.title}</span>
-                        </Link>
-                      </li>
-                    );
-                  })}
+                                    </MenuItem>
+                                  )
+                                }
+                                
+                              </MenuGroup>
+                            ))
+                          }
+                        </MenuContent>
+                      </Menu>
+                    ) : (
+                      <Link
+                        href={menu.path || "#"}
+                        className={cn(
+                          "px-3 text-sidebar-main-foreground hover:text-primary hover:bg-accent inline-flex items-center gap-2 border-b border-transparent py-2.5 text-sm font-normal whitespace-nowrap lg:py-0",
+                          "[&_svg]:text-sidebar-main-foreground hover:[&_svg]:text-primary",
+                          active &&
+                            "text-primary border-primary [&_svg]:text-primary",
+                        )}
+                        key={index}
+                      >
+                        {menu.icon && (
+                          <menu.icon className="size-4" />
+                        )}
+                        <span>{menu.title}</span>
+                      </Link>
+                    )
+                  }
                 </Fragment>
               );
             })}
