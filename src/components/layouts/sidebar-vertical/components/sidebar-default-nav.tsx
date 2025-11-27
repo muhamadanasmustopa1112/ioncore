@@ -140,14 +140,14 @@ function MoreDropdownMenu({ item }: { item: MenuItem }) {
                     </PopoverTrigger>
                     <PopoverContent className='bg-sidebar-main text-sidebar-main-foreground' side='right' sideOffset={22}>
                       {selectedMenuItem.children.map((child) => (
-                        <div key={child.title}>
+                        <div className='py-1.5' key={child.title}>
                           <NavItem item={child} />
                         </div>
                       ))}
                     </PopoverContent>
                   </Popover>
                 ) : (
-                  <div key={selectedMenuItem.title}>
+                  <div className='py-1.5' key={selectedMenuItem.title}>
                     <NavItem item={selectedMenuItem} />
                   </div>
                 )

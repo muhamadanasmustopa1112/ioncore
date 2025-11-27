@@ -35,19 +35,19 @@ interface Workspace {
 const mockWorkspaces: Workspace[] = [
   {
     id: '1',
-    name: 'Keenthemes',
+    name: 'App Name',
     state: 'bg-emerald-500',
     isCurrent: true,
   },
   {
     id: '2',
-    name: 'Studio',
+    name: 'App Name',
     state: 'bg-indigo-500',
     isCurrent: false,
   },
   {
     id: '3',
-    name: 'ReUI',
+    name: 'App Name',
     state: 'bg-pink-500',
     isCurrent: false,
   },
@@ -69,10 +69,10 @@ export function SidebarDefaultHeader() {
               <span className="rounded-md bg-emerald-500 text-white text-sm shrink-0 size-6 flex items-center justify-center">
                 K
               </span>
-              <span className="text-sidebar-main-foreground text-sm font-medium in-data-[sidebar-collapsed]:hidden">
+              <span className="text-sidebar-main-foreground hover:text-primary text-sm font-medium in-data-[sidebar-collapsed]:hidden">
                 App Name
               </span>
-              <ChevronDown className="size-4 text-muted-foreground in-data-[sidebar-collapsed]:hidden" />
+              <ChevronDown className="size-4 text-sidebar-main-foreground hover:text-primary in-data-[sidebar-collapsed]:hidden" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -158,7 +158,7 @@ export function SidebarDefaultHeader() {
       <Button
         variant="ghost"
         mode="icon"
-        className="hidden lg:group-hover:flex lg:in-data-[sidebar-collapsed]:hidden!"
+        className="hidden text-sidebar-main-foreground hover:text-primary lg:group-hover:flex lg:in-data-[sidebar-collapsed]:hidden!"
         onClick={() => setSidebarCollapse(!sidebarCollapse)}
       >
         <PanelRightOpen className="size-4" />
