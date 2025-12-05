@@ -93,15 +93,15 @@ export function SigninForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="block w-full space-y-5"
+        className="block w-full space-y-5 px-[20px]"
       >
         <div className="space-y-1.5 pb-3">
-          <h1 className="text-center text-2xl font-semibold tracking-tight">
-            Sign in to Metronic
+          <h1 className="text-left text-2xl font-semibold tracking-tight">
+            Sign in to App Name
           </h1>
         </div>
 
-        <Alert size="sm" close={false}>
+        {/* <Alert size="sm" close={false}>
           <AlertIcon>
             <RiErrorWarningFill className="text-primary" />
           </AlertIcon>
@@ -111,23 +111,7 @@ export function SigninForm() {
             <span className="text-mono font-semibold">demo123</span> for demo
             access.
           </AlertTitle>
-        </Alert>
-
-        <div className="flex flex-col gap-3.5">
-          <Button variant="outline" type="button" onClick={() => {}}>
-            <Icons.googleColorful className="size-5! opacity-100!" /> Sign in
-            with Google
-          </Button>
-        </div>
-
-        <div className="relative py-1.5">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background text-muted-foreground px-2">or</span>
-          </div>
-        </div>
+        </Alert> */}
 
         {error && (
           <Alert variant="destructive">
@@ -235,6 +219,26 @@ export function SigninForm() {
             Sign Up
           </Link>
         </p>
+        
+        <div className="relative py-1.5">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background text-muted-foreground px-2">or</span>
+          </div>
+        </div>
+
+        <div className="flex gap-3.5">
+
+          <Button variant="outline" type="button" className="w-full" onClick={() => {}}>
+            <Icons.googleColorful className="size-5! opacity-100!" /> Google
+          </Button>
+
+          <Button variant="outline" type="button" className="w-full" onClick={() => {}}>
+            <Icons.apple className="size-5! opacity-100!" /> Apple
+          </Button>
+        </div>
       </form>
     </Form>
   );

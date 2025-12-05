@@ -113,28 +113,11 @@ export function SignupForm() {
   return (
     <Suspense>
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="block w-full space-y-5">
+        <form onSubmit={handleSubmit} className="block w-full space-y-5 px-[20px]">
           <div className="space-y-1.5 pb-3">
-            <h1 className="text-center text-2xl font-semibold tracking-tight">
-              Sign Up to Metronic
+            <h1 className="text-left text-2xl font-semibold tracking-tight">
+              Sign Up to App Name
             </h1>
-          </div>
-
-          <div className="flex flex-col gap-3.5">
-            <Button variant="outline" type="button" onClick={() => {}}>
-              <Icons.googleColorful className="size-4!" /> Sign up with Google
-            </Button>
-          </div>
-
-          <div className="relative py-1.5">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background text-muted-foreground px-2">
-                or
-              </span>
-            </div>
           </div>
 
           {error && (
@@ -146,109 +129,113 @@ export function SignupForm() {
             </Alert>
           )}
 
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Your Name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-3.5">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Your Name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Your email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Your email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <div className="relative">
-                  <Input
-                    placeholder="Your password"
-                    type={passwordVisible ? "text" : "password"}
-                    {...field}
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    mode="icon"
-                    size="sm"
-                    onClick={() => setPasswordVisible(!passwordVisible)}
-                    className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 bg-transparent!"
-                    aria-label={
-                      passwordVisible ? "Hide password" : "Show password"
-                    }
-                  >
-                    {passwordVisible ? (
-                      <EyeOff className="text-muted-foreground" />
-                    ) : (
-                      <Eye className="text-muted-foreground" />
-                    )}
-                  </Button>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-3.5">
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Password</FormLabel>
+                  <div className="relative">
+                    <Input
+                      placeholder="Your password"
+                      type={passwordVisible ? "text" : "password"}
+                      {...field}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      mode="icon"
+                      size="sm"
+                      onClick={() => setPasswordVisible(!passwordVisible)}
+                      className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 bg-transparent!"
+                      aria-label={
+                        passwordVisible ? "Hide password" : "Show password"
+                      }
+                    >
+                      {passwordVisible ? (
+                        <EyeOff className="text-muted-foreground" />
+                      ) : (
+                        <Eye className="text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="passwordConfirmation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
-                <div className="relative">
-                  <Input
-                    type={passwordConfirmationVisible ? "text" : "password"}
-                    {...field}
-                    placeholder="Confirm your password"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    mode="icon"
-                    size="sm"
-                    onClick={() =>
-                      setPasswordConfirmationVisible(
-                        !passwordConfirmationVisible,
-                      )
-                    }
-                    className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 bg-transparent!"
-                    aria-label={
-                      passwordConfirmationVisible
-                        ? "Hide password confirmation"
-                        : "Show password confirmation"
-                    }
-                  >
-                    {passwordConfirmationVisible ? (
-                      <EyeOff className="text-muted-foreground" />
-                    ) : (
-                      <Eye className="text-muted-foreground" />
-                    )}
-                  </Button>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="passwordConfirmation"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Confirm Password</FormLabel>
+                  <div className="relative">
+                    <Input
+                      type={passwordConfirmationVisible ? "text" : "password"}
+                      {...field}
+                      placeholder="Confirm your password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      mode="icon"
+                      size="sm"
+                      onClick={() =>
+                        setPasswordConfirmationVisible(
+                          !passwordConfirmationVisible,
+                        )
+                      }
+                      className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 bg-transparent!"
+                      aria-label={
+                        passwordConfirmationVisible
+                          ? "Hide password confirmation"
+                          : "Show password confirmation"
+                      }
+                    >
+                      {passwordConfirmationVisible ? (
+                        <EyeOff className="text-muted-foreground" />
+                      ) : (
+                        <Eye className="text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="flex items-center space-x-2">
             <FormField
@@ -301,6 +288,28 @@ export function SignupForm() {
             >
               Sign In
             </Link>
+          </div>
+
+          <div className="relative py-1.5">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background text-muted-foreground px-2">
+                or
+              </span>
+            </div>
+          </div>
+
+          <div className="flex gap-3.5">
+
+            <Button variant="outline" type="button" className="w-full" onClick={() => {}}>
+              <Icons.googleColorful className="size-5! opacity-100!" /> Google
+            </Button>
+
+            <Button variant="outline" type="button" className="w-full" onClick={() => {}}>
+              <Icons.apple className="size-5! opacity-100!" /> Apple
+            </Button>
           </div>
         </form>
       </Form>

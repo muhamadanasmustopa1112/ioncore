@@ -16,14 +16,27 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
           }
         `}
       </style>
-      <div className="grid grow lg:grid-cols-2">
+      <div className="grid grow lg:grid-cols-1">
         <div className="order-2 flex items-center justify-center p-8 lg:order-1 lg:p-10">
-          <Card className="w-full max-w-[400px]">
-            <CardContent className="p-6">{children}</CardContent>
+          <Card className="w-full max-w-[1000px]">
+            <CardContent className="p-[10px] flex gap-[40px] items-center">
+              <div className="flex w-full flex-col gap-4">
+                <Link href="/">
+                  <img
+                    src={toAbsoluteUrl("/media/signin/slide1.png")}
+                    className="w-full rounded-xl"
+                    alt=""
+                  />
+                </Link>
+              </div>
+              <div className="w-full">
+                {children}
+              </div>
+            </CardContent>
           </Card>
         </div>
 
-        <div className="lg:border-border xxl:bg-center branded-bg order-1 bg-top bg-no-repeat lg:order-2 lg:m-5 lg:rounded-xl lg:border xl:bg-cover">
+        {/* <div className="lg:border-border xxl:bg-center branded-bg order-1 bg-top bg-no-repeat lg:order-2 lg:m-5 lg:rounded-xl lg:border xl:bg-cover">
           <div className="flex flex-col gap-4 p-8 lg:p-16">
             <Link href="/">
               <img
@@ -48,7 +61,7 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </>
   );
