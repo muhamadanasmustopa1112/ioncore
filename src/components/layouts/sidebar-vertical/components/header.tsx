@@ -47,7 +47,7 @@ export function Header() {
                   close={false}
                 >
                   <SheetHeader className="p-0 space-y-0" />
-                  <SheetBody className="flex flex-col grow p-0 [--sidebar-space-x:calc(var(--spacing)*2.5)]">
+                  <SheetBody className="bg-sidebar-main text-sidebar-main-foreground flex flex-col grow p-0 [--sidebar-space-x:calc(var(--spacing)*2.5)]">
                     <SidebarContent />
                   </SheetBody>
                 </SheetContent>
