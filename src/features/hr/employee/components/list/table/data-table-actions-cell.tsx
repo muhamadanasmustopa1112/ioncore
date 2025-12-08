@@ -20,11 +20,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useEmployeeStore } from "../../../store/employee";
 import { Employee } from "../../../types";
 
 export function ActionsCell({ row }: { row: Row<Employee> }) {
   const router = useRouter();
   const { copyToClipboard } = useCopyToClipboard();
+  const { openEmployeeDetailsSheet } = useEmployeeStore();
+  
   const handleCopyId = () => {
     copyToClipboard(String(row.original.guid));
     const message = `User ID successfully copied: ${row.original.guid}`;
@@ -54,6 +57,10 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
     );
   };
 
+  const handleDetailClick = () => {
+    openEmployeeDetailsSheet(row.original);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -66,7 +73,7 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
           <RiEditLine />
           Edit
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer" onClick={handleEditClick}>
+        <DropdownMenuItem className="cursor-pointer" onClick={handleDetailClick}>
           <RiEyeLine />
           Detail
         </DropdownMenuItem>

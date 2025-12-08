@@ -353,11 +353,11 @@ export function EmployeeList() {
         }}
         isLoading={isLoading || isFetching}
       >
-        <Card>
-          <CardHeader>
+        <Card className="mt-[10px]">
+          <CardHeader className="px-4">
             <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
-              <CardHeading className="py-[15px]">
-                <div className="flex items-center gap-2.5">
+              <CardHeading className="py-4">
+                <div className="flex items-center gap-2">
                   <div>
                     <CollapsibleTrigger asChild>
                       <Button variant="outline">
@@ -415,7 +415,7 @@ export function EmployeeList() {
                   </div>
                 </div>
                 <CollapsibleContent>
-                  <div className="flex items-center gap-2.5 py-[10px]">
+                  <div className="flex items-center gap-2 py-[5px]">
                     <div className="relative">
                       <Select>
                         <SelectTrigger>

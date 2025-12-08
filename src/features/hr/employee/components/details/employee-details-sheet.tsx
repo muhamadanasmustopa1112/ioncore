@@ -14,6 +14,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEmployeeStore } from "../../store/employee";
 import { EmployeeActivity } from "./employee-activity";
 import { EmployeeDetailsBilling } from "./employee-details-billing";
 import { EmployeeDetailsInvoice } from "./employee-details-invoice";
@@ -22,23 +23,27 @@ import { EmployeeDetailsOverviews } from "./employee-details-overview";
 import { EmployeeDetailsReviews } from "./employee-details-review";
 import { Upload } from "./employee-upload";
 
-export function EmployeeDetailsSheet({
-  open,
-  onOpenChange,
-  onEditClick,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onEditClick?: () => void;
-}) {
+export function EmployeeDetailsSheet() {
   const router = useRouter();
+  const {
+    employeeDetailsSheetOpen,
+    closeEmployeeDetailsSheet,
+    selectedEmployee,
+    openEmployeeFormSheet,
+  } = useEmployeeStore();
+
   const onExpandClick = () => {
-    onOpenChange(!open);
+    closeEmployeeDetailsSheet();
     router.push("/human-resources/employee/detail/guid-employee");
   };
 
+  const handleEditClick = () => {
+    closeEmployeeDetailsSheet();
+    openEmployeeFormSheet("edit");
+  };
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={employeeDetailsSheetOpen} onOpenChange={closeEmployeeDetailsSheet}>
       <SheetContent className="inset-5 start-auto h-auto gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[1160px] [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5">
         <SheetHeader className="border-border border-b px-5 py-3.5">
           <SheetTitle className="font-medium">Customer Details</SheetTitle>
@@ -49,23 +54,23 @@ export function EmployeeDetailsSheet({
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2.5">
                 <span className="text-foreground leading-none font-semibold lg:text-[22px]">
-                  Jeroen de Jong
+                  {selectedEmployee?.fullname || "N/A"}
                 </span>
                 <Badge size="sm" variant="success" appearance="light">
-                  Active
+                  {selectedEmployee?.status || "Active"}
                 </Badge>
               </div>
               <div className="text-2sm flex flex-wrap items-center gap-2">
                 <span className="text-muted-foreground font-normal">
                   Customer ID:
                 </span>
-                <span className="text-foreground font-medium">583920-XT</span>
+                <span className="text-foreground font-medium">{selectedEmployee?.guid || "N/A"}</span>
                 <BadgeDot className="bg-muted-foreground size-1" />
                 <span className="text-muted-foreground font-normal">
                   Joined
                 </span>
                 <span className="text-foreground font-medium">
-                  16 Jan, 2022
+                  {selectedEmployee?.job?.join_date || "N/A"}
                 </span>
                 <BadgeDot className="bg-muted-foreground size-1" />
                 <span className="text-muted-foreground font-normal">
@@ -75,11 +80,11 @@ export function EmployeeDetailsSheet({
               </div>
             </div>
             <div className="flex items-center gap-2.5">
-              <Button variant="ghost" onClick={() => onOpenChange(false)}>
+              <Button variant="ghost" onClick={closeEmployeeDetailsSheet}>
                 Close
               </Button>
               <Button variant="outline">Send Email</Button>
-              <Button variant="mono" onClick={onEditClick}>
+              <Button variant="mono" onClick={handleEditClick}>
                 Edit Details
               </Button>
               <Button variant="outline" onClick={onExpandClick}>
@@ -134,11 +139,11 @@ export function EmployeeDetailsSheet({
         </SheetBody>
 
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+          <Button variant="ghost" onClick={closeEmployeeDetailsSheet}>
             Close
           </Button>
           <Button variant="outline">Send Email</Button>
-          <Button variant="mono" onClick={onEditClick}>
+          <Button variant="mono" onClick={handleEditClick}>
             Edit Details
           </Button>
         </SheetFooter>

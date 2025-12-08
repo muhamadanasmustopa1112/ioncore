@@ -365,7 +365,7 @@ export function EmployeeList() {
         }}
         isLoading={isLoading || isFetching}
       >
-        <Card>
+        <Card className="mt-[10px]">
         <CardHeader>
             <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
               <CardHeading className="py-[15px]">

@@ -44,6 +44,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ConfigSelector } from "@/components/shared/dialogs/config-selector";
 
 export function HeaderToolbar() {
   const router = useRouter();
@@ -81,13 +82,19 @@ export function HeaderToolbar() {
         >
           <BellDot className="opacity-100" />
         </Button>
-        <Button
+        <ConfigSelector
+          buttonVariant="ghost"
+          buttonSize="icon"
+          buttonClassName="text-sidebar-main-foreground hover:text-foreground"
+          buttonMode="icon"
+        />
+        {/* <Button
           variant="ghost"
           size="icon"
           className="text-sidebar-main-foreground hover:text-foreground"
         >
           <Settings className="opacity-100" />
-        </Button>
+        </Button> */}
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger className="cursor-pointer">
