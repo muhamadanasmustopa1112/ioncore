@@ -60,7 +60,14 @@ const scales = [
   { value: "lg", label: "Large" },
 ];
 
-export function ConfigSelector() {
+type ConfigSelectorProps = {
+  buttonVariant?: "primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse";
+  buttonSize?: "lg" | "md" | "sm" | "icon";
+  buttonClassName?: string;
+  buttonMode?: "default" | "icon" | "link" | "input";
+};
+
+export function ConfigSelector({ buttonVariant = "outline", buttonSize = "sm", buttonClassName = "", buttonMode = "icon" }: ConfigSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [config, setConfig] = useState<ConfigState>({
     brand: "default",
@@ -138,24 +145,20 @@ export function ConfigSelector() {
   return (
     <>
       {/* Floating Button */}
-      <div className="fixed right-6 bottom-6 z-50">
         <Popover open={isOpen} onOpenChange={setIsOpen}>
           <PopoverTrigger asChild>
             <Button
-              size="lg"
-              className={cn(
-                "h-14 w-14 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl",
-                "bg-primary hover:bg-primary/90 text-primary-foreground",
-                "border-primary/20 border-2",
-              )}
+              mode={buttonMode}
+              variant={buttonVariant}
+              size={buttonSize}
+              className={buttonClassName}
             >
-              <Settings className="h-6 w-6" />
-              <span className="sr-only">Open configuration panel</span>
+              <Settings />
             </Button>
           </PopoverTrigger>
 
           <PopoverContent
-            side="top"
+            side="bottom"
             align="end"
             className="border-border/50 w-80 p-0 shadow-xl"
             sideOffset={16}
@@ -335,7 +338,6 @@ export function ConfigSelector() {
             </Card>
           </PopoverContent>
         </Popover>
-      </div>
     </>
   );
 }

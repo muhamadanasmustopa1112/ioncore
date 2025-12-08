@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     return (
       <SidebarVerticalLayout>
         {children}
-        <ConfigSelector />
+        {/* <ConfigSelector /> */}
       </SidebarVerticalLayout>
     );
   }

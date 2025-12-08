@@ -32,7 +32,7 @@ export function Wrapper({ children }: { children: React.ReactNode }) {
       <Header />
       <div className="flex flex-1">
         {!isMobile && <Sidebar />}
-        <main className="flex-1 flex flex-col mt-(--header-height) lg:mt-[calc(var(--header-height)+var(--content-header-height))] lg:ms-(--sidebar-width) lg:in-data-[sidebar-collapsed]:ms-(--sidebar-width-collapsed) transition-[margin] duration-200 ease-in-out p-[20px]">
+        <main className="flex-1 flex flex-col mt-(--header-height) lg:mt-[calc(var(--header-height)+var(--content-header-height))] lg:ms-(--sidebar-width) lg:in-data-[sidebar-collapsed]:ms-(--sidebar-width-collapsed) transition-[margin] duration-200 ease-in-out p-4">
           {children}
         </main>
       </div>

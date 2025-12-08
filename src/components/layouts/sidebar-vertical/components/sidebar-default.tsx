@@ -7,7 +7,7 @@ export function SidebarDefault() {
     <>
       <SidebarDefaultHeader />
       <SidebarDefaultContent />
-      <SidebarDefaultFooter />
+      {/* <SidebarDefaultFooter /> */}
     </>
   );
 }

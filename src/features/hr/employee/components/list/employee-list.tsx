@@ -73,12 +73,12 @@ export function EmployeeList() {
               <span className="text-muted-foreground text-sm font-normal">
                 {row.original.job?.job_name}
               </span>
-              <span
+              {/* <span
                 className="text-primary cursor-pointer"
-                onClick={handleEmployeeDetailsOpen}
+                onClick={() => openEmployeeDetailsSheet(row.original)}
               >
                 {row.original.guid}
-              </span>
+              </span> */}
             </div>
           </div>
         ),
@@ -199,6 +199,7 @@ export function EmployeeList() {
     employeeSheetOpen,
     closeEmployeeFormSheet,
     openEmployeeFormSheet,
+    openEmployeeDetailsSheet,
   } = useEmployeeStore();
 
   const [filter, setFilter] = useQueryStates({
@@ -214,19 +215,6 @@ export function EmployeeList() {
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
-  const [isEmployeeSheetOpen, setIsEmployeeSheetOpen] = useState(false);
-
-  const handleEmployeeDetailsOpen = () => {
-    setIsEmployeeSheetOpen(true);
-  };
-
-  const handleEmployeeDetailsClose = () => {
-    setIsEmployeeSheetOpen(false);
-  };
-
-  const handleEditFromEmployeeDetails = () => {
-    openEmployeeFormSheet("edit");
-  };
 
   const handleEmployeeFormClose = () => {
     closeEmployeeFormSheet();
@@ -416,11 +404,7 @@ export function EmployeeList() {
       </DataGrid>
 
       {/* Customer Details Sheet */}
-      <EmployeeDetailsSheet
-        open={isEmployeeSheetOpen}
-        onOpenChange={handleEmployeeDetailsClose}
-        onEditClick={handleEditFromEmployeeDetails}
-      />
+      <EmployeeDetailsSheet />
 
       {/* Customer Form Sheet */}
       <EmployeeFormSheet

@@ -58,7 +58,7 @@ export function SidebarDefaultHeader() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <div className="group flex justify-between items-center gap-2.5 border-b border-border h-11 lg:h-(--sidebar-header-height) shrink-0 px-2.5">
+    <div className="group flex justify-between items-center gap-2.5 border-border h-11 lg:h-(--sidebar-header-height) shrink-0 px-2.5">
       <div className="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
