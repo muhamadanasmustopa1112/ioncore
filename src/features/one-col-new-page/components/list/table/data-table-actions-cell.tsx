@@ -52,13 +52,13 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
 
   const handleEditClick = () => {
     router.push(
-      paths.dashboard.oneColNewPage.update.getHref(row.original.guid || ""),
+      paths.docs.oneColNewPage.update.getHref(row.original.guid || ""),
     );
   };
 
   const handleDetailClick = () => {
     router.push(
-      paths.dashboard.oneColNewPage.detail.getHref(row.original.guid || ""),
+      paths.docs.oneColNewPage.detail.getHref(row.original.guid || ""),
     );
   };
 

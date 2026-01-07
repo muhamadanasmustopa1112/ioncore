@@ -53,7 +53,7 @@ export function ActionsCell({ row }: { row: Row<Employee> }) {
 
   const handleEditClick = () => {
     router.push(
-      paths.dashboard.employee.detail.getHref(row.original.guid || ""),
+      paths.docs.employee.detail.getHref(row.original.guid || ""),
     );
   };
 
