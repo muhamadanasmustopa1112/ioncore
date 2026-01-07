@@ -24,7 +24,7 @@ export function EmployeeDetail() {
   const router = useRouter();
 
   const onBackClick = () => {
-    router.push(paths.dashboard.oneColNewPage.root.getHref());
+    router.push(paths.docs.oneColNewPage.root.getHref());
   };
 
   return (

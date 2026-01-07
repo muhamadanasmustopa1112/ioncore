@@ -19,7 +19,7 @@ export function EmployeeDetails() {
     useEmployeeStore();
 
   const onEditClick = () => {
-    router.push(paths.dashboard.oneColNewPage.update.getHref(id || ""));
+    router.push(paths.docs.oneColNewPage.update.getHref(id || ""));
   };
 
   return (

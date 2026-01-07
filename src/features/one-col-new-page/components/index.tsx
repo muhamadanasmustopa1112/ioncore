@@ -24,7 +24,7 @@ export function EmployeeListPage() {
   const router = useRouter();
 
   const onAddClick = () => {
-    router.push(paths.dashboard.oneColNewPage.create.getHref());
+    router.push(paths.docs.oneColNewPage.create.getHref());
   };
 
   return (
