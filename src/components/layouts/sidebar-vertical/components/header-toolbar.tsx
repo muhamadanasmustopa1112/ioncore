@@ -42,6 +42,7 @@ import { Input, InputWrapper } from "@/components/ui/input";
 import { useLayout } from "./context";
 import { Badge } from "@/components/ui/badge";
 import { ConfigSelector } from "@/components/shared/dialogs/config-selector";
+import { LayoutSelector } from "@/components/shared/dialogs/layout-selector";
 
 export function HeaderToolbar() {
   const { isMobile } = useLayout();
@@ -107,8 +108,8 @@ export function HeaderToolbar() {
         <Button mode="icon" variant="outline">
           <MessageSquareDot />
         </Button>
+        <LayoutSelector buttonMode="icon" buttonVariant="outline" />
         <ConfigSelector buttonMode="icon" buttonVariant="outline" />
-
         {/* {isMobile ? (
           <>
             <Button variant="outline" mode="icon">

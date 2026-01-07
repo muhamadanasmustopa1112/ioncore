@@ -277,6 +277,20 @@ export function SidebarDefaultNav() {
     return navItems;
   }, [getSidebarNavItems]);
 
+  const groupedNavItems = useMemo(() => {
+    const groups = new Map<string, typeof filteredNavItems>();
+    filteredNavItems.forEach((item) => {
+      const key = item.heading || "__no_heading__";
+      if (!groups.has(key)) groups.set(key, [] as typeof filteredNavItems);
+      groups.get(key)!.push(item);
+    });
+
+    return Array.from(groups.entries()).map(([heading, items]) => ({
+      heading: heading === "__no_heading__" ? null : heading,
+      items,
+    }));
+  }, [filteredNavItems]);
+
   const matchPath = (path: string) =>
     path === pathname || (path.length > 1 && pathname.startsWith(path));
 
@@ -286,76 +300,74 @@ export function SidebarDefaultNav() {
         type="multiple"
         matchPath={matchPath}
         classNames={{
-          root: 'grow space-y-0.5 shrink-0',
+          root: 'grow space-y-4 shrink-0',
           item: 'group py-0 h-8 [&:has([data-state=open])]:bg-accent justify-between cursor-pointer',
         }}
       >
-        {filteredNavItems.map((item) => (
-          <AccordionMenuGroup key={item.title}>
-            {sidebarCollapse ? (
-              <AccordionMenuItem key={item.title} asChild value={item.path || item.title} className='text-sidebar-main-foreground hover:text-primary'>
-                <div>
-                  <NavItemCollapsed item={item} />
-                </div>
-              </AccordionMenuItem>
-            ) : (
-              <div>
-                {
-                  item.children ? (
-                    <AccordionMenuSub value={item.path || item.title}>
-                      <AccordionMenuSubTrigger className='text-sidebar-main-foreground hover:text-primary'>
-                        {item.icon && <item.icon />}
-                        <span>{item.title}</span>
-                        <AccordionMenuIndicator />
-                      </AccordionMenuSubTrigger>
-                      <AccordionMenuSubContent type="multiple" parentValue={item.path || item.title} defaultValue={item.children[0].title}>
-                        <AccordionMenuGroup>
-                          {item.children.map((child) => {
-                              if (child.children) {
-                                return (
-                                  <AccordionMenuSub key={child.title} value={child.path || child.title}>
-                                    <AccordionMenuSubTrigger className='text-sidebar-main-foreground hover:text-primary'>
-                                      {child.icon && <child.icon />}
-                                      <span>{child.title}</span>
-                                      <AccordionMenuIndicator />
-                                    </AccordionMenuSubTrigger>
-                                    <AccordionMenuSubContent type="multiple" parentValue={child.path || child.title} defaultValue={child.children[0].title}>
-                                      <AccordionMenuGroup>
-                                        {child.children.map((grandchild) => (
-                                          <AccordionMenuItem key={grandchild.title} asChild value={grandchild.path || grandchild.title} className='text-sidebar-main-foreground hover:text-primary'>
-                                            <div>
-                                              <NavItem item={grandchild} />
-                                            </div>
-                                          </AccordionMenuItem>
-                                        ))}
-                                      </AccordionMenuGroup>
-                                    </AccordionMenuSubContent>
-                                  </AccordionMenuSub>
-                                )
-                              } else {
-                                return (
-                                  <AccordionMenuItem key={child.title} asChild value={child.path || child.title} className='text-sidebar-main-foreground hover:text-primary'>
-                                    <div>
-                                      <NavItem item={child} />
-                                    </div>
-                                  </AccordionMenuItem>
-                                )
-                              }
-                            }
-                          )}
-                        </AccordionMenuGroup>
-                      </AccordionMenuSubContent>
-                    </AccordionMenuSub>
-                  ) : (
-                    <AccordionMenuItem key={item.title} asChild value={item.path || item.title} className='text-sidebar-main-foreground hover:text-primary'>
-                      <div>
-                        <NavItem item={item} />
-                      </div>
-                    </AccordionMenuItem>
-                  )
-              }
-              </div>
+        {groupedNavItems.map((group, gIndex) => (
+          <AccordionMenuGroup key={group.heading ?? gIndex}>
+            {!sidebarCollapse && group.heading && (
+              <h1 className='text-sm px-2 text-muted-foreground'>{group.heading}</h1>
             )}
+            {group.items.map((item) => (
+              sidebarCollapse ? (
+                <AccordionMenuItem key={item.title} asChild value={item.path || item.title} className='text-sidebar-main-foreground hover:text-primary'>
+                  <div>
+                    <NavItemCollapsed item={item} />
+                  </div>
+                </AccordionMenuItem>
+              ) : item.children ? (
+                <AccordionMenuSub key={item.title} value={item.path || item.title}>
+                  <AccordionMenuSubTrigger className='text-sidebar-main-foreground hover:text-primary'>
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                    <AccordionMenuIndicator />
+                  </AccordionMenuSubTrigger>
+                  <AccordionMenuSubContent type="multiple" parentValue={item.path || item.title} defaultValue={item.children[0].title}>
+                    <AccordionMenuGroup>
+                      {item.children.map((child) => {
+                        if (child.children) {
+                          return (
+                            <AccordionMenuSub key={child.title} value={child.path || child.title}>
+                              <AccordionMenuSubTrigger className='text-sidebar-main-foreground hover:text-primary'>
+                                {child.icon && <child.icon />}
+                                <span>{child.title}</span>
+                                <AccordionMenuIndicator />
+                              </AccordionMenuSubTrigger>
+                              <AccordionMenuSubContent className="ps-8" type="multiple" parentValue={child.path || child.title} defaultValue={child.children[0].title}>
+                                <AccordionMenuGroup>
+                                  {child.children.map((grandchild) => (
+                                    <AccordionMenuItem key={grandchild.title} asChild value={grandchild.path || grandchild.title} className='text-sidebar-main-foreground hover:text-primary'>
+                                      <div>
+                                        <NavItem item={grandchild} />
+                                      </div>
+                                    </AccordionMenuItem>
+                                  ))}
+                                </AccordionMenuGroup>
+                              </AccordionMenuSubContent>
+                            </AccordionMenuSub>
+                          );
+                        }
+
+                        return (
+                          <AccordionMenuItem key={child.title} asChild value={child.path || child.title} className='text-sidebar-main-foreground hover:text-primary'>
+                            <div>
+                              <NavItem item={child} />
+                            </div>
+                          </AccordionMenuItem>
+                        );
+                      })}
+                    </AccordionMenuGroup>
+                  </AccordionMenuSubContent>
+                </AccordionMenuSub>
+              ) : (
+                <AccordionMenuItem key={item.title} asChild value={item.path || item.title} className='text-sidebar-main-foreground hover:text-primary'>
+                  <div>
+                    <NavItem item={item} />
+                  </div>
+                </AccordionMenuItem>
+              )
+            ))}
           </AccordionMenuGroup>
         ))}
       </AccordionMenu>
