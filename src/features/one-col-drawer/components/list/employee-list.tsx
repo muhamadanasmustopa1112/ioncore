@@ -27,7 +27,7 @@ import {
   CardTable,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DataGrid } from "@/components/ui/data-grid";
+import { DataGrid, DataGridContainer } from "@/components/ui/data-grid";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
@@ -384,16 +384,16 @@ export function EmployeeList() {
     manualPagination: true,
   });
 
-  const handleDragColumn = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (active && over && active.id !== over.id) {
-      setColumnOrder((columnOrder) => {
-        const oldIndex = columnOrder.indexOf(active.id as string);
-        const newIndex = columnOrder.indexOf(over.id as string);
-        return arrayMove(columnOrder, oldIndex, newIndex);
-      });
-    }
-  };
+  // const handleDragColumn = (event: DragEndEvent) => {
+  //   const { active, over } = event;
+  //   if (active && over && active.id !== over.id) {
+  //     setColumnOrder((columnOrder) => {
+  //       const oldIndex = columnOrder.indexOf(active.id as string);
+  //       const newIndex = columnOrder.indexOf(over.id as string);
+  //       return arrayMove(columnOrder, oldIndex, newIndex);
+  //     });
+  //   }
+  // };
 
   return (
     <>
@@ -406,13 +406,12 @@ export function EmployeeList() {
           columnsVisibility: true,
           columnsResizable: true,
           cellBorder: true,
-          columnsDraggable: true,
-          
+          // columnsDraggable: true,
         }}
         isLoading={isLoading || isFetching}
       >
         <Card className="mt-[10px]">
-          <CardHeader className="px-4">
+          <CardHeader className="">
             <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
               <CardHeading className="py-4">
                 <div className="flex items-center gap-2">
@@ -454,6 +453,7 @@ export function EmployeeList() {
                     <MultiSelect
                       value={selectedEmployees}
                       onChange={setSelectedEmployees}
+                      filteredText="Employees"
                       placeholder="Select Employees Checkbox"
                       className="w-[280px]"
                       options={employeeOptions}
@@ -574,10 +574,12 @@ export function EmployeeList() {
             </Collapsible>
             <DataTableToolbar />
           </CardHeader>
-          <CardTable>
+          <CardTable className="">
             <ScrollArea>
-              {/* <DataGridTable /> */}
-              <DataGridTableDnd handleDragEnd={handleDragColumn} />
+              <DataGridContainer className="w-full">
+                <DataGridTable />
+              </DataGridContainer>
+              {/* <DataGridTableDnd handleDragEnd={handleDragColumn} /> */}
               <ScrollBar orientation="horizontal" />
             </ScrollArea>
           </CardTable>

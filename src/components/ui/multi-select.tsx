@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ChevronsUpDown, Loader2, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,6 +23,7 @@ export interface MultiSelectOption {
 interface MultiSelectProps {
   value?: string[];
   onChange?: (value: string[]) => void;
+  filteredText?: string;
   placeholder?: string;
   className?: string;
   options?: MultiSelectOption[];
@@ -40,6 +42,7 @@ interface MultiSelectProps {
 export function MultiSelect({
   value = [],
   onChange,
+  filteredText = "Items",
   placeholder = "Select items",
   className,
   options = [],
@@ -149,11 +152,16 @@ export function MultiSelect({
           className={cn("justify-between", className)}
         >
           <span className="truncate">
-            {selectedItems.length > 0 && showCount
-              ? `${selectedItems.length} item${selectedItems.length > 1 ? "s" : ""} selected`
-              : selectedItems.length > 0 && selectedLabels.length > 0
-              ? selectedLabels.join(", ")
-              : placeholder}
+            {selectedItems.length > 0 && showCount ? (
+              <span className="inline-flex items-center gap-2">
+                <span className="whitespace-nowrap">{filteredText}</span>
+                <Badge size="sm" variant="primary">{selectedItems.length}</Badge>
+              </span>
+            ) : selectedItems.length > 0 && selectedLabels.length > 0 ? (
+              selectedLabels.join(", ")
+            ) : (
+              placeholder
+            )}
           </span>
           <div className="ml-2 flex shrink-0 items-center gap-1">
             {selectedItems.length > 0 && (

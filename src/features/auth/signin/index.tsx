@@ -104,7 +104,7 @@ export function SigninForm() {
         router.push(redirectTo);
         return;
       }
-      router.push(paths.dashboard.employee.list.getHref());
+      router.push(paths.dashboard.root.getHref());
     }
   }, [redirectTo]);
 

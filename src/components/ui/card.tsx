@@ -39,11 +39,11 @@ const cardVariants = cva(
 );
 
 const cardHeaderVariants = cva(
-  "flex items-center justify-between flex-wrap px-5 min-h-14 gap-2.5",
+  "flex items-center justify-between flex-wrap min-h-14 gap-2.5 px-4",
   {
     variants: {
       variant: {
-        default: "border-b border-border",
+        default: "",
         accent: "",
       },
     },
@@ -65,7 +65,7 @@ const cardContentVariants = cva("grow p-5", {
   },
 });
 
-const cardTableVariants = cva("grid grow", {
+const cardTableVariants = cva("grid grow px-4", {
   variants: {
     variant: {
       default: "",
@@ -80,7 +80,7 @@ const cardTableVariants = cva("grid grow", {
 const cardFooterVariants = cva("flex items-center px-5 min-h-14", {
   variants: {
     variant: {
-      default: "border-t border-border",
+      default: "",
       accent: "bg-card rounded-b-xl mt-[2px]",
     },
   },

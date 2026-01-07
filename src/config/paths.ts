@@ -16,85 +16,139 @@ export const paths = {
       path: "/dashboard",
       getHref: () => "/dashboard",
     },
+    user: {
+      root: {
+        path: "/users",
+        getHref: () => "/users",
+      },
+    },
+    role: {
+      root: {
+        path: "/users/role",
+        getHref: () => "/users/role",
+      },
+    },
+    employees: {
+      root: {
+        path: "/users/employee",
+        getHref: () => "/users/employee",
+      },
+    },
+    department: {
+      root: {
+        path: "/users/employees/department",
+        getHref: () => "/users/employees/department",
+      },
+    },
+    division: {
+      root: {
+        path: "/users/employees/division",
+        getHref: () => "/users/employees/division",
+      },
+    },
+    position: {
+      root: {
+        path: "/users/employees/position",
+        getHref: () => "/users/employees/position",
+      },
+    },
+    employee: {
+      root: {
+        path: "/users/employees/employee",
+        getHref: () => "/users/employees/employee",
+      },
+    },
+    accessManagement: {
+      root: {
+        path: "/users/employees/access-management",
+        getHref: () => "/users/employees/access-management",
+      },
+    },
+  },
+  docs: {
+    root: {
+      path: "/docs/dashboard",
+      getHref: () => "/docs/dashboard",
+    },
     masterData: {
       root: {
-        path: "/master-data",
-        getHref: () => "/master-data",
+        path: "/docs/master-data",
+        getHref: () => "/docs/master-data",
       },
     },
     oneColDrawer: {
       root: {
-        path: "/master-data/one-col-drawer",
-        getHref: () => "/master-data/one-col-drawer",
+        path: "/docs/master-data/one-col-drawer",
+        getHref: () => "/docs/master-data/one-col-drawer",
       },
     },
     oneColNewPage: {
       root: {
-        path: "/master-data/one-col-new-page",
-        getHref: () => "/master-data/one-col-new-page",
+        path: "/docs/master-data/one-col-new-page",
+        getHref: () => "/docs/master-data/one-col-new-page",
       },
       detail: {
-        path: "/master-data/one-col-new-page/detail/:id",
-        getHref: (id: string) => `/master-data/one-col-new-page/detail/${id}`,
+        path: "/docs/master-data/one-col-new-page/detail/:id",
+        getHref: (id: string) => `/docs/master-data/one-col-new-page/detail/${id}`,
       },
       create: {
-        path: "/master-data/one-col-new-page/create",
-        getHref: () => "/master-data/one-col-new-page/create",
+        path: "/docs/master-data/one-col-new-page/create",
+        getHref: () => "/docs/master-data/one-col-new-page/create",
       },
       update: {
-        path: "/master-data/one-col-new-page/update/:id",
-        getHref: (id: string) => `/master-data/one-col-new-page/update/${id}`,
+        path: "/docs/master-data/one-col-new-page/update/:id",
+        getHref: (id: string) => `/docs/master-data/one-col-new-page/update/${id}`,
       },
     },
     oneColToTwoCol: {
       root: {
-        path: "/master-data/one-col-to-two-col",
-        getHref: () => "/master-data/one-col-to-two-col",
+        path: "/docs/master-data/one-col-to-two-col",
+        getHref: () => "/docs/master-data/one-col-to-two-col",
       },
     },
     twoColTwoCard: {
       root: {
-        path: "/master-data/two-col-two-card",
-        getHref: () => "/master-data/two-col-two-card",
+        path: "/docs/master-data/two-col-two-card",
+        getHref: () => "/docs/master-data/two-col-two-card",
       }
     },
     project: {
       root: {
-        path: "/project",
-        getHref: () => "/project",
+        path: "/docs/project",
+        getHref: () => "/docs/project",
       },
     },
     kanban: {
       root: {
-        path: "/project/kanban",
-        getHref: () => "/project/kanban",
+        path: "/docs/project/kanban",
+        getHref: () => "/docs/project/kanban",
       },
     },
     employee: {
       list: {
-        path: "/human-resources/employee/list",
-        getHref: () => "/human-resources/employee/list",
+        path: "/docs/human-resources/employee/list",
+        getHref: () => "/docs/human-resources/employee/list",
       },
       twoColumn: {
-        path: "/human-resources/employee/two-column",
-        getHref: () => "/human-resources/employee/list/two-columns",
+        path: "/docs/human-resources/employee/two-column",
+        getHref: () => "/docs/human-resources/employee/list/two-columns",
       },
       twoColumnCard: {
-        path: "/human-resources/employee/two-column-card",
-        getHref: () => "/human-resources/employee/list/two-columns/card",
+        path: "/docs/human-resources/employee/two-column-card",
+        getHref: () => "/docs/human-resources/employee/list/two-columns/card",
       },
       detail: {
-        path: "/human-resources/employee/detail/:id",
-        getHref: (id: string) => `/human-resources/employee/detail/${id}`,
+        path: "/docs/human-resources/employee/detail/:id",
+        getHref: (id: string) => `/docs/human-resources/employee/detail/${id}`,
       },
     },
     application: {
-      path: "/dashboard/application",
-      getHref: () => "/dashboard/application",
+      path: "/docs/dashboard/application",
+      getHref: () => "/docs/dashboard/application",
     },
     transaction: {
-      path: "/dashboard/transaction",
-      getHref: () => "/dashboard/transaction",
+      path: "/docs/dashboard/transaction",
+      getHref: () => "/docs/dashboard/transaction",
     },
   },
 };

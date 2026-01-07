@@ -1,26 +1,37 @@
+'use client';
+
 import { Metadata } from "next";
+import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 import { Wrapper } from "./components/wrapper";
 import { LayoutProvider } from "@/components/layouts/context/layout-context";
 import { LayoutProvider as SidebarLayoutProvider } from "./components/context";
 import { MAIN_NAV } from "@/config/layout-15.config";
-import { MENU } from "@/config/menu";
+import { DOCS_MENU, DASHBOARD_MENU } from "@/config/menu";
 
 // Generate metadata for the layout
-export async function generateMetadata(): Promise<Metadata> {
-  // You can access route params here if needed
-  // const { params } = props;
+// export async function generateMetadata(): Promise<Metadata> {
+//   // You can access route params here if needed
+//   // const { params } = props;
 
-  return {
-    title: "Dashboard",
-    description: "",
-  };
-}
+//   return {
+//     title: "Dashboard",
+//     description: "",
+//   };
+// }
 
 export function SidebarVerticalLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  
+  // Tentukan menu berdasarkan pathname
+  const currentMenu = useMemo(() => {
+    return pathname.startsWith('/docs') ? DOCS_MENU : DASHBOARD_MENU;
+  }, [pathname]);
+
   return (
     <LayoutProvider
       // style={
@@ -32,7 +43,7 @@ export function SidebarVerticalLayout({
       //     "--header-height-mobile": "60px",
       //   } as React.CSSProperties
       // }
-      sidebarNavItems={MENU}
+      sidebarNavItems={currentMenu}
     >
       <SidebarLayoutProvider>
         <Wrapper>{children}</Wrapper>
