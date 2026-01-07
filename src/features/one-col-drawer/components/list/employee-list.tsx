@@ -50,9 +50,13 @@ import { DataTableToolbar } from "./table/data-table-toolbar";
 import { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { DataGridTableDnd } from "@/components/ui/data-grid-table-dnd";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { MultiSelect, MultiSelectOption } from "@/components/ui/multi-select";
+import { RadioSelect, RadioSelectOption } from "@/components/ui/radio-select";
+import { useEmployeesForSelect } from "../../api/get-users-for-select";
 
 export function EmployeeList() {
   const columns: ColumnDef<Employee>[] = useMemo(() => {
@@ -223,7 +227,55 @@ export function EmployeeList() {
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
-  const [openFilter, setOpenFilter] = useState<boolean>(false)
+  const [openFilter, setOpenFilter] = useState<boolean>(false);
+  const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const [employeeSearchQuery, setEmployeeSearchQuery] = useState("");
+  const [selectedEmployee, setSelectedEmployee] = useState<string>("");
+  const [employeeRadioSearchQuery, setEmployeeRadioSearchQuery] = useState("");
+
+  // Fetch employees for multi-select
+  const { 
+    data: employeeSelectData, 
+    isLoading: isLoadingEmployees, 
+    isFetching: isFetchingEmployees, 
+    hasNextPage: hasNextPageEmployees, 
+    fetchNextPage: fetchNextPageEmployees 
+  } = useEmployeesForSelect({
+    search: employeeSearchQuery,
+    page: 1,
+    limit: 20,
+  });
+
+  const employeeOptions: MultiSelectOption[] = 
+    employeeSelectData?.pages
+      ?.flatMap((page: any) => page.data)
+      .filter(Boolean)
+      .map((employee: any) => ({
+        value: employee.guid,
+        label: employee.fullname,
+      })) ?? [];
+
+  // Fetch employees for radio-select
+  const { 
+    data: employeeRadioSelectData, 
+    isLoading: isLoadingEmployeesRadio, 
+    isFetching: isFetchingEmployeesRadio, 
+    hasNextPage: hasNextPageEmployeesRadio, 
+    fetchNextPage: fetchNextPageEmployeesRadio 
+  } = useEmployeesForSelect({
+    search: employeeRadioSearchQuery,
+    page: 1,
+    limit: 20,
+  });
+
+  const employeeRadioOptions: RadioSelectOption[] = 
+    employeeRadioSelectData?.pages
+      ?.flatMap((page: any) => page.data)
+      .filter(Boolean)
+      .map((employee: any) => ({
+        value: employee.guid,
+        label: employee.fullname,
+      })) ?? [];
 
   const handleEmployeeDetailsOpen = () => {
     openEmployeeFormSheet("details");
@@ -242,10 +294,16 @@ export function EmployeeList() {
   };
 
   const request = useMemo<EmployeeRequest>(() => {
+    // Combine selectedEmployees (multi) and selectedEmployee (single) for guid filter
+    const allSelectedGuids = [
+      ...selectedEmployees,
+      ...(selectedEmployee ? [selectedEmployee] : [])
+    ];
+    
     return {
       filter: {
-        set_guid: false,
-        guid: "e28c301f-9773-4197-9979-f86f15c5df34",
+        set_guid: allSelectedGuids.length > 0,
+        guid: allSelectedGuids.length > 0 ? allSelectedGuids.join(',') : "e28c301f-9773-4197-9979-f86f15c5df34",
         set_fullname: !!filter.search,
         fullname: filter.search || "",
         set_nickname: false,
@@ -288,7 +346,7 @@ export function EmployeeList() {
       order: "created_at",
       sort: "DESC",
     };
-  }, [filter]);
+  }, [filter, selectedEmployees, selectedEmployee]);
 
   const { data: userData, isLoading, isFetching } = useEmployees({ request });
 
@@ -393,16 +451,38 @@ export function EmployeeList() {
                     )}
                   </div>
                   <div className="relative">
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Outlet" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="outlet_1">Outlet 1</SelectItem>
-                        <SelectItem value="outlet_2">Outlet 2</SelectItem>
-                        <SelectItem value="outlet_3">Outlet 3</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <MultiSelect
+                      value={selectedEmployees}
+                      onChange={setSelectedEmployees}
+                      placeholder="Select Employees Checkbox"
+                      className="w-[280px]"
+                      options={employeeOptions}
+                      isLoading={isLoadingEmployees}
+                      isFetching={isFetchingEmployees}
+                      hasNextPage={hasNextPageEmployees}
+                      onSearch={setEmployeeSearchQuery}
+                      onLoadMore={fetchNextPageEmployees}
+                      maxHeight="300px"
+                      emptyText="No employees found"
+                    />  
+                  </div>
+                  <div className="relative">
+                    <RadioSelect
+                      value={selectedEmployee}
+                      onChange={(value) => {
+                        setSelectedEmployee(value);
+                      }}
+                      placeholder="Select Employees Radio"
+                      className="w-[280px]"
+                      options={employeeRadioOptions}
+                      isLoading={isLoadingEmployeesRadio}
+                      isFetching={isFetchingEmployeesRadio}
+                      hasNextPage={hasNextPageEmployeesRadio}
+                      onSearch={setEmployeeRadioSearchQuery}
+                      onLoadMore={fetchNextPageEmployeesRadio}
+                      maxHeight="300px"
+                      emptyText="No employees found"
+                    />
                   </div>
                   <div className="relative">
                     <ToggleGroup value={filter.status || "all"} type="single" variant="outline" 

@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/common/icons";
+import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function SignupForm() {
   const router = useRouter();
@@ -113,12 +114,14 @@ export function SignupForm() {
   return (
     <Suspense>
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="block w-full space-y-5 px-[20px]">
-          <div className="space-y-1.5 pb-3">
-            <h1 className="text-left text-2xl font-semibold tracking-tight">
-              Sign Up to App Name
-            </h1>
-          </div>
+        <form onSubmit={handleSubmit} className="block w-full space-y-4 px-[20px]">
+          <img
+            src={toAbsoluteUrl(
+              `/media/app/logo-wit-dark.png`,
+            )}
+            className="h-10 mx-auto mt-4"
+            alt="WIT. Logo"
+          />
 
           {error && (
             <Alert variant="destructive" onClose={() => setError(null)}>
@@ -302,14 +305,15 @@ export function SignupForm() {
           </div>
 
           <div className="flex gap-3.5">
-
             <Button variant="outline" type="button" className="w-full" onClick={() => {}}>
               <Icons.googleColorful className="size-5! opacity-100!" /> Google
             </Button>
+          </div>
 
-            <Button variant="outline" type="button" className="w-full" onClick={() => {}}>
-              <Icons.apple className="size-5! opacity-100!" /> Apple
-            </Button>
+          <div className="pt-4 md:pt-6 mb-2">
+              <p className="text-center text-xs text-gray-500">
+                  © {new Date().getFullYear()} WIT. All rights reserved.
+              </p>
           </div>
         </form>
       </Form>

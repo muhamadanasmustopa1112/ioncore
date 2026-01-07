@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { toAbsoluteUrl } from "@/lib/helpers";
 
 export function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +85,17 @@ export function ResetPasswordForm() {
   return (
     <Suspense>
       <Form {...form}>
+      
+
         <form onSubmit={handleSubmit} className="block w-full space-y-5">
+          <img
+            src={toAbsoluteUrl(
+              `/media/app/logo-wit-dark.png`,
+            )}
+            className="h-10 mx-auto mt-4"
+            alt="WIT. Logo"
+          />
+
           <div className="space-y-1 pb-3 text-center">
             <h1 className="text-2xl font-semibold tracking-tight">
               Reset Password
