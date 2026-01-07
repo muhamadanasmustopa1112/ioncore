@@ -1,9 +1,24 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import { Card, CardContent } from "@/components/ui/card";
+import Image from "next/image";
 
 export function BrandedLayout({ children }: { children: ReactNode }) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const slides = [
+    "/media/signin/slide_1.jpg",
+    "/media/signin/slide_2.jpeg",
+    "/media/signin/slide_3.jpeg",
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
       <style>
@@ -18,18 +33,55 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
       </style>
       <div className="grid grow lg:grid-cols-1">
         <div className="order-2 flex items-center justify-center p-8 lg:order-1 lg:p-10">
-          <Card className="w-full max-w-[1000px]">
-            <CardContent className="p-[10px] flex gap-[40px] items-center">
-              <div className="flex w-full flex-col gap-4">
-                <Link href="/">
-                  <img
-                    src={toAbsoluteUrl("/media/signin/slide1.png")}
-                    className="w-full rounded-xl"
-                    alt=""
-                  />
-                </Link>
+          <Card className="w-full max-w-[1000px] overflow-hidden lg:h-[540px]">
+            <CardContent className="p-0 flex items-stretch h-full">
+              <div className="flex-1 relative overflow-hidden h-full">
+                  {slides.map((slide, index) => (
+                    <Image
+                        key={index}
+                        src={toAbsoluteUrl(slide)}
+                        fill
+                        alt={`Slide ${index + 1}`}
+                        className={`object-cover transition-opacity duration-1000 ${
+                          index === currentSlide ? "opacity-100" : "opacity-0"
+                        }`}
+                      />
+                  ))}
+
+                  {/* Back to Website Button */}
+                  <div className="absolute top-4 left-4 md:top-6 md:left-6 z-20">
+                    <a
+                      href="https://techletica.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1 text-xs md:text-sm bg-black/40 rounded-lg text-white hover:bg-black/60 transition"
+                    >
+                      ← Back to website
+                    </a>
+                  </div>
+
+                  {/* Logo and Title - Bottom Left */}
+                  <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white z-20 max-w-[85%] md:max-w-md pr-4">
+                    <h1 className="text-2xl md:text-3xl font-bold">All-in-One Padel Dashboard</h1>
+                    <p className="text-sm md:text-lg opacity-80">
+                      Track transactions, manage courts, and access key features easily.
+                    </p>
+                  </div>
+
+                  {/* Slider Dots - Bottom Right */}
+                  <div className="absolute bottom-4 right-4 flex gap-2 z-20">
+                    {slides.map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentSlide(index)}
+                        className={`w-2 h-2 md:w-3 md:h-3 rounded-full transition-colors ${
+                          index === currentSlide ? "bg-white" : "bg-white/50 hover:bg-white"
+                        }`}
+                      />
+                    ))}
+                  </div>
               </div>
-              <div className="w-full">
+              <div className="flex-1 p-[40px] h-full">
                 {children}
               </div>
             </CardContent>
