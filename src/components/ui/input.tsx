@@ -126,6 +126,7 @@ function Input({
     <input
       data-slot="input"
       type={type}
+      suppressHydrationWarning
       className={cn(inputVariants({ variant }), className)}
       {...props}
     />

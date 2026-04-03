@@ -38,6 +38,7 @@ function Checkbox({
   return (
     <CheckboxPrimitive.Root
       data-slot="checkbox"
+      suppressHydrationWarning
       className={cn(checkboxVariants({ size }), className)}
       {...props}
     >

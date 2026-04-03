@@ -16,6 +16,30 @@ export const paths = {
       path: "/dashboard",
       getHref: () => "/dashboard",
     },
+    crmAndSales: {
+      root: {
+        path: "/crm-and-sales",
+        getHref: () => "/crm-and-sales",
+      },
+    },
+    networkAndOrchestration: {
+      root: {
+        path: "/network-and-orchestration",
+        getHref: () => "/network-and-orchestration",
+      },
+    },
+    odpPop: {
+      root: {
+        path: "/odp-pop",
+        getHref: () => "/odp-pop",
+      },
+    },
+    technician: {
+      root: {
+        path: "/technician",
+        getHref: () => "/technician",
+      },
+    },
     user: {
       root: {
         path: "/users",

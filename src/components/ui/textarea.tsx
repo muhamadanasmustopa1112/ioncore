@@ -34,6 +34,7 @@ function Textarea({
   return (
     <textarea
       data-slot="textarea"
+      suppressHydrationWarning
       className={cn(textareaVariants({ variant }), className)}
       {...props}
     />

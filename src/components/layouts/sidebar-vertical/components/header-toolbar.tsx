@@ -2,10 +2,13 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUsers } from "@/features/auth/api";
 import {
+  Bell,
+  ChevronDown,
   Loader2,
   LogOut,
   MessageSquareDot,
   Moon,
+  Search,
   Settings,
   Sun,
   User,
@@ -30,19 +33,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Input, InputWrapper } from "@/components/ui/input";
 import { useLayout } from "./context";
 import { Badge } from "@/components/ui/badge";
 import { ConfigSelector } from "@/components/shared/dialogs/config-selector";
-import { LayoutSelector } from "@/components/shared/dialogs/layout-selector";
 
 export function HeaderToolbar() {
   const { isMobile } = useLayout();
@@ -65,7 +59,7 @@ export function HeaderToolbar() {
     router.push(paths.auth.signin.getHref());
   };
 
-  const handleInputChange = () => {};
+  const handleInputChange = () => { };
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
@@ -74,100 +68,104 @@ export function HeaderToolbar() {
   const user = useMemo(() => userData?.response?.data, [userData]);
 
   return (
-    <nav className="flex items-center justify-between gap-2.5 lg:w-full">
-      <div>
-        {
-          !isMobile && (
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem>
-                  <BreadcrumbLink href="/">Home</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Human Resources</BreadcrumbPage>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Employee</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          )
-        }
-        
+    <nav className="flex items-center justify-between gap-4 lg:w-full px-4 border-b border-border/50 h-full">
+      {/* Left Section: Search Bar */}
+      <div className="flex-grow max-w-xl">
+        {!isMobile && (
+          <InputWrapper className="bg-muted/30 border-none shadow-none rounded-lg h-10 px-4">
+            <Search className="size-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Global search for customers, tickets, nodes..."
+              className="placeholder:text-muted-foreground/60"
+              onChange={handleInputChange}
+            />
+          </InputWrapper>
+        )}
       </div>
-      <div className="flex items-center gap-2.5">
-        <InputWrapper className="relative">
-          <Input
-            type="search"
-            placeholder="Search Menu"
-            onChange={handleInputChange}
-          />
-        </InputWrapper>
-        <Button mode="icon" variant="outline">
-          <MessageSquareDot />
-        </Button>
-        <LayoutSelector buttonMode="icon" buttonVariant="outline" />
-        <ConfigSelector buttonMode="icon" buttonVariant="outline" />
-        {/* {isMobile ? (
-          <>
-            <Button variant="outline" mode="icon">
-              <ClipboardList />
-            </Button>
-            <Button variant="mono" mode="icon">
-            <Plus />
+
+      {/* Right Section: Actions & User */}
+      <div className="flex items-center gap-3">
+        {/* Branch Selector */}
+        {!isMobile && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="gap-2 bg-muted/40 hover:bg-muted/60 transition-colors h-10 px-4 rounded-lg hidden md:flex font-medium text-muted-foreground">
+                Main Branch (HQ)
+                <ChevronDown className="size-4 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem className="font-semibold">Main Branch (HQ)</DropdownMenuItem>
+              <DropdownMenuItem>Branch Surabaya</DropdownMenuItem>
+              <DropdownMenuItem>Branch Jakarta</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
+        {/* Notif / Messages */}
+        <div className="flex items-center gap-1">
+          <Button mode="icon" variant="ghost" className="relative size-10 rounded-lg text-muted-foreground hover:text-primary">
+            <Bell className="size-5" />
+            <Badge className="absolute top-1.5 right-1.5 size-4 p-0 flex items-center justify-center bg-destructive text-white border-white border-2 text-[10px] font-bold">
+              4
+            </Badge>
           </Button>
-          </>
-        ) : (
-          <>
-            <Button variant="outline">
-              <ClipboardList /> Reports
-            </Button>
-            <Button variant="mono">
-            <Plus /> Add
-          </Button>
-          </>
-        )} */}
+        </div>
+
+        <div className="hidden sm:flex items-center gap-2">
+          {/* <LayoutSelector buttonMode="icon" buttonVariant="ghost" buttonClassName="size-10 rounded-lg" /> */}
+          <ConfigSelector buttonMode="icon" buttonVariant="ghost" buttonClassName="size-10 rounded-lg" />
+        </div>
+
+        {/* Separator */}
+        {!isMobile && <div className="h-6 w-px bg-border/60 mx-1" />}
 
         {/* User Dropdown Menu */}
         <DropdownMenu>
-          <DropdownMenuTrigger className="cursor-pointer">
-            <Avatar className="size-7">
-              <AvatarImage
-                src={toAbsoluteUrl("/media/avatars/300-2.png")}
-                alt="@reui"
-              />
-              <AvatarFallback>CH</AvatarFallback>
-              <AvatarIndicator className="-end-2 -top-2">
-                <AvatarStatus variant="online" className="size-2.5" />
-              </AvatarIndicator>
-            </Avatar>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="flex items-center gap-3 h-12 p-1 px-2 rounded-xl hover:bg-muted/40 transition-all group">
+              <div className="hidden sm:flex flex-col items-end text-right leading-none gap-1.5">
+                <span className="text-[13px] font-semibold text-foreground transition-colors group-hover:text-primary">
+                  {user?.username || "Alex Thompson"}
+                </span>
+                <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
+                  ADMINISTRATOR
+                </span>
+              </div>
+              <Avatar className="size-9 rounded-lg border-2 border-primary/10 group-hover:border-primary/30 transition-all overflow-hidden bg-muted">
+                <AvatarImage
+                  src={toAbsoluteUrl("/media/avatars/300-2.png")}
+                  alt="@reui"
+                />
+                <AvatarFallback>AT</AvatarFallback>
+                <AvatarIndicator className="-end-0.5 -top-0.5">
+                  <AvatarStatus variant="online" className="size-2.5 border-2 border-background" />
+                </AvatarIndicator>
+              </Avatar>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-56"
+            className="w-64"
             side="bottom"
             align="end"
             sideOffset={11}
           >
             {/* User Information Section */}
-            <div className="flex items-center gap-3 px-3 py-2">
-              <Avatar>
+            <div className="flex items-center gap-3 px-3 py-3 bg-muted/20">
+              <Avatar className="size-10 rounded-lg">
                 <AvatarImage
                   src={toAbsoluteUrl("/media/avatars/300-2.png")}
                   alt="@reui"
                 />
-                <AvatarFallback>CH</AvatarFallback>
-                <AvatarIndicator className="-end-1.5 -top-1.5">
-                  <AvatarStatus variant="online" className="size-2.5" />
-                </AvatarIndicator>
+                <AvatarFallback>AT</AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-start overflow-hidden">
-                <span className="text-foreground w-full truncate overflow-hidden text-sm font-semibold text-ellipsis">
-                  {user?.username}
+                <span className="text-foreground w-full truncate overflow-hidden text-sm font-bold text-ellipsis">
+                  {user?.username || "Alex Thompson"}
                 </span>
-                <span className="text-muted-foreground text-xs">
-                  Senior Developer
+                <span className="text-muted-foreground text-[11px] font-medium uppercase tracking-tight">
+                  ADMINISTRATOR
                 </span>
               </div>
             </div>
@@ -175,38 +173,38 @@ export function HeaderToolbar() {
             <DropdownMenuSeparator />
 
             {/* User Actions */}
-            <DropdownMenuItem>
-              <User />
-              <span>Profile</span>
+            <DropdownMenuItem className="py-2.5">
+              <User className="size-4 opacity-70" />
+              <span className="font-medium">My Profile</span>
             </DropdownMenuItem>
 
-            <DropdownMenuItem>
-              <Settings />
-              <span>Settings</span>
+            <DropdownMenuItem className="py-2.5">
+              <Settings className="size-4 opacity-70" />
+              <span className="font-medium">Settings</span>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
             {/* Theme Toggle */}
-            <DropdownMenuItem onClick={toggleTheme}>
+            <DropdownMenuItem onClick={toggleTheme} className="py-2.5">
               {theme === "light" ? (
-                <Moon className="size-4" />
+                <Moon className="size-4 opacity-70" />
               ) : (
-                <Sun className="size-4" />
+                <Sun className="size-4 opacity-70" />
               )}
-              <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
+              <span className="font-medium">{theme === "light" ? "Dark mode" : "Light mode"}</span>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
             {/* Action Items */}
-            <DropdownMenuItem onClick={logout}>
+            <DropdownMenuItem onClick={logout} className="py-2.5 text-destructive focus:text-destructive focus:bg-destructive/10">
               {isPending ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (
-                <LogOut />
+                <LogOut className="size-4" />
               )}
-              <span>Sign out</span>
+              <span className="font-bold">Sign out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

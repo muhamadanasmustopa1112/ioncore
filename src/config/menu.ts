@@ -1,19 +1,33 @@
 import {
+  Activity,
+  BarChart2,
   BarChart3,
+  BookMinus,
   Box,
+  BoxIcon,
   Columns,
-  Dot,
   FileChartLine,
   FileText,
+  Headset,
+  Map,
+  Network,
+  Package,
   PanelsTopLeft,
   PanelTop,
   Presentation,
+  RouterIcon,
   Settings,
-  ShieldUser,
   SquareKanban,
+  SquareRoundCorner,
   StickyNote,
   User,
+  UserCheck2,
+  UserCog,
+  UserIcon,
   Users,
+  Users2,
+  UserSearch,
+  Wallet,
 } from "lucide-react";
 import { paths } from "@/config/paths";
 import { MenuConfig } from "@/config/types";
@@ -120,52 +134,116 @@ export const DOCS_MENU: MenuConfig = [
 // Menu untuk halaman dashboard (production/main app)
 export const DASHBOARD_MENU: MenuConfig = [
   {
-    title: "My Dashboard",
+    title: "Dashboard",
     path: paths.dashboard.root.getHref(),
-    heading: 'Dashboard',
+    heading: 'GENERAL',
     icon: BarChart3,
   },
   {
-    title: "Users",
-    path: paths.dashboard.user.root.getHref(),
-    heading: 'Master',
-    icon: Users,
+    title: "CRM & Sales",
+    path: paths.dashboard.crmAndSales.root.getHref(),
+    heading: 'GENERAL',
+    icon: UserSearch,
+  },
+  {
+    title: "Network & Orchestration",
+    path: paths.dashboard.networkAndOrchestration.root.getHref(),
+    heading: 'INFRASTRUCTURE',
+    icon: Network,
     children: [
       {
-        title: "Role",
-        path: paths.dashboard.role.root.getHref(),
-        icon: Dot,
-      },
-      {
-        title: "Employees",
-        path: paths.dashboard.employees.root.getHref(),
-        icon: Dot,
+        title: "ION Radius",
+        path: paths.dashboard.accessManagement.root.getHref(),
+        icon: SquareRoundCorner,
         children: [
           {
-            title: "Department",
-            path: paths.dashboard.department.root.getHref(),
+            title: "Dashboard",
+            path: paths.dashboard.accessManagement.root.getHref(),
+            icon: BarChart2,
           },
           {
-            title: "Division",
+            title: "Router [NAS]",
+            path: paths.dashboard.accessManagement.root.getHref(),
+            icon: RouterIcon,
+          },
+          {
+            title: "Customers",
             path: paths.dashboard.division.root.getHref(),
+            icon: UserIcon,
+            children: [
+              {
+                title: "PPP Users",
+                path: paths.dashboard.accessManagement.root.getHref(),
+                icon: Users,
+              },
+            ],
           },
           {
-            title: "Position",
-            path: paths.dashboard.position.root.getHref(),
+            title: "Service Plan",
+            path: paths.dashboard.accessManagement.root.getHref(),
+            icon: Package,
+            children: [
+              {
+                title: "Bandwidth",
+                path: paths.dashboard.accessManagement.root.getHref(),
+                icon: Activity,
+              },
+              {
+                title: "Profile Group",
+                path: paths.dashboard.accessManagement.root.getHref(),
+                icon: Users2,
+              },
+              {
+                title: "PPP Profile",
+                path: paths.dashboard.accessManagement.root.getHref(),
+                icon: UserCheck2,
+              },
+            ],
+          },
+        ],
+      },
+      {
+        title: "ODP | POP Data",
+        path: paths.dashboard.odpPop.root.getHref(),
+        icon: BoxIcon,
+        children: [
+          {
+            title: "Manage ODP | POP",
+            path: paths.dashboard.accessManagement.root.getHref(),
+            icon: Settings,
           },
           {
-            title: "Employee",
-            path: paths.dashboard.employee.root.getHref(),
+            title: "View Map",
+            path: paths.dashboard.accessManagement.root.getHref(),
+            icon: Map,
           },
         ],
       },
     ],
   },
   {
-    title: "Access Management",
-    path: paths.dashboard.accessManagement.root.getHref(),
-    heading: 'Master',
-    icon: ShieldUser,
+    title: "Technician",
+    path: paths.dashboard.technician.root.getHref(),
+    heading: 'INFRASTRUCTURE',
+    icon: UserCog,
+  },
+  {
+    title: "Warehouse & Asset",
+    path: paths.dashboard.technician.root.getHref(),
+    heading: 'INFRASTRUCTURE',
+    icon: BookMinus,
+  },
+  {
+    title: "Billing & Finance",
+    path: paths.dashboard.technician.root.getHref(),
+    heading: 'FINANCE & SUPPORT',
+    icon: Wallet,
+  },
+  {
+    title: "Customer Service",
+    path: paths.dashboard.technician.root.getHref(),
+    heading: 'FINANCE & SUPPORT',
+    icon: Headset,
   },
 ];
 

@@ -50,7 +50,7 @@ export function SigninForm() {
 
       setError(
         data?.response?.message_en ||
-          "An unexpected error occurred. Please try again.",
+        "An unexpected error occurred. Please try again.",
       );
     },
     onError(error) {
@@ -94,7 +94,16 @@ export function SigninForm() {
       // ignore storage errors
     }
 
-    login(values);
+    //login(values);
+
+    // Bypass API login due to CORS errors as requested by user
+    setCookie(
+      auth.logged_in,
+      state.loggedIn,
+      new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+    );
+
+    router.push(paths.dashboard.root.getHref());
   }
 
   useLayoutEffect(() => {
@@ -281,7 +290,7 @@ export function SigninForm() {
               Sign Up
             </Link>
           </p>
-          
+
           <div className="relative py-1.5">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
@@ -292,20 +301,20 @@ export function SigninForm() {
           </div>
 
           <div className="flex gap-3.5">
-            <Button variant="outline" type="button" className="w-full" onClick={() => {}}>
+            <Button variant="outline" type="button" className="w-full" onClick={() => { }}>
               <Icons.googleColorful className="size-5! opacity-100!" /> Google
             </Button>
           </div>
 
           <div className="pt-4 md:pt-6 mb-2">
-              <p className="text-center text-xs text-gray-500">
-                  © {new Date().getFullYear()} WIT. All rights reserved.
-              </p>
+            <p className="text-center text-xs text-gray-500">
+              © {new Date().getFullYear()} WIT. All rights reserved.
+            </p>
           </div>
         </form>
-    </Form>
+      </Form>
 
-    <style jsx>{`
+      <style jsx>{`
         @keyframes rotateShape {
           0% {
             transform: rotateX(0deg) rotateY(0deg);
@@ -316,6 +325,6 @@ export function SigninForm() {
         }
       `}</style>
     </>
-    
+
   );
 }

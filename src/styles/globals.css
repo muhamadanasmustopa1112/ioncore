@@ -29,18 +29,23 @@
   --chart-3: var(--color-yellow-500);
   --chart-4: var(--color-red-500);
   --chart-5: var(--color-purple-500);
-  --border: oklch(
-    94% 0.004 286.32
-  ); /* between --color-zinc-100 and --color-zinc-200 */
+  --border: #ececec; /* Fixed hex to avoid oklch formatter errors */
   --input: var(--color-zinc-200);
   --ring: var(--color-zinc-400);
   --radius: 0.5rem;
 
-  /* custom */
-  --sidebar-main: var(--color-zinc-950);
-  --sidebar-main-foreground: var(--foreground);
+  /* custom colors */
+  --primary: #0052CC;
+  --primary-foreground: var(--color-white);
+  --secondary: #6476A7;
+  --secondary-foreground: var(--color-white);
+  --tertiary: #A33500;
+  --neutral: #757780;
+
+  --sidebar-main: var(--color-white);
+  --sidebar-main-foreground: var(--color-zinc-900);
   --sidebar-secondary: var(--color-zinc-100);
-  --sidebar-secondary-foreground: var(--foreground);
+  --sidebar-secondary-foreground: var(--color-zinc-900);
 
   --body-background: var(--color-neutral-50);
   --header-background: var(--color-white);
@@ -84,12 +89,15 @@
 
 /* Brand Colors */
 [data-theme-brand="default"] {
-  --primary: var(--color-blue-600);
+  --primary: #0052CC;
   --primary-foreground: var(--color-white);
-  --secondary: var(--color-blue-100);
+  --secondary: #6476A7;
+  --secondary-foreground: var(--color-white);
+  --tertiary: #A33500;
+  --neutral: #757780;
 
-  --sidebar-main: var(--color-zinc-950);
-  --sidebar-main-foreground: var(--color-white);
+  --sidebar-main: var(--color-white);
+  --sidebar-main-foreground: var(--color-zinc-900);
   --sidebar-secondary: var(--color-zinc-100);
   --sidebar-secondary-foreground: var(--color-zinc-900);
 }
@@ -335,6 +343,8 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-tertiary: var(--tertiary);
+  --color-neutral: var(--neutral);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
 

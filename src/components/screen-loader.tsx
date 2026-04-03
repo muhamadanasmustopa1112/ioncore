@@ -7,7 +7,7 @@ export function ScreenLoader() {
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-2 transition-opacity duration-700 ease-in-out">
       <img
         className="h-[30px] max-w-none"
-        src={toAbsoluteUrl("/media/app/mini-logo.svg")}
+        src={toAbsoluteUrl("/media/app/logo_ion_baru.png")}
         alt="logo"
       />
       <div className="text-muted-foreground text-sm font-medium">

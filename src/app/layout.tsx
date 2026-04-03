@@ -8,15 +8,14 @@ import { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { ThemeProvider } from "@/components/layouts/context/theme-provider";
-import { LayoutProvider } from "@/components/layouts/context/layout-context";
-import { MAIN_NAV } from "@/config/layout-15.config";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | Metronic",
-    default: "Metronic", // a default is required when creating a template
+    template: "%s | ION",
+    default: "ION", // a default is required when creating a template
   },
 };
 
