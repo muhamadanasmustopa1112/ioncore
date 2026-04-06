@@ -31,7 +31,6 @@ import {
 } from "lucide-react";
 import { paths } from "@/config/paths";
 import { MenuConfig } from "@/config/types";
-
 // Menu untuk halaman /docs (documentation/development)
 export const DOCS_MENU: MenuConfig = [
   {
@@ -130,25 +129,24 @@ export const DOCS_MENU: MenuConfig = [
     icon: User,
   },
 ];
-
 // Menu untuk halaman dashboard (production/main app)
 export const DASHBOARD_MENU: MenuConfig = [
   {
     title: "Dashboard",
     path: paths.dashboard.root.getHref(),
-    heading: 'GENERAL',
+    heading: 'General',
     icon: BarChart3,
   },
   {
     title: "CRM & Sales",
     path: paths.dashboard.crmAndSales.root.getHref(),
-    heading: 'GENERAL',
+    heading: 'General',
     icon: UserSearch,
   },
   {
     title: "Network & Orchestration",
     path: paths.dashboard.networkAndOrchestration.root.getHref(),
-    heading: 'INFRASTRUCTURE',
+    heading: 'Infrastructure',
     icon: Network,
     children: [
       {
@@ -222,30 +220,59 @@ export const DASHBOARD_MENU: MenuConfig = [
     ],
   },
   {
-    title: "Technician",
+    title: "Technician & Field",
     path: paths.dashboard.technician.root.getHref(),
-    heading: 'INFRASTRUCTURE',
+    heading: 'Infrastructure',
     icon: UserCog,
   },
   {
     title: "Warehouse & Asset",
-    path: paths.dashboard.technician.root.getHref(),
-    heading: 'INFRASTRUCTURE',
+    path: "#",
+    heading: 'Infrastructure',
     icon: BookMinus,
   },
   {
     title: "Billing & Finance",
-    path: paths.dashboard.technician.root.getHref(),
-    heading: 'FINANCE & SUPPORT',
+    path: "#",
+    heading: 'Finance & Support',
     icon: Wallet,
   },
   {
     title: "Customer Service",
-    path: paths.dashboard.technician.root.getHref(),
-    heading: 'FINANCE & SUPPORT',
+    path: "#",
+    heading: 'Finance & Support',
     icon: Headset,
   },
+  {
+    title: "Operations",
+    path: paths.dashboard.operations.root.getHref(),
+    heading: 'Strategic',
+    icon: Activity,
+  },
+  {
+    title: "Enterprise System",
+    path: "#",
+    heading: 'Strategic',
+    icon: Network,
+  },
+  {
+    title: "Intelligence Center",
+    path: "#",
+    heading: 'Strategic',
+    icon: Activity,
+  },
+  {
+    title: "War Room",
+    path: "#",
+    heading: 'Strategic',
+    icon: Activity,
+  },
+  {
+    title: "Administration",
+    path: "#",
+    heading: 'System',
+    icon: Settings,
+  },
 ];
-
 // Export default untuk backward compatibility
 export const MENU = DOCS_MENU;

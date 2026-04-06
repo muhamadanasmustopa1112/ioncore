@@ -223,7 +223,7 @@ function AccordionMenuSeparator({
 }
 
 const itemVariants = cva(
-  "relative cursor-pointer select-none flex w-full text-start items-center text-foreground rounded-lg gap-2 px-2 py-1.5 text-sm outline-hidden transition-colors hover:bg-accent hover:text-primary data-[selected=true]:bg-accent data-[selected=true]:text-primary disabled:opacity-50 disabled:bg-transparent focus-visible:bg-accent focus-visible:text-primary [&_svg]:pointer-events-none [&_svg]:opacity-60 [&_svg:not([class*=size-])]:size-4 [&_svg]:shrink-0 [&_a]:flex [&>a]:w-full [&>a]:items-center [&>a]:gap-2",
+  "relative cursor-pointer select-none flex w-full text-start items-center text-slate-600 dark:text-slate-400 rounded-lg gap-3 px-3 py-2.5 text-sm font-medium outline-hidden transition-colors hover:bg-slate-100 dark:hover:bg-slate-800 data-[selected=true]:bg-primary/10 data-[selected=true]:text-primary data-[selected=true]:border-r-4 data-[selected=true]:border-primary data-[selected=true]:rounded-r-none disabled:opacity-50 disabled:bg-transparent focus-visible:bg-slate-100 [&_svg]:pointer-events-none [&_svg]:opacity-100 [&_svg:not([class*=size-])]:size-[20px] [&_svg]:shrink-0 [&_a]:flex [&>a]:w-full [&>a]:items-center [&>a]:gap-3",
   {
     variants: {
       variant: {

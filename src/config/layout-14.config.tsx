@@ -28,6 +28,7 @@ import {
   User,
   UserRoundCog,
   Users,
+  Activity,
 } from "lucide-react";
 import { paths } from "@/config/paths";
 import { MenuConfig } from "@/config/types";
@@ -37,6 +38,21 @@ export const MENU: MenuConfig = [
     title: "Dashboard",
     path: paths.dashboard.root.getHref(),
     icon: BarChart3,
+  },
+  {
+    title: "CRM & Sales",
+    path: paths.dashboard.crmAndSales.root.getHref(),
+    icon: Users,
+  },
+  {
+    title: "Technician & Field",
+    path: paths.dashboard.technician.root.getHref(),
+    icon: Briefcase,
+  },
+  {
+    title: "Operations",
+    path: paths.dashboard.operations.root.getHref(),
+    icon: Activity,
   },
   {
     title: "Master Data",

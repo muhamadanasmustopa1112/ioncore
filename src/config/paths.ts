@@ -39,6 +39,20 @@ export const paths = {
         path: "/technician",
         getHref: () => "/technician",
       },
+      detail: {
+        path: "/technician/:id",
+        getHref: (id: string) => `/technician/${id}`,
+      },
+    },
+    operations: {
+      root: {
+        path: "/operations",
+        getHref: () => "/operations",
+      },
+      connectivity: {
+        path: "/operations/connectivity/:id",
+        getHref: (id: string) => `/operations/connectivity/${id}`,
+      },
     },
     user: {
       root: {
