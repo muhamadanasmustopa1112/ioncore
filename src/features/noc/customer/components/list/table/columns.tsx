@@ -3,16 +3,16 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
-import { RouterData } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
+import { CustomerData } from "../../../types";
 
-const statusColorMap: Record<RouterData["pingStatus"], string> = {
+const statusColorMap: Record<CustomerData["pingStatus"], string> = {
   online: "bg-green-500",
   warning: "bg-yellow-500",
   offline: "bg-red-500",
 };
 
-export const columns: ColumnDef<RouterData>[] = [
+export const columns: ColumnDef<CustomerData>[] = [
   {
     id: "pingStatus",
     accessorFn: (row) => row.pingStatus,
