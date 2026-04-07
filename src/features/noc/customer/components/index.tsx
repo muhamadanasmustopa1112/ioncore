@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { RiAddLine, RiDownloadLine, RiInformationLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,13 +12,10 @@ import {
 } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
-import { useCustomerStore } from "../store/customer";
-import { CustomerFormSheet } from "./form/customer-form-sheet";
 import { CustomerList } from "./list/customer-list";
+import { CustomerKpiCards } from "./customer-kpi-cards";
 
 export function CustomerListPage() {
-    const { openCustomerFormSheet } = useCustomerStore();
-
     return (
         <div className="relative h-full w-full overflow-hidden px-6 py-3">
             <PageBreadcrumb
@@ -44,25 +42,24 @@ export function CustomerListPage() {
                     </div>
                 </ToolbarHeading>
                 <ToolbarActions>
-                    <Button variant="outline" className="h-11 px-5 font-semibold shadow-xs">
-                        <RiDownloadLine className="size-4" />
-                        Export Data
-                    </Button>
                     <Button
-                        className="h-11 px-6 font-semibold shadow-md bg-blue-600 hover:bg-blue-700"
-                        onClick={() => openCustomerFormSheet("new")}
+                        variant="primary"
+                        className="h-11 px-6 font-semibold shadow-md"
+                        asChild
                     >
-                        <RiAddLine className="size-5" />
-                        Add New Customer
+                        <Link href={paths.dashboard.customer.create.getHref()}>
+                            <RiAddLine className="size-5" />
+                            Add New Customer
+                        </Link>
                     </Button>
                 </ToolbarActions>
             </Toolbar>
 
+            <CustomerKpiCards />
+
             <div className="flex-1 overflow-auto mt-4">
                 <CustomerList />
             </div>
-
-            <CustomerFormSheet />
         </div>
     );
 }

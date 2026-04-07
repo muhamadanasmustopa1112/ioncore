@@ -8,7 +8,7 @@ import {
     SheetTitle,
 } from "@/components/ui/sheet";
 import { useCustomerStore } from "../../store/customer";
-import { CustomerForm } from "./router-form";
+import { CustomerForm } from "./service-form";
 
 export function CustomerFormSheet() {
     const { customerSheetOpen, closeCustomerFormSheet, form } = useCustomerStore();

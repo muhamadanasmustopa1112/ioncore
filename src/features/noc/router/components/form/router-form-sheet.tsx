@@ -49,7 +49,7 @@ export function RouterFormSheet() {
                     <Button
                         variant="primary"
                         onClick={handleSave}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                        className="font-semibold"
                         disabled={isDetailMode}
                     >
                         {isNewMode ? "Create Router" : "Save Changes"}
