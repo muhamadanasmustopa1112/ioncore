@@ -49,7 +49,8 @@ export function RouterListPage() {
                         Export Data
                     </Button>
                     <Button
-                        className="h-11 px-6 font-semibold shadow-md bg-blue-600 hover:bg-blue-700"
+                        variant="primary"
+                        className="h-11 px-6 font-semibold shadow-md"
                         onClick={() => openRouterFormSheet("new")}
                     >
                         <RiAddLine className="size-5" />

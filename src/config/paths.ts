@@ -65,6 +65,18 @@ export const paths = {
         path: "/noc/ion-radius/customer",
         getHref: () => "/noc/ion-radius/customer",
       },
+      create: {
+        path: "/noc/ion-radius/customer/create",
+        getHref: () => "/noc/ion-radius/customer/create",
+      },
+      edit: {
+        path: "/noc/ion-radius/customer/edit/:id",
+        getHref: (id: string) => `/noc/ion-radius/customer/edit/${id}`,
+      },
+      detail: {
+        path: "/noc/ion-radius/customer/detail/:id",
+        getHref: (id: string) => `/noc/ion-radius/customer/detail/${id}`,
+      },
     },
     user: {
       root: {

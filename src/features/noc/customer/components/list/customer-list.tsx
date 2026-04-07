@@ -33,6 +33,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { CustomerData } from "../../types";
 import { columns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
+import { CustomerAdvancedFilter } from "./customer-advanced-filter";
 import { DUMMY_CUSTOMERS } from "../../data/dummy-customers";
 
 export function CustomerList() {
@@ -76,18 +77,16 @@ export function CustomerList() {
       isLoading={false}
     >
       <Card className="mt-[10px]">
-        <CardHeader className="">
+        <CardHeader className="flex-col items-stretch pt-4 pb-2">
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
-            <CardHeading className="py-4">
+            <div className="flex items-center justify-between w-full mb-2">
               <div className="flex items-center gap-2">
-                <div>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="outline">
-                      <Filter />
-                      Filter
-                    </Button>
-                  </CollapsibleTrigger>
-                </div>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline">
+                    <Filter />
+                    Filter
+                  </Button>
+                </CollapsibleTrigger>
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
@@ -110,15 +109,16 @@ export function CustomerList() {
                   )}
                 </div>
               </div>
-              <CollapsibleContent>
-                <div className="flex items-center gap-2 py-[5px] text-sm text-muted-foreground">
-                  No advanced filters defined yet.
-                </div>
-              </CollapsibleContent>
-            </CardHeading>
+              
+              <DataTableToolbar />
+            </div>
+
+            <CollapsibleContent className="border-t border-border/50 mt-4 pt-4">
+              <CustomerAdvancedFilter />
+            </CollapsibleContent>
           </Collapsible>
-          <DataTableToolbar />
         </CardHeader>
+
         <CardTable className="">
           <ScrollArea>
             <DataGridContainer className="w-full">
