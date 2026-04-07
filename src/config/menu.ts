@@ -163,7 +163,7 @@ export const DASHBOARD_MENU: MenuConfig = [
           },
           {
             title: "Router [NAS]",
-            path: paths.dashboard.accessManagement.root.getHref(),
+            path: paths.dashboard.router.root.getHref(),
             icon: RouterIcon,
           },
           {
@@ -173,7 +173,7 @@ export const DASHBOARD_MENU: MenuConfig = [
             children: [
               {
                 title: "PPP Users",
-                path: paths.dashboard.accessManagement.root.getHref(),
+                path: paths.dashboard.customer.root.getHref(),
                 icon: Users,
               },
             ],

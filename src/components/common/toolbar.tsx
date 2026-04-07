@@ -3,10 +3,12 @@ import { cn } from "@/lib/utils";
 
 export interface ToolbarActionsProps {
   children?: ReactNode;
+  className?: string;
 }
 
 export interface ToolbarProps {
   children?: ReactNode;
+  className?: string;
 }
 
 export interface ToolbarTitleProps {
@@ -19,9 +21,14 @@ export interface ToolbarHeadingProps {
   children: ReactNode;
 }
 
-export const Toolbar = ({ children }: ToolbarProps) => {
+export const Toolbar = ({ children, className }: ToolbarProps) => {
   return (
-    <div className="flex grow items-center justify-between gap-2.5">
+    <div
+      className={cn(
+        "flex grow flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-2.5",
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -31,11 +38,7 @@ export const ToolbarHeading = ({
   children,
   className,
 }: ToolbarHeadingProps) => {
-  return (
-    <div className={cn("flex flex-col", className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn("flex flex-col gap-1", className)}>{children}</div>;
 };
 
 export const ToolbarTitle = ({ className, children }: ToolbarTitleProps) => {
@@ -46,9 +49,9 @@ export const ToolbarTitle = ({ className, children }: ToolbarTitleProps) => {
   );
 };
 
-export const ToolbarActions = ({ children }: ToolbarActionsProps) => {
+export const ToolbarActions = ({ children, className }: ToolbarActionsProps) => {
   return (
-    <div className="flex flex-wrap items-center gap-1.5 lg:gap-3.5">
+    <div className={cn("flex flex-wrap items-center gap-1.5 lg:gap-3.5", className)}>
       {children}
     </div>
   );

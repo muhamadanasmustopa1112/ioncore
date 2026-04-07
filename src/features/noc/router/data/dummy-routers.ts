@@ -1,0 +1,55 @@
+import { RouterData } from "../types";
+
+
+export const DUMMY_ROUTERS: RouterData[] = [
+  {
+    id: "r1",
+    pingStatus: "online",
+    routerName: "CCR-Core-Main",
+    ipAddress: "192.168.10.1",
+    timeZone: "Asia/Jakarta",
+    description: "Main Core Router HQ",
+    onlineUsers: 1450,
+    lastChecked: "2026-04-06T10:00:00Z",
+  },
+  {
+    id: "r2",
+    pingStatus: "online",
+    routerName: "CCR-Dist-South",
+    ipAddress: "192.168.20.1",
+    timeZone: "Asia/Jakarta",
+    description: "Distribution Area South",
+    onlineUsers: 890,
+    lastChecked: "2026-04-06T10:02:00Z",
+  },
+  {
+    id: "r3",
+    pingStatus: "offline",
+    routerName: "RB-Access-A1",
+    ipAddress: "192.168.30.15",
+    timeZone: "Asia/Jakarta",
+    description: "Access point block A1",
+    onlineUsers: 0,
+    lastChecked: "2026-04-06T09:45:00Z",
+  },
+  {
+    id: "r4",
+    pingStatus: "warning",
+    routerName: "CCR-Dist-North",
+    ipAddress: "192.168.40.1",
+    timeZone: "Asia/Jakarta",
+    description: "High CPU Load Indicator",
+    onlineUsers: 1205,
+    lastChecked: "2026-04-06T10:01:30Z",
+  },
+  {
+    id: "r5",
+    pingStatus: "online",
+    routerName: "RB-Access-B2",
+    ipAddress: "192.168.50.25",
+    timeZone: "Asia/Jakarta",
+    description: "Access point block B2",
+    onlineUsers: 64,
+    lastChecked: "2026-04-06T10:05:00Z",
+  },
+];

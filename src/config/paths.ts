@@ -24,20 +24,32 @@ export const paths = {
     },
     networkAndOrchestration: {
       root: {
-        path: "/network-and-orchestration",
-        getHref: () => "/network-and-orchestration",
+        path: "/noc",
+        getHref: () => "/noc",
+      },
+    },
+    router: {
+      root: {
+        path: "/noc/ion-radius/router",
+        getHref: () => "/noc/ion-radius/router",
       },
     },
     odpPop: {
       root: {
-        path: "/odp-pop",
-        getHref: () => "/odp-pop",
+        path: "/noc/odp-pop",
+        getHref: () => "/noc/odp-pop",
       },
     },
     technician: {
       root: {
         path: "/technician",
         getHref: () => "/technician",
+      },
+    },
+    customer: {
+      root: {
+        path: "/noc/ion-radius/customer",
+        getHref: () => "/noc/ion-radius/customer",
       },
     },
     user: {
