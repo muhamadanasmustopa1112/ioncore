@@ -1,0 +1,53 @@
+import { BandwidthData } from "../types";
+
+
+export const DUMMY_BANDWIDTH: BandwidthData[] = [
+  {
+    id: "bw1",
+    bandwidthName: "SME Starter 50M",
+    uploadMin: 10,
+    uploadMax: 50,
+    downloadMin: 10,
+    downloadMax: 50,
+    dataOwner: "Sales Retail",
+    unit: "Mbps",
+    description: "Standard package for small businesses",
+    lastChecked: new Date().toISOString(),
+  },
+  {
+    id: "bw2",
+    bandwidthName: "Corporate Premium 100M",
+    uploadMin: 100,
+    uploadMax: 100,
+    downloadMin: 100,
+    downloadMax: 100,
+    dataOwner: "Enterprise Solutions",
+    unit: "Mbps",
+    description: "Dedicated symmetric connection",
+    lastChecked: new Date().toISOString(),
+  },
+  {
+    id: "bw3",
+    bandwidthName: "Home Ultimate 1G",
+    uploadMin: 100,
+    downloadMin: 1000,
+    uploadMax: 500,
+    downloadMax: 1000,
+    dataOwner: "FTTH Department",
+    unit: "Mbps",
+    description: "High speed home internet",
+    lastChecked: new Date().toISOString(),
+  },
+  {
+    id: "bw4",
+    bandwidthName: "Dedicated Local 10G",
+    uploadMin: 10000,
+    uploadMax: 10000,
+    downloadMin: 10000,
+    downloadMax: 10000,
+    dataOwner: "NOC Infrastructure",
+    unit: "Mbps",
+    description: "Inter-datacenter connectivity",
+    lastChecked: new Date().toISOString(),
+  },
+];
