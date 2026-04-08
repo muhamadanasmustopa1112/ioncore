@@ -151,49 +151,49 @@ export const DASHBOARD_MENU: MenuConfig = [
     children: [
       {
         title: "ION Radius",
-        path: paths.dashboard.accessManagement.root.getHref(),
+        path: paths.dashboard.networkAndOrchestration.root.getHref(),
         icon: SquareRoundCorner,
         children: [
           {
             title: "Dashboard",
-            path: paths.dashboard.accessManagement.root.getHref(),
+            path: paths.dashboard.networkAndOrchestration.root.getHref(),
             icon: BarChart2,
           },
           {
             title: "Router [NAS]",
-            path: paths.dashboard.router.root.getHref(),
+            path: paths.dashboard.networkAndOrchestration.router.getHref(),
             icon: RouterIcon,
           },
           {
             title: "Customers",
-            path: paths.dashboard.division.root.getHref(),
+            path: paths.dashboard.networkAndOrchestration.customer.root.getHref(),
             icon: UserIcon,
             children: [
               {
                 title: "PPP Users",
-                path: paths.dashboard.customer.root.getHref(),
+                path: paths.dashboard.networkAndOrchestration.customer.root.getHref(),
                 icon: Users,
               },
             ],
           },
           {
             title: "Service Plan",
-            path: paths.dashboard.accessManagement.root.getHref(),
+            path: paths.dashboard.networkAndOrchestration.servicePlan.root.getHref(),
             icon: Package,
             children: [
               {
                 title: "Bandwidth",
-                path: paths.dashboard.accessManagement.root.getHref(),
+                path: paths.dashboard.networkAndOrchestration.servicePlan.bandwidth.getHref(),
                 icon: Activity,
               },
               {
                 title: "Profile Group",
-                path: paths.dashboard.accessManagement.root.getHref(),
+                path: paths.dashboard.networkAndOrchestration.servicePlan.profileGroup.getHref(),
                 icon: Users2,
               },
               {
                 title: "PPP Profile",
-                path: paths.dashboard.accessManagement.root.getHref(),
+                path: paths.dashboard.networkAndOrchestration.servicePlan.pppProfile.getHref(),
                 icon: UserCheck2,
               },
             ],

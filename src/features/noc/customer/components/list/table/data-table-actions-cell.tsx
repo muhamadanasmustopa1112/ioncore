@@ -54,11 +54,11 @@ export function ActionsCell({ row }: { row: Row<CustomerData> }) {
   const router = useRouter();
 
   const handleEditClick = () => {
-    router.push(paths.dashboard.customer.edit.getHref(row.original.id));
+    router.push(paths.dashboard.networkAndOrchestration.customer.edit.getHref(row.original.id));
   };
 
   const handleDetailClick = () => {
-    router.push(paths.dashboard.customer.detail.getHref(row.original.id));
+    router.push(paths.dashboard.networkAndOrchestration.customer.detail.getHref(row.original.id));
   };
 
   return (

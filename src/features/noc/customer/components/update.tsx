@@ -42,7 +42,7 @@ export function CustomerUpdate() {
               { title: "ION Radius" },
               {
                 title: "Customer",
-                path: paths.dashboard.customer.root.getHref(),
+                path: paths.dashboard.networkAndOrchestration.customer.root.getHref(),
               },
               { title: "Edit Customer" },
             ]}

@@ -27,11 +27,45 @@ export const paths = {
         path: "/noc",
         getHref: () => "/noc",
       },
-    },
-    router: {
-      root: {
+      router: {
         path: "/noc/ion-radius/router",
         getHref: () => "/noc/ion-radius/router",
+      },
+      customer: {
+        root: {
+          path: "/noc/ion-radius/customer",
+          getHref: () => "/noc/ion-radius/customer",
+        },
+        create: {
+          path: "/noc/ion-radius/customer/create",
+          getHref: () => "/noc/ion-radius/customer/create",
+        },
+        edit: {
+          path: "/noc/ion-radius/customer/edit/:id",
+          getHref: (id: string) => `/noc/ion-radius/customer/edit/${id}`,
+        },
+        detail: {
+          path: "/noc/ion-radius/customer/detail/:id",
+          getHref: (id: string) => `/noc/ion-radius/customer/detail/${id}`,
+        },
+      },
+      servicePlan: {
+        root: {
+          path: "/noc/ion-radius/service-plan",
+          getHref: () => "/noc/ion-radius/service-plan",
+        },
+        bandwidth: {
+          path: "/noc/ion-radius/service-plan/bandwidth",
+          getHref: () => "/noc/ion-radius/service-plan/bandwidth",
+        },
+        profileGroup: {
+          path: "/noc/ion-radius/service-plan/profile-group",
+          getHref: () => "/noc/ion-radius/service-plan/profile-group",
+        },
+        pppProfile: {
+          path: "/noc/ion-radius/service-plan/ppp-profile",
+          getHref: () => "/noc/ion-radius/service-plan/ppp-profile",
+        },
       },
     },
     odpPop: {
@@ -58,24 +92,6 @@ export const paths = {
       connectivity: {
         path: "/operations/connectivity/:id",
         getHref: (id: string) => `/operations/connectivity/${id}`,
-      },
-    },
-    customer: {
-      root: {
-        path: "/noc/ion-radius/customer",
-        getHref: () => "/noc/ion-radius/customer",
-      },
-      create: {
-        path: "/noc/ion-radius/customer/create",
-        getHref: () => "/noc/ion-radius/customer/create",
-      },
-      edit: {
-        path: "/noc/ion-radius/customer/edit/:id",
-        getHref: (id: string) => `/noc/ion-radius/customer/edit/${id}`,
-      },
-      detail: {
-        path: "/noc/ion-radius/customer/detail/:id",
-        getHref: (id: string) => `/noc/ion-radius/customer/detail/${id}`,
       },
     },
     user: {
