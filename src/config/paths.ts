@@ -142,6 +142,26 @@ export const paths = {
         getHref: () => "/users/employees/access-management",
       },
     },
+    administration: {
+      branch: {
+        root: {
+          path: "/administration/branch",
+          getHref: () => "/administration/branch",
+        },
+      },
+      roles: {
+        root: {
+          path: "/administration/roles",
+          getHref: () => "/administration/roles",
+        },
+      },
+      users: {
+        root: {
+          path: "/administration/users",
+          getHref: () => "/administration/users",
+        },
+      },
+    },
   },
   docs: {
     root: {

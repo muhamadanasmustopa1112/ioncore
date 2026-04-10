@@ -6,7 +6,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RiErrorWarningFill } from "@remixicon/react";
 import { isAxiosError } from "axios";
-import { AlertCircle, Eye, EyeOff, LoaderCircleIcon } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronUp, Eye, EyeOff, LoaderCircleIcon, Zap } from "lucide-react";
+import { useAuthStore } from "@/store/auth-store";
+import { QUICK_LOGIN_USERS } from "@/data/dummy-quick-login";
 import { useForm } from "react-hook-form";
 import { auth, responses, state } from "@/config/constants";
 import { paths } from "@/config/paths";
@@ -34,6 +36,8 @@ export function SigninForm() {
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showQuickAccess, setShowQuickAccess] = useState(false);
+  const { loginAs } = useAuthStore();
 
   const { mutate: login, isPending: isProcessing } = useLogin({
     onSuccess(data) {
@@ -81,6 +85,16 @@ export function SigninForm() {
       rememberMe: !!rememberedUsername,
     },
   });
+
+  const handleQuickLogin = (user: typeof QUICK_LOGIN_USERS[0]) => {
+    loginAs(user);
+    setCookie(
+      auth.logged_in,
+      state.loggedIn,
+      new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+    );
+    router.push(paths.dashboard.root.getHref());
+  };
 
   async function onSubmit(values: ExtendedLoginInput) {
     setError(null);
@@ -304,6 +318,44 @@ export function SigninForm() {
             <Button variant="outline" type="button" className="w-full" onClick={() => { }}>
               <Icons.googleColorful className="size-5! opacity-100!" /> Google
             </Button>
+          </div>
+
+          {/* Quick Access — Dev Only */}
+          <div className="border border-border rounded-lg overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowQuickAccess(!showQuickAccess)}
+              className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <Zap className="size-3.5 text-yellow-500" />
+                Quick Access (Dev Only)
+              </span>
+              {showQuickAccess ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+            </button>
+
+            {showQuickAccess && (
+              <div className="border-t border-border p-3">
+                <div className="grid grid-cols-2 gap-2">
+                  {QUICK_LOGIN_USERS.map((user) => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => handleQuickLogin(user)}
+                      className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2 text-left hover:bg-muted/60 hover:border-primary/30 transition-all group"
+                    >
+                      <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0 group-hover:bg-primary/20">
+                        {user.avatarInitials}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold truncate">{user.primaryRole}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{user.primaryBranch}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="pt-4 md:pt-6 mb-2">
