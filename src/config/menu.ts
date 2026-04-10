@@ -5,6 +5,7 @@ import {
   BookMinus,
   Box,
   BoxIcon,
+  Building2,
   Columns,
   FileChartLine,
   FileText,
@@ -17,6 +18,7 @@ import {
   Presentation,
   RouterIcon,
   Settings,
+  ShieldCheck,
   SquareKanban,
   SquareRoundCorner,
   StickyNote,
@@ -269,9 +271,26 @@ export const DASHBOARD_MENU: MenuConfig = [
   },
   {
     title: "Administration",
-    path: "#",
+    path: paths.dashboard.administration.branch.root.getHref(),
     heading: 'System',
     icon: Settings,
+    children: [
+      {
+        title: "Branch Management",
+        path: paths.dashboard.administration.branch.root.getHref(),
+        icon: Building2,
+      },
+      {
+        title: "Role Management",
+        path: paths.dashboard.administration.roles.root.getHref(),
+        icon: ShieldCheck,
+      },
+      {
+        title: "User Management",
+        path: paths.dashboard.administration.users.root.getHref(),
+        icon: UserCog,
+      },
+    ],
   },
 ];
 // Export default untuk backward compatibility
