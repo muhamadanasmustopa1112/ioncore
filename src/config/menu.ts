@@ -204,17 +204,17 @@ export const DASHBOARD_MENU: MenuConfig = [
       },
       {
         title: "ODP | POP Data",
-        path: paths.dashboard.odpPop.root.getHref(),
+        path: paths.dashboard.networkAndOrchestration.odpPop.root.getHref(),
         icon: BoxIcon,
         children: [
           {
             title: "Manage ODP | POP",
-            path: paths.dashboard.accessManagement.root.getHref(),
+            path: paths.dashboard.networkAndOrchestration.odpPop.manage.getHref(),
             icon: Settings,
           },
           {
             title: "View Map",
-            path: paths.dashboard.accessManagement.root.getHref(),
+            path: paths.dashboard.networkAndOrchestration.odpPop.map.getHref(),
             icon: Map,
           },
         ],
