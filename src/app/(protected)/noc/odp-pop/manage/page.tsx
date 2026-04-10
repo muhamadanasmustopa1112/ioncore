@@ -1,17 +1,17 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import { ScreenLoader } from "@/components/common/screen-loader";
-import { PPPProfileListPage } from "@/features/noc/service-plan/ppp-profile/components";
+import { OdpPopManagePage } from "@/features/noc/odp-pop/components";
 
 export const metadata: Metadata = {
-    title: "Profile PPP",
-    description: "Manage Profile.",
+    title: "Manage ODP | POP",
+    description: "Monitoring and managing ODP & POP locations via list and interactive map views.",
 };
 
 export default function Page() {
     return (
         <Suspense fallback={<ScreenLoader />}>
-            <PPPProfileListPage />
+            <OdpPopManagePage />
         </Suspense>
     );
 }

@@ -67,13 +67,26 @@ export const paths = {
           getHref: () => "/noc/ion-radius/service-plan/ppp-profile",
         },
       },
-    },
-    odpPop: {
-      root: {
-        path: "/noc/odp-pop",
-        getHref: () => "/noc/odp-pop",
+      odpPop: {
+        root: {
+          path: "/noc/odp-pop",
+          getHref: () => "/noc/odp-pop",
+        },
+        manage: {
+          path: "/noc/odp-pop/manage",
+          getHref: () => "/noc/odp-pop/manage",
+        },
+        map: {
+          path: "/noc/odp-pop/map",
+          getHref: () => "/noc/odp-pop/map",
+        },
+        oltDetail: {
+          path: "/noc/odp-pop/olt/:id",
+          getHref: (id: string) => `/noc/odp-pop/olt/${id}`,
+        },
       },
     },
+
     technician: {
       root: {
         path: "/technician",
