@@ -290,6 +290,11 @@ export const DASHBOARD_MENU: MenuConfig = [
         path: paths.dashboard.administration.users.root.getHref(),
         icon: UserCog,
       },
+      {
+        title: "Schema Management",
+        path: paths.dashboard.administration.schema.root.getHref(),
+        icon: FileText,
+      },
     ],
   },
 ];
