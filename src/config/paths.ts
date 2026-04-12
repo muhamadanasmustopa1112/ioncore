@@ -27,6 +27,12 @@ export const paths = {
         path: "/noc",
         getHref: () => "/noc",
       },
+      radius: {
+        dashboard: {
+          path: "/noc/ion-radius/dashboard",
+          getHref: () => "/noc/ion-radius/dashboard",
+        },
+      },
       router: {
         path: "/noc/ion-radius/router",
         getHref: () => "/noc/ion-radius/router",

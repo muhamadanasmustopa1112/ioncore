@@ -10,7 +10,6 @@ import { PopData } from "../../types/odp-pop";
 import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
 import { Maximize2, Map as MapIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { RiFocus2Line } from "@remixicon/react";
 
 // Controller to handle programmatic map changes with smooth navigation
 function MapFocusController({ selectedPopId, data, markerRefs }: {

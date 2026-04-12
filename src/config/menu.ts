@@ -158,7 +158,7 @@ export const DASHBOARD_MENU: MenuConfig = [
         children: [
           {
             title: "Dashboard",
-            path: paths.dashboard.networkAndOrchestration.root.getHref(),
+            path: paths.dashboard.networkAndOrchestration.radius.dashboard.getHref(),
             icon: BarChart2,
           },
           {

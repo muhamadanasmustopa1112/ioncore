@@ -29,7 +29,6 @@ export function RouterListPage() {
                     { title: "ION Radius" },
                     { title: "Router" },
                 ]}
-                className="mb-15"
             />
             <Toolbar className="mt-5 items-center">
                 <ToolbarHeading>
