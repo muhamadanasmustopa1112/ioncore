@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "Manage business schemas for ION Core.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function Page() {
   return (
     <Suspense fallback={<ScreenLoader />}>

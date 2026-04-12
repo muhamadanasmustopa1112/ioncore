@@ -19,3 +19,4 @@ dist-ssr
 docs/plans/
 graphify-out/
 .claude/
+claude.local.md
