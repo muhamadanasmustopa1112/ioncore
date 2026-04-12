@@ -35,9 +35,9 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
       </style>
       <div className="grid grow lg:grid-cols-1">
         <div className="order-2 flex items-center justify-center p-8 lg:order-1 lg:p-10">
-          <Card className="w-full max-w-[1000px] overflow-hidden lg:h-[540px]">
-            <CardContent className="p-0 flex items-stretch h-full">
-              <div className="flex-1 relative overflow-hidden h-full">
+          <Card className="w-full max-w-[1000px] overflow-hidden lg:h-[540px] lg:max-h-[calc(100vh-4rem)]">
+            <CardContent className="p-0 flex items-stretch h-full min-h-0">
+              <div className="flex-1 relative overflow-hidden h-full min-h-0">
                 {slides.map((slide, index) => (
                   <Image
                     key={index}
@@ -83,7 +83,7 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
                   ))}
                 </div>
               </div>
-              <div className="flex-1 p-[40px] h-full">
+              <div className="flex-1 h-full min-h-0 overflow-y-auto p-[32px] lg:p-[40px]">
                 {children}
               </div>
             </CardContent>

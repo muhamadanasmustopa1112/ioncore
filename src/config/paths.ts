@@ -180,6 +180,12 @@ export const paths = {
           getHref: () => "/administration/users",
         },
       },
+      schema: {
+        root: {
+          path: "/administration/schema",
+          getHref: () => "/administration/schema",
+        },
+      },
     },
   },
   docs: {
