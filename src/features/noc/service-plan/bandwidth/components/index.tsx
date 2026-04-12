@@ -30,7 +30,6 @@ export function BandwidthListPage() {
                     { title: "Service Plan" },
                     { title: "Bandwidth" },
                 ]}
-                className="mb-15"
             />
             <Toolbar className="mt-5 items-center">
                 <ToolbarHeading>

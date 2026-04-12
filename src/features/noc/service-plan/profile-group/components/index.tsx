@@ -30,7 +30,6 @@ export function ProfileGroupListPage() {
                     { title: "Service Plan" },
                     { title: "Profile Group" },
                 ]}
-                className="mb-15"
             />
             <Toolbar className="mt-5 items-center">
                 <ToolbarHeading>
