@@ -10,21 +10,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BranchData } from "../../../types";
-import { useBranchStore } from "../../../store/branch";
-import { useDeleteBranch } from "../../../api/branch-queries";
+import { CapabilityData } from "../../../../types/capability";
+import { useCapabilityStore } from "../../../../store/capability";
+import { useDeleteCapability } from "../../../../api/capability-queries";
 
-export function ActionsCell({ row }: { row: Row<BranchData> }) {
-  const { openBranchFormSheet } = useBranchStore();
-  const deleteBranch = useDeleteBranch();
-  const branch = row.original;
+export function ActionsCell({ row }: { row: Row<CapabilityData> }) {
+  const { openSheet, selectedBranchId } = useCapabilityStore();
+  const deleteCapability = useDeleteCapability();
+  const capability = row.original;
 
   const handleDelete = () => {
-    deleteBranch.mutate({
-      level: branch.level,
-      id: branch.id,
-      regionalId: branch._regionalId,
-      areaId: branch._areaId,
+    deleteCapability.mutate({
+      branchId: selectedBranchId,
+      capabilityId: capability.id,
     });
   };
 
@@ -38,14 +36,14 @@ export function ActionsCell({ row }: { row: Row<BranchData> }) {
       <DropdownMenuContent side="bottom" align="end">
         <DropdownMenuItem
           className="cursor-pointer"
-          onClick={() => openBranchFormSheet("edit", branch)}
+          onClick={() => openSheet("edit", capability)}
         >
           <RiEditLine />
           Edit
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer"
-          onClick={() => openBranchFormSheet("details", branch)}
+          onClick={() => openSheet("details", capability)}
         >
           <RiEyeLine />
           Detail
@@ -53,7 +51,7 @@ export function ActionsCell({ row }: { row: Row<BranchData> }) {
         <DropdownMenuItem
           variant="destructive"
           className="cursor-pointer"
-          disabled={deleteBranch.isPending}
+          disabled={deleteCapability.isPending}
           onClick={handleDelete}
         >
           <RiDeleteBin7Line />

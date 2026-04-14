@@ -1,10 +1,11 @@
 import { create } from "zustand";
-import { BranchFormMode } from "../types";
+import { BranchData, BranchFormMode } from "../types";
 
 interface BranchState {
   form: BranchFormMode;
   branchSheetOpen: boolean;
-  openBranchFormSheet: (form: BranchFormMode) => void;
+  selectedBranch: BranchData | null;
+  openBranchFormSheet: (form: BranchFormMode, branch?: BranchData) => void;
   closeBranchFormSheet: () => void;
   setForm: (form: BranchFormMode) => void;
   setBranchFormSheetOpen: (open: boolean) => void;
@@ -13,13 +14,24 @@ interface BranchState {
 const useBranchStore = create<BranchState>((set) => ({
   form: "new",
   branchSheetOpen: false,
+  selectedBranch: null,
   setForm: (form) => set((state) => ({ ...state, form })),
   setBranchFormSheetOpen: (open: boolean) =>
     set((state) => ({ ...state, branchSheetOpen: open })),
-  openBranchFormSheet: (form: BranchFormMode) =>
-    set((state) => ({ ...state, branchSheetOpen: true, form })),
+  openBranchFormSheet: (form: BranchFormMode, branch?: BranchData) =>
+    set((state) => ({
+      ...state,
+      branchSheetOpen: true,
+      form,
+      selectedBranch: branch ?? null,
+    })),
   closeBranchFormSheet: () =>
-    set((state) => ({ ...state, branchSheetOpen: false, form: null })),
+    set((state) => ({
+      ...state,
+      branchSheetOpen: false,
+      form: null,
+      selectedBranch: null,
+    })),
 }));
 
 export { useBranchStore };

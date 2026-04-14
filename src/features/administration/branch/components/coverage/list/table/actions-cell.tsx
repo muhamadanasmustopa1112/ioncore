@@ -10,21 +10,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BranchData } from "../../../types";
-import { useBranchStore } from "../../../store/branch";
-import { useDeleteBranch } from "../../../api/branch-queries";
+import { CoverageData } from "../../../../types/coverage";
+import { useCoverageStore } from "../../../../store/coverage";
+import { useDeleteCoverage } from "../../../../api/coverage-queries";
 
-export function ActionsCell({ row }: { row: Row<BranchData> }) {
-  const { openBranchFormSheet } = useBranchStore();
-  const deleteBranch = useDeleteBranch();
-  const branch = row.original;
+export function ActionsCell({ row }: { row: Row<CoverageData> }) {
+  const { openSheet, selectedBranchId } = useCoverageStore();
+  const deleteCoverage = useDeleteCoverage();
+  const coverage = row.original;
 
   const handleDelete = () => {
-    deleteBranch.mutate({
-      level: branch.level,
-      id: branch.id,
-      regionalId: branch._regionalId,
-      areaId: branch._areaId,
+    deleteCoverage.mutate({
+      branchId: selectedBranchId,
+      coverageId: coverage.id,
     });
   };
 
@@ -38,14 +36,14 @@ export function ActionsCell({ row }: { row: Row<BranchData> }) {
       <DropdownMenuContent side="bottom" align="end">
         <DropdownMenuItem
           className="cursor-pointer"
-          onClick={() => openBranchFormSheet("edit", branch)}
+          onClick={() => openSheet("edit", coverage)}
         >
           <RiEditLine />
           Edit
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer"
-          onClick={() => openBranchFormSheet("details", branch)}
+          onClick={() => openSheet("details", coverage)}
         >
           <RiEyeLine />
           Detail
@@ -53,7 +51,7 @@ export function ActionsCell({ row }: { row: Row<BranchData> }) {
         <DropdownMenuItem
           variant="destructive"
           className="cursor-pointer"
-          disabled={deleteBranch.isPending}
+          disabled={deleteCoverage.isPending}
           onClick={handleDelete}
         >
           <RiDeleteBin7Line />

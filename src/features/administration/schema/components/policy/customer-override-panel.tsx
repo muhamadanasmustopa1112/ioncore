@@ -61,7 +61,7 @@ function OverrideCard({ override }: { override: CustomerSchemaOverride }) {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="info" appearance="light" className="text-xs">
             {override.overridden_fields.length} field{override.overridden_fields.length !== 1 ? "s" : ""}
           </Badge>
           <Button

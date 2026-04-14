@@ -30,8 +30,11 @@ const processQueue = (error: unknown) => {
   failedQueue = [];
 };
 
+const isProxyMode =
+  env.APP_URL === "/api-proxy" || env.APP_URL?.startsWith("/api-proxy/");
+
 export const api = Axios.create({
-  baseURL: env.API_URL,
+  baseURL: isProxyMode ? "/api-proxy" : env.API_URL,
   // withCredentials: true,
 });
 

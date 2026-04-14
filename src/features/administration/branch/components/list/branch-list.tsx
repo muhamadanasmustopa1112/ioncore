@@ -36,13 +36,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { BranchData } from "../../types";
-import { DUMMY_BRANCHES } from "../../data/dummy-branch";
+import { useBranchList } from "../../api/branch-queries";
 import { columns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 
 export function BranchList() {
-  const [data] = useState<BranchData[]>(DUMMY_BRANCHES);
+  const { data: branches = [], isLoading } = useBranchList();
+
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -54,7 +54,7 @@ export function BranchList() {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const filteredData = useMemo(() => {
-    let result = data;
+    let result = branches;
     if (filter.search) {
       const q = filter.search.toLowerCase();
       result = result.filter(
@@ -67,16 +67,14 @@ export function BranchList() {
       result = result.filter((b) => b.level === filter.level);
     }
     return result;
-  }, [data, filter.search, filter.level]);
+  }, [branches, filter.search, filter.level]);
 
   const table = useReactTable({
     columns,
     data: filteredData,
     pageCount: Math.ceil(filteredData.length / (filter.limit || 10)),
     getRowId: (row) => row.id,
-    state: {
-      rowSelection,
-    },
+    state: { rowSelection },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
@@ -96,10 +94,10 @@ export function BranchList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={false}
+      isLoading={isLoading}
     >
       <Card className="mt-[10px]">
-        <CardHeader className="">
+        <CardHeader>
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
             <CardHeading className="py-4">
               <div className="flex items-center gap-2">
@@ -160,7 +158,7 @@ export function BranchList() {
           </Collapsible>
           <DataTableToolbar />
         </CardHeader>
-        <CardTable className="">
+        <CardTable>
           <ScrollArea>
             <DataGridContainer className="w-full">
               <DataGridTable />
