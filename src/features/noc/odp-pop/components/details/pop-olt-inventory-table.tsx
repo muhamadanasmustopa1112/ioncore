@@ -32,6 +32,7 @@ import {
 import { DUMMY_OLT_DETAILS } from "@/features/noc/odp-pop/data/dummy-olt-details";
 import { RiListCheck } from "@remixicon/react";
 import { columns } from "./table/columns_olt";
+import { AddOltDialog } from "../form/olt-dialog";
 
 export function PopOltInventoryTable({ popId }: { popId: string }) {
   const data = useMemo(() => DUMMY_OLT_DETAILS[popId] || [], [popId]);
@@ -84,6 +85,7 @@ export function PopOltInventoryTable({ popId }: { popId: string }) {
               <RiListCheck className="size-5 text-primary" />
               List OLT
             </CardHeading>
+            <AddOltDialog />
           </div>
 
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>

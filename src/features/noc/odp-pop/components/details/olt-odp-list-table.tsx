@@ -6,62 +6,58 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Filter, Search, X } from "lucide-react";
+import { Filter, Search, X, Settings2 } from "lucide-react";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardFooter,
+  CardTable,
   CardHeader,
   CardHeading,
-  CardTable,
+  CardFooter,
+  CardToolbar,
 } from "@/components/ui/card";
 import { DataGrid, DataGridContainer } from "@/components/ui/data-grid";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
+import { DataGridColumnVisibility } from "@/components/ui/data-grid-column-visibility";
 import { Input } from "@/components/ui/input";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { columns } from "./table/columns";
-import { DataTableToolbar } from "./table/data-table-toolbar";
-import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
+import { RiRouterLine } from "@remixicon/react";
+import { DUMMY_ODP_LIST } from "@/features/noc/odp-pop/data/dummy-odp-list";
+import { columns } from "./table/columns_odp";
+import { AddOdpDialog } from "../form/add-odp-dialog";
 
-export function OdpPopList({
-  onPopSelect
-}: {
-  onPopSelect: (id: string) => void;
-}) {
-  const [filter, setFilter] = useQueryStates({
-    limit: parseAsInteger.withDefault(10),
-    page: parseAsInteger.withDefault(1),
-    search: parseAsString,
-  });
+export function OltOdpListTable({ oltId }: { oltId: string }) {
+  const data = useMemo(() => DUMMY_ODP_LIST[oltId] || [], [oltId]);
 
-  const data = DUMMY_POP_DATA;
+  const [filter, setFilter] = useQueryStates(
+    {
+      limit: parseAsInteger.withDefault(10),
+      page: parseAsInteger.withDefault(1),
+      search: parseAsString,
+    },
+    {
+      urlKeys: {
+        limit: "odp_limit",
+        page: "odp_page",
+        search: "odp_search",
+      },
+    }
+  );
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const table = useReactTable({
-    columns,
     data,
-    meta: {
-      onPopSelect,
-    },
+    columns,
     pageCount: Math.ceil(data.length / (filter.limit || 10)),
-    getRowId: (row) => row.id,
-    state: {
-      rowSelection,
-    },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -85,25 +81,34 @@ export function OdpPopList({
       }}
       isLoading={false}
     >
-      <Card className="mt-0">
-        <CardHeader className="flex-col items-stretch pt-4 pb-2 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+      <Card className="border-none shadow-sm rounded-2xl overflow-hidden mt-8">
+        <CardHeader className="flex-col items-stretch pt-6 pb-2 px-6">
+          <div className="flex items-center justify-between mb-4">
+            <CardHeading className="flex items-center gap-3 text-lg font-black tracking-tight text-foreground uppercase">
+              <RiRouterLine className="size-5 text-primary" />
+              List ODP
+            </CardHeading>
+            <AddOdpDialog />
+
+          </div>
+
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
             <div className="flex items-center justify-between w-full mb-2">
               <div className="flex items-center gap-2">
                 <CollapsibleTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="h-8">
                     <Filter className="size-3" />
                   </Button>
                 </CollapsibleTrigger>
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-3.5 -translate-y-1/2" />
                   <Input
-                    placeholder="Search Router..."
+                    placeholder="Search ODP..."
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
                     }
-                    className="h-8 w-32 ps-9 text-xs"
+                    className="h-8 w-48 ps-9 text-xs"
                   />
                   {filter.search && (
                     <Button
@@ -118,12 +123,23 @@ export function OdpPopList({
                 </div>
               </div>
 
-              <DataTableToolbar />
+              <CardToolbar>
+                <DataGridColumnVisibility
+                  table={table}
+                  trigger={
+                    <Button variant="outline" size="sm" className="h-8">
+                      <Settings2 className="size-3" />
+                      View
+                    </Button>
+                  }
+                />
+              </CardToolbar>
             </div>
 
             <CollapsibleContent className="border-t border-border/50 mt-4 pt-4">
-              {/* <CustomerAdvancedFilter /> */}
-              Filter Test
+              <div className="text-xs text-muted-foreground italic">
+                Advanced filters coming soon...
+              </div>
             </CollapsibleContent>
           </Collapsible>
         </CardHeader>
@@ -135,7 +151,8 @@ export function OdpPopList({
             </div>
           </div>
         </CardTable>
-        <CardFooter>
+
+        <CardFooter className="bg-white border-t border-border/40 p-4">
           <DataGridPagination setFilter={setFilter} filter={filter} />
         </CardFooter>
       </Card>

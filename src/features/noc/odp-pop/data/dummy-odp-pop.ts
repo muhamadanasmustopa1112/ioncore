@@ -1,4 +1,4 @@
-import { PopData } from "../types/odp-pop";
+import { PopData } from "../types/pop";
 
 export const DUMMY_POP_DATA: PopData[] = [
   {

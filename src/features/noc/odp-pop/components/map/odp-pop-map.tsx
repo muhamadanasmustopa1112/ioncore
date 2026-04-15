@@ -6,10 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { PopData } from "../../types/odp-pop";
 import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
 import { Maximize2, Map as MapIcon, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PopData } from "../../types/pop";
 
 // Controller to handle programmatic map changes with smooth navigation
 function MapFocusController({ selectedPopId, data, markerRefs }: {

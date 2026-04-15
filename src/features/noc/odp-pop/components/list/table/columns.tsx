@@ -2,8 +2,8 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
-import { PopData } from "../../../types/odp-pop";
 import { ActionsCell } from "./data-table-actions-cell";
+import { PopData } from "../../../types/pop";
 
 export const columns: ColumnDef<PopData>[] = [
   {
