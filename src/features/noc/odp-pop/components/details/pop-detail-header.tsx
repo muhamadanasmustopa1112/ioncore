@@ -3,11 +3,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RiMapPinLine, RiPencilLine, RiAddLine, RiSignalTowerLine } from "@remixicon/react";
-import { PopData } from "../../types/odp-pop";
+import { PopData } from "../../types/pop";
 import { useRouter } from "next/navigation";
+import { useProvisioningStore } from "../../store/provisioning";
+import { ProvisionDeviceFormSheet } from "../form/provision-device-form-sheet";
 
 export function PopDetailHeader({ pop }: { pop: PopData }) {
   const router = useRouter();
+  const { openProvisioningSheet } = useProvisioningStore();
 
   return (
     <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between p-6 bg-white rounded-2xl shadow-sm border border-border/50">
@@ -40,11 +43,16 @@ export function PopDetailHeader({ pop }: { pop: PopData }) {
           <RiPencilLine className="size-5 text-muted-foreground" />
           Edit Details
         </Button>
-        <Button className="h-11 px-8 font-bold gap-2 bg-primary hover:bg-primary/80 shadow-md">
+        <Button
+          className="h-11 px-8 font-bold gap-2 bg-primary hover:bg-primary/80 shadow-md"
+          onClick={openProvisioningSheet}
+        >
           <RiAddLine className="size-5" />
           Provision Device
         </Button>
       </div>
+
+      <ProvisionDeviceFormSheet />
     </div>
   );
 }

@@ -11,15 +11,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PopData } from "../../../types/odp-pop";
 import { paths } from "@/config/paths";
+import { PopData } from "../../../types/pop";
+import { usePopStore } from "../../../store/pop";
 
 export function ActionsCell({ row }: { row: Row<PopData> }) {
   const router = useRouter();
+  const { openPopFormSheet, setSelectedPop } = usePopStore();
 
   const handleEditClick = () => {
-    // router.push(paths.dashboard.networkAndOrchestration.odpPop.edit.getHref(row.original.id));
-    console.log("Edit click", row.original.id);
+    setSelectedPop({
+      ...row.original,
+      latitude: String(row.original.latitude),
+      longitude: String(row.original.longitude),
+    });
+    openPopFormSheet("edit");
   };
 
   const handleDetailClick = () => {
@@ -54,3 +60,5 @@ export function ActionsCell({ row }: { row: Row<PopData> }) {
     </DropdownMenu>
   );
 }
+
+

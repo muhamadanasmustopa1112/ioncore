@@ -8,13 +8,13 @@ import L from "leaflet";
 import { Map as MapIcon, Maximize2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DUMMY_OLT_ODP_LOCATIONS, OdpLocation } from "../../data/dummy-olt-odp-locations";
 import { RiFocus2Line } from "@remixicon/react";
+import { DUMMY_ODP_LIST, OdpListItem } from "../../data/dummy-odp-list";
 
 // Controller to handle programmatic map changes
 function MapFocusController({ selectedOdpName, points, markerRefs }: {
   selectedOdpName: string | null,
-  points: OdpLocation[],
+  points: OdpListItem[],
   markerRefs: MutableRefObject<Record<string, L.Marker>>
 }) {
   const map = useMap();
@@ -24,7 +24,7 @@ function MapFocusController({ selectedOdpName, points, markerRefs }: {
       const odp = points.find(p => p.name === selectedOdpName);
       if (odp) {
         // Pan and Zoom
-        map.flyTo([odp.lat, odp.lng], 18, {
+        map.flyTo([odp.latitude, odp.longitude], 18, {
           animate: true,
           duration: 1.5
         });
@@ -44,12 +44,12 @@ function MapFocusController({ selectedOdpName, points, markerRefs }: {
 }
 
 // Update map bounds to fit all markers initially
-function MapBoundsController({ points }: { points: OdpLocation[] }) {
+function MapBoundsController({ points }: { points: OdpListItem[] }) {
   const map = useMap();
 
   useEffect(() => {
     if (points.length > 0) {
-      const bounds = L.latLngBounds(points.map(p => [p.lat, p.lng]));
+      const bounds = L.latLngBounds(points.map(p => [p.latitude, p.longitude]));
       map.fitBounds(bounds, { padding: [50, 50], animate: true });
     }
   }, [points, map]);
@@ -73,14 +73,14 @@ const odpIcon = L.divIcon({
 });
 
 export default function OltOdpMap({ oltId }: { oltId: string }) {
-  const [points, setPoints] = useState<OdpLocation[]>(DUMMY_OLT_ODP_LOCATIONS[oltId] || []);
+  const [points, setPoints] = useState<OdpListItem[]>(DUMMY_ODP_LIST[oltId] || []);
   const [isMounted, setIsMounted] = useState(false);
   const [selectedOdpName, setSelectedOdpName] = useState<string | null>(null);
   const markerRefs = useRef<Record<string, L.Marker>>({});
 
   useEffect(() => {
     setIsMounted(true);
-    setPoints(DUMMY_OLT_ODP_LOCATIONS[oltId] || []);
+    setPoints(DUMMY_ODP_LIST[oltId] || []);
   }, [oltId]);
 
   if (!isMounted) {
@@ -92,7 +92,7 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
   }
 
   const defaultCenter: [number, number] = points.length > 0
-    ? [points[0].lat, points[0].lng]
+    ? [points[0].latitude, points[0].longitude]
     : [-6.2088, 106.8456];
 
   return (
@@ -182,7 +182,7 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
           {points.map((odp) => (
             <Marker
               key={odp.name}
-              position={[odp.lat, odp.lng]}
+              position={[odp.latitude, odp.longitude]}
               icon={odpIcon}
               ref={(ref) => {
                 if (ref) {
@@ -201,11 +201,11 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
                   <div className="space-y-1.5 pt-2 border-t border-border/50">
                     <div className="flex justify-between text-[9px] font-bold">
                       <span className="text-muted-foreground uppercase">Latitude</span>
-                      <span className="text-foreground">{odp.lat.toFixed(6)}</span>
+                      <span className="text-foreground">{odp.latitude.toFixed(6)}</span>
                     </div>
                     <div className="flex justify-between text-[9px] font-bold">
                       <span className="text-muted-foreground uppercase">Longitude</span>
-                      <span className="text-foreground">{odp.lng.toFixed(6)}</span>
+                      <span className="text-foreground">{odp.longitude.toFixed(6)}</span>
                     </div>
                   </div>
                 </div>

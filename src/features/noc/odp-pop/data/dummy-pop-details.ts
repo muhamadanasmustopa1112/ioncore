@@ -30,7 +30,13 @@ export const DUMMY_DEVICE_DETAILS: Record<string, PopDeviceDetail[]> = {
   ],
   "pop-klapanunggal": [
     { id: "dev-6", name: "KLP-CORE-01", type: "Core Switch", model: "Huawei CloudEngine", ipAddress: "10.40.1.1", status: "active", rackPos: "Rack 1-A" },
-  ]
+  ],
+  "pop-pandeglang": [
+    { id: "dev-7", name: "PDL-CORE-01", type: "Core Switch", model: "Huawei CloudEngine", ipAddress: "10.40.1.1", status: "active", rackPos: "Rack 1-A" },
+    { id: "dev-8", name: "NY-EDGE-06", type: "Router", model: "Juniper MX960", ipAddress: "10.1.1.1", status: "warning", rackPos: "Rack 01-C" },
+
+  ],
+
 };
 
 export const DUMMY_ODP_DETAILS: Record<string, PopOdpDetail[]> = {

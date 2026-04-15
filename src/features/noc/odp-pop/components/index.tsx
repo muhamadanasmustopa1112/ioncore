@@ -16,8 +16,12 @@ import { paths } from "@/config/paths";
 import { OdpPopKpiCards } from "./odp-pop-kpi-cards";
 import { OdpPopList } from "./list/odp-pop-list";
 import { OdpPopMapWrapper } from "./map/odp-pop-map-wrapper";
+import { usePopStore } from "../store/pop";
+import { PopFormSheet } from "./form/pop-form-sheet";
 
 export function OdpPopManagePage() {
+    const { openPopFormSheet } = usePopStore();
+
     const [selectedPopId, setSelectedPopId] = useState<string | null>(null);
 
     return (
@@ -48,13 +52,11 @@ export function OdpPopManagePage() {
                 <ToolbarActions>
                     <Button
                         variant="primary"
-                        className="h-11 px-6 font-semibold shadow-md bg-blue-600 hover:bg-blue-700 text-white"
-                        asChild
+                        className="h-11 px-6 font-semibold shadow-md"
+                        onClick={() => openPopFormSheet("new")}
                     >
-                        <Link href={paths.dashboard.networkAndOrchestration.odpPop.manage.getHref()}>
-                            <RiAddLine className="size-5" />
-                            Add New POP
-                        </Link>
+                        <RiAddLine className="size-5" />
+                        Add New POP
                     </Button>
                 </ToolbarActions>
             </Toolbar>
@@ -74,6 +76,8 @@ export function OdpPopManagePage() {
                     <OdpPopList onPopSelect={setSelectedPopId} />
                 </div>
             </div>
+
+            <PopFormSheet />
         </div>
     );
 }
