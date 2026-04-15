@@ -79,7 +79,9 @@ export const columns: ColumnDef<BranchData>[] = [
       <DataGridColumnHeader title="Type" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => {
-      const config = typeConfig[row.original.branchType];
+      const type = row.original.branchType;
+      if (!type) return <span className="text-muted-foreground/40">—</span>;
+      const config = typeConfig[type];
       return <span className={config.className}>{config.label}</span>;
     },
     enableSorting: true,

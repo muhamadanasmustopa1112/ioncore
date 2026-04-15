@@ -281,6 +281,16 @@ export const DASHBOARD_MENU: MenuConfig = [
         icon: Building2,
       },
       {
+        title: "Branch Capability",
+        path: paths.dashboard.administration.branch.capability.getHref(),
+        icon: Settings,
+      },
+      {
+        title: "Branch Coverage",
+        path: paths.dashboard.administration.branch.coverage.getHref(),
+        icon: Map,
+      },
+      {
         title: "Role Management",
         path: paths.dashboard.administration.roles.root.getHref(),
         icon: ShieldCheck,

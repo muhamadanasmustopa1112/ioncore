@@ -1,6 +1,14 @@
 import { create } from "zustand";
 import { SchemaType, SchemaFormMode } from "../types";
 
+export type SchemaView =
+  | "schemas"
+  | "assignment-rules"
+  | "customer-overrides"
+  | "change-policies"
+  | "upgrade-rules"
+  | "change-matrix";
+
 interface SchemaStore {
   activeSchemaType: SchemaType;
   form: SchemaFormMode;
@@ -9,7 +17,9 @@ interface SchemaStore {
   migrationPanelOpen: boolean;
   historyPanelOpen: boolean;
   selectedSchemaId: string | null;
+  view: SchemaView;
 
+  setView: (view: SchemaView) => void;
   setActiveSchemaType: (type: SchemaType) => void;
   setSelectedSchemaId: (id: string | null) => void;
   openSchemaSheet: (form: "new" | "edit" | "details") => void;
@@ -31,7 +41,9 @@ const useSchemaStore = create<SchemaStore>((set) => ({
   migrationPanelOpen: false,
   historyPanelOpen: false,
   selectedSchemaId: null,
+  view: "schemas",
 
+  setView: (view) => set({ view }),
   setActiveSchemaType: (type) => set({ activeSchemaType: type }),
   setSelectedSchemaId: (id) => set({ selectedSchemaId: id }),
   setForm: (form) => set({ form }),

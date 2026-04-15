@@ -4,3 +4,4 @@ export * from "./billing-schema";
 export * from "./service-schema";
 export * from "./commission-schema";
 export * from "./suspension-schema";
+export * from "./policy-types";

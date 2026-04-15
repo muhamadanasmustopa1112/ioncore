@@ -167,6 +167,14 @@ export const paths = {
           path: "/administration/branch",
           getHref: () => "/administration/branch",
         },
+        capability: {
+          path: "/administration/branch/capability",
+          getHref: () => "/administration/branch/capability",
+        },
+        coverage: {
+          path: "/administration/branch/coverage",
+          getHref: () => "/administration/branch/coverage",
+        },
       },
       roles: {
         root: {

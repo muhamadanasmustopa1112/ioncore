@@ -9,9 +9,12 @@ export interface BranchData {
   level: BranchLevel;
   parentId: string | null;
   parentName?: string;
-  branchType: BranchType;
+  branchType?: BranchType;
   address?: string;
   active: boolean;
   createdAt: string;
   updatedAt: string;
+  // Internal fields used for nested API routing — not displayed in UI
+  _regionalId?: string;
+  _areaId?: string;
 }
