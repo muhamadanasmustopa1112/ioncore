@@ -1,14 +1,26 @@
 import {
   defaultShouldDehydrateQuery,
   isServer,
+  QueryCache,
   QueryClient,
 } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 function makeQueryClient() {
   return new QueryClient({
+    queryCache: new QueryCache({
+      onError: (_error, query) => {
+        // Skip during SSR — toast requires browser DOM
+        if (typeof window === "undefined") return;
+        // Skip if the query suppresses the global toast (has its own error UI)
+        if (query.meta?.suppressGlobalError) return;
+        toast.error("Failed to load data. Please try again.");
+      },
+    }),
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,
+        retry: false,
       },
       dehydrate: {
         // include pending queries in dehydration
