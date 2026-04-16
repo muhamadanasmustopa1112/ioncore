@@ -111,7 +111,7 @@ export function ChangeMatrixPanel() {
 
       {/* Matrix table */}
       <div className="rounded-xl border border-border overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto scrollbar-none">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">

@@ -100,16 +100,14 @@ export function BranchList() {
         <CardHeader>
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
             <CardHeading className="py-4">
-              <div className="flex items-center gap-2">
-                <div>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="outline">
-                      <Filter />
-                      Filter
-                    </Button>
-                  </CollapsibleTrigger>
-                </div>
-                <div className="relative">
+              <div className="flex flex-wrap items-center gap-2">
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline">
+                    <Filter />
+                    Filter
+                  </Button>
+                </CollapsibleTrigger>
+                <div className="relative flex-1 min-w-[150px]">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
                     placeholder="Search branch..."
@@ -117,7 +115,7 @@ export function BranchList() {
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
                     }
-                    className="w-48 ps-9"
+                    className="w-full ps-9"
                   />
                   {filter.search && (
                     <Button

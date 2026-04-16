@@ -133,8 +133,8 @@ export function CustomerOverridePanel() {
         Overrides are applied on top of the customer&apos;s assigned base schema at runtime.
       </p>
 
-      <div className="flex items-center justify-between gap-3">
-        <div className="relative w-64">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="relative w-full sm:w-64">
           <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             placeholder="Search customer or schema..."
@@ -143,7 +143,7 @@ export function CustomerOverridePanel() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button variant="primary" size="sm" className="h-9 px-4 font-medium">
+        <Button variant="primary" size="sm" className="h-9 px-4 font-medium w-full sm:w-auto">
           <RiAddLine className="size-4 mr-1.5" />
           New Override
         </Button>

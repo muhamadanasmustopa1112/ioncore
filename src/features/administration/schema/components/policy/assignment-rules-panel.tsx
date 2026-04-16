@@ -86,7 +86,7 @@ export function AssignmentRulesPanel() {
                 <div className="flex items-center gap-2">
                   {!isEditing && (
                     <>
-                      <span className="text-xs opacity-70">
+                      <span className="hidden sm:inline text-xs opacity-70">
                         Last updated by {rule.updated_by}
                       </span>
                       <Button

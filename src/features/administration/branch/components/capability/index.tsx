@@ -31,13 +31,14 @@ const levelLabel: Record<string, string> = {
 
 export function BranchCapabilityPage() {
   const { data: branches = [] } = useBranchTree();
-  const { openSheet, selectedBranchId, setSelectedBranchId } =
-    useCapabilityStore();
+  const openSheet = useCapabilityStore((s) => s.openSheet);
+  const selectedBranchId = useCapabilityStore((s) => s.selectedBranchId);
+  const setSelectedBranchId = useCapabilityStore((s) => s.setSelectedBranchId);
 
   const selectedBranch = branches.find((b) => b.id === selectedBranchId);
 
   return (
-    <div className="relative h-full w-full overflow-hidden px-6 py-3">
+    <div className="relative h-full w-full overflow-hidden">
       <PageBreadcrumb
         items={[
           {
@@ -52,41 +53,41 @@ export function BranchCapabilityPage() {
         ]}
       />
 
-      <Toolbar className="mt-5 items-center">
+      <Toolbar className="mt-5 items-start sm:items-center">
         <ToolbarHeading>
-          <ToolbarTitle className="text-2xl font-extrabold tracking-tight">
+          <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
             Branch Capability Configuration
           </ToolbarTitle>
-          <div className="mt-2.5 flex items-center gap-2.5 text-sm font-medium">
+          <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
             <Badge
               variant="info"
               appearance="light"
-              className="h-6 px-2.5 gap-1.5 border-none font-semibold"
+              className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs"
             >
               <RiSettings3Line className="size-3.5" />
               Feature Capabilities
             </Badge>
-            <span className="text-muted-foreground/60">•</span>
-            <span className="text-muted-foreground font-normal">
+            <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
+            <span className="text-muted-foreground font-normal text-xs sm:text-sm">
               Configure which features are enabled per branch
             </span>
           </div>
         </ToolbarHeading>
-        <ToolbarActions>
+        <ToolbarActions className="mt-1 sm:mt-0">
           <Button
             variant="primary"
-            className="h-11 px-6 font-semibold shadow-md"
+            className="h-9 px-4 text-sm font-semibold shadow-md sm:h-11 sm:px-6"
             disabled={!selectedBranchId}
             onClick={() => openSheet("new")}
           >
-            <RiAddLine className="size-5" />
+            <RiAddLine className="size-4 sm:size-5" />
             Add Capability
           </Button>
         </ToolbarActions>
       </Toolbar>
 
       {/* Branch Selector */}
-      <div className="mt-4 flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
+      <div className="mt-4 flex flex-col gap-2 rounded-lg border bg-card px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
         <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
           Select Branch:
         </span>
@@ -94,7 +95,7 @@ export function BranchCapabilityPage() {
           value={selectedBranchId || "none"}
           onValueChange={(v) => setSelectedBranchId(v === "none" ? "" : v)}
         >
-          <SelectTrigger className="w-72">
+          <SelectTrigger className="w-full sm:w-72">
             <SelectValue placeholder="Choose a branch to manage..." />
           </SelectTrigger>
           <SelectContent>

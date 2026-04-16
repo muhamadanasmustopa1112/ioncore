@@ -86,7 +86,11 @@ function DataGridPagination(props: DataGridPaginationProps) {
           })}
           onClick={() => {
             if (pageIndex !== i) {
-              setFilter((prevState: any) => ({...prevState, page: i + 1}))
+              if (setFilter) {
+                setFilter((prevState: any) => ({ ...prevState, page: i + 1 }));
+              } else {
+                table.setPageIndex(i);
+              }
             }
           }}
         >
@@ -137,11 +141,11 @@ function DataGridPagination(props: DataGridPaginationProps) {
     <div
       data-slot="data-grid-pagination"
       className={cn(
-        "flex grow flex-col flex-wrap items-center justify-between gap-2.5 py-2.5 sm:flex-row sm:py-0",
+        "flex grow flex-wrap items-center justify-between gap-x-4 gap-y-2 py-2 sm:py-0",
         mergedProps?.className,
       )}
     >
-      <div className="order-2 flex flex-wrap items-center space-x-2.5 pb-2.5 sm:order-1 sm:pb-0">
+      <div className="flex flex-wrap items-center gap-2">
         {isLoading ? (
           mergedProps?.sizesSkeleton
         ) : (
@@ -152,7 +156,11 @@ function DataGridPagination(props: DataGridPaginationProps) {
               indicatorPosition="right"
               onValueChange={(value) => {
                 const newPageSize = Number(value);
-                setFilter((prevState: any) => ({...prevState, limit: newPageSize}))
+                if (setFilter) {
+                  setFilter((prevState: any) => ({ ...prevState, limit: newPageSize }));
+                } else {
+                  table.setPageSize(newPageSize);
+                }
               }}
             >
               <SelectTrigger className="w-fit" size="sm">
@@ -169,22 +177,28 @@ function DataGridPagination(props: DataGridPaginationProps) {
           </>
         )}
       </div>
-      <div className="order-1 flex flex-col items-center justify-center gap-2.5 pt-2.5 sm:order-2 sm:flex-row sm:justify-end sm:pt-0">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         {isLoading ? (
           mergedProps?.infoSkeleton
         ) : (
           <>
-            <div className="text-muted-foreground order-2 text-sm text-nowrap sm:order-1">
+            <div className="text-muted-foreground text-sm text-nowrap">
               {paginationInfo}
             </div>
             {pageCount > 1 && (
-              <div className="order-1 flex items-center space-x-1 sm:order-2">
+              <div className="flex items-center gap-1">
                 <Button
                   size="sm"
                   mode="icon"
                   variant="ghost"
                   className={btnArrowClasses}
-                  onClick={() => setFilter((prevState: any) => ({...prevState, page: filter.page - 1}))}
+                  onClick={() => {
+                    if (setFilter) {
+                      setFilter((prevState: any) => ({ ...prevState, page: filter.page - 1 }));
+                    } else {
+                      table.previousPage();
+                    }
+                  }}
                   disabled={!table.getCanPreviousPage()}
                 >
                   <span className="sr-only">Go to previous page</span>
@@ -202,7 +216,13 @@ function DataGridPagination(props: DataGridPaginationProps) {
                   mode="icon"
                   variant="ghost"
                   className={btnArrowClasses}
-                  onClick={() => setFilter((prevState: any) => ({...prevState, page: filter.page + 1}))}
+                  onClick={() => {
+                    if (setFilter) {
+                      setFilter((prevState: any) => ({ ...prevState, page: filter.page + 1 }));
+                    } else {
+                      table.nextPage();
+                    }
+                  }}
                   disabled={!table.getCanNextPage()}
                 >
                   <span className="sr-only">Go to next page</span>

@@ -6,7 +6,7 @@ import { Tabs as TabsPrimitive } from "radix-ui";
 import { cn } from "@/lib/utils";
 
 // Variants for TabsList
-const tabsListVariants = cva("flex items-center shrink-0", {
+const tabsListVariants = cva("flex items-center min-w-0 w-full max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-3rem)] overflow-x-auto scrollbar-none", {
   variants: {
     variant: {
       default: "bg-accent p-1",
@@ -152,7 +152,7 @@ function Tabs({
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
-      className={cn("", className)}
+      className={cn("w-full min-w-0", className)}
       {...props}
     />
   );

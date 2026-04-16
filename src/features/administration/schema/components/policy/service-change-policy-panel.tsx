@@ -10,6 +10,7 @@ import {
 } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DUMMY_CHANGE_POLICIES } from "../../data/dummy-policies";
 import { ServiceChangePolicy, ChangeType } from "../../types/policy-types";
 import { CustomerType } from "../../types";
@@ -66,22 +67,19 @@ export function ServiceChangePolicyPanel() {
       </p>
 
       {/* Filter tabs */}
-      <div className="flex items-center gap-1 border-b overflow-x-auto">
-        {changeTypes.map((type) => (
-          <button
-            key={type}
-            onClick={() => setFilterType(type)}
-            className={[
-              "px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors border-b-2 -mb-px",
-              filterType === type
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            ].join(" ")}
-          >
-            {type === "all" ? "All" : CHANGE_TYPE_LABELS[type]}
-          </button>
-        ))}
-      </div>
+      <Tabs value={filterType} onValueChange={(v) => setFilterType(v as ChangeType | "all")}>
+        <TabsList
+          variant="line"
+          size="sm"
+          className="w-full justify-start"
+        >
+          {changeTypes.map((type) => (
+            <TabsTrigger key={type} value={type}>
+              {type === "all" ? "All" : CHANGE_TYPE_LABELS[type]}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       <div className="flex justify-end">
         <Button variant="primary" size="sm" className="h-9 px-4 font-medium">
@@ -133,7 +131,7 @@ function PolicyCard({ policy }: { policy: ServiceChangePolicy }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <PolicyMeta
           icon={<RiShieldCheckLine className="size-3.5 text-blue-500" />}
           label="Approval"

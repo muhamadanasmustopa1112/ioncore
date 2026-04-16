@@ -7,105 +7,105 @@ import { ActionsCell } from "./actions-cell";
 
 export const columns: ColumnDef<CoverageData>[] = [
   {
-    id: "areaName",
-    accessorFn: (row) => row.areaName,
+    id: "name",
+    accessorFn: (row) => row.name,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Area Name"
+        title="Name"
         column={column}
         className="text-foreground font-semibold"
       />
     ),
     cell: ({ row }) => (
-      <span className="font-medium text-foreground">{row.original.areaName}</span>
+      <span className="font-medium text-foreground">{row.original.name}</span>
     ),
     enableSorting: true,
-    size: 180,
+    size: 200,
   },
   {
-    id: "village",
-    accessorFn: (row) => row.village,
+    id: "description",
+    accessorFn: (row) => row.description,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Village (Kelurahan)"
+        title="Description"
         column={column}
         className="text-foreground font-semibold"
       />
     ),
     cell: ({ row }) => (
-      <span className={row.original.village ? "text-foreground" : "text-muted-foreground/40"}>
-        {row.original.village || "—"}
-      </span>
-    ),
-    enableSorting: true,
-    size: 160,
-  },
-  {
-    id: "district",
-    accessorFn: (row) => row.district,
-    header: ({ column }) => (
-      <DataGridColumnHeader
-        title="District (Kecamatan)"
-        column={column}
-        className="text-foreground font-semibold"
-      />
-    ),
-    cell: ({ row }) => (
-      <span className={row.original.district ? "text-foreground" : "text-muted-foreground/40"}>
-        {row.original.district || "—"}
-      </span>
-    ),
-    enableSorting: true,
-    size: 160,
-  },
-  {
-    id: "city",
-    accessorFn: (row) => row.city,
-    header: ({ column }) => (
-      <DataGridColumnHeader
-        title="City"
-        column={column}
-        className="text-foreground font-semibold"
-      />
-    ),
-    cell: ({ row }) => (
-      <span className="text-foreground">{row.original.city}</span>
-    ),
-    enableSorting: true,
-    size: 140,
-  },
-  {
-    id: "province",
-    accessorFn: (row) => row.province,
-    header: ({ column }) => (
-      <DataGridColumnHeader
-        title="Province"
-        column={column}
-        className="text-foreground font-semibold"
-      />
-    ),
-    cell: ({ row }) => (
-      <span className="text-foreground">{row.original.province}</span>
-    ),
-    enableSorting: true,
-    size: 140,
-  },
-  {
-    id: "postalCode",
-    accessorFn: (row) => row.postalCode,
-    header: ({ column }) => (
-      <DataGridColumnHeader
-        title="Postal Code"
-        column={column}
-        className="text-foreground font-semibold"
-      />
-    ),
-    cell: ({ row }) => (
-      <span className={row.original.postalCode ? "font-mono text-xs text-foreground" : "text-muted-foreground/40"}>
-        {row.original.postalCode || "—"}
+      <span
+        className={
+          row.original.description
+            ? "text-foreground"
+            : "text-muted-foreground/40"
+        }
+      >
+        {row.original.description || "—"}
       </span>
     ),
     enableSorting: false,
+    size: 240,
+  },
+  {
+    id: "service_area",
+    accessorFn: (row) => row.coverageJson.service_area.join(", "),
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        title="Service Areas"
+        column={column}
+        className="text-foreground font-semibold"
+      />
+    ),
+    cell: ({ row }) => {
+      const areas = row.original.coverageJson.service_area;
+      return areas.length > 0 ? (
+        <span className="text-foreground text-xs">
+          {areas.slice(0, 2).join(", ")}
+          {areas.length > 2 && (
+            <span className="text-muted-foreground"> +{areas.length - 2}</span>
+          )}
+        </span>
+      ) : (
+        <span className="text-muted-foreground/40">—</span>
+      );
+    },
+    enableSorting: false,
+    size: 200,
+  },
+  {
+    id: "network_scope",
+    accessorFn: (row) => row.coverageJson.network_scope,
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        title="Network Scope"
+        column={column}
+        className="text-foreground font-semibold"
+      />
+    ),
+    cell: ({ row }) => (
+      <span className="font-mono text-xs text-foreground bg-muted px-2 py-0.5 rounded">
+        {row.original.coverageJson.network_scope || "—"}
+      </span>
+    ),
+    enableSorting: true,
+    size: 130,
+  },
+  {
+    id: "dispatch_radius_km",
+    accessorFn: (row) => row.coverageJson.dispatch_radius_km,
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        title="Radius (km)"
+        column={column}
+        className="text-foreground font-semibold"
+      />
+    ),
+    cell: ({ row }) => (
+      <span className="text-foreground">
+        {row.original.coverageJson.dispatch_radius_km ?? "—"}
+      </span>
+    ),
+    enableSorting: true,
     size: 110,
   },
   {

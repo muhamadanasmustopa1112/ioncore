@@ -1,16 +1,6 @@
 import { ContentHeader } from "@/components/common/content-header";
 import { useLayout } from "./context";
-import { HeaderBreadcrumbs } from "./header-breadcrumbs";
-import { HeaderLogo } from "./header-logo";
 import { HeaderToolbar } from "./header-toolbar";
-import {
-  Toolbar,
-  ToolbarActions,
-  ToolbarHeading,
-  ToolbarTitle,
-} from "@/components/common/toolbar";
-import { RiAddLine } from "@remixicon/react";
-import { ToolbarBreadcrumbs } from "./toolbar";
 import {
   Sheet,
   SheetBody,
@@ -21,41 +11,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { SidebarContent } from "./sidebar-content";
 
 export function Header() {
   const { isMobile } = useLayout();
-  const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
     <header>
       <ContentHeader>
-        <Toolbar>
-          {
-            isMobile && (
-              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="dim" mode="icon" className="hover:text-white">
-                    <Menu />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent
-                  className="p-0 gap-0 w-(--sidebar-width)"
-                  side="left"
-                  close={false}
-                >
-                  <SheetHeader className="p-0 space-y-0" />
-                  <SheetBody className="bg-sidebar-main text-sidebar-main-foreground flex flex-col grow p-0 [--sidebar-space-x:calc(var(--spacing)*2.5)]">
-                    <SidebarContent />
-                  </SheetBody>
-                </SheetContent>
-              </Sheet>
-            )
-          }
-          <HeaderToolbar />
-        </Toolbar>
+        <div className="flex grow items-center h-full border-b border-border/50">
+          {isMobile && (
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" mode="icon" className="shrink-0 mx-1">
+                  <Menu className="size-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                className="p-0 gap-0 w-(--sidebar-width)"
+                side="left"
+                close={false}
+              >
+                <SheetHeader className="p-0 space-y-0" />
+                <SheetBody className="bg-sidebar-main text-sidebar-main-foreground flex flex-col grow p-0 [--sidebar-space-x:calc(var(--spacing)*2.5)]">
+                  <SidebarContent />
+                </SheetBody>
+              </SheetContent>
+            </Sheet>
+          )}
+          <div className="flex-1 min-w-0 h-full">
+            <HeaderToolbar />
+          </div>
+        </div>
       </ContentHeader>
     </header>
   );

@@ -14,7 +14,9 @@ function cast<T>(p: unknown): Promise<T> {
 
 export function listCapabilities(branchId: string) {
   return cast<ApiResponse<CapabilityListResponse>>(
-    api.get(`${BASE}/${branchId}/capability`)
+    api.get(`${BASE}/${branchId}/capability`, {
+      params: { page: 1, per_page: 100 },
+    })
   );
 }
 

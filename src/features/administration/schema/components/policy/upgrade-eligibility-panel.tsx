@@ -80,8 +80,8 @@ function RuleCard({
 
   return (
     <div className={`rounded-xl border bg-card overflow-hidden transition-opacity ${!rule.active ? "opacity-60" : ""}`}>
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between px-4 py-3 border-b border-border/60 bg-muted/30 gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 text-sm font-medium">
             <RiArrowUpLine className="size-4 text-emerald-500" />
             {rule.rule_name}
@@ -94,17 +94,15 @@ function RuleCard({
             {CUSTOMER_TYPE_LABELS[rule.customer_type]}
           </Badge>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
-              {rule.active ? "Active" : "Inactive"}
-            </span>
-            <Switch
-              size="sm"
-              checked={rule.active}
-              onCheckedChange={() => onToggle(rule.id)}
-            />
-          </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs text-muted-foreground">
+            {rule.active ? "Active" : "Inactive"}
+          </span>
+          <Switch
+            size="sm"
+            checked={rule.active}
+            onCheckedChange={() => onToggle(rule.id)}
+          />
           <Button variant="ghost" size="sm" className="h-7 px-3 text-xs">
             <RiEditLine className="size-3.5 mr-1" />
             Edit
@@ -125,7 +123,7 @@ function RuleCard({
         </div>
 
         {/* Requirements grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <RiTimeLine className="size-3.5 text-blue-500" />

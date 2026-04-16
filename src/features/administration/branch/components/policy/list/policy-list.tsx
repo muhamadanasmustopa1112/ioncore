@@ -25,28 +25,29 @@ import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useCapabilityList } from "../../../api/capability-queries";
+import { usePolicyList } from "../../../api/policy-queries";
 import { columns } from "./table/columns";
 
-interface CapabilityListProps {
+interface PolicyListProps {
   branchId: string;
 }
 
-export function CapabilityList({ branchId }: CapabilityListProps) {
-  const { data: capabilities = [], isLoading, isError, refetch } = useCapabilityList(branchId);
+export function PolicyList({ branchId }: PolicyListProps) {
+  const { data: policies = [], isLoading, isError, refetch } = usePolicyList(branchId);
 
   const [search, setSearch] = useState("");
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const filteredData = useMemo(() => {
-    if (!search) return capabilities;
+    if (!search) return policies;
     const q = search.toLowerCase();
-    return capabilities.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.description.toLowerCase().includes(q)
+    return policies.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.policyJson.timezone.toLowerCase().includes(q)
     );
-  }, [capabilities, search]);
+  }, [policies, search]);
 
   const table = useReactTable({
     columns,
@@ -78,7 +79,7 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
           <div className="flex flex-col items-center gap-2 py-4">
             <AlertCircle className="size-8 text-destructive opacity-70" />
             <p className="text-sm font-medium text-destructive">
-              Failed to load capabilities
+              Failed to load policies
             </p>
             <p className="text-xs text-muted-foreground">
               Something went wrong. Please try again.
@@ -92,7 +93,7 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
             </button>
           </div>
         ) : (
-          "No capabilities found"
+          "No policies found"
         )
       }
     >
@@ -102,7 +103,7 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
             <div className="relative w-full sm:w-56">
               <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
               <Input
-                placeholder="Search capabilities..."
+                placeholder="Search policies..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full ps-9"

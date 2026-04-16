@@ -1,0 +1,50 @@
+import { ApiResponse, PaginationMeta } from "./branch-api";
+
+// ─── Policy JSON nested fields ────────────────────────────────────────────────
+
+export interface PolicyJson {
+  sla_hours: number;
+  working_hours: {
+    start: string;
+    end: string;
+  };
+  timezone: string;
+  tax_default: number;
+  notification_contacts: string[];
+  approval_matrix: {
+    level_1: string;
+    level_2: string;
+  };
+}
+
+// ─── Policy Payload ───────────────────────────────────────────────────────────
+
+export interface PolicyPayload {
+  name: string;
+  description: string;
+  is_active: boolean;
+  policy_json: PolicyJson;
+}
+
+// ─── Policy DTO ───────────────────────────────────────────────────────────────
+
+export interface PolicyDto {
+  id: string;
+  branch_id: string;
+  name: string;
+  description: string;
+  is_active: boolean;
+  policy_json: PolicyJson;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─── Policy List Response ─────────────────────────────────────────────────────
+
+export interface PolicyListResponse {
+  policies: PolicyDto[];
+  pagination: PaginationMeta;
+}
+
+// Re-export for convenience
+export type { ApiResponse };
