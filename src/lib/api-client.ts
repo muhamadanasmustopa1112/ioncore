@@ -69,6 +69,8 @@ api.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: () => {
+              // Mark as retried so queued requests don't re-enter this block
+              originalRequest._retry = true;
               resolve(api.request(originalRequest));
             },
             reject,
@@ -78,18 +80,34 @@ api.interceptors.response.use(
 
       originalRequest._retry = true;
       isRefreshing = true;
-      const response = await generateToken();
 
-      processQueue(null);
+      try {
+        const response = await generateToken();
 
-      // retry the request
-      return api.request({
-        ...error.config,
-        headers: {
-          ...error.config.headers,
-          token: response?.token,
-        },
-      });
+        // generateToken returns null when the backend responds but auth fails.
+        // Treat null as a hard failure — don't call processQueue(null) which
+        // would re-fire all queued requests and create an infinite retry loop.
+        if (!response?.token) {
+          isRefreshing = false;
+          const tokenErr = new Error("Failed to generate token");
+          processQueue(tokenErr);
+          return Promise.reject(tokenErr);
+        }
+
+        isRefreshing = false;
+        processQueue(null);
+        return api.request({
+          ...error.config,
+          headers: {
+            ...error.config.headers,
+            token: response.token,
+          },
+        });
+      } catch (refreshError) {
+        isRefreshing = false;
+        processQueue(refreshError);
+        return Promise.reject(refreshError);
+      }
     }
 
     if (message === responses.pleaseLoginFirst && !originalRequest._retry) {

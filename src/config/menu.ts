@@ -9,7 +9,9 @@ import {
   Columns,
   FileChartLine,
   FileText,
+  Gauge,
   Headset,
+  KeyRound,
   Map,
   Network,
   Package,
@@ -294,6 +296,26 @@ export const DASHBOARD_MENU: MenuConfig = [
         title: "Branch Policy",
         path: paths.dashboard.administration.branch.policy.getHref(),
         icon: ShieldCheck,
+      },
+      {
+        title: "Cross-branch Rules",
+        path: paths.dashboard.administration.branch.crossBranchRules.getHref(),
+        icon: Network,
+      },
+      {
+        title: "Resource Mapping",
+        path: paths.dashboard.administration.branch.resourceMapping.getHref(),
+        icon: Users2,
+      },
+      {
+        title: "Access Scope Control",
+        path: paths.dashboard.administration.branch.accessScope.getHref(),
+        icon: KeyRound,
+      },
+      {
+        title: "Branch Performance",
+        path: paths.dashboard.administration.branch.performance.getHref(),
+        icon: Gauge,
       },
       {
         title: "Role Management",

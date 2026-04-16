@@ -179,6 +179,22 @@ export const paths = {
           path: "/administration/branch/policy",
           getHref: () => "/administration/branch/policy",
         },
+        crossBranchRules: {
+          path: "/administration/branch/cross-branch-rules",
+          getHref: () => "/administration/branch/cross-branch-rules",
+        },
+        resourceMapping: {
+          path: "/administration/branch/resource-mapping",
+          getHref: () => "/administration/branch/resource-mapping",
+        },
+        accessScope: {
+          path: "/administration/branch/access-scope",
+          getHref: () => "/administration/branch/access-scope",
+        },
+        performance: {
+          path: "/administration/branch/performance",
+          getHref: () => "/administration/branch/performance",
+        },
       },
       roles: {
         root: {
