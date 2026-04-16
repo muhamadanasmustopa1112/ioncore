@@ -9,34 +9,34 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useCapabilityStore } from "../../../store/capability";
-import { useCreateCapability, useUpdateCapability } from "../../../api/capability-queries";
-import { CapabilityForm } from "./capability-form";
-import { CapabilityPayload } from "../../../types/capability-api";
+import { usePolicyStore } from "../../../store/policy";
+import { useCreatePolicy, useUpdatePolicy } from "../../../api/policy-queries";
+import { PolicyForm } from "./policy-form";
+import { PolicyPayload } from "../../../types/policy-api";
 
-export function CapabilityFormSheet() {
-  const { sheetOpen, closeSheet, form, selectedCapability, selectedBranchId } =
-    useCapabilityStore();
+export function PolicyFormSheet() {
+  const { sheetOpen, closeSheet, form, selectedPolicy, selectedBranchId } =
+    usePolicyStore();
 
   const isNewMode = form === "new";
   const isEditMode = form === "edit";
   const isDetailMode = form === "details";
 
-  const createCapability = useCreateCapability();
-  const updateCapability = useUpdateCapability();
-  const isPending = createCapability.isPending || updateCapability.isPending;
+  const createPolicy = useCreatePolicy();
+  const updatePolicy = useUpdatePolicy();
+  const isPending = createPolicy.isPending || updatePolicy.isPending;
 
-  const handleFormSubmit = (payload: CapabilityPayload) => {
+  const handleFormSubmit = (payload: PolicyPayload) => {
     if (isNewMode) {
-      createCapability.mutate(
+      createPolicy.mutate(
         { branchId: selectedBranchId, payload },
         { onSuccess: closeSheet }
       );
-    } else if (isEditMode && selectedCapability) {
-      updateCapability.mutate(
+    } else if (isEditMode && selectedPolicy) {
+      updatePolicy.mutate(
         {
           branchId: selectedBranchId,
-          capabilityId: selectedCapability.id,
+          policyId: selectedPolicy.id,
           payload,
         },
         { onSuccess: closeSheet }
@@ -47,25 +47,25 @@ export function CapabilityFormSheet() {
   const handleSaveClick = () => {
     const submit = (
       window as unknown as Record<string, unknown>
-    ).__capabilityFormSubmit;
+    ).__policyFormSubmit;
     if (typeof submit === "function") (submit as () => void)();
   };
 
   return (
     <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
-      <SheetContent className="inset-y-0 sm:inset-y-8 lg:end-10 start-auto h-full sm:max-h-[calc(100vh-64px)] gap-0 sm:rounded-lg border p-0 sm:max-w-none w-full md:w-[520px] lg:w-[600px] flex flex-col [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5 shadow-2xl">
+      <SheetContent className="inset-y-0 sm:inset-y-8 lg:end-10 start-auto h-full sm:max-h-[calc(100vh-64px)] gap-0 sm:rounded-lg border p-0 sm:max-w-none w-full md:w-[540px] lg:w-[650px] flex flex-col [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5 shadow-2xl">
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl">
             {isNewMode
-              ? "Add Capability"
+              ? "Add Branch Policy"
               : isEditMode
-                ? "Edit Capability"
-                : "Capability Details"}
+                ? "Edit Branch Policy"
+                : "Policy Details"}
           </SheetTitle>
         </SheetHeader>
 
         <SheetBody className="flex-1 p-0 overflow-hidden">
-          <CapabilityForm onSubmit={handleFormSubmit} />
+          <PolicyForm onSubmit={handleFormSubmit} />
         </SheetBody>
 
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
@@ -90,7 +90,7 @@ export function CapabilityFormSheet() {
             {isPending
               ? "Saving..."
               : isNewMode
-                ? "Add Capability"
+                ? "Add Policy"
                 : "Save Changes"}
           </Button>
         </SheetFooter>

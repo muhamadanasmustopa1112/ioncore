@@ -9,7 +9,7 @@ import {
   RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Search, Settings2, X } from "lucide-react";
+import { AlertCircle, RefreshCw, Search, Settings2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,7 +33,7 @@ interface CoverageListProps {
 }
 
 export function CoverageList({ branchId }: CoverageListProps) {
-  const { data: coverages = [], isLoading } = useCoverageList(branchId);
+  const { data: coverages = [], isLoading, isError, refetch } = useCoverageList(branchId);
 
   const [search, setSearch] = useState("");
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -43,11 +43,10 @@ export function CoverageList({ branchId }: CoverageListProps) {
     const q = search.toLowerCase();
     return coverages.filter(
       (c) =>
-        c.areaName.toLowerCase().includes(q) ||
-        c.city.toLowerCase().includes(q) ||
-        c.province.toLowerCase().includes(q) ||
-        c.village.toLowerCase().includes(q) ||
-        c.district.toLowerCase().includes(q)
+        c.name.toLowerCase().includes(q) ||
+        c.description.toLowerCase().includes(q) ||
+        c.coverageJson.network_scope.toLowerCase().includes(q) ||
+        c.coverageJson.service_area.some((a) => a.toLowerCase().includes(q))
     );
   }, [coverages, search]);
 
@@ -75,18 +74,40 @@ export function CoverageList({ branchId }: CoverageListProps) {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={isLoading}
+      isLoading={isLoading && !isError}
+      emptyMessage={
+        isError ? (
+          <div className="flex flex-col items-center gap-2 py-4">
+            <AlertCircle className="size-8 text-destructive opacity-70" />
+            <p className="text-sm font-medium text-destructive">
+              Failed to load coverage areas
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Something went wrong. Please try again.
+            </p>
+            <button
+              onClick={() => refetch()}
+              className="mt-1 flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+            >
+              <RefreshCw className="size-3.5" />
+              Retry
+            </button>
+          </div>
+        ) : (
+          "No coverage areas found"
+        )
+      }
     >
       <Card className="mt-[10px]">
         <CardHeader>
           <CardHeading className="py-4">
-            <div className="relative">
+            <div className="relative w-full sm:w-56">
               <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
               <Input
                 placeholder="Search coverage areas..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-56 ps-9"
+                className="w-full ps-9"
               />
               {search && (
                 <Button

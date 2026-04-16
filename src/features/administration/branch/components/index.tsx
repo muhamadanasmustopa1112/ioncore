@@ -20,7 +20,7 @@ export function BranchListPage() {
   const { openBranchFormSheet } = useBranchStore();
 
   return (
-    <div className="relative h-full w-full overflow-hidden px-6 py-3">
+    <div className="relative h-full w-full overflow-hidden">
       <PageBreadcrumb
         items={[
           {
@@ -30,33 +30,33 @@ export function BranchListPage() {
           { title: "Branch Management" },
         ]}
       />
-      <Toolbar className="mt-5 items-center">
+      <Toolbar className="mt-5 items-start sm:items-center">
         <ToolbarHeading>
-          <ToolbarTitle className="text-2xl font-extrabold tracking-tight">
+          <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
             Branch Management
           </ToolbarTitle>
-          <div className="mt-2.5 flex items-center gap-2.5 text-sm font-medium">
-            <Badge variant="info" appearance="light" className="h-6 px-2.5 gap-1.5 border-none font-semibold">
+          <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
+            <Badge variant="info" appearance="light" className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs">
               <RiBuilding2Line className="size-3.5" />
               {DUMMY_BRANCHES.length} Branches
             </Badge>
-            <span className="text-muted-foreground/60">•</span>
-            <span className="text-muted-foreground font-normal">
+            <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
+            <span className="text-muted-foreground font-normal text-xs sm:text-sm">
               Regional → Area → Sub Area hierarchy
             </span>
           </div>
         </ToolbarHeading>
-        <ToolbarActions>
-          <Button variant="outline" className="h-11 px-5 font-semibold shadow-xs">
+        <ToolbarActions className="mt-1 sm:mt-0">
+          <Button variant="outline" className="h-9 px-4 text-sm font-semibold shadow-xs sm:h-11 sm:px-5">
             <RiDownloadLine className="size-4" />
             Export Data
           </Button>
           <Button
             variant="primary"
-            className="h-11 px-6 font-semibold shadow-md"
+            className="h-9 px-4 text-sm font-semibold shadow-md sm:h-11 sm:px-6"
             onClick={() => openBranchFormSheet("new")}
           >
-            <RiAddLine className="size-5" />
+            <RiAddLine className="size-4 sm:size-5" />
             Add New Branch
           </Button>
         </ToolbarActions>

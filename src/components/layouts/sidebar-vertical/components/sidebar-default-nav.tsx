@@ -362,8 +362,7 @@ export function SidebarDefaultNav() {
     }));
   }, [filteredNavItems]);
 
-  const matchPath = (path: string) =>
-    path === pathname || (path.length > 1 && pathname.startsWith(path));
+  const matchPath = (path: string) => path === pathname;
 
   return (
     <div className="px-(--sidebar-space-x)">

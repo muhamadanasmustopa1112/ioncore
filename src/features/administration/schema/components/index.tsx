@@ -12,6 +12,7 @@ import {
 } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Toolbar,
   ToolbarActions,
@@ -66,7 +67,7 @@ export function SchemaManagementPage() {
   const { openSchemaSheet, view, setView } = useSchemaStore();
 
   return (
-    <div className="relative h-full w-full overflow-hidden px-6 py-3">
+    <div className="relative h-full w-full overflow-hidden">
       <PageBreadcrumb
         items={[
           {
@@ -76,35 +77,35 @@ export function SchemaManagementPage() {
           { title: "Schema Management" },
         ]}
       />
-      <Toolbar className="mt-5 items-center">
+      <Toolbar className="mt-5 items-start sm:items-center">
         <ToolbarHeading>
-          <ToolbarTitle className="text-2xl font-extrabold tracking-tight">
+          <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
             Schema Management
           </ToolbarTitle>
-          <div className="mt-2.5 flex items-center gap-2.5 text-sm font-medium">
-            <Badge variant="info" appearance="light" className="h-6 px-2.5 gap-1.5 border-none font-semibold">
+          <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
+            <Badge variant="info" appearance="light" className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs">
               <RiFileTextLine className="size-3.5" />
               {DUMMY_SCHEMAS.length} Schemas
             </Badge>
-            <span className="text-muted-foreground/60">•</span>
-            <span className="text-muted-foreground font-normal">
+            <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
+            <span className="text-muted-foreground font-normal text-xs sm:text-sm">
               {VIEW_TITLES[view]}
             </span>
           </div>
         </ToolbarHeading>
-        <ToolbarActions>
+        <ToolbarActions className="mt-1 sm:mt-0">
           {view === "schemas" && (
             <>
-              <Button variant="outline" className="h-11 px-5 font-semibold shadow-xs">
+              <Button variant="outline" className="h-9 px-3 text-sm font-semibold shadow-xs sm:h-11 sm:px-5">
                 <RiDownloadLine className="size-4" />
-                Export
+                <span className="hidden sm:inline">Export</span>
               </Button>
               <Button
                 variant="primary"
-                className="h-11 px-6 font-semibold shadow-md"
+                className="h-9 px-4 text-sm font-semibold shadow-md sm:h-11 sm:px-6"
                 onClick={() => openSchemaSheet("new")}
               >
-                <RiAddLine className="size-5" />
+                <RiAddLine className="size-4 sm:size-5" />
                 New Schema
               </Button>
             </>
@@ -113,23 +114,20 @@ export function SchemaManagementPage() {
       </Toolbar>
 
       {/* View switcher */}
-      <div className="flex items-center gap-1 mt-4 border-b overflow-x-auto">
-        {VIEWS.map((v) => (
-          <button
-            key={v.value}
-            onClick={() => setView(v.value)}
-            className={[
-              "flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-medium whitespace-nowrap transition-colors border-b-2 -mb-px",
-              view === v.value
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            ].join(" ")}
-          >
-            {v.icon}
-            {v.label}
-          </button>
-        ))}
-      </div>
+      <Tabs value={view} onValueChange={(v) => setView(v as SchemaView)} className="mt-4">
+        <TabsList
+          variant="line"
+          size="sm"
+          className="w-full justify-start"
+        >
+          {VIEWS.map((v) => (
+            <TabsTrigger key={v.value} value={v.value}>
+              {v.icon}
+              {v.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       <div className="mt-4 flex-1 overflow-auto">
         <ViewContent view={view} />

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CoveragePayload } from "../types/coverage-api";
+import { CoveragePayload, CoverageDto } from "../types/coverage-api";
 import { CoverageData } from "../types/coverage";
 import {
   listCoverages,
@@ -19,29 +19,19 @@ export const coverageKeys = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function mapToCoverageData(dto: {
-  id: string;
-  branch_id: string;
-  area_name: string;
-  village: string;
-  district: string;
-  city: string;
-  province: string;
-  postal_code: string;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}): CoverageData {
+function mapToCoverageData(dto: CoverageDto): CoverageData {
   return {
     id: dto.id,
     branchId: dto.branch_id,
-    areaName: dto.area_name,
-    village: dto.village,
-    district: dto.district,
-    city: dto.city,
-    province: dto.province,
-    postalCode: dto.postal_code,
+    name: dto.name,
+    description: dto.description,
     isActive: dto.is_active,
+    coverageJson: dto.coverage_json ?? {
+      service_area: [],
+      warehouse_coverage: [],
+      network_scope: "",
+      dispatch_radius_km: 0,
+    },
     createdAt: dto.created_at,
     updatedAt: dto.updated_at,
   };
@@ -53,10 +43,22 @@ export function useCoverageList(branchId: string) {
   return useQuery({
     queryKey: coverageKeys.byBranch(branchId),
     queryFn: async () => {
-      const res = await listCoverages(branchId);
-      return (res.data?.coverages ?? []).map(mapToCoverageData);
+      try {
+        const res = await listCoverages(branchId);
+        const raw = res.data;
+        const items: CoverageDto[] = Array.isArray(raw)
+          ? raw
+          : (raw?.coverages ?? []);
+        return items.map(mapToCoverageData);
+      } catch (err) {
+        const status = (err as { response?: { status: number } })?.response?.status;
+        if (status === 404) return [];
+        throw err;
+      }
     },
     enabled: !!branchId,
+    retry: false,
+    meta: { suppressGlobalError: true },
   });
 }
 

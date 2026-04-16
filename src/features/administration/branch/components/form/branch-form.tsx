@@ -175,7 +175,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
               <h3 className="text-sm font-semibold">General Information</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* Branch Name */}
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
@@ -211,7 +211,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* Branch Level */}
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">

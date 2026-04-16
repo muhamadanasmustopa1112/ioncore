@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { RiInformationLine } from "@remixicon/react";
+import { useCallback, useEffect, useState } from "react";
+import { RiInformationLine, RiSettings3Line } from "@remixicon/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,9 +12,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useCapabilityStore } from "../../../store/capability";
-import { CapabilityPayload } from "../../../types/capability-api";
+import { CapabilityJson, CapabilityPayload } from "../../../types/capability-api";
+
+const CAPABILITY_LABELS: Record<keyof CapabilityJson, string> = {
+  sales: "Sales",
+  helpdesk: "Helpdesk",
+  dispatch: "Dispatch",
+  stock_holding: "Stock Holding",
+  monitoring: "Monitoring",
+  collection: "Collection",
+  approval: "Approval",
+};
+
+const DEFAULT_JSON: CapabilityJson = {
+  sales: false,
+  helpdesk: false,
+  dispatch: false,
+  stock_holding: false,
+  monitoring: false,
+  collection: false,
+  approval: false,
+};
 
 interface CapabilityFormProps {
   onSubmit?: (payload: CapabilityPayload) => void;
@@ -23,66 +44,77 @@ interface CapabilityFormProps {
 export function CapabilityForm({ onSubmit }: CapabilityFormProps) {
   const { form, selectedCapability } = useCapabilityStore();
   const isDetailMode = form === "details";
-  const isEditMode = form === "edit";
 
-  const [capabilityKey, setCapabilityKey] = useState("");
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [isEnabled, setIsEnabled] = useState("true");
+  const [isActive, setIsActive] = useState("true");
+  const [capJson, setCapJson] = useState<CapabilityJson>({ ...DEFAULT_JSON });
 
   useEffect(() => {
-    if (selectedCapability && (isEditMode || isDetailMode)) {
-      setCapabilityKey(selectedCapability.capabilityKey);
+    if (selectedCapability && (form === "edit" || form === "details")) {
+      setName(selectedCapability.name);
       setDescription(selectedCapability.description);
-      setIsEnabled(selectedCapability.isEnabled ? "true" : "false");
+      setIsActive(selectedCapability.isActive ? "true" : "false");
+      setCapJson(selectedCapability.capabilityJson ?? { ...DEFAULT_JSON });
+    } else if (form === "new") {
+      setName("");
+      setDescription("");
+      setIsActive("true");
+      setCapJson({ ...DEFAULT_JSON });
     }
-  }, [selectedCapability, isEditMode, isDetailMode]);
+  }, [selectedCapability, form]);
 
-  const handleSubmit = () => {
-    if (!onSubmit) return;
-    onSubmit({
-      capability_key: capabilityKey,
-      description,
-      is_enabled: isEnabled === "true",
-    });
+  const toggleCap = (key: keyof CapabilityJson) => {
+    setCapJson((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  const handleSubmit = useCallback(() => {
+    if (!onSubmit) return;
+    onSubmit({ name, description, is_active: isActive === "true", capability_json: capJson });
+  }, [name, description, isActive, capJson, onSubmit]);
 
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__capabilityFormSubmit =
       handleSubmit;
     return () => {
-      delete (window as unknown as Record<string, unknown>)
-        .__capabilityFormSubmit;
+      delete (window as unknown as Record<string, unknown>).__capabilityFormSubmit;
     };
-  });
+  }, [handleSubmit]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
+          {/* General */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
               <RiInformationLine className="size-4 text-blue-500" />
-              <h3 className="text-sm font-semibold">Capability Information</h3>
+              <h3 className="text-sm font-semibold">General Information</h3>
             </div>
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
-                Capability Key <span className="text-red-500">*</span>
+                Name <span className="text-red-500">*</span>
               </Label>
               <Input
-                placeholder="e.g. broadband_installation"
-                value={capabilityKey}
-                onChange={(e) =>
-                  setCapabilityKey(e.target.value.toLowerCase().replace(/\s+/g, "_"))
-                }
-                disabled={isDetailMode || isEditMode}
-                className="font-mono"
+                placeholder="e.g. Full Capability"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isDetailMode}
               />
-              {!isDetailMode && !isEditMode && (
-                <p className="text-[11px] text-muted-foreground">
-                  Use snake_case. Cannot be changed after creation.
-                </p>
-              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Description
+              </Label>
+              <Textarea
+                placeholder="Describe what this capability set enables for the branch..."
+                className="min-h-[72px] resize-none"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                disabled={isDetailMode}
+              />
             </div>
 
             <div className="space-y-2">
@@ -91,33 +123,48 @@ export function CapabilityForm({ onSubmit }: CapabilityFormProps) {
               </Label>
               {isDetailMode ? (
                 <Input
-                  value={isEnabled === "true" ? "Enabled" : "Disabled"}
+                  value={isActive === "true" ? "Active" : "Inactive"}
                   disabled
                 />
               ) : (
-                <Select value={isEnabled} onValueChange={setIsEnabled}>
+                <Select value={isActive} onValueChange={setIsActive}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="true">Enabled</SelectItem>
-                    <SelectItem value="false">Disabled</SelectItem>
+                    <SelectItem value="true">Active</SelectItem>
+                    <SelectItem value="false">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
               )}
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Description
-              </Label>
-              <Textarea
-                placeholder="Describe what this capability enables for the branch..."
-                className="min-h-[80px] resize-none"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                disabled={isDetailMode}
-              />
+          {/* Capability Flags */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2 pb-1 border-b border-border/50">
+              <RiSettings3Line className="size-4 text-violet-500" />
+              <h3 className="text-sm font-semibold">Feature Flags</h3>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              {(Object.keys(CAPABILITY_LABELS) as Array<keyof CapabilityJson>).map(
+                (key) => (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between rounded-lg border border-border/60 px-4 py-3 bg-muted/20"
+                  >
+                    <span className="text-sm font-medium">
+                      {CAPABILITY_LABELS[key]}
+                    </span>
+                    <Switch
+                      checked={capJson[key]}
+                      onCheckedChange={() => !isDetailMode && toggleCap(key)}
+                      disabled={isDetailMode}
+                    />
+                  </div>
+                )
+              )}
             </div>
           </div>
         </div>

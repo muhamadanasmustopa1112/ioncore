@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RiInformationLine, RiMapPin2Line } from "@remixicon/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useCoverageStore } from "../../../store/coverage";
 import { CoveragePayload } from "../../../types/coverage-api";
 
@@ -23,38 +24,58 @@ export function CoverageForm({ onSubmit }: CoverageFormProps) {
   const { form, selectedCoverage } = useCoverageStore();
   const isDetailMode = form === "details";
 
-  const [areaName, setAreaName] = useState("");
-  const [village, setVillage] = useState("");
-  const [district, setDistrict] = useState("");
-  const [city, setCity] = useState("");
-  const [province, setProvince] = useState("");
-  const [postalCode, setPostalCode] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [isActive, setIsActive] = useState("true");
+  const [serviceArea, setServiceArea] = useState("");
+  const [warehouseCoverage, setWarehouseCoverage] = useState("");
+  const [networkScope, setNetworkScope] = useState("");
+  const [dispatchRadius, setDispatchRadius] = useState("");
 
   useEffect(() => {
     if (selectedCoverage && (form === "edit" || form === "details")) {
-      setAreaName(selectedCoverage.areaName);
-      setVillage(selectedCoverage.village);
-      setDistrict(selectedCoverage.district);
-      setCity(selectedCoverage.city);
-      setProvince(selectedCoverage.province);
-      setPostalCode(selectedCoverage.postalCode);
+      setName(selectedCoverage.name);
+      setDescription(selectedCoverage.description);
       setIsActive(selectedCoverage.isActive ? "true" : "false");
+      setServiceArea(selectedCoverage.coverageJson.service_area.join(", "));
+      setWarehouseCoverage(
+        selectedCoverage.coverageJson.warehouse_coverage.join(", ")
+      );
+      setNetworkScope(selectedCoverage.coverageJson.network_scope);
+      setDispatchRadius(
+        selectedCoverage.coverageJson.dispatch_radius_km?.toString() ?? ""
+      );
+    } else if (form === "new") {
+      setName("");
+      setDescription("");
+      setIsActive("true");
+      setServiceArea("");
+      setWarehouseCoverage("");
+      setNetworkScope("");
+      setDispatchRadius("");
     }
   }, [selectedCoverage, form]);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
     if (!onSubmit) return;
     onSubmit({
-      area_name: areaName,
-      village: village || undefined,
-      district: district || undefined,
-      city,
-      province,
-      postal_code: postalCode || undefined,
+      name,
+      description,
       is_active: isActive === "true",
+      coverage_json: {
+        service_area: serviceArea
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        warehouse_coverage: warehouseCoverage
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+        network_scope: networkScope,
+        dispatch_radius_km: Number(dispatchRadius) || 0,
+      },
     });
-  };
+  }, [name, description, isActive, serviceArea, warehouseCoverage, networkScope, dispatchRadius, onSubmit]);
 
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__coverageFormSubmit =
@@ -62,7 +83,7 @@ export function CoverageForm({ onSubmit }: CoverageFormProps) {
     return () => {
       delete (window as unknown as Record<string, unknown>).__coverageFormSubmit;
     };
-  });
+  }, [handleSubmit]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -75,106 +96,120 @@ export function CoverageForm({ onSubmit }: CoverageFormProps) {
               <h3 className="text-sm font-semibold">General Information</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Area Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="e.g. Kelapa Gading Barat"
-                  value={areaName}
-                  onChange={(e) => setAreaName(e.target.value)}
-                  disabled={isDetailMode}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                placeholder="e.g. Jakarta Selatan Coverage"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={isDetailMode}
+              />
+            </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Status
-                </Label>
-                {isDetailMode ? (
-                  <Input
-                    value={isActive === "true" ? "Active" : "Inactive"}
-                    disabled
-                  />
-                ) : (
-                  <Select value={isActive} onValueChange={setIsActive}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="true">Active</SelectItem>
-                      <SelectItem value="false">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Description
+              </Label>
+              <Textarea
+                placeholder="Describe the service area covered by this branch..."
+                className="min-h-[72px] resize-none"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                disabled={isDetailMode}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Status
+              </Label>
+              {isDetailMode ? (
+                <Input
+                  value={isActive === "true" ? "Active" : "Inactive"}
+                  disabled
+                />
+              ) : (
+                <Select value={isActive} onValueChange={setIsActive}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Active</SelectItem>
+                    <SelectItem value="false">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
 
-          {/* Location */}
+          {/* Coverage JSON */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 pb-1 border-b border-border/50">
               <RiMapPin2Line className="size-4 text-emerald-500" />
-              <h3 className="text-sm font-semibold">Location Details</h3>
+              <h3 className="text-sm font-semibold">Coverage Details</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Service Areas
+              </Label>
+              <Textarea
+                placeholder="e.g. Kebayoran Baru, Tebet, Setiabudi"
+                className="min-h-[72px] resize-none"
+                value={serviceArea}
+                onChange={(e) => setServiceArea(e.target.value)}
+                disabled={isDetailMode}
+              />
+              {!isDetailMode && (
+                <p className="text-[11px] text-muted-foreground">
+                  Comma-separated list of service area names.
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Warehouse Coverage
+              </Label>
+              <Textarea
+                placeholder="e.g. Gudang JKT-01, Gudang JKT-02"
+                className="min-h-[60px] resize-none"
+                value={warehouseCoverage}
+                onChange={(e) => setWarehouseCoverage(e.target.value)}
+                disabled={isDetailMode}
+              />
+              {!isDetailMode && (
+                <p className="text-[11px] text-muted-foreground">
+                  Comma-separated list of warehouse names.
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Village (Kelurahan)
+                  Network Scope
                 </Label>
                 <Input
-                  placeholder="e.g. Kelapa Gading Barat"
-                  value={village}
-                  onChange={(e) => setVillage(e.target.value)}
+                  placeholder="e.g. metro"
+                  value={networkScope}
+                  onChange={(e) => setNetworkScope(e.target.value)}
                   disabled={isDetailMode}
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  District (Kecamatan)
+                  Dispatch Radius (km)
                 </Label>
                 <Input
-                  placeholder="e.g. Kelapa Gading"
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
+                  type="number"
+                  placeholder="e.g. 15"
+                  value={dispatchRadius}
+                  onChange={(e) => setDispatchRadius(e.target.value)}
                   disabled={isDetailMode}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  City <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="e.g. Jakarta Utara"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  disabled={isDetailMode}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Province <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="e.g. DKI Jakarta"
-                  value={province}
-                  onChange={(e) => setProvince(e.target.value)}
-                  disabled={isDetailMode}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Postal Code
-                </Label>
-                <Input
-                  placeholder="e.g. 14240"
-                  value={postalCode}
-                  onChange={(e) => setPostalCode(e.target.value)}
-                  disabled={isDetailMode}
-                  className="font-mono"
-                  maxLength={5}
+                  min={0}
                 />
               </div>
             </div>

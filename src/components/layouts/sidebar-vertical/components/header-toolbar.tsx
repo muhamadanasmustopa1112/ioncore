@@ -68,7 +68,7 @@ export function HeaderToolbar() {
   const user = useMemo(() => userData?.response?.data, [userData]);
 
   return (
-    <nav className="flex items-center justify-between gap-4 lg:w-full px-4 border-b border-border/50 h-full">
+    <nav className="flex items-center justify-between gap-4 lg:w-full px-4 h-full">
       {/* Left Section: Search Bar */}
       <div className="flex-grow max-w-xl">
         {!isMobile && (

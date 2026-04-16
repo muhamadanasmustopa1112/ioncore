@@ -1,15 +1,21 @@
 import { ApiResponse, PaginationMeta } from "./branch-api";
 
+// ─── Coverage JSON nested fields ─────────────────────────────────────────────
+
+export interface CoverageJson {
+  service_area: string[];
+  warehouse_coverage: string[];
+  network_scope: string;
+  dispatch_radius_km: number;
+}
+
 // ─── Coverage Payload ─────────────────────────────────────────────────────────
 
 export interface CoveragePayload {
-  area_name: string;
-  village?: string;
-  district?: string;
-  city: string;
-  province: string;
-  postal_code?: string;
+  name: string;
+  description: string;
   is_active: boolean;
+  coverage_json: CoverageJson;
 }
 
 // ─── Coverage DTO ─────────────────────────────────────────────────────────────
@@ -17,13 +23,10 @@ export interface CoveragePayload {
 export interface CoverageDto {
   id: string;
   branch_id: string;
-  area_name: string;
-  village: string;
-  district: string;
-  city: string;
-  province: string;
-  postal_code: string;
+  name: string;
+  description: string;
   is_active: boolean;
+  coverage_json: CoverageJson;
   created_at: string;
   updated_at: string;
 }

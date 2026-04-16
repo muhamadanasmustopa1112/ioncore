@@ -2,10 +2,10 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
-import { CapabilityData } from "../../../../types/capability";
+import { PolicyData } from "../../../../types/policy";
 import { ActionsCell } from "./actions-cell";
 
-export const columns: ColumnDef<CapabilityData>[] = [
+export const columns: ColumnDef<PolicyData>[] = [
   {
     id: "name",
     accessorFn: (row) => row.name,
@@ -44,58 +44,86 @@ export const columns: ColumnDef<CapabilityData>[] = [
       </span>
     ),
     enableSorting: false,
-    size: 240,
+    size: 220,
   },
   {
-    id: "enabled_count",
+    id: "sla_hours",
+    accessorFn: (row) => row.policyJson.sla_hours,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Features Enabled"
+        title="SLA (hrs)"
+        column={column}
+        className="text-foreground font-semibold"
+      />
+    ),
+    cell: ({ row }) => (
+      <span className="font-mono text-sm text-foreground">
+        {row.original.policyJson.sla_hours ?? "—"}
+      </span>
+    ),
+    enableSorting: true,
+    size: 100,
+  },
+  {
+    id: "working_hours",
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        title="Working Hours"
         column={column}
         className="text-foreground font-semibold"
       />
     ),
     cell: ({ row }) => {
-      const json = row.original.capabilityJson;
-      const total = Object.keys(json).length;
-      const enabled = Object.values(json).filter(Boolean).length;
-      return (
-        <span className="text-sm font-medium">
-          <span className="text-emerald-600 dark:text-emerald-400">{enabled}</span>
-          <span className="text-muted-foreground">/{total}</span>
+      const wh = row.original.policyJson.working_hours;
+      return wh ? (
+        <span className="font-mono text-xs text-foreground">
+          {wh.start} – {wh.end}
         </span>
+      ) : (
+        <span className="text-muted-foreground/40">—</span>
       );
     },
     enableSorting: false,
     size: 130,
   },
   {
-    id: "capabilities",
+    id: "timezone",
+    accessorFn: (row) => row.policyJson.timezone,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Active Features"
+        title="Timezone"
+        column={column}
+        className="text-foreground font-semibold"
+      />
+    ),
+    cell: ({ row }) => (
+      <span className="text-xs text-foreground">
+        {row.original.policyJson.timezone || "—"}
+      </span>
+    ),
+    enableSorting: true,
+    size: 130,
+  },
+  {
+    id: "tax_default",
+    accessorFn: (row) => row.policyJson.tax_default,
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        title="Tax"
         column={column}
         className="text-foreground font-semibold"
       />
     ),
     cell: ({ row }) => {
-      const json = row.original.capabilityJson;
-      const active = Object.entries(json)
-        .filter(([, v]) => v)
-        .map(([k]) => k.replace(/_/g, " "));
-      return active.length > 0 ? (
-        <span className="text-xs text-foreground">
-          {active.slice(0, 3).join(", ")}
-          {active.length > 3 && (
-            <span className="text-muted-foreground"> +{active.length - 3}</span>
-          )}
+      const tax = row.original.policyJson.tax_default;
+      return (
+        <span className="text-sm text-foreground">
+          {tax != null ? `${(tax * 100).toFixed(0)}%` : "—"}
         </span>
-      ) : (
-        <span className="text-muted-foreground/40 text-xs">None</span>
       );
     },
-    enableSorting: false,
-    size: 220,
+    enableSorting: true,
+    size: 80,
   },
   {
     id: "isActive",

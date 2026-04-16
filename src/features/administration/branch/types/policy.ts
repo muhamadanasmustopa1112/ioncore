@@ -1,0 +1,19 @@
+export type PolicyFormMode = "new" | "edit" | "details" | null;
+
+export interface PolicyData {
+  id: string;
+  branchId: string;
+  name: string;
+  description: string;
+  isActive: boolean;
+  policyJson: {
+    sla_hours: number;
+    working_hours: { start: string; end: string };
+    timezone: string;
+    tax_default: number;
+    notification_contacts: string[];
+    approval_matrix: { level_1: string; level_2: string };
+  };
+  createdAt: string;
+  updatedAt: string;
+}

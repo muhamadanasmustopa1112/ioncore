@@ -1,6 +1,6 @@
 "use client";
 
-import { RiAddLine, RiMapPin2Line } from "@remixicon/react";
+import { RiAddLine, RiShieldLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -19,9 +19,9 @@ import {
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import { useBranchTree } from "../../api/branch-queries";
-import { useCoverageStore } from "../../store/coverage";
-import { CoverageList } from "./list/coverage-list";
-import { CoverageFormSheet } from "./form/coverage-form-sheet";
+import { usePolicyStore } from "../../store/policy";
+import { PolicyList } from "./list/policy-list";
+import { PolicyFormSheet } from "./form/policy-form-sheet";
 
 const levelLabel: Record<string, string> = {
   regional: "Regional",
@@ -29,11 +29,11 @@ const levelLabel: Record<string, string> = {
   sub_area: "Sub Area",
 };
 
-export function BranchCoveragePage() {
+export function BranchPolicyPage() {
   const { data: branches = [] } = useBranchTree();
-  const openSheet = useCoverageStore((s) => s.openSheet);
-  const selectedBranchId = useCoverageStore((s) => s.selectedBranchId);
-  const setSelectedBranchId = useCoverageStore((s) => s.setSelectedBranchId);
+  const openSheet = usePolicyStore((s) => s.openSheet);
+  const selectedBranchId = usePolicyStore((s) => s.selectedBranchId);
+  const setSelectedBranchId = usePolicyStore((s) => s.setSelectedBranchId);
 
   const selectedBranch = branches.find((b) => b.id === selectedBranchId);
 
@@ -49,27 +49,27 @@ export function BranchCoveragePage() {
             title: "Branch Management",
             path: paths.dashboard.administration.branch.root.getHref(),
           },
-          { title: "Coverage & Service Area" },
+          { title: "Branch Policies" },
         ]}
       />
 
       <Toolbar className="mt-5 items-start sm:items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Branch Coverage & Service Area
+            Branch Policies
           </ToolbarTitle>
           <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
             <Badge
-              variant="success"
+              variant="warning"
               appearance="light"
               className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs"
             >
-              <RiMapPin2Line className="size-3.5" />
-              Service Areas
+              <RiShieldLine className="size-3.5" />
+              SLA & Compliance
             </Badge>
             <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
             <span className="text-muted-foreground font-normal text-xs sm:text-sm">
-              Manage geographic coverage areas per branch
+              Configure SLA, working hours, and approval rules per branch
             </span>
           </div>
         </ToolbarHeading>
@@ -81,7 +81,7 @@ export function BranchCoveragePage() {
             onClick={() => openSheet("new")}
           >
             <RiAddLine className="size-4 sm:size-5" />
-            Add Coverage Area
+            Add Policy
           </Button>
         </ToolbarActions>
       </Toolbar>
@@ -118,22 +118,22 @@ export function BranchCoveragePage() {
         )}
       </div>
 
-      {/* List — only shown when branch is selected */}
+      {/* List */}
       {selectedBranchId ? (
         <div className="flex-1 overflow-auto mt-2">
-          <CoverageList branchId={selectedBranchId} />
+          <PolicyList branchId={selectedBranchId} />
         </div>
       ) : (
         <div className="mt-10 flex flex-col items-center justify-center text-center text-muted-foreground gap-2">
-          <RiMapPin2Line className="size-10 opacity-30" />
-          <p className="text-sm font-medium">Select a branch to view coverage areas</p>
+          <RiShieldLine className="size-10 opacity-30" />
+          <p className="text-sm font-medium">Select a branch to view policies</p>
           <p className="text-xs opacity-70">
             Choose a Regional, Area, or Sub Area branch from the selector above.
           </p>
         </div>
       )}
 
-      <CoverageFormSheet />
+      <PolicyFormSheet />
     </div>
   );
 }
