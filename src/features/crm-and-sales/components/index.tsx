@@ -68,7 +68,7 @@ export function CrmAndSales() {
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-white dark:bg-slate-900 border-outline z-[100]" align="start">
+          <PopoverContent className="w-auto p-0 bg-card border-border z-[100]" align="start">
             <CalendarComponent
               initialFocus
               mode="range"

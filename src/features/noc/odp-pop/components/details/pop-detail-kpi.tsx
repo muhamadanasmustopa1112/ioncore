@@ -12,7 +12,7 @@ export function PopDetailKpi({ pop }: { pop: any }) {
       trend: "up",
       icon: RiRouterLine,
       color: "text-blue-600",
-      bg: "bg-blue-50"
+      bg: "bg-blue-600/10"
     },
     {
       title: "ONLINE DEVICES",
@@ -21,7 +21,7 @@ export function PopDetailKpi({ pop }: { pop: any }) {
       trend: "down",
       icon: RiSignalTowerLine,
       color: "text-emerald-600",
-      bg: "bg-emerald-50"
+      bg: "bg-emerald-600/10"
     },
     {
       title: "OFFLINE DEVICES",
@@ -30,7 +30,7 @@ export function PopDetailKpi({ pop }: { pop: any }) {
       trend: "up",
       icon: RiFlashlightLine,
       color: "text-rose-600",
-      bg: "bg-rose-50"
+      bg: "bg-rose-600/10"
     },
     {
       title: "RACK UTILIZATION",
@@ -38,14 +38,14 @@ export function PopDetailKpi({ pop }: { pop: any }) {
       progress: 78,
       icon: RiToolsLine,
       color: "text-amber-600",
-      bg: "bg-amber-50"
+      bg: "bg-amber-600/10"
     }
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => (
-        <Card key={index} className="border-none shadow-sm bg-white overflow-hidden rounded-2xl">
+        <Card key={index} className="border-none shadow-sm bg-card overflow-hidden rounded-2xl">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{stat.title}</span>

@@ -13,8 +13,13 @@ export function SidebarDefaultHeader() {
         <Link href="/" className="flex items-center gap-2.5">
           <img
             src={toAbsoluteUrl('/media/app/logo_ion_baru.png')}
-            className="h-9 in-data-[sidebar-collapsed]:hidden"
-            alt="Logo Text"
+            className="h-9 in-data-[sidebar-collapsed]:hidden dark:hidden"
+            alt="Logo"
+          />
+          <img
+            src={toAbsoluteUrl('/media/app/logo-ion-dark.png')}
+            className="h-9 in-data-[sidebar-collapsed]:hidden hidden dark:block"
+            alt="Logo Dark"
           />
         </Link>
       </div>

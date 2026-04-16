@@ -27,8 +27,8 @@ export function OdpPopKpiCards() {
       label: "Total POP Infrastructure",
       value: stats.total,
       icon: RiMapPinLine,
-      color: "text-blue-600",
-      bgColor: "bg-blue-500/10",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
       description: "Active infrastructure points"
     },
     {
@@ -60,7 +60,7 @@ export function OdpPopKpiCards() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {items.map((item, index) => (
-        <Card key={index} className="overflow-hidden border-none shadow-md bg-white">
+        <Card key={index} className="overflow-hidden border-none shadow-md bg-card">
           <CardContent className="p-5">
             <div className="flex items-center gap-4">
               <div className={`p-3 rounded-xl ${item.bgColor} ${item.color}`}>

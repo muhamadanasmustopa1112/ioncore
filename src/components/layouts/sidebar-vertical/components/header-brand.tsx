@@ -29,8 +29,13 @@ export function HeaderBrand() {
     <div className="flex items-center -ms-1">
       <img
         src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-        alt=""
-        className="h-4"
+        alt="Logo"
+        className="h-4 dark:hidden"
+      />
+      <img
+        src={toAbsoluteUrl('/media/app/mini-logo-primary-dark.svg')}
+        alt="Logo Dark"
+        className="h-4 hidden dark:block"
       />
       {isMobile && (
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>

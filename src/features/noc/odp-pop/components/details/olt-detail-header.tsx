@@ -6,7 +6,7 @@ import { PopOltDetail } from "../../data/dummy-olt-details";
 
 export function OltDetailHeader({ olt }: { olt: PopOltDetail }) {
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-8 rounded-3xl shadow-sm border border-border/40">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card p-8 rounded-3xl shadow-sm border border-border/40">
       <div className="flex items-start gap-5">
         <div className="p-4 bg-primary/10 rounded-2xl">
           <RiRouterLine className="size-10 text-primary" />

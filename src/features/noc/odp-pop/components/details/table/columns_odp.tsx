@@ -71,7 +71,7 @@ export const columns: ColumnDef<OdpListItem>[] = [
     cell: ({ row }) => (
       <Badge
         variant="secondary"
-        className="text-[11px] px-2.5 py-0.5 bg-blue-50 text-primary border-blue-100 shadow-none rounded-md uppercase font-mono tracking-tight"
+        className="text-[11px] px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 shadow-none rounded-md uppercase font-mono tracking-tight"
       >
         {row.original.ponPort}
       </Badge>

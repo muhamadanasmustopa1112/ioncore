@@ -27,8 +27,8 @@ export function RadiusKpiCards() {
       label: "Total Sessions",
       value: kpi.totalSessions.toLocaleString(),
       icon: RiUserVoiceLine,
-      color: "text-blue-600",
-      bgColor: "bg-blue-500/10",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
       trend: kpi.trend.sessions,
       dataSource: "Data diambil dari akumulasi Log RADIUS Accounting (Riwayat koneksi PPP Users)"
     },
@@ -65,7 +65,7 @@ export function RadiusKpiCards() {
     <TooltipProvider delayDuration={100}>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {items.map((item, index) => (
-          <Card key={index} className="overflow-hidden border-none shadow-md bg-white hover:shadow-lg transition-shadow duration-300 rounded-3xl">
+          <Card key={index} className="border-none shadow-md bg-card rounded-3xl overflow-hidden h-full hover:shadow-lg transition-shadow duration-300">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className={`p-3 rounded-2xl ${item.bgColor} ${item.color}`}>

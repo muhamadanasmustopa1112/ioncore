@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function CustomerHeader() {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
       <div className="flex gap-6 items-center">
         <div className="rounded-xl overflow-hidden ring-4 ring-primary/5 shrink-0">
           <Avatar className="size-24 rounded-none">
@@ -55,8 +55,8 @@ export function CustomerWidgets() {
   return (
     <>
       {/* Upcoming Payment Widget */}
-      <div className="bg-slate-900 dark:bg-slate-800 rounded-xl p-6 text-white shadow-xl shadow-primary/10">
-        <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">
+      <div className="bg-primary/95 dark:bg-primary-foreground/10 rounded-xl p-6 text-white dark:text-foreground shadow-xl shadow-primary/10 border border-primary/20">
+        <h4 className="text-xs font-bold uppercase tracking-widest text-primary-foreground/70 dark:text-muted-foreground mb-4">
           Upcoming Payment
         </h4>
         <div className="flex justify-between items-end mb-6">
@@ -71,7 +71,7 @@ export function CustomerWidgets() {
         </Button>
       </div>
       {/* Trouble Tickets Widget */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="px-6 py-4 border-b flex justify-between items-center">
           <h4 className="font-bold text-sm">Trouble Tickets</h4>
           <span className="text-xs text-primary font-bold cursor-pointer hover:underline">
@@ -79,7 +79,7 @@ export function CustomerWidgets() {
           </span>
         </div>
         <div className="p-4 flex flex-col gap-4">
-          <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg flex flex-col gap-1 border-l-4 border-amber-500">
+          <div className="p-3 bg-muted/50 rounded-lg flex flex-col gap-1 border-l-4 border-amber-500">
             <div className="flex justify-between items-start">
               <p className="text-xs font-bold text-muted-foreground">TKT-29002</p>
               <span className="text-[10px] font-bold text-amber-600 uppercase">Pending</span>
@@ -98,13 +98,13 @@ export function CustomerWidgets() {
         </div>
       </div>
       {/* Helpdesk History Widget */}
-      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <div className="px-6 py-4 border-b">
           <h4 className="font-bold text-sm">Helpdesk History</h4>
         </div>
         <div className="p-4 flex flex-col gap-4">
           <div className="flex gap-3">
-            <div className="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+            <div className="size-8 rounded-full bg-muted flex items-center justify-center shrink-0">
               <MessageSquare className="size-4 text-muted-foreground" />
             </div>
             <div>
@@ -116,7 +116,7 @@ export function CustomerWidgets() {
             </div>
           </div>
           <div className="flex gap-3">
-            <div className="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+            <div className="size-8 rounded-full bg-muted flex items-center justify-center shrink-0">
               <PhoneCall className="size-4 text-muted-foreground" />
             </div>
             <div>

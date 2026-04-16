@@ -433,7 +433,7 @@ const EmployeeProductInfoSheet = ({ onClose }: ProductInfoSheetProps) => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="max-h-[90vh] w-full max-w-7xl overflow-hidden rounded-lg bg-white shadow-xl"
+        className="max-h-[90vh] w-full max-w-7xl overflow-hidden rounded-lg bg-card shadow-xl"
       >
         <DataGrid
           table={table}

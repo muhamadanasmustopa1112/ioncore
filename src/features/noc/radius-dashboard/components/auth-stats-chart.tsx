@@ -49,7 +49,7 @@ export function RadiusAuthStatsChart() {
       position: 'bottom',
       fontSize: '11px',
       fontWeight: 700,
-      labels: { colors: '#64748b' },
+      labels: { colors: 'var(--muted-foreground)' },
       markers: { size: 6, shape: 'rect' }
     },
     dataLabels: { enabled: false },
@@ -63,7 +63,7 @@ export function RadiusAuthStatsChart() {
   const series = useMemo(() => RADIUS_AUTH_STATS.map(s => s.count), []);
 
   return (
-    <Card className="border-none shadow-md bg-white rounded-3xl overflow-hidden h-full">
+    <Card className="border-none shadow-md bg-card rounded-3xl overflow-hidden h-full">
       <CardHeader className="pb-2 flex-row justify-between items-center">
         <CardHeading className="text-sm font-black uppercase tracking-widest text-foreground">
           Auth Distribution

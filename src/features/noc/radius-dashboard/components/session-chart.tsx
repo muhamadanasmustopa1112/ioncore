@@ -48,17 +48,17 @@ export function RadiusSessionChart() {
       axisBorder: { show: false },
       axisTicks: { show: false },
       labels: {
-        style: { colors: '#94a3b8', fontSize: '10px', fontWeight: 600 }
+        style: { colors: 'var(--muted-foreground)', fontSize: '10px', fontWeight: 600 }
       }
     },
     yaxis: {
       labels: {
-        style: { colors: '#94a3b8', fontSize: '10px', fontWeight: 600 },
+        style: { colors: 'var(--muted-foreground)', fontSize: '10px', fontWeight: 600 },
         formatter: (val) => (val / 1000).toFixed(0) + 'k'
       }
     },
     grid: {
-      borderColor: '#f1f5f9',
+      borderColor: 'var(--border)',
       strokeDashArray: 4,
       padding: { left: 0, right: 0, top: 0, bottom: 0 }
     },
@@ -66,7 +66,7 @@ export function RadiusSessionChart() {
       size: 0,
     },
     tooltip: {
-      theme: 'light',
+      theme: 'dark',
       y: {
         formatter: (val) => val.toLocaleString() + ' Active Sessions'
       }
@@ -81,7 +81,7 @@ export function RadiusSessionChart() {
   }], []);
 
   return (
-    <Card className="border-none shadow-md bg-white rounded-3xl overflow-hidden">
+    <Card className="border-none shadow-md bg-card rounded-3xl overflow-hidden">
       <CardHeader className="pb-2 flex-row justify-between items-center">
         <CardHeading className="text-sm font-black uppercase tracking-widest text-foreground">
           Session Activity (24h)
