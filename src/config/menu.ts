@@ -1,5 +1,6 @@
 import {
   Activity,
+  ArrowLeftRight,
   BarChart2,
   BarChart3,
   BookMinus,
@@ -272,35 +273,35 @@ export const DASHBOARD_MENU: MenuConfig = [
     icon: Activity,
   },
   {
-    title: "Administration",
+    title: "Branch",
     path: paths.dashboard.administration.branch.root.getHref(),
-    heading: 'System',
-    icon: Settings,
+    heading: 'Administration',
+    icon: Building2,
     children: [
       {
-        title: "Branch Management",
+        title: "Hierarchy",
         path: paths.dashboard.administration.branch.root.getHref(),
         icon: Building2,
       },
       {
-        title: "Branch Capability",
+        title: "Capability",
         path: paths.dashboard.administration.branch.capability.getHref(),
         icon: Settings,
       },
       {
-        title: "Branch Coverage",
+        title: "Coverage",
         path: paths.dashboard.administration.branch.coverage.getHref(),
         icon: Map,
       },
       {
-        title: "Branch Policy",
+        title: "Policy",
         path: paths.dashboard.administration.branch.policy.getHref(),
         icon: ShieldCheck,
       },
       {
         title: "Cross-branch Rules",
         path: paths.dashboard.administration.branch.crossBranchRules.getHref(),
-        icon: Network,
+        icon: ArrowLeftRight,
       },
       {
         title: "Resource Mapping",
@@ -308,31 +309,40 @@ export const DASHBOARD_MENU: MenuConfig = [
         icon: Users2,
       },
       {
-        title: "Access Scope Control",
+        title: "Access Scope",
         path: paths.dashboard.administration.branch.accessScope.getHref(),
         icon: KeyRound,
       },
       {
-        title: "Branch Performance",
+        title: "Performance",
         path: paths.dashboard.administration.branch.performance.getHref(),
         icon: Gauge,
+      },
+    ],
+  },
+  {
+    title: "Users & Roles",
+    path: paths.dashboard.administration.users.root.getHref(),
+    heading: 'Administration',
+    icon: UserCog,
+    children: [
+      {
+        title: "User Management",
+        path: paths.dashboard.administration.users.root.getHref(),
+        icon: UserIcon,
       },
       {
         title: "Role Management",
         path: paths.dashboard.administration.roles.root.getHref(),
         icon: ShieldCheck,
       },
-      {
-        title: "User Management",
-        path: paths.dashboard.administration.users.root.getHref(),
-        icon: UserCog,
-      },
-      {
-        title: "Schema Management",
-        path: paths.dashboard.administration.schema.root.getHref(),
-        icon: FileText,
-      },
     ],
+  },
+  {
+    title: "Schema Builder",
+    path: paths.dashboard.administration.schema.root.getHref(),
+    heading: 'Administration',
+    icon: FileText,
   },
 ];
 // Export default untuk backward compatibility
