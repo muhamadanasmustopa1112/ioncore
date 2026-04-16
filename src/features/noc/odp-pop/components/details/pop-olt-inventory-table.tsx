@@ -148,7 +148,7 @@ export function PopOltInventoryTable({ popId }: { popId: string }) {
           </div>
         </CardTable>
 
-        <CardFooter className="bg-white border-t border-border/40 p-4">
+        <CardFooter className="bg-card border-t border-border/40 p-4">
           <DataGridPagination setFilter={setFilter} filter={filter} />
         </CardFooter>
       </Card>

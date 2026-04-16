@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 // Define input size variants
 const inputVariants = cva(
   `
-    flex w-full bg-primary-foreground border border-input transition-[color,box-shadow] text-foreground placeholder:text-muted-foreground/80 
+    flex w-full bg-background border border-input transition-[color,box-shadow] text-foreground placeholder:text-muted-foreground/80 
     focus-visible:ring-ring/30  focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px]     
     disabled:cursor-not-allowed disabled:opacity-60 
     [&[readonly]]:bg-muted/80 [&[readonly]]:cursor-not-allowed

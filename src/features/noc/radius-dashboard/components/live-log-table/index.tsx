@@ -77,7 +77,7 @@ export function RadiusLiveLogTable() {
       }}
       isLoading={isLoading}
     >
-      <Card className="border-none shadow-md bg-white rounded-3xl overflow-hidden mt-8">
+      <Card className="border-none shadow-md bg-card rounded-3xl overflow-hidden mt-8">
         <CardHeader className="flex-col items-stretch pt-6 pb-4 px-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 bg-primary/10 rounded-lg">

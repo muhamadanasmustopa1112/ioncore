@@ -3,7 +3,7 @@ import { AlertTriangle, Cog, Ticket, XCircle } from "lucide-react";
 export function OperationsKpi() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      <div className="bg-white dark:bg-slate-900 p-6 rounded shadow-sm border border-outline flex flex-col gap-1 relative overflow-hidden">
+      <div className="bg-card p-6 rounded shadow-sm border border-outline flex flex-col gap-1 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/5 rounded-full -mr-6 -mt-6"></div>
         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Area Outages</span>
         <span className="text-3xl font-black text-red-500">12</span>
@@ -12,7 +12,7 @@ export function OperationsKpi() {
           <AlertTriangle className="text-red-500 size-4" />
         </div>
       </div>
-      <div className="bg-white dark:bg-slate-900 p-6 rounded shadow-sm border border-outline flex flex-col gap-1">
+      <div className="bg-card p-6 rounded shadow-sm border border-outline flex flex-col gap-1">
         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Maintenance Orders</span>
         <span className="text-3xl font-black text-on-surface">45</span>
         <div className="mt-2 flex items-center gap-1.5 text-slate-400">
@@ -20,7 +20,7 @@ export function OperationsKpi() {
           <span className="text-[10px] font-bold">Active Scheduled</span>
         </div>
       </div>
-      <div className="bg-white dark:bg-slate-900 p-6 rounded shadow-sm border border-outline flex flex-col gap-1">
+      <div className="bg-card p-6 rounded shadow-sm border border-outline flex flex-col gap-1">
         <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Open Tickets</span>
         <span className="text-3xl font-black text-on-surface">82</span>
         <div className="mt-2 flex items-center gap-1.5 text-slate-400">

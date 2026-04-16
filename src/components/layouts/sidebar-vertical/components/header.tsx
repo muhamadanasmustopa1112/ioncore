@@ -6,6 +6,7 @@ import {
   SheetBody,
   SheetContent,
   SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Button } from "@/components/ui/button";
@@ -33,7 +34,9 @@ export function Header() {
                 side="left"
                 close={false}
               >
-                <SheetHeader className="p-0 space-y-0" />
+                <SheetHeader className="p-0 space-y-0">
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                </SheetHeader>
                 <SheetBody className="bg-sidebar-main text-sidebar-main-foreground flex flex-col grow p-0 [--sidebar-space-x:calc(var(--spacing)*2.5)]">
                   <SidebarContent />
                 </SheetBody>

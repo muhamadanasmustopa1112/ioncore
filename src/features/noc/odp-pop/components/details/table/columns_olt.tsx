@@ -94,7 +94,7 @@ export const columns: ColumnDef<PopOltDetail>[] = [
       <div className="flex justify-center">
         <Badge
           variant="secondary"
-          className="text-[11px] px-2.5 py-0.5 bg-blue-50 text-primary border-blue-100 shadow-none rounded-md"
+          className="text-[11px] px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 shadow-none rounded-md"
         >
           {row.original.odpCount} <span className="ml-1">ODPs</span>
         </Badge>

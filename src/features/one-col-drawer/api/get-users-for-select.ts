@@ -73,6 +73,6 @@ export const useEmployeesForSelect = ({
       return undefined;
     },
     initialPageParam: 1,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 };

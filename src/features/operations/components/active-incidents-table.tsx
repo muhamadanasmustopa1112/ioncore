@@ -20,16 +20,16 @@ export function ActiveIncidentsTable() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 size-4" />
             <input 
-              className="w-full bg-white dark:bg-slate-900 border border-outline rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-1 focus:ring-primary outline-none placeholder:text-slate-400" 
+              className="w-full bg-background border border-input rounded-lg py-2 pl-10 pr-4 text-sm focus:ring-1 focus:ring-primary outline-none placeholder:text-muted-foreground" 
               placeholder="Ex: CUST-12345..." 
               type="text"
             />
           </div>
         </div>
       </div>
-      <div className="bg-white dark:bg-slate-900 rounded shadow-sm border border-outline overflow-hidden">
-        <div className="px-6 py-5 border-b border-outline flex justify-between items-center bg-surface-variant dark:bg-slate-800">
-          <h4 className="text-sm font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300">Connection Status Matrix</h4>
+      <div className="bg-card rounded shadow-sm border border-border overflow-hidden">
+        <div className="px-6 py-5 border-b border-border flex justify-between items-center bg-muted">
+          <h4 className="text-sm font-bold uppercase tracking-widest text-foreground">Connection Status Matrix</h4>
           <div className="flex gap-2">
             <button className="bg-white border border-outline px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-slate-50 flex items-center gap-2 text-slate-700">
               <Filter className="size-4" /> Filter
@@ -52,12 +52,12 @@ export function ActiveIncidentsTable() {
                 <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-outline">
+            <tbody className="divide-y divide-border">
               {connections.map((row, i) => (
-                <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors group">
-                  <td className="px-6 py-4 text-xs font-semibold text-on-surface">{row.pop}</td>
-                  <td className="px-6 py-4 text-xs text-slate-600 dark:text-slate-400">{row.area}</td>
-                  <td className="px-6 py-4 text-xs text-slate-600 dark:text-slate-400">{row.subArea}</td>
+                <tr key={i} className="hover:bg-muted/50 transition-colors group">
+                  <td className="px-6 py-4 text-xs font-semibold text-foreground">{row.pop}</td>
+                  <td className="px-6 py-4 text-xs text-muted-foreground">{row.area}</td>
+                  <td className="px-6 py-4 text-xs text-muted-foreground">{row.subArea}</td>
                   <td className="px-6 py-4 text-center">
                     <span className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] font-bold rounded">
                       {row.status}
@@ -85,18 +85,18 @@ export function ActiveIncidentsTable() {
             </tbody>
           </table>
         </div>
-        <div className="px-6 py-4 flex items-center justify-between border-t border-outline bg-surface-variant dark:bg-slate-800">
-          <span className="text-xs text-on-surface-variant">Showing <b>1</b> to <b>7</b> of <b>52</b> entries</span>
+        <div className="px-6 py-4 flex items-center justify-between border-t border-border bg-muted">
+          <span className="text-xs text-muted-foreground">Showing <b>1</b> to <b>7</b> of <b>52</b> entries</span>
           <div className="flex gap-1">
-            <button className="px-3 py-1 bg-white dark:bg-slate-900 border border-outline rounded text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 text-slate-600 dark:text-slate-400" disabled>
+            <button className="px-3 py-1 bg-background border border-border rounded text-xs font-semibold hover:bg-muted/50 disabled:opacity-50 text-muted-foreground" disabled>
               <ChevronLeft className="size-4" />
             </button>
-            <button className="px-3 py-1 bg-primary text-white border border-primary rounded text-xs font-semibold">1</button>
-            <button className="px-3 py-1 bg-white dark:bg-slate-900 border border-outline rounded text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50">2</button>
-            <button className="px-3 py-1 bg-white dark:bg-slate-900 border border-outline rounded text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50">3</button>
-            <button className="px-3 py-1 bg-white dark:bg-slate-900 border border-outline rounded text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50">...</button>
-            <button className="px-3 py-1 bg-white dark:bg-slate-900 border border-outline rounded text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50">6</button>
-            <button className="px-3 py-1 bg-white dark:bg-slate-900 border border-outline rounded text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50">
+            <button className="px-3 py-1 bg-primary text-primary-foreground border border-primary rounded text-xs font-semibold">1</button>
+            <button className="px-3 py-1 bg-background border border-border rounded text-xs font-semibold text-muted-foreground hover:bg-muted/50">2</button>
+            <button className="px-3 py-1 bg-background border border-border rounded text-xs font-semibold text-muted-foreground hover:bg-muted/50">3</button>
+            <button className="px-3 py-1 bg-background border border-border rounded text-xs font-semibold text-muted-foreground hover:bg-muted/50">...</button>
+            <button className="px-3 py-1 bg-background border border-border rounded text-xs font-semibold text-muted-foreground hover:bg-muted/50">6</button>
+            <button className="px-3 py-1 bg-background border border-border rounded text-xs font-semibold text-muted-foreground hover:bg-muted/50">
               <ChevronRight className="size-4" />
             </button>
           </div>

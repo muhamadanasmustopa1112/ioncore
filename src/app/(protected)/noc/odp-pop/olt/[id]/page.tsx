@@ -19,7 +19,7 @@ export default function OltDetailPage({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <div className="relative h-full w-full flex flex-col gap-y-6 overflow-y-auto px-6 py-4 bg-muted/20">
+    <div className="relative h-full w-full flex flex-col gap-y-6 overflow-y-auto px-6 py-4 bg-background">
       <PageBreadcrumb
         items={[
           {

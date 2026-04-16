@@ -10,9 +10,9 @@ export function OltDetailKpi({ olt }: { olt: PopOltDetail }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <Card className="p-6 bg-white border-none shadow-sm rounded-3xl group hover:shadow-md transition-all duration-300">
+      <Card className="p-6 bg-card border-none shadow-sm rounded-3xl group hover:shadow-md transition-all duration-300">
         <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 bg-blue-50 rounded-2xl text-blue-600">
+          <div className="p-3 bg-blue-600/10 rounded-2xl text-blue-600">
             <RiSignalTowerLine className="size-6" />
           </div>
           <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">
@@ -42,9 +42,9 @@ export function OltDetailKpi({ olt }: { olt: PopOltDetail }) {
         </div>
       </Card>
 
-      <Card className="p-6 bg-white border-none shadow-sm rounded-3xl group hover:shadow-md transition-all duration-300">
+      <Card className="p-6 bg-card border-none shadow-sm rounded-3xl group hover:shadow-md transition-all duration-300">
         <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 bg-purple-50 rounded-2xl text-purple-600">
+          <div className="p-3 bg-purple-600/10 rounded-2xl text-purple-600">
             <RiHashtag className="size-6" />
           </div>
           <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">
@@ -56,9 +56,9 @@ export function OltDetailKpi({ olt }: { olt: PopOltDetail }) {
         </h3>
       </Card>
 
-      <Card className="p-6 bg-white border-none shadow-sm rounded-3xl group hover:shadow-md transition-all duration-300">
+      <Card className="p-6 bg-card border-none shadow-sm rounded-3xl group hover:shadow-md transition-all duration-300">
         <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 bg-orange-50 rounded-2xl text-orange-600">
+          <div className="p-3 bg-orange-600/10 rounded-2xl text-orange-600">
             <RiGlobalLine className="size-6" />
           </div>
           <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">

@@ -9,6 +9,7 @@ import { Map as MapIcon, Maximize2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RiFocus2Line } from "@remixicon/react";
+import { useTheme } from "next-themes";
 import { DUMMY_ODP_LIST, OdpListItem } from "../../data/dummy-odp-list";
 
 // Controller to handle programmatic map changes
@@ -75,6 +76,7 @@ const odpIcon = L.divIcon({
 export default function OltOdpMap({ oltId }: { oltId: string }) {
   const [points, setPoints] = useState<OdpListItem[]>(DUMMY_ODP_LIST[oltId] || []);
   const [isMounted, setIsMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
   const [selectedOdpName, setSelectedOdpName] = useState<string | null>(null);
   const markerRefs = useRef<Record<string, L.Marker>>({});
 
@@ -97,7 +99,7 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
 
   return (
     <Card className="h-full flex flex-col shadow-sm border-none rounded-3xl overflow-hidden relative">
-      <CardHeader className="py-5 px-6 border-b bg-white z-10">
+      <CardHeader className="py-5 px-6 border-b bg-card z-10">
         <div className="flex items-center justify-between">
           <CardHeading className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-foreground">
             <div className="p-2 bg-primary/10 rounded-lg">
@@ -120,8 +122,8 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
       <CardContent className="p-0 flex-1 relative min-h-[600px] overflow-hidden">
         {/* Floating List Overlay */}
         <div className="absolute top-6 left-6 z-[400] w-64 max-h-[calc(100%-48px)] flex flex-col gap-3">
-          <div className="bg-white/80 backdrop-blur-xl border border-white/40 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-border/10 bg-white/40 flex items-center justify-between">
+          <div className="bg-background/80 backdrop-blur-xl border border-border/40 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-border/10 bg-card/40 flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-widest text-foreground/70">
                 ODP Terminal List
               </span>
@@ -142,7 +144,7 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
                         : 'hover:bg-primary/5 text-foreground/80'
                         }`}
                     >
-                      <div className={`p-1.5 rounded-lg transition-colors ${selectedOdpName === odp.name ? 'bg-white/20' : 'bg-muted group-hover:bg-primary/10'
+                      <div className={`p-1.5 rounded-lg transition-colors ${selectedOdpName === odp.name ? 'bg-primary-foreground/20' : 'bg-muted group-hover:bg-primary/10'
                         }`}>
                         <Search className={`size-3 ${selectedOdpName === odp.name ? 'text-white' : 'text-primary'}`} />
                       </div>
@@ -167,7 +169,7 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
         <MapContainer center={defaultCenter} zoom={15} className="h-full w-full z-0">
           <TileLayer
             attribution='&copy; Google Maps'
-            url="http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+            url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
             subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
           />
 
@@ -218,7 +220,7 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
           variant="outline"
           size="sm"
           mode="icon"
-          className="absolute bottom-6 right-6 z-[400] bg-white/90 backdrop-blur-xl shadow-2xl border-none hover:bg-white size-10 rounded-xl transition-transform hover:scale-110 active:scale-95"
+          className="absolute bottom-6 right-6 z-[400] bg-background/90 backdrop-blur-xl shadow-2xl border-none hover:bg-background size-10 rounded-xl transition-transform hover:scale-110 active:scale-95"
           onClick={() => setSelectedOdpName(null)}
         >
           <Maximize2 className="size-5 text-primary" />

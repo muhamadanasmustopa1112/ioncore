@@ -8,7 +8,7 @@ const kpiCards = [
     change: "+12%",
     positive: true,
     icon: Users,
-    iconClass: "bg-blue-50 text-blue-600 dark:bg-blue-900/20",
+    iconClass: "bg-primary/10 text-primary",
   },
   {
     title: "Total Potential Leads",

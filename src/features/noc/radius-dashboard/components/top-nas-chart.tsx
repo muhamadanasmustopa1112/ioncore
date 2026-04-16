@@ -54,7 +54,7 @@ export function RadiusTopNasChart() {
     },
     grid: { show: false },
     tooltip: {
-      theme: 'light',
+      theme: 'dark',
       y: {
         formatter: (val) => val.toLocaleString() + ' Active Sessions'
       }
@@ -68,7 +68,7 @@ export function RadiusTopNasChart() {
   }], []);
 
   return (
-    <Card className="border-none shadow-md bg-white rounded-3xl overflow-hidden h-full">
+    <Card className="border-none shadow-md bg-card rounded-3xl overflow-hidden h-full">
       <CardHeader className="pb-2 flex-row justify-between items-center">
         <CardHeading className="text-sm font-black uppercase tracking-widest text-foreground">
           Top NAS Performance

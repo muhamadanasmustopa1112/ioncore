@@ -55,7 +55,7 @@ export function RadiusServiceInfo() {
   ], [serviceInfo]);
 
   return (
-    <Card className="border-none shadow-md bg-white rounded-3xl overflow-hidden h-full">
+    <Card className="border-none shadow-md bg-card rounded-3xl overflow-hidden h-full">
       <CardHeader className="pb-4 flex flex-row items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-primary/10 rounded-lg">
@@ -83,7 +83,7 @@ export function RadiusServiceInfo() {
               className="group flex items-center justify-between p-3 rounded-2xl hover:bg-muted/30 transition-all duration-200 border border-transparent hover:border-border/50"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-muted/50 rounded-xl group-hover:bg-white group-hover:shadow-sm transition-colors text-muted-foreground group-hover:text-primary">
+                <div className="p-2 bg-muted/50 rounded-xl group-hover:bg-background group-hover:shadow-sm transition-colors text-muted-foreground group-hover:text-primary">
                   <item.icon className="size-4" />
                 </div>
                 <div className="flex flex-col">
