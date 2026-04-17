@@ -8,6 +8,7 @@ import {
 } from "@remixicon/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -16,8 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useResourceMappingStore } from "../../../store/resource-mapping";
+import { useBranchList } from "../../../api/branch-queries";
 
 interface ResourceMappingFormProps {
   onSubmit?: () => void;
@@ -25,15 +26,15 @@ interface ResourceMappingFormProps {
 
 export function ResourceMappingForm({ onSubmit }: ResourceMappingFormProps) {
   const { form, selectedMapping } = useResourceMappingStore();
+  const { data: branchList = [], isLoading: branchListLoading } = useBranchList();
   const isDetailMode = form === "details";
 
   const [resourceType, setResourceType] = useState("sales_rep");
   const [resourceName, setResourceName] = useState("");
   const [resourceCode, setResourceCode] = useState("");
   const [branchName, setBranchName] = useState("");
-  const [scopeLevel, setScopeLevel] = useState("area");
   const [servesMultiple, setServesMultiple] = useState("false");
-  const [additionalBranches, setAdditionalBranches] = useState("");
+  const [additionalBranches, setAdditionalBranches] = useState<string[]>([]);
   const [isActive, setIsActive] = useState("true");
 
   useEffect(() => {
@@ -43,18 +44,16 @@ export function ResourceMappingForm({ onSubmit }: ResourceMappingFormProps) {
       setResourceName(m.resourceName);
       setResourceCode(m.resourceCode);
       setBranchName(m.branchName);
-      setScopeLevel(m.scopeLevel);
       setServesMultiple(m.servesMultiple ? "true" : "false");
-      setAdditionalBranches(m.additionalBranches.join(", "));
+      setAdditionalBranches(m.additionalBranches);
       setIsActive(m.isActive ? "true" : "false");
     } else if (form === "new") {
       setResourceType("sales_rep");
       setResourceName("");
       setResourceCode("");
       setBranchName("");
-      setScopeLevel("area");
       setServesMultiple("false");
-      setAdditionalBranches("");
+      setAdditionalBranches([]);
       setIsActive("true");
     }
   }, [selectedMapping, form]);
@@ -70,10 +69,19 @@ export function ResourceMappingForm({ onSubmit }: ResourceMappingFormProps) {
     };
   }, [handleSubmit]);
 
+  const activeBranches = branchList.filter((b) => b.active);
+
+  const branchOptions = activeBranches.map((b) => ({
+    value: b.name,
+    label: b.name,
+    level: b.level,
+  }));
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
+
           {/* Resource Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
@@ -90,9 +98,7 @@ export function ResourceMappingForm({ onSubmit }: ResourceMappingFormProps) {
                   <Input value={resourceType} disabled />
                 ) : (
                   <Select value={resourceType} onValueChange={setResourceType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="sales_rep">Sales Rep</SelectItem>
                       <SelectItem value="team_leader">Team Leader</SelectItem>
@@ -109,9 +115,7 @@ export function ResourceMappingForm({ onSubmit }: ResourceMappingFormProps) {
                   <Input value={isActive === "true" ? "Active" : "Inactive"} disabled />
                 ) : (
                   <Select value={isActive} onValueChange={setIsActive}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="true">Active</SelectItem>
                       <SelectItem value="false">Inactive</SelectItem>
@@ -151,36 +155,29 @@ export function ResourceMappingForm({ onSubmit }: ResourceMappingFormProps) {
               <h3 className="text-sm font-semibold">Branch Assignment</h3>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Primary Branch <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="e.g. Jakarta Timur"
-                  value={branchName}
-                  onChange={(e) => setBranchName(e.target.value)}
-                  disabled={isDetailMode}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Scope Level</Label>
-                {isDetailMode ? (
-                  <Input value={scopeLevel} disabled />
-                ) : (
-                  <Select value={scopeLevel} onValueChange={setScopeLevel}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="regional">Regional</SelectItem>
-                      <SelectItem value="area">Area</SelectItem>
-                      <SelectItem value="sub_area">Sub Area</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Primary Branch <span className="text-red-500">*</span>
+              </Label>
+              {isDetailMode ? (
+                <Input value={branchName} disabled />
+              ) : (
+                <Select value={branchName} onValueChange={setBranchName} disabled={branchListLoading}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={branchListLoading ? "Loading branches…" : "Select branch"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeBranches.map((b) => (
+                      <SelectItem key={b.id} value={b.name}>
+                        <span>{b.name}</span>
+                        <span className="ml-2 text-xs text-muted-foreground capitalize">
+                          {b.level.replace("_", " ")}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -188,10 +185,11 @@ export function ResourceMappingForm({ onSubmit }: ResourceMappingFormProps) {
               {isDetailMode ? (
                 <Input value={servesMultiple === "true" ? "Yes" : "No"} disabled />
               ) : (
-                <Select value={servesMultiple} onValueChange={setServesMultiple}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <Select
+                  value={servesMultiple}
+                  onValueChange={(v) => { setServesMultiple(v); if (v === "false") setAdditionalBranches([]); }}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="false">No — Single branch only</SelectItem>
                     <SelectItem value="true">Yes — Shared across branches</SelectItem>
@@ -203,21 +201,23 @@ export function ResourceMappingForm({ onSubmit }: ResourceMappingFormProps) {
             {servesMultiple === "true" && (
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">Additional Branches</Label>
-                <Textarea
-                  placeholder="e.g. Jakarta Barat, Jakarta Pusat"
-                  className="min-h-[60px] resize-none"
-                  value={additionalBranches}
-                  onChange={(e) => setAdditionalBranches(e.target.value)}
-                  disabled={isDetailMode}
-                />
-                {!isDetailMode && (
-                  <p className="text-[11px] text-muted-foreground">
-                    Comma-separated list of additional branches this resource serves.
-                  </p>
+                {isDetailMode ? (
+                  <Input value={additionalBranches.join(", ")} disabled />
+                ) : (
+                  <MultiSelect
+                    value={additionalBranches}
+                    onChange={setAdditionalBranches}
+                    options={branchOptions}
+                    placeholder="Select additional branches"
+                    filteredText="branches"
+                    isLoading={branchListLoading}
+                    emptyText="No branches found"
+                  />
                 )}
               </div>
             )}
           </div>
+
         </div>
       </ScrollArea>
     </div>

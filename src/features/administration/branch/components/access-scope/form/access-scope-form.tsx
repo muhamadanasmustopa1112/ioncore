@@ -8,6 +8,7 @@ import {
 } from "@remixicon/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -16,8 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useAccessScopeStore } from "../../../store/access-scope";
+import { useBranchList } from "../../../api/branch-queries";
 
 interface AccessScopeFormProps {
   onSubmit?: () => void;
@@ -25,13 +26,14 @@ interface AccessScopeFormProps {
 
 export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
   const { form, selectedScope } = useAccessScopeStore();
+  const { data: branchList = [], isLoading: branchListLoading } = useBranchList();
   const isDetailMode = form === "details";
 
   const [subjectType, setSubjectType] = useState("role");
   const [subjectName, setSubjectName] = useState("");
   const [subjectCode, setSubjectCode] = useState("");
   const [scopeLevel, setScopeLevel] = useState("area");
-  const [branchScope, setBranchScope] = useState("");
+  const [branchScope, setBranchScope] = useState<string[]>([]);
   const [permissionLevel, setPermissionLevel] = useState("read");
   const [canCrossBranch, setCanCrossBranch] = useState("false");
   const [isActive, setIsActive] = useState("true");
@@ -43,7 +45,7 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
       setSubjectName(s.subjectName);
       setSubjectCode(s.subjectCode);
       setScopeLevel(s.scopeLevel);
-      setBranchScope(s.branchScope.join(", "));
+      setBranchScope(s.branchScope);
       setPermissionLevel(s.permissionLevel);
       setCanCrossBranch(s.canCrossBranch ? "true" : "false");
       setIsActive(s.isActive ? "true" : "false");
@@ -52,7 +54,7 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
       setSubjectName("");
       setSubjectCode("");
       setScopeLevel("area");
-      setBranchScope("");
+      setBranchScope([]);
       setPermissionLevel("read");
       setCanCrossBranch("false");
       setIsActive("true");
@@ -70,10 +72,24 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
     };
   }, [handleSubmit]);
 
+  // Filter by active, then by selected scope level
+  const filteredBranches = branchList.filter((b) => {
+    if (!b.active) return false;
+    if (scopeLevel === "all") return true;
+    return b.level === scopeLevel;
+  });
+
+  const branchOptions = filteredBranches.map((b) => ({
+    value: b.name,
+    label: b.name,
+    level: b.level,
+  }));
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
+
           {/* Subject Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
@@ -90,9 +106,7 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
                   <Input value={subjectType} disabled />
                 ) : (
                   <Select value={subjectType} onValueChange={setSubjectType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="user">User</SelectItem>
                       <SelectItem value="role">Role</SelectItem>
@@ -107,9 +121,7 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
                   <Input value={isActive === "true" ? "Active" : "Inactive"} disabled />
                 ) : (
                   <Select value={isActive} onValueChange={setIsActive}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="true">Active</SelectItem>
                       <SelectItem value="false">Inactive</SelectItem>
@@ -155,10 +167,11 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
               {isDetailMode ? (
                 <Input value={scopeLevel} disabled />
               ) : (
-                <Select value={scopeLevel} onValueChange={setScopeLevel}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                <Select
+                  value={scopeLevel}
+                  onValueChange={(v) => { setScopeLevel(v); setBranchScope([]); }}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Levels</SelectItem>
                     <SelectItem value="regional">Regional</SelectItem>
@@ -171,16 +184,24 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">Assigned Branches</Label>
-              <Textarea
-                placeholder="e.g. Jakarta Barat, Jakarta Timur (leave empty for all)"
-                className="min-h-[60px] resize-none"
-                value={branchScope}
-                onChange={(e) => setBranchScope(e.target.value)}
-                disabled={isDetailMode || scopeLevel === "all"}
-              />
-              {!isDetailMode && (
+              {isDetailMode ? (
+                <Input value={branchScope.join(", ")} disabled />
+              ) : (
+                <div className={scopeLevel === "all" ? "pointer-events-none opacity-50" : undefined}>
+                  <MultiSelect
+                    value={branchScope}
+                    onChange={setBranchScope}
+                    options={branchOptions}
+                    placeholder={scopeLevel === "all" ? "All branches — no restriction" : "Select branches"}
+                    filteredText="branches"
+                    isLoading={branchListLoading}
+                    emptyText="No branches found"
+                  />
+                </div>
+              )}
+              {!isDetailMode && scopeLevel !== "all" && (
                 <p className="text-[11px] text-muted-foreground">
-                  Comma-separated branch names. Leave empty if scope level is &quot;All Levels&quot;.
+                  Leave empty to grant access to all branches at the selected scope level.
                 </p>
               )}
             </div>
@@ -200,9 +221,7 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
                   <Input value={permissionLevel} disabled />
                 ) : (
                   <Select value={permissionLevel} onValueChange={setPermissionLevel}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="read">Read — View only</SelectItem>
                       <SelectItem value="write">Write — Create & edit</SelectItem>
@@ -219,9 +238,7 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
                   <Input value={canCrossBranch === "true" ? "Allowed" : "Restricted"} disabled />
                 ) : (
                   <Select value={canCrossBranch} onValueChange={setCanCrossBranch}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="false">Restricted — Own branch only</SelectItem>
                       <SelectItem value="true">Allowed — Can access other branches</SelectItem>
@@ -231,6 +248,7 @@ export function AccessScopeForm({ onSubmit }: AccessScopeFormProps) {
               </div>
             </div>
           </div>
+
         </div>
       </ScrollArea>
     </div>
