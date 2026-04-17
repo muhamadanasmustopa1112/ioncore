@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCrossBranchRulesStore } from "../../../store/cross-branch-rules";
+import { useBranchList } from "../../../api/branch-queries";
 
 interface CrossBranchRulesFormProps {
   onSubmit?: () => void;
@@ -25,6 +26,7 @@ interface CrossBranchRulesFormProps {
 
 export function CrossBranchRulesForm({ onSubmit }: CrossBranchRulesFormProps) {
   const { form, selectedRule } = useCrossBranchRulesStore();
+  const { data: branchList = [], isLoading: branchListLoading } = useBranchList();
   const isDetailMode = form === "details";
 
   const [name, setName] = useState("");
@@ -73,10 +75,39 @@ export function CrossBranchRulesForm({ onSubmit }: CrossBranchRulesFormProps) {
     };
   }, [handleSubmit]);
 
+  const activeBranches = branchList.filter((b) => b.active);
+
+  const BranchSelect = ({
+    value,
+    onValueChange,
+    disabled,
+  }: {
+    value: string;
+    onValueChange: (v: string) => void;
+    disabled?: boolean;
+  }) => (
+    <Select value={value} onValueChange={onValueChange} disabled={disabled || branchListLoading}>
+      <SelectTrigger>
+        <SelectValue placeholder={branchListLoading ? "Loading branches…" : "Select branch"} />
+      </SelectTrigger>
+      <SelectContent>
+        {activeBranches.map((b) => (
+          <SelectItem key={b.id} value={b.name}>
+            <span>{b.name}</span>
+            <span className="ml-2 text-xs text-muted-foreground capitalize">
+              {b.level.replace("_", " ")}
+            </span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
+
           {/* General */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
@@ -114,9 +145,7 @@ export function CrossBranchRulesForm({ onSubmit }: CrossBranchRulesFormProps) {
                   <Input value={ruleType} disabled />
                 ) : (
                   <Select value={ruleType} onValueChange={setRuleType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="dispatch">Dispatch</SelectItem>
                       <SelectItem value="inventory">Inventory</SelectItem>
@@ -133,9 +162,7 @@ export function CrossBranchRulesForm({ onSubmit }: CrossBranchRulesFormProps) {
                   <Input value={isActive === "true" ? "Active" : "Inactive"} disabled />
                 ) : (
                   <Select value={isActive} onValueChange={setIsActive}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="true">Active</SelectItem>
                       <SelectItem value="false">Inactive</SelectItem>
@@ -158,23 +185,19 @@ export function CrossBranchRulesForm({ onSubmit }: CrossBranchRulesFormProps) {
                 <Label className="text-xs font-medium text-muted-foreground">
                   Source Branch <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  placeholder="e.g. Jakarta Barat"
-                  value={sourceBranch}
-                  onChange={(e) => setSourceBranch(e.target.value)}
-                  disabled={isDetailMode}
-                />
+                {isDetailMode
+                  ? <Input value={sourceBranch} disabled />
+                  : <BranchSelect value={sourceBranch} onValueChange={setSourceBranch} />
+                }
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
                   Target Branch <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  placeholder="e.g. Jakarta Pusat"
-                  value={targetBranch}
-                  onChange={(e) => setTargetBranch(e.target.value)}
-                  disabled={isDetailMode}
-                />
+                {isDetailMode
+                  ? <Input value={targetBranch} disabled />
+                  : <BranchSelect value={targetBranch} onValueChange={setTargetBranch} />
+                }
               </div>
             </div>
 
@@ -209,9 +232,7 @@ export function CrossBranchRulesForm({ onSubmit }: CrossBranchRulesFormProps) {
                   <Input value={requiresApproval === "true" ? "Yes" : "No"} disabled />
                 ) : (
                   <Select value={requiresApproval} onValueChange={setRequiresApproval}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="true">Yes — Manual approval required</SelectItem>
                       <SelectItem value="false">No — Auto-allowed</SelectItem>
@@ -231,6 +252,7 @@ export function CrossBranchRulesForm({ onSubmit }: CrossBranchRulesFormProps) {
               </div>
             </div>
           </div>
+
         </div>
       </ScrollArea>
     </div>
