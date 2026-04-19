@@ -108,6 +108,16 @@ export const paths = {
         path: "/operations",
         getHref: () => "/operations",
       },
+      workOrders: {
+        root: {
+          path: "/operations/work-orders",
+          getHref: () => "/operations/work-orders",
+        },
+        detail: {
+          path: "/operations/work-orders/:id",
+          getHref: (id: string) => `/operations/work-orders/${id}`,
+        },
+      },
       connectivity: {
         path: "/operations/connectivity/:id",
         getHref: (id: string) => `/operations/connectivity/${id}`,
@@ -213,6 +223,40 @@ export const paths = {
           path: "/administration/schema",
           getHref: () => "/administration/schema",
         },
+      },
+      checklist: {
+        root: {
+          path: "/administration/checklist",
+          getHref: () => "/administration/checklist",
+        },
+        templates: {
+          path: "/administration/checklist/templates",
+          getHref: () => "/administration/checklist/templates",
+        },
+        overrides: {
+          path: "/administration/checklist/overrides",
+          getHref: () => "/administration/checklist/overrides",
+        },
+        versioning: {
+          path: "/administration/checklist/versioning",
+          getHref: () => "/administration/checklist/versioning",
+        },
+        binding: {
+          path: "/administration/checklist/binding",
+          getHref: () => "/administration/checklist/binding",
+        },
+      },
+      platformConfig: {
+        path: "/administration/platform-config",
+        getHref: () => "/administration/platform-config",
+      },
+      masterData: {
+        path: "/administration/master-data",
+        getHref: () => "/administration/master-data",
+      },
+      auditLog: {
+        path: "/administration/audit-log",
+        getHref: () => "/administration/audit-log",
       },
     },
   },

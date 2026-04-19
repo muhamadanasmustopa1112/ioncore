@@ -15,8 +15,11 @@ import { CapabilityForm } from "./capability-form";
 import { CapabilityPayload } from "../../../types/capability-api";
 
 export function CapabilityFormSheet() {
-  const { sheetOpen, closeSheet, form, selectedCapability, selectedBranchId } =
-    useCapabilityStore();
+  const sheetOpen = useCapabilityStore((s) => s.sheetOpen);
+  const closeSheet = useCapabilityStore((s) => s.closeSheet);
+  const form = useCapabilityStore((s) => s.form);
+  const selectedCapability = useCapabilityStore((s) => s.selectedCapability);
+  const selectedBranchId = useCapabilityStore((s) => s.selectedBranchId);
 
   const isNewMode = form === "new";
   const isEditMode = form === "edit";

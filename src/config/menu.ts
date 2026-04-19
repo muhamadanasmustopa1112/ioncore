@@ -7,12 +7,16 @@ import {
   Box,
   BoxIcon,
   Building2,
+  ClipboardList,
   Columns,
+  Database,
   FileChartLine,
   FileText,
   Gauge,
+  GitBranch,
   Headset,
   KeyRound,
+  LayoutGrid,
   Map,
   Network,
   Package,
@@ -20,8 +24,11 @@ import {
   PanelTop,
   Presentation,
   RouterIcon,
+  ScrollText,
   Settings,
+  ShieldAlert,
   ShieldCheck,
+  SlidersHorizontal,
   SquareKanban,
   SquareRoundCorner,
   StickyNote,
@@ -33,6 +40,7 @@ import {
   Users2,
   UserSearch,
   Wallet,
+  Wrench,
 } from "lucide-react";
 import { paths } from "@/config/paths";
 import { MenuConfig } from "@/config/types";
@@ -253,6 +261,13 @@ export const DASHBOARD_MENU: MenuConfig = [
     path: paths.dashboard.operations.root.getHref(),
     heading: 'Strategic',
     icon: Activity,
+    children: [
+      {
+        title: "Work Orders",
+        path: paths.dashboard.operations.workOrders.root.getHref(),
+        icon: Wrench,
+      },
+    ],
   },
   {
     title: "Enterprise System",
@@ -343,6 +358,52 @@ export const DASHBOARD_MENU: MenuConfig = [
     path: paths.dashboard.administration.schema.root.getHref(),
     heading: 'Administration',
     icon: FileText,
+  },
+  {
+    title: "Checklist",
+    path: paths.dashboard.administration.checklist.root.getHref(),
+    heading: 'Administration',
+    icon: ClipboardList,
+    children: [
+      {
+        title: "Templates",
+        path: paths.dashboard.administration.checklist.templates.getHref(),
+        icon: ClipboardList,
+      },
+      {
+        title: "Override & Exception",
+        path: paths.dashboard.administration.checklist.overrides.getHref(),
+        icon: ShieldAlert,
+      },
+      {
+        title: "Versioning & Publish",
+        path: paths.dashboard.administration.checklist.versioning.getHref(),
+        icon: GitBranch,
+      },
+      {
+        title: "Binding Matrix",
+        path: paths.dashboard.administration.checklist.binding.getHref(),
+        icon: LayoutGrid,
+      },
+    ],
+  },
+  {
+    title: "Platform Config",
+    path: paths.dashboard.administration.platformConfig.getHref(),
+    heading: 'Administration',
+    icon: SlidersHorizontal,
+  },
+  {
+    title: "Master Data",
+    path: paths.dashboard.administration.masterData.getHref(),
+    heading: 'Administration',
+    icon: Database,
+  },
+  {
+    title: "Audit Log",
+    path: paths.dashboard.administration.auditLog.getHref(),
+    heading: 'Administration',
+    icon: ScrollText,
   },
 ];
 // Export default untuk backward compatibility
