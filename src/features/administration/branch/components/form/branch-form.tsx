@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -77,6 +77,20 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
 
   const { data: regionals = [] } = useRegionalList();
 
+  const defaultValues = useMemo(
+    () => ({
+      name: "",
+      code: "",
+      level: "regional" as const,
+      active: true,
+      regionalId: "",
+      areaId: "",
+      address: "",
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
   const {
     register,
     handleSubmit,
@@ -87,15 +101,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
     formState: { errors },
   } = useForm<BranchFormValues>({
     resolver: zodResolver(branchSchema),
-    defaultValues: {
-      name: "",
-      code: "",
-      level: "regional",
-      active: true,
-      regionalId: "",
-      areaId: "",
-      address: "",
-    },
+    defaultValues,
   });
 
   const level = watch("level");

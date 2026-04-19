@@ -15,8 +15,10 @@ import { BranchForm } from "./branch-form";
 import { BranchLevel } from "../../types";
 
 export function BranchFormSheet() {
-  const { branchSheetOpen, closeBranchFormSheet, form, selectedBranch } =
-    useBranchStore();
+  const branchSheetOpen = useBranchStore((s) => s.branchSheetOpen);
+  const closeBranchFormSheet = useBranchStore((s) => s.closeBranchFormSheet);
+  const form = useBranchStore((s) => s.form);
+  const selectedBranch = useBranchStore((s) => s.selectedBranch);
 
   const isNewMode = form === "new";
   const isEditMode = form === "edit";
