@@ -3,65 +3,66 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
-import { RouterData } from "../../../types";
+import { RouterItem } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
 
-const statusColorMap: Record<RouterData["pingStatus"], string> = {
+const statusColorMap: Record<string, string> = {
   online: "bg-green-500",
   warning: "bg-yellow-500",
   offline: "bg-red-500",
+  timeout: "bg-red-500",
 };
 
-export const columns: ColumnDef<RouterData>[] = [
+export const columns: ColumnDef<RouterItem>[] = [
   {
-    id: "pingStatus",
-    accessorFn: (row) => row.pingStatus,
+    id: "ping_status",
+    accessorFn: (row) => row.ping_status,
     header: ({ column }) => (
       <DataGridColumnHeader title="Ping Status" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <span
-          className={`block size-2.5 rounded-full ${statusColorMap[row.original.pingStatus]
+          className={`block size-2.5 rounded-full ${statusColorMap[row.original.ping_status] || "bg-gray-400"
             }`}
         />
-        <span className="capitalize">{row.original.pingStatus}</span>
+        <span className="capitalize">{row.original.ping_status_label || row.original.ping_status}</span>
       </div>
     ),
     enableSorting: true,
     size: 130,
   },
   {
-    id: "routerName",
-    accessorFn: (row) => row.routerName,
+    id: "router_name",
+    accessorFn: (row) => row.router_name,
     header: ({ column }) => (
       <DataGridColumnHeader title="Router Name" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="font-medium text-foreground">
-        {row.original.routerName}
+        {row.original.router_name}
       </div>
     ),
     enableSorting: true,
     size: 200,
   },
   {
-    id: "ipAddress",
-    accessorFn: (row) => row.ipAddress,
+    id: "ip_address",
+    accessorFn: (row) => row.ip_address,
     header: ({ column }) => (
       <DataGridColumnHeader title="IP Address" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => <div>{row.original.ipAddress}</div>,
+    cell: ({ row }) => <div>{row.original.ip_address}</div>,
     enableSorting: true,
     size: 150,
   },
   {
-    id: "timeZone",
-    accessorFn: (row) => row.timeZone,
+    id: "time_zone",
+    accessorFn: (row) => row.time_zone,
     header: ({ column }) => (
       <DataGridColumnHeader title="Time Zone" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => <div>{row.original.timeZone}</div>,
+    cell: ({ row }) => <div>{row.original.time_zone}</div>,
     enableSorting: true,
     size: 150,
   },
@@ -80,24 +81,24 @@ export const columns: ColumnDef<RouterData>[] = [
     size: 220,
   },
   {
-    id: "onlineUsers",
-    accessorFn: (row) => row.onlineUsers,
+    id: "online_users",
+    accessorFn: (row) => row.online_users,
     header: ({ column }) => (
       <DataGridColumnHeader title="Online Users" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => <div>{row.original.onlineUsers}</div>,
+    cell: ({ row }) => <div>{row.original.online_users}</div>,
     enableSorting: true,
     size: 130,
   },
   {
-    id: "lastChecked",
-    accessorFn: (row) => row.lastChecked,
+    id: "last_checked",
+    accessorFn: (row) => row.last_checked,
     header: ({ column }) => (
       <DataGridColumnHeader title="Last Checked" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div>
-        {format(new Date(row.original.lastChecked), "dd MMM yyyy, HH:mm")}
+        {row.original.last_checked ? format(new Date(row.original.last_checked), "dd MMM yyyy, HH:mm") : "-"}
       </div>
     ),
     enableSorting: true,
@@ -105,11 +106,10 @@ export const columns: ColumnDef<RouterData>[] = [
   },
   {
     id: "actions",
-    accessorFn: (row) => row.lastChecked,
     header: ({ column }) => (
       <DataGridColumnHeader title="Actions" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => <ActionsCell row={row} />,
+    cell: ({ row }) => <ActionsCell row={row as any} />,
     enableSorting: false,
     size: 75,
   },

@@ -11,18 +11,12 @@ export const odpSchema = z.object({
     .number({ error: "Longitude is required" })
     .min(-180, "Invalid longitude")
     .max(180, "Invalid longitude"),
-  splitters: z
-    .number({ error: "Splitters is required" })
-    .min(1, "Minimum 1 splitter"),
   totalPorts: z
     .number({ error: "Total ports is required" })
     .min(1, "Minimum 1 port"),
   portsUsed: z
     .number({ error: "Ports used is required" })
     .min(0, "Cannot be negative"),
-  signalLevel: z
-    .number({ error: "Signal level is required" })
-    .max(0, "Signal level must be negative (dBm)"),
   status: z.enum(["active", "warning", "down"]),
 });
 
@@ -33,9 +27,7 @@ export const DEFAULT_ODP_VALUES: Partial<OdpFormValues> = {
   ponPort: "",
   latitude: undefined,
   longitude: undefined,
-  splitters: undefined,
   totalPorts: undefined,
   portsUsed: 0,
-  signalLevel: undefined,
   status: "active",
 };

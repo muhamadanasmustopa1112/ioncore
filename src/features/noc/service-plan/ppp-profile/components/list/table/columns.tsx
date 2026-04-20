@@ -3,64 +3,45 @@
 import { ColumnDef } from "@tanstack/react-table";
 import {
   RiUserLine,
-  RiSignalTowerLine,
-  RiInformationLine,
-  RiMoneyDollarCircleLine,
   RiDatabase2Line
 } from "@remixicon/react";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { Badge } from "@/components/ui/badge";
-import { thousandSeparator } from "@/lib/string";
-import { PPPProfileData } from "../../../types";
+import { PPPProfileItem } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
 
-export const columns: ColumnDef<PPPProfileData>[] = [
+export const columns: ColumnDef<PPPProfileItem>[] = [
   {
-    id: "planeName",
-    accessorFn: (row) => row.planeName,
+    id: "name",
+    accessorFn: (row) => row.name,
     header: ({ column }) => (
       <DataGridColumnHeader title="Plan Name" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="font-bold text-foreground py-1">
-        {row.original.planeName}
+        {row.original.name}
       </div>
     ),
     enableSorting: true,
     size: 220,
   },
   {
-    id: "profileGroup",
-    accessorFn: (row) => row.profileGroup,
+    id: "profile_group",
+    accessorFn: (row) => row.profile_group,
     header: ({ column }) => (
       <DataGridColumnHeader title="Profile Group" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="text-muted-foreground font-medium">
-        {row.original.profileGroup}
+        {row.original.profile_group}
       </div>
     ),
     enableSorting: true,
     size: 200,
   },
   {
-    id: "bandwidth",
-    accessorFn: (row) => row.bandwidth,
-    header: ({ column }) => (
-      <DataGridColumnHeader title="Bandwidth" column={column} className="text-foreground font-semibold" />
-    ),
-    cell: ({ row }) => (
-      <Badge variant="info" appearance="light" className="gap-1.5 font-bold uppercase tracking-tight">
-        <RiSignalTowerLine className="size-3" />
-        {row.original.bandwidth}
-      </Badge>
-    ),
-    enableSorting: true,
-    size: 250,
-  },
-  {
-    id: "capitalPrice",
-    accessorFn: (row) => row.capitalPrice,
+    id: "capital_price_display",
+    accessorFn: (row) => row.capital_price_display,
     header: ({ column }) => (
       <DataGridColumnHeader
         title="Capital Price"
@@ -70,16 +51,15 @@ export const columns: ColumnDef<PPPProfileData>[] = [
     ),
     cell: ({ row }) => (
       <div className="text-right tabular-nums font-semibold text-foreground/80">
-        <span className="text-[10px] text-muted-foreground mr-1 font-bold">Rp</span>
-        {thousandSeparator(row.original.capitalPrice)}
+        {row.original.capital_price_display}
       </div>
     ),
     enableSorting: true,
     size: 160,
   },
   {
-    id: "sellPrice",
-    accessorFn: (row) => row.sellPrice,
+    id: "sell_price_display",
+    accessorFn: (row) => row.sell_price_display,
     header: ({ column }) => (
       <DataGridColumnHeader
         title="Sell Price"
@@ -89,52 +69,51 @@ export const columns: ColumnDef<PPPProfileData>[] = [
     ),
     cell: ({ row }) => (
       <div className="text-right tabular-nums font-bold text-primary">
-        <span className="text-[10px] opacity-70 mr-1">Rp</span>
-        {thousandSeparator(row.original.sellPrice)}
+        {row.original.sell_price_display}
       </div>
     ),
     enableSorting: true,
     size: 160,
   },
   {
-    id: "sharedUser",
-    accessorFn: (row) => row.sharedUser,
+    id: "shared_users",
+    accessorFn: (row) => row.shared_users,
     header: ({ column }) => (
       <DataGridColumnHeader title="Shared User" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <Badge variant="secondary" appearance="light" className="gap-1.5 font-bold">
         <RiUserLine className="size-3" />
-        {row.original.sharedUser}
+        {row.original.shared_users}
       </Badge>
     ),
     enableSorting: true,
     size: 180,
   },
   {
-    id: "dataOwner",
-    accessorFn: (row) => row.dataOwner,
+    id: "data_owner",
+    accessorFn: (row) => row.data_owner,
     header: ({ column }) => (
       <DataGridColumnHeader title="Data Owner" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="flex items-center gap-2 text-muted-foreground font-medium">
         <RiDatabase2Line className="size-3.5 opacity-50" />
-        {row.original.dataOwner}
+        {row.original.data_owner}
       </div>
     ),
     enableSorting: true,
     size: 180,
   },
   {
-    id: "vcrCustomer",
-    accessorFn: (row) => row.vcrCustomer,
+    id: "vcr_customer_display",
+    accessorFn: (row) => row.vcr_customer_display,
     header: ({ column }) => (
       <DataGridColumnHeader title="VCR | Customer" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
-      <div className="font-bold text-foreground">
-        {row.original.vcrCustomer || '-'}
+      <div className="font-bold text-foreground" title={row.original.vcr_customer_tooltip?.replace(/<br>/g, '\n')}>
+        {row.original.vcr_customer_display || '-'}
       </div>
     ),
     enableSorting: true,
@@ -147,7 +126,7 @@ export const columns: ColumnDef<PPPProfileData>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex justify-center">
-        <ActionsCell row={row} />
+        <ActionsCell row={row as any} />
       </div>
     ),
     enableSorting: false,

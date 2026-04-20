@@ -79,25 +79,6 @@ export const columns: ColumnDef<OdpListItem>[] = [
     size: 110,
   },
   {
-    id: "splitters",
-    accessorKey: "splitters",
-    header: ({ column }) => (
-      <DataGridColumnHeader
-        title="SPLITTERS"
-        column={column}
-        className="text-[10px] text-muted-foreground font-black tracking-widest uppercase text-center"
-      />
-    ),
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <span className="text-foreground font-bold text-sm">
-          {row.original.splitters}
-        </span>
-      </div>
-    ),
-    size: 100,
-  },
-  {
     id: "portCapacity",
     header: ({ column }) => (
       <DataGridColumnHeader
@@ -145,32 +126,5 @@ export const columns: ColumnDef<OdpListItem>[] = [
       );
     },
     size: 160,
-  },
-  {
-    id: "signalLevel",
-    accessorKey: "signalLevel",
-    header: ({ column }) => (
-      <DataGridColumnHeader
-        title="SIGNAL LEVEL"
-        column={column}
-        className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
-      />
-    ),
-    cell: ({ row }) => {
-      const signal = row.original.signalLevel;
-      const isGood = signal >= -20;
-      const isWarn = signal >= -24 && signal < -20;
-
-      return (
-        <Badge
-          variant={isGood ? "success" : isWarn ? "warning" : "destructive"}
-          appearance="light"
-          className="uppercase text-[10px] tracking-tighter font-mono"
-        >
-          {signal.toFixed(1)} dBm
-        </Badge>
-      );
-    },
-    size: 130,
   },
 ];

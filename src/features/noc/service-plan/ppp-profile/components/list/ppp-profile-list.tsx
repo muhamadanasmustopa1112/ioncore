@@ -29,13 +29,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { PPPProfileData } from "../../types";
-import { DUMMY_PPP_PROFILE } from "../../data/dummy-ppp-profile";
-import { columns } from "./table/columns";
+import { usePPPProfiles } from "../../api/get-ppp-profiles";
+import { columns as columnsDef } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
+import { PPPProfileItem } from "../../types";
 
 export function PPPProfileList() {
-  const [data] = useState<PPPProfileData[]>(DUMMY_PPP_PROFILE);
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -45,12 +44,33 @@ export function PPPProfileList() {
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  // 1. Memoize Columns
+  const columns = useMemo(() => columnsDef, []);
+
+  // 2. Memoize Request Params
+  const params = useMemo(() => ({
+    page: filter.page,
+    limit: filter.limit,
+    search: filter.search || "",
+  }), [filter]);
+
+  // 3. Fetch Data with TanStack Query
+  const { data: pppProfileData, isLoading, isFetching } = usePPPProfiles({ params });
+
+  // 4. Memoize Data and Metadata
+  const data = useMemo(() => pppProfileData?.data ?? [], [pppProfileData]);
+  const metadata = useMemo(() => pppProfileData?.metadata, [pppProfileData]);
+
   const table = useReactTable({
     columns,
     data,
-    pageCount: Math.ceil(data.length / (filter.limit || 10)),
-    getRowId: (row) => row.id,
+    pageCount: metadata?.total_page ?? 0,
+    getRowId: (row: PPPProfileItem) => String(row.id),
     state: {
+      pagination: {
+        pageIndex: filter.page - 1,
+        pageSize: filter.limit,
+      },
       rowSelection,
     },
     enableRowSelection: true,
@@ -59,12 +79,13 @@ export function PPPProfileList() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
   });
 
   return (
     <DataGrid
       table={table}
-      recordCount={data.length}
+      recordCount={metadata?.total_data || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -72,7 +93,7 @@ export function PPPProfileList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={false}
+      isLoading={isLoading || isFetching}
     >
       <Card className="mt-[10px]">
         <CardHeader className="">
@@ -90,7 +111,7 @@ export function PPPProfileList() {
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
-                    placeholder="Search bandwidth..."
+                    placeholder="Search PPP profile..."
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })

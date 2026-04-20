@@ -123,28 +123,8 @@ export function AddOdpForm() {
         />
       </div>
 
-      {/* Splitters & Total Ports */}
+      {/* Ports Info */}
       <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="splitters"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs text-muted-foreground">Splitters</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="2"
-                  {...field}
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="totalPorts"
@@ -164,10 +144,7 @@ export function AddOdpForm() {
             </FormItem>
           )}
         />
-      </div>
 
-      {/* Ports Used & Signal Level */}
-      <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="portsUsed"
@@ -178,27 +155,6 @@ export function AddOdpForm() {
                 <Input
                   type="number"
                   placeholder="0"
-                  {...field}
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="signalLevel"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs text-muted-foreground">Signal Level (dBm)</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  step="0.1"
-                  placeholder="-19.5"
                   {...field}
                   value={field.value ?? ""}
                   onChange={(e) => field.onChange(e.target.valueAsNumber)}
