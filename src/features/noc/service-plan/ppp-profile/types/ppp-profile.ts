@@ -42,3 +42,26 @@ export type PPPProfileParams = {
   limit?: number;
   search?: string;
 };
+
+export type TimeUnit = "MINUTES" | "HOURS" | "DAYS" | "WEEKS" | "MONTHS";
+
+export type PPPProfileFormValues = {
+  name: string;
+  planeName: string;
+  dataOwner: string;
+  capitalPrice: number;
+  sellPrice: number;
+  promoPrice: number;
+  vat: number;
+  profileGroup: string;
+  bandwidth: string;
+  planValidity: number;
+  timeUnit: TimeUnit | string;
+  sharedUsers: number;
+  priority: number;
+  loginPeriod: string[];
+  fromTime: string;
+  toTime: string;
+};
+
+export type PPPProfileData = PPPProfileItem;

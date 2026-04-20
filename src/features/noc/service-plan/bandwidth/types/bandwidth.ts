@@ -40,3 +40,5 @@ export type BandwidthParams = {
   limit?: number;
   search?: string;
 };
+
+export type BandwidthData = BandwidthItem;
