@@ -8,12 +8,14 @@ import { RiErrorWarningFill } from "@remixicon/react";
 import { isAxiosError } from "axios";
 import { AlertCircle, ChevronDown, ChevronUp, Eye, EyeOff, LoaderCircleIcon, Zap } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
-import { QUICK_LOGIN_USERS } from "@/data/dummy-quick-login";
+import { QUICK_LOGIN_USERS, QuickLoginAccount } from "@/data/dummy-quick-login";
 import { useForm } from "react-hook-form";
-import { auth, responses, state } from "@/config/constants";
+import { auth, state } from "@/config/constants";
 import { paths } from "@/config/paths";
-import { LoginInput, loginInputSchema, useLogin } from "@/lib/auth";
-import { getCookie, setCookie } from "@/lib/cookies";
+import { LoginInput, loginInputSchema } from "@/lib/auth";
+import { useLogin } from "@/features/user-service/api/auth";
+import { persistAuthPayload } from "@/features/user-service/utils";
+import { getCookie } from "@/lib/cookies";
 import { Alert, AlertIcon, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,38 +39,35 @@ export function SigninForm() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showQuickAccess, setShowQuickAccess] = useState(false);
-  const { loginAs } = useAuthStore();
+  const { loginFromPayload } = useAuthStore();
 
-  const { mutate: login, isPending: isProcessing } = useLogin({
-    onSuccess(data) {
-      if (data?.response?.message_en === responses.success) {
-        setError(null);
-        setCookie(
-          auth.logged_in,
-          state.loggedIn,
-          new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-        );
-        router.push(paths.home.getHref());
-        return;
-      }
+  const { mutateAsync: login, isPending: isProcessing } = useLogin();
 
-      setError(
-        data?.response?.message_en ||
-        "An unexpected error occurred. Please try again.",
-      );
-    },
-    onError(error) {
-      if (isAxiosError(error)) {
-        const errorMessage = error?.response?.data?.message_en;
-        if (errorMessage) {
-          return {
-            success: false,
-            message: errorMessage,
-          };
-        }
+  const handleLoginResult = async (email: string, password: string) => {
+    setError(null);
+    try {
+      const res = await login({ email, password });
+      const payload = res?.data;
+      if (!payload?.tokens?.access_token || !payload?.user) {
+        setError(res?.message || "Invalid login response.");
+        return false;
       }
-    },
-  });
+      persistAuthPayload(payload);
+      loginFromPayload(payload);
+      return true;
+    } catch (err) {
+      if (isAxiosError(err)) {
+        const msg =
+          err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err.message;
+        setError(msg || "Login failed. Please try again.");
+      } else {
+        setError("Login failed. Please try again.");
+      }
+      return false;
+    }
+  };
 
   type ExtendedLoginInput = LoginInput & { rememberMe?: boolean };
 
@@ -86,18 +85,12 @@ export function SigninForm() {
     },
   });
 
-  const handleQuickLogin = (user: typeof QUICK_LOGIN_USERS[0]) => {
-    loginAs(user);
-    setCookie(
-      auth.logged_in,
-      state.loggedIn,
-      new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-    );
-    router.push(paths.dashboard.root.getHref());
+  const handleQuickLogin = async (account: QuickLoginAccount) => {
+    const ok = await handleLoginResult(account.email, account.password);
+    if (ok) router.push(paths.dashboard.root.getHref());
   };
 
   async function onSubmit(values: ExtendedLoginInput) {
-    setError(null);
     try {
       if (values.rememberMe) {
         localStorage.setItem("rememberedUsername", values.username || "");
@@ -108,16 +101,8 @@ export function SigninForm() {
       // ignore storage errors
     }
 
-    //login(values);
-
-    // Bypass API login due to CORS errors as requested by user
-    setCookie(
-      auth.logged_in,
-      state.loggedIn,
-      new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-    );
-
-    router.push(paths.dashboard.root.getHref());
+    const ok = await handleLoginResult(values.username, values.password);
+    if (ok) router.push(paths.dashboard.root.getHref());
   }
 
   useLayoutEffect(() => {
@@ -337,19 +322,20 @@ export function SigninForm() {
             {showQuickAccess && (
               <div className="border-t border-border p-3">
                 <div className="grid grid-cols-2 gap-2">
-                  {QUICK_LOGIN_USERS.map((user) => (
+                  {QUICK_LOGIN_USERS.map((account) => (
                     <button
-                      key={user.id}
+                      key={account.id}
                       type="button"
-                      onClick={() => handleQuickLogin(user)}
-                      className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2 text-left hover:bg-muted/60 hover:border-primary/30 transition-all group"
+                      disabled={isProcessing}
+                      onClick={() => handleQuickLogin(account)}
+                      className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2 text-left hover:bg-muted/60 hover:border-primary/30 transition-all group disabled:opacity-60"
                     >
                       <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0 group-hover:bg-primary/20">
-                        {user.avatarInitials}
+                        {account.avatarInitials}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold truncate">{user.primaryRole}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{user.primaryBranch}</p>
+                        <p className="text-xs font-semibold truncate">{account.role}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{account.email}</p>
                       </div>
                     </button>
                   ))}

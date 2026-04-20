@@ -14,6 +14,13 @@ export interface MenuItem {
   expandTitle?: string;
   badge?: string;
   separator?: boolean;
+  /**
+   * Permission name(s) required to see this item, e.g. "user.manage".
+   * Array = user must hold at least ONE (unless requireAll=true).
+   * Omitted = visible to all authenticated users.
+   */
+  permission?: string | string[];
+  requireAll?: boolean;
 }
 
 export type MenuConfig = MenuItem[];

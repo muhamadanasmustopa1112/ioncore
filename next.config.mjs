@@ -7,20 +7,11 @@ const nextConfig = {
   assetPrefix: process.env.NEXT_PUBLIC_BASE_PATH || "",
 
   async rewrites() {
-    const publicApiUrl = process.env.NEXT_PUBLIC_APP_URL.trim();
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL.trim();
-    const useProxyMode =
-      publicApiUrl === "/api-proxy" ||
-      Boolean(publicApiUrl?.startsWith("/api-proxy/"));
-
-    if (!useProxyMode) {
-      return [];
-    }
+    const publicApiUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
 
     if (!apiBaseUrl) {
-      throw new Error(
-        "Missing NEXT_PUBLIC_API_URL: set NEXT_PUBLIC_API_URL when NEXT_PUBLIC_APP_URL uses /api-proxy"
-      );
+      return [];
     }
 
     const parsed = new URL(apiBaseUrl);
@@ -29,12 +20,31 @@ const nextConfig = {
     }
     const normalizedBaseUrl = parsed.toString().replace(/\/$/, "");
 
-    return [
-      {
+    const ionServices = [
+      "ion-user-service",
+      "ion-branch-service",
+      "ion-order-service",
+      "ion-networking-service",
+      "ion-rule-scheme-service",
+    ];
+
+    const serviceRewrites = ionServices.map((svc) => ({
+      source: `/${svc}/:path*`,
+      destination: `${normalizedBaseUrl}/${svc}/:path*`,
+    }));
+
+    const useProxyMode =
+      publicApiUrl === "/api-proxy" ||
+      Boolean(publicApiUrl?.startsWith("/api-proxy/"));
+
+    if (useProxyMode) {
+      serviceRewrites.push({
         source: "/api-proxy/:path*",
         destination: `${normalizedBaseUrl}/:path*`,
-      },
-    ];
+      });
+    }
+
+    return serviceRewrites;
   },
 };
 

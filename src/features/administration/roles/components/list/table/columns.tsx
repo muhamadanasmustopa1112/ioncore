@@ -1,6 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { RoleData } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
@@ -23,21 +24,7 @@ export const columns: ColumnDef<RoleData>[] = [
       </div>
     ),
     enableSorting: true,
-    size: 200,
-  },
-  {
-    id: "keyPermissions",
-    accessorFn: (row) => row.keyPermissions,
-    header: ({ column }) => (
-      <DataGridColumnHeader title="Key Permissions" column={column} className="text-foreground font-semibold" />
-    ),
-    cell: ({ row }) => (
-      <div className="text-muted-foreground text-sm truncate max-w-[320px]" title={row.original.keyPermissions}>
-        {row.original.keyPermissions}
-      </div>
-    ),
-    enableSorting: false,
-    size: 340,
+    size: 220,
   },
   {
     id: "description",
@@ -46,31 +33,28 @@ export const columns: ColumnDef<RoleData>[] = [
       <DataGridColumnHeader title="Description" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
-      <div className="text-muted-foreground text-sm truncate max-w-[220px]" title={row.original.description}>
-        {row.original.description}
+      <div className="text-muted-foreground text-sm truncate max-w-[360px]" title={row.original.description}>
+        {row.original.description || "—"}
       </div>
     ),
     enableSorting: false,
-    size: 240,
+    size: 380,
   },
   {
-    id: "active",
-    accessorFn: (row) => row.active,
+    id: "createdAt",
+    accessorFn: (row) => row.createdAt,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Status" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Created" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) =>
-      row.original.active ? (
-        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-          Active
-        </span>
-      ) : (
-        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-          Inactive
-        </span>
-      ),
+    cell: ({ row }) => (
+      <span className="text-xs text-muted-foreground">
+        {row.original.createdAt
+          ? format(new Date(row.original.createdAt), "dd MMM yyyy")
+          : "—"}
+      </span>
+    ),
     enableSorting: true,
-    size: 100,
+    size: 140,
   },
   {
     id: "actions",

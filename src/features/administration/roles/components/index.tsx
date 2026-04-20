@@ -14,10 +14,12 @@ import { paths } from "@/config/paths";
 import { RoleList } from "./list/role-list";
 import { useRoleStore } from "../store/role";
 import { RoleDialog } from "./form/role-dialog";
-import { DUMMY_ROLES } from "../data/dummy-roles";
+import { useRoles } from "@/features/user-service/api/roles";
 
 export function RoleListPage() {
   const { openRoleDialog } = useRoleStore();
+  const { data: rolesResp } = useRoles({ per_page: 1 });
+  const totalRoles = rolesResp?.metadata?.total ?? rolesResp?.data?.length ?? 0;
 
   return (
     <div className="relative h-full w-full overflow-hidden px-6 py-3">
@@ -38,7 +40,7 @@ export function RoleListPage() {
           <div className="mt-2.5 flex items-center gap-2.5 text-sm font-medium">
             <Badge variant="info" appearance="light" className="h-6 px-2.5 gap-1.5 border-none font-semibold">
               <RiShieldLine className="size-3.5" />
-              {DUMMY_ROLES.length} Roles
+              {totalRoles} Roles
             </Badge>
             <span className="text-muted-foreground/60">•</span>
             <span className="text-muted-foreground font-normal">

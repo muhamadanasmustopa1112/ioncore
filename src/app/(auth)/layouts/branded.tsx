@@ -64,10 +64,10 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
 
                 {/* Logo and Title - Bottom Left */}
                 <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-white z-20 max-w-[85%] md:max-w-md pr-4">
-                  <h1 className="text-2xl md:text-3xl font-bold">All-in-One Padel Dashboard</h1>
-                  <p className="text-sm md:text-lg opacity-80">
+                  <h1 className="text-2xl md:text-3xl font-bold">ION Network</h1>
+                  {/* <p className="text-sm md:text-lg opacity-80">
                     Track transactions, manage courts, and access key features easily.
-                  </p>
+                  </p> */}
                 </div>
 
                 {/* Slider Dots - Bottom Right */}

@@ -6,6 +6,8 @@ export const auth = {
   refresh_token_expired: "refresh_token_expired",
   logged_in: "logged_in",
   user: "user",
+  session_id: "session_id",
+  active_branch_id: "active_branch_id",
 };
 
 // auth state
@@ -40,6 +42,8 @@ export const services = {
   hr: "/hr-services",
   iam: "/iam-access",
   networking: "/ion-networking-service/api/v1",
+  user: "/ion-user-service/api/v1",
+  userOrigin: "/ion-user-service",
 };
 
 // devices

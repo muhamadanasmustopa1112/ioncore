@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useUsers } from "@/features/user-service/api/users";
+import { mapAuthUserToUserData } from "../../mappers";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -32,12 +34,10 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UserData } from "../../types";
-import { DUMMY_USERS } from "../../data/dummy-users";
 import { columns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 
 export function UserList() {
-  const [data] = useState<UserData[]>(DUMMY_USERS);
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -45,6 +45,15 @@ export function UserList() {
     status: parseAsString,
   });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  const { data: usersResp, isLoading } = useUsers({
+    page: filter.page || 1,
+    per_page: filter.limit || 10,
+  });
+  const data = useMemo<UserData[]>(
+    () => (usersResp?.data || []).map(mapAuthUserToUserData),
+    [usersResp],
+  );
 
   const filteredData = useMemo(() => {
     let result = data;
@@ -91,7 +100,7 @@ export function UserList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={false}
+      isLoading={isLoading}
     >
       <Card className="mt-[10px]">
         <CardHeader>

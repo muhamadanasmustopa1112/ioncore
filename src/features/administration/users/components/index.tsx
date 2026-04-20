@@ -14,10 +14,12 @@ import { paths } from "@/config/paths";
 import { UserList } from "./list/user-list";
 import { useUserStore } from "../store/user";
 import { UserFormSheet } from "./form/user-form-sheet";
-import { DUMMY_USERS } from "../data/dummy-users";
+import { useUsers } from "@/features/user-service/api/users";
 
 export function UserListPage() {
   const { openUserFormSheet } = useUserStore();
+  const { data: usersResp } = useUsers({ per_page: 1 });
+  const totalUsers = usersResp?.metadata?.total ?? usersResp?.data?.length ?? 0;
 
   return (
     <div className="relative h-full w-full overflow-hidden px-6 py-3">
@@ -38,7 +40,7 @@ export function UserListPage() {
           <div className="mt-2.5 flex items-center gap-2.5 text-sm font-medium">
             <Badge variant="info" appearance="light" className="h-6 px-2.5 gap-1.5 border-none font-semibold">
               <RiTeamLine className="size-3.5" />
-              {DUMMY_USERS.length} Users
+              {totalUsers} Users
             </Badge>
             <span className="text-muted-foreground/60">•</span>
             <span className="text-muted-foreground font-normal">
