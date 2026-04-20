@@ -124,7 +124,7 @@ export function StepsBuilder({ steps, isDetail, onChange }: StepsBuilderProps) {
     };
     const next = [...steps, newStep];
     onChange(next);
-    setExpandedIds((prev) => new Set([...prev, newStep.stepId]));
+    setExpandedIds((prev) => new Set(Array.from(prev).concat(newStep.stepId)));
   };
 
   const updateStep = (idx: number, s: Step) => {
