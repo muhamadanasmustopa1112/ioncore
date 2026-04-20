@@ -142,13 +142,6 @@ export function SigninForm() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="block w-full space-y-4 px-[20px]"
         >
-          <img
-            src={toAbsoluteUrl(
-              `/media/app/logo-wit-dark.png`,
-            )}
-            className="h-10 mx-auto"
-            alt="WIT. Logo"
-          />
           {/* <Alert size="sm" close={false}>
             <AlertIcon>
               <RiErrorWarningFill className="text-primary" />
@@ -344,11 +337,11 @@ export function SigninForm() {
             )}
           </div>
 
-          <div className="pt-4 md:pt-6 mb-2">
+          {/* <div className="pt-4 md:pt-6 mb-2">
             <p className="text-center text-xs text-gray-500">
               © {new Date().getFullYear()} WIT. All rights reserved.
             </p>
-          </div>
+          </div> */}
         </form>
       </Form>
 

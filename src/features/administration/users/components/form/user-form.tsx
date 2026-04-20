@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   RiInformationLine,
   RiOrganizationChart,
@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { useUserStore } from "../../store/user";
 import { useRoles } from "@/features/user-service/api/roles";
 import { useBranches } from "@/features/user-service/api/branches";
-import { useCreateUser } from "@/features/user-service/api/users";
+import { useCreateUser, useUpdateUser } from "@/features/user-service/api/users";
 
 function PwRule({ ok, label }: { ok: boolean; label: string }) {
   return (
@@ -47,7 +47,7 @@ interface RoleAssignmentRow {
 }
 
 export function UserForm() {
-  const { form, closeUserFormSheet } = useUserStore();
+  const { form, selectedUser, closeUserFormSheet } = useUserStore();
   const isNewMode = form === "new";
   const isDetailMode = form === "details";
 
@@ -67,6 +67,35 @@ export function UserForm() {
     { id: "row-1", roleId: "", branchId: "" },
   ]);
 
+  useEffect(() => {
+    if (selectedUser) {
+      setFullName(selectedUser.fullName);
+      setEmail(selectedUser.email);
+      setPhone(selectedUser.phone ?? "");
+      setDepartment(selectedUser.department ?? "");
+      setPosition(selectedUser.position ?? "");
+      setHomeBranchId(selectedUser.homeBranchId ?? "");
+      setRoleRows(
+        selectedUser.roleAssignments.length > 0
+          ? selectedUser.roleAssignments.map((r, i) => ({
+              id: `row-${i}`,
+              roleId: r.roleId,
+              branchId: r.branchId,
+            }))
+          : [{ id: "row-0", roleId: "", branchId: "" }],
+      );
+    } else {
+      setFullName("");
+      setEmail("");
+      setPhone("");
+      setDepartment("");
+      setPosition("");
+      setHomeBranchId("");
+      setPassword("");
+      setRoleRows([{ id: "row-1", roleId: "", branchId: "" }]);
+    }
+  }, [selectedUser]);
+
   const addRoleRow = () => {
     setRoleRows([...roleRows, { id: `row-${Date.now()}`, roleId: "", branchId: "" }]);
   };
@@ -78,7 +107,9 @@ export function UserForm() {
     setRoleRows(roleRows.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
   };
 
-  const { mutate: createUser, isPending } = useCreateUser();
+  const { mutate: createUser, isPending: isCreating } = useCreateUser();
+  const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
+  const isPending = isCreating || isUpdating;
 
   const pwRules = {
     length: password.length >= 8,
@@ -88,10 +119,34 @@ export function UserForm() {
   const pwValid = pwRules.length && pwRules.uppercase && pwRules.special;
 
   const handleSave = () => {
-    if (!isNewMode) {
-      closeUserFormSheet();
+    if (isDetailMode) { closeUserFormSheet(); return; }
+
+    if (!isNewMode && selectedUser) {
+      updateUser(
+        {
+          id: selectedUser.id,
+          payload: {
+            name: fullName.trim(),
+            email: email.trim(),
+            phone: phone.trim() || undefined,
+            job_title: position.trim() || undefined,
+            unit_kerja: department.trim() || undefined,
+            home_branch_id: homeBranchId || undefined,
+          },
+        },
+        {
+          onSuccess: () => { toast.success("User updated"); closeUserFormSheet(); },
+          onError: (err: unknown) => {
+            toast.error(
+              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+              "Failed to update user",
+            );
+          },
+        },
+      );
       return;
     }
+
     if (!fullName.trim() || !email.trim() || !password.trim()) {
       toast.error("Name, email, and password are required");
       return;

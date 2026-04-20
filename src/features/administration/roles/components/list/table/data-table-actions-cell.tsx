@@ -22,11 +22,11 @@ export function ActionsCell({ row }: { row: Row<RoleData> }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="end">
-        <DropdownMenuItem className="cursor-pointer" onClick={() => openRoleDialog("edit")}>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => openRoleDialog("edit", row.original)}>
           <RiEditLine />
           Edit
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer" onClick={() => openRoleDialog("details")}>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => openRoleDialog("details", row.original)}>
           <RiEyeLine />
           Detail
         </DropdownMenuItem>

@@ -23,11 +23,11 @@ export function ActionsCell({ row }: { row: Row<UserData> }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent side="bottom" align="end">
-        <DropdownMenuItem className="cursor-pointer" onClick={() => openUserFormSheet("edit")}>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => openUserFormSheet("edit", row.original)}>
           <RiEditLine />
           Edit
         </DropdownMenuItem>
-        <DropdownMenuItem className="cursor-pointer" onClick={() => openUserFormSheet("details")}>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => openUserFormSheet("details", row.original)}>
           <RiEyeLine />
           Detail
         </DropdownMenuItem>

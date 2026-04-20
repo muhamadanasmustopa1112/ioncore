@@ -1,10 +1,11 @@
 import { create } from "zustand";
-import { UserFormMode } from "../types";
+import { UserData, UserFormMode } from "../types";
 
 interface UserState {
   form: UserFormMode;
   userSheetOpen: boolean;
-  openUserFormSheet: (form: UserFormMode) => void;
+  selectedUser: UserData | null;
+  openUserFormSheet: (form: UserFormMode, user?: UserData) => void;
   closeUserFormSheet: () => void;
   setForm: (form: UserFormMode) => void;
   setUserFormSheetOpen: (open: boolean) => void;
@@ -13,10 +14,13 @@ interface UserState {
 const useUserStore = create<UserState>((set) => ({
   form: "new",
   userSheetOpen: false,
-  setForm: (form) => set((state) => ({ ...state, form })),
-  setUserFormSheetOpen: (open) => set((state) => ({ ...state, userSheetOpen: open })),
-  openUserFormSheet: (form) => set((state) => ({ ...state, userSheetOpen: true, form })),
-  closeUserFormSheet: () => set((state) => ({ ...state, userSheetOpen: false, form: null })),
+  selectedUser: null,
+  setForm: (form) => set((s) => ({ ...s, form })),
+  setUserFormSheetOpen: (open) => set((s) => ({ ...s, userSheetOpen: open })),
+  openUserFormSheet: (form, user) =>
+    set((s) => ({ ...s, userSheetOpen: true, form, selectedUser: user ?? null })),
+  closeUserFormSheet: () =>
+    set((s) => ({ ...s, userSheetOpen: false, form: null, selectedUser: null })),
 }));
 
 export { useUserStore };
