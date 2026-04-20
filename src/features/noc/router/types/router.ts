@@ -44,3 +44,5 @@ export type RouterParams = {
   length?: number;
   search?: string;
 };
+
+export type RouterData = RouterItem;
