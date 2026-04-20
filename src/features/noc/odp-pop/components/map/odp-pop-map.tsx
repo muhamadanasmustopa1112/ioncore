@@ -12,6 +12,7 @@ import { useTheme } from "next-themes";
 // Modular Components
 import { PopMarkers } from "./pop-markers";
 import { OdpMarkers } from "./odp-markers";
+import { TopologyPaths } from "./topology-paths";
 import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
 import { DUMMY_OLT_DETAILS } from "../../data/dummy-olt-details";
 import { DUMMY_ODP_LIST } from "../../data/dummy-odp-list";
@@ -155,6 +156,11 @@ export default function OdpPopMap({
           />
 
           {/* Composed Data Layers */}
+          <TopologyPaths
+            selectedArea={selectedArea}
+            selectedPopId={selectedPopId}
+          />
+
           <PopMarkers
             data={filteredPops}
             markerRefs={markerRefs}
