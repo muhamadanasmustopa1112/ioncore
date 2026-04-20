@@ -29,13 +29,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { BandwidthData } from "../../types";
-import { DUMMY_BANDWIDTH } from "../../data/dummy-bandwidth";
-import { columns } from "./table/columns";
+import { useBandwidths } from "../../api/get-bandwidth";
+import { columns as columnsDef } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
+import { BandwidthItem } from "../../types";
 
 export function BandwidthList() {
-  const [data] = useState<BandwidthData[]>(DUMMY_BANDWIDTH);
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -45,12 +44,33 @@ export function BandwidthList() {
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  // 1. Memoize Columns
+  const columns = useMemo(() => columnsDef, []);
+
+  // 2. Memoize Request Params
+  const params = useMemo(() => ({
+    page: filter.page,
+    limit: filter.limit,
+    search: filter.search || "",
+  }), [filter]);
+
+  // 3. Fetch Data with TanStack Query
+  const { data: bandwidthData, isLoading, isFetching } = useBandwidths({ params });
+
+  // 4. Memoize Data and Metadata
+  const data = useMemo(() => bandwidthData?.data ?? [], [bandwidthData]);
+  const metadata = useMemo(() => bandwidthData?.metadata, [bandwidthData]);
+
   const table = useReactTable({
     columns,
     data,
-    pageCount: Math.ceil(data.length / (filter.limit || 10)),
-    getRowId: (row) => row.id,
+    pageCount: metadata?.total_page ?? 0,
+    getRowId: (row: BandwidthItem) => String(row.id),
     state: {
+      pagination: {
+        pageIndex: filter.page - 1,
+        pageSize: filter.limit,
+      },
       rowSelection,
     },
     enableRowSelection: true,
@@ -59,12 +79,13 @@ export function BandwidthList() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
   });
 
   return (
     <DataGrid
       table={table}
-      recordCount={data.length}
+      recordCount={metadata?.total_data || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -72,7 +93,7 @@ export function BandwidthList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={false}
+      isLoading={isLoading || isFetching}
     >
       <Card className="mt-[10px]">
         <CardHeader className="">

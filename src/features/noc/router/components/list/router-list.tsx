@@ -11,7 +11,6 @@ import {
 } from "@tanstack/react-table";
 import { Filter, Search, X } from "lucide-react";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,13 +29,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { RouterData } from "../../types";
-import { DUMMY_ROUTERS } from "../../data/dummy-routers";
-import { columns } from "./table/columns";
+import { useRouters } from "../../api/get-routers";
+import { columns as columnsDef } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
+import { RouterItem } from "../../types";
 
 export function RouterList() {
-  const [data] = useState<RouterData[]>(DUMMY_ROUTERS);
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -46,12 +44,34 @@ export function RouterList() {
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  // 1. Memoize Columns
+  const columns = useMemo(() => columnsDef, []);
+
+  // 2. Memoize Request Params
+  const params = useMemo(() => ({
+    draw: 1,
+    start: (filter.page - 1) * filter.limit,
+    length: filter.limit,
+    search: filter.search || "",
+  }), [filter]);
+
+  // 3. Fetch Data with TanStack Query
+  const { data: routerData, isLoading, isFetching } = useRouters({ params });
+
+  // 4. Memoize Data and Metadata
+  const data = useMemo(() => routerData?.data ?? [], [routerData]);
+  const metadata = useMemo(() => routerData?.metadata, [routerData]);
+
   const table = useReactTable({
     columns,
     data,
-    pageCount: Math.ceil(data.length / (filter.limit || 10)),
-    getRowId: (row) => row.id,
+    pageCount: metadata?.total_page ?? 0,
+    getRowId: (row: RouterItem) => String(row.id),
     state: {
+      pagination: {
+        pageIndex: filter.page - 1,
+        pageSize: filter.limit,
+      },
       rowSelection,
     },
     enableRowSelection: true,
@@ -60,12 +80,13 @@ export function RouterList() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
   });
 
   return (
     <DataGrid
       table={table}
-      recordCount={data.length}
+      recordCount={metadata?.total_data || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -73,7 +94,7 @@ export function RouterList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={false}
+      isLoading={isLoading || isFetching}
     >
       <Card className="mt-[10px]">
         <CardHeader className="">

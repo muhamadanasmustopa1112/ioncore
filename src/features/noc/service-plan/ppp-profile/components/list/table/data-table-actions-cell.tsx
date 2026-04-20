@@ -8,11 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PPPProfileData } from "../../../types";
+import { PPPProfileItem } from "../../../types";
 import { usePPPProfileStore } from "../../../store/ppp-profile";
 
 
-export function ActionsCell({ row }: { row: Row<PPPProfileData> }) {
+export function ActionsCell({ row }: { row: Row<PPPProfileItem> }) {
 
   const { openPPPProfileFormSheet } = usePPPProfileStore();
 

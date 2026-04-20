@@ -1,127 +1,135 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
-import { ProfileGroupData } from "../../../types";
+import { ProfileGroupItem } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
 
-export const columns: ColumnDef<ProfileGroupData>[] = [
+export const columns: ColumnDef<ProfileGroupItem>[] = [
   {
-    accessorKey: "groupName",
+    id: "name",
+    accessorFn: (row) => row.name,
     header: ({ column }) => (
       <DataGridColumnHeader title="Group Name" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
+    cell: ({ row }) => (
       <div className="font-medium text-foreground">
-        {getValue() as string}
+        {row.original.name}
       </div>
     ),
     enableSorting: true,
     size: 200,
   },
   {
-    accessorKey: "type",
+    id: "profile_type",
+    accessorFn: (row) => row.profile_type,
     header: ({ column }) => (
       <DataGridColumnHeader title="Type" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
+    cell: ({ row }) => (
       <div className="font-medium">
-        {getValue() as string}
+        {row.original.profile_type}
       </div>
     ),
     enableSorting: true,
     size: 120,
   },
   {
-    accessorKey: "parentPool",
+    id: "parent_pool",
+    accessorFn: (row) => row.parent_pool,
     header: ({ column }) => (
       <DataGridColumnHeader title="Parent Pool" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
+    cell: ({ row }) => (
       <div className="text-muted-foreground">
-        {getValue() as string}
+        {row.original.parent_pool}
       </div>
     ),
     enableSorting: true,
     size: 150,
   },
   {
-    accessorKey: "module",
+    id: "module",
+    accessorFn: (row) => row.module,
     header: ({ column }) => (
       <DataGridColumnHeader title="Module" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
+    cell: ({ row }) => (
       <div className="text-muted-foreground">
-        {getValue() as string}
+        {row.original.module}
       </div>
     ),
     enableSorting: true,
     size: 150,
   },
   {
-    accessorKey: "localAddress",
+    id: "local_address",
+    accessorFn: (row) => row.local_address,
     header: ({ column }) => (
       <DataGridColumnHeader title="Local Address" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
+    cell: ({ row }) => (
       <div className="font-mono">
-        {getValue() as string}
+        {row.original.local_address}
       </div>
     ),
     enableSorting: true,
     size: 150,
   },
   {
-    accessorKey: "firstAddress",
+    id: "first_address",
+    accessorFn: (row) => row.first_address,
     header: ({ column }) => (
       <DataGridColumnHeader title="First Address" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
+    cell: ({ row }) => (
       <div className="font-mono text-primary">
-        {getValue() as string}
+        {row.original.first_address}
       </div>
     ),
     enableSorting: true,
     size: 150,
   },
   {
-    accessorKey: "lastAddress",
+    id: "last_address",
+    accessorFn: (row) => row.last_address,
     header: ({ column }) => (
       <DataGridColumnHeader title="Last Address" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
+    cell: ({ row }) => (
       <div className="font-mono text-tertiary">
-        {getValue() as string}
+        {row.original.last_address}
       </div>
     ),
     enableSorting: true,
     size: 150,
   },
   {
-    accessorKey: "routersNas",
+    id: "router_nas",
+    accessorFn: (row) => row.router_nas,
     header: ({ column }) => (
       <DataGridColumnHeader title="Routers [ NAS ]" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
+    cell: ({ row }) => (
       <div className="text-muted-foreground">
-        {getValue() as string}
+        {row.original.router_nas}
       </div>
     ),
     enableSorting: true,
     size: 180,
   },
   {
-    accessorKey: "dataOwner",
+    id: "data_owner",
+    accessorFn: (row) => row.data_owner,
     header: ({ column }) => (
       <DataGridColumnHeader title="Data Owner" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row, getValue }) => (
+    cell: ({ row }) => (
       <div className="flex items-center gap-2">
         <div className="size-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground">
-          {(getValue() as string).substring(0, 2).toUpperCase()}
+          {row.original.data_owner?.substring(0, 2).toUpperCase() || "??"}
         </div>
-        <span>{getValue() as string}</span>
+        <span>{row.original.data_owner}</span>
       </div>
     ),
     enableSorting: true,
@@ -132,11 +140,8 @@ export const columns: ColumnDef<ProfileGroupData>[] = [
     header: ({ column }) => (
       <DataGridColumnHeader title="Actions" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => <ActionsCell row={row} />,
+    cell: ({ row }) => <ActionsCell row={row as any} />,
     enableSorting: false,
     size: 75,
   },
 ];
-
-
-

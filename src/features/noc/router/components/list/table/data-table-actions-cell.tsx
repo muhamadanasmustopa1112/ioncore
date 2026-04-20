@@ -8,11 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { RouterData } from "../../../types";
+import { RouterItem } from "../../../types";
 import { useRouterStore } from "../../../store/router";
 
 
-export function ActionsCell({ row }: { row: Row<RouterData> }) {
+export function ActionsCell({ row }: { row: Row<RouterItem> }) {
 
   const { openRouterFormSheet } = useRouterStore();
 

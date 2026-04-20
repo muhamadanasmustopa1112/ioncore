@@ -8,11 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BandwidthData } from "../../../types";
+import { BandwidthItem } from "../../../types";
 import { useBandwidthStore } from "../../../store/bandwidth";
 
 
-export function ActionsCell({ row }: { row: Row<BandwidthData> }) {
+export function ActionsCell({ row }: { row: Row<BandwidthItem> }) {
 
   const { openBandwidthFormSheet } = useBandwidthStore();
 

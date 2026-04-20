@@ -39,6 +39,7 @@ export const services = {
   auth: "/authorization",
   hr: "/hr-services",
   iam: "/iam-access",
+  networking: "/ion-networking-service/api/v1",
 };
 
 // devices

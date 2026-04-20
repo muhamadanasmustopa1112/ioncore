@@ -73,10 +73,6 @@ export function OdpMarkers({ selectedArea, selectedPopId, markerRefs }: OdpMarke
                   <span className="text-muted-foreground font-bold uppercase text-[8px]">PON Port:</span>
                   <span className="font-black">{odp.ponPort}</span>
                 </div>
-                <div className="flex justify-between border-b border-border/30 pb-1">
-                  <span className="text-muted-foreground font-bold uppercase text-[8px]">Signal:</span>
-                  <span className="font-black text-violet-600">{odp.signalLevel} dBm</span>
-                </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground font-bold uppercase text-[8px]">Capacity:</span>
                   <span className="font-black">{odp.portsUsed}/{odp.totalPorts} Ports</span>

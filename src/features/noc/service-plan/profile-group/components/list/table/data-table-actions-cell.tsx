@@ -8,11 +8,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ProfileGroupData } from "../../../types";
+import { ProfileGroupItem } from "../../../types";
 import { useProfileGroupStore } from "../../../store/profile-group";
 
 
-export function ActionsCell({ row }: { row: Row<ProfileGroupData> }) {
+export function ActionsCell({ row }: { row: Row<ProfileGroupItem> }) {
 
   const { openProfileGroupFormSheet } = useProfileGroupStore();
 
