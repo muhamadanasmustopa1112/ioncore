@@ -11,6 +11,10 @@ export const paths = {
         `/signin${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`,
     },
   },
+  profile: {
+    path: "/profile",
+    getHref: () => "/profile",
+  },
   dashboard: {
     root: {
       path: "/dashboard",

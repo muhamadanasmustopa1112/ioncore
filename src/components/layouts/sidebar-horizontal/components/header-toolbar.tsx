@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Bell,
   BellDot,
@@ -166,9 +167,11 @@ export function HeaderToolbar() {
             </DropdownMenuSubContent>
           </DropdownMenuSub>
 
-          <DropdownMenuItem>
-            <User />
-            <span>Profile</span>
+          <DropdownMenuItem asChild>
+            <Link href={paths.profile.getHref()} className="flex items-center gap-2 w-full">
+              <User />
+              <span>Profile</span>
+            </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem>

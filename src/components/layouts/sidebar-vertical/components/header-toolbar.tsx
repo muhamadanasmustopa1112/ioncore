@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Bell,
@@ -20,6 +21,7 @@ import { useAuthStore } from "@/store/auth-store";
 import {
   useLogout,
   useMyProfile,
+  useSetActiveBranch,
 } from "@/features/user-service/api/auth";
 import {
   Avatar,
@@ -47,6 +49,7 @@ export function HeaderToolbar() {
   const router = useRouter();
 
   const { user, rawUser, setProfile, logout: clearAuth } = useAuthStore();
+  const { mutate: setActiveBranch } = useSetActiveBranch();
 
   const shouldFetchProfile = !user;
   const { data: meResponse } = useMyProfile(shouldFetchProfile);
@@ -117,7 +120,11 @@ export function HeaderToolbar() {
             <DropdownMenuContent align="end" className="w-64">
               {rawUser?.branches?.length ? (
                 rawUser.branches.map((b) => (
-                  <DropdownMenuItem key={b.id} className={b.id === rawUser.active_branch_id ? "font-semibold" : ""}>
+                  <DropdownMenuItem
+                    key={b.id}
+                    className={b.id === rawUser.active_branch_id ? "font-semibold" : ""}
+                    onClick={() => setActiveBranch({ branch_id: b.id })}
+                  >
                     {b.name || b.code || b.id}
                   </DropdownMenuItem>
                 ))
@@ -201,9 +208,11 @@ export function HeaderToolbar() {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem className="py-2.5">
-              <User className="size-4 opacity-70" />
-              <span className="font-medium">My Profile</span>
+            <DropdownMenuItem asChild className="py-2.5">
+              <Link href="/profile" className="flex items-center gap-2 w-full">
+                <User className="size-4 opacity-70" />
+                <span className="font-medium">My Profile</span>
+              </Link>
             </DropdownMenuItem>
 
             <DropdownMenuItem className="py-2.5">

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, ArrowLeft, Check, LoaderCircleIcon } from "lucide-react";
@@ -18,150 +18,97 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { toAbsoluteUrl } from "@/lib/helpers";
+import { useForgotPassword } from "@/features/user-service/api/auth";
 
-export function ResetPasswordForm() {
-  const [error, setError] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [showRecaptcha, setShowRecaptcha] = useState(false);
+const formSchema = z.object({
+  email: z.string().email({ message: "Please enter a valid email address." }),
+});
 
-  const formSchema = z.object({
-    email: z.string().email({ message: "Please enter a valid email address." }),
-  });
-
+function ResetPasswordFormInner() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-    },
+    defaultValues: { email: "" },
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const result = await form.trigger();
-    if (!result) return;
+  const { mutate: forgotPassword, isPending, isSuccess, error } = useForgotPassword();
+  const apiError =
+    (error as { response?: { data?: { message?: string } } } | null)?.response?.data?.message ||
+    (error ? "Something went wrong. Please try again." : null);
 
-    setShowRecaptcha(true);
-  };
-
-  const handleVerifiedSubmit = async (token: string) => {
-    try {
-      const values = form.getValues();
-
-      setIsProcessing(true);
-      setError(null);
-      setSuccess(null);
-      setShowRecaptcha(false);
-
-      // const response = await apiFetch('/api/auth/reset-password', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'x-recaptcha-token': token,
-      //   },
-      //   body: JSON.stringify(values),
-      // });
-
-      // const data = await response.json();
-
-      // if (!response.ok) {
-      //   setError(data.message);
-      //   return;
-      // }
-
-      // setSuccess(data.message);
-      // form.reset();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "An unexpected error occurred. Please try again.",
-      );
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  const handleSubmit = form.handleSubmit((values) => {
+    forgotPassword({ email: values.email });
+  });
 
   return (
+    <Form {...form}>
+      <form onSubmit={handleSubmit} className="block w-full space-y-5">
+        <img
+          src={toAbsoluteUrl("/media/app/logo-wit-dark.png")}
+          className="h-10 mx-auto mt-4"
+          alt="WIT. Logo"
+        />
+
+        <div className="space-y-1 pb-3 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">Reset Password</h1>
+          <p className="text-muted-foreground text-sm">
+            Enter your email to receive a password reset link.
+          </p>
+        </div>
+
+        {apiError && (
+          <Alert variant="destructive">
+            <AlertIcon><AlertCircle /></AlertIcon>
+            <AlertTitle>{apiError}</AlertTitle>
+          </Alert>
+        )}
+
+        {isSuccess && (
+          <Alert>
+            <AlertIcon><Check /></AlertIcon>
+            <AlertTitle>
+              Reset link sent! Check your email inbox.
+            </AlertTitle>
+          </Alert>
+        )}
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  type="email"
+                  placeholder="Enter your email address"
+                  disabled={isSuccess || isPending}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" disabled={isSuccess || isPending} className="w-full">
+          {isPending && <LoaderCircleIcon className="animate-spin" />}
+          {isSuccess ? "Email Sent" : "Send Reset Link"}
+        </Button>
+
+        <Button type="button" variant="outline" className="w-full" asChild>
+          <Link href="/signin">
+            <ArrowLeft className="size-3.5" /> Back to Sign In
+          </Link>
+        </Button>
+      </form>
+    </Form>
+  );
+}
+
+export function ResetPasswordForm() {
+  return (
     <Suspense>
-      <Form {...form}>
-      
-
-        <form onSubmit={handleSubmit} className="block w-full space-y-5">
-          <img
-            src={toAbsoluteUrl(
-              `/media/app/logo-wit-dark.png`,
-            )}
-            className="h-10 mx-auto mt-4"
-            alt="WIT. Logo"
-          />
-
-          <div className="space-y-1 pb-3 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Reset Password
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Enter your email to receive a password reset link.
-            </p>
-          </div>
-
-          {error && (
-            <Alert variant="destructive" onClose={() => setError(null)}>
-              <AlertIcon>
-                <AlertCircle />
-              </AlertIcon>
-              <AlertTitle>{error}</AlertTitle>
-            </Alert>
-          )}
-
-          {success && (
-            <Alert onClose={() => setSuccess(null)}>
-              <AlertIcon>
-                <Check />
-              </AlertIcon>
-              <AlertTitle>{success}</AlertTitle>
-            </Alert>
-          )}
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="Enter your email address"
-                    disabled={!!success || isProcessing}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button
-            type="submit"
-            disabled={!!success || isProcessing}
-            className="w-full"
-          >
-            {isProcessing ? (
-              <LoaderCircleIcon className="animate-spin" />
-            ) : null}
-            Submit
-          </Button>
-
-          <div className="space-y-3">
-            <Button type="button" variant="outline" className="w-full" asChild>
-              <Link href="/signin">
-                <ArrowLeft className="size-3.5" /> Back
-              </Link>
-            </Button>
-          </div>
-        </form>
-      </Form>
+      <ResetPasswordFormInner />
     </Suspense>
   );
 }
