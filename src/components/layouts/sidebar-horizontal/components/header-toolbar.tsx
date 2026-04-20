@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useUsers } from "@/features/auth/api";
 import {
   Bell,
   BellDot,
@@ -21,9 +20,11 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { auth } from "@/config/constants";
 import { paths } from "@/config/paths";
-import { useLogout, useUser } from "@/lib/auth";
-import { clearAllCookies } from "@/lib/cookies";
+import { useAuthStore } from "@/store/auth-store";
+import { useLogout, useMyProfile } from "@/features/user-service/api/auth";
+import { clearAllCookies, getCookie } from "@/lib/cookies";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import {
   Avatar,
@@ -50,27 +51,34 @@ export function HeaderToolbar() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
 
-  const { data: userData } = useUsers();
+  const { user, rawUser, setProfile, logout: clearAuth } = useAuthStore();
 
-  const { mutate: logout, isPending } = useLogout({
-    onSuccess: () => {
-      handleLogout();
-    },
-    onError: () => {
-      handleLogout();
-    },
-  });
+  const { data: meResponse } = useMyProfile(!user);
 
-  const handleLogout = () => {
-    clearAllCookies();
-    router.push(paths.auth.signin.getHref());
+  useEffect(() => {
+    if (meResponse?.data && !rawUser) {
+      setProfile(meResponse.data);
+    }
+  }, [meResponse, rawUser, setProfile]);
+
+  const { mutate: logoutApi, isPending } = useLogout();
+
+  const logout = () => {
+    const refreshToken = getCookie(auth.refresh_token) || "";
+    const finish = () => {
+      clearAuth();
+      clearAllCookies();
+      router.push(paths.auth.signin.getHref());
+    };
+    logoutApi(
+      { refresh_token: refreshToken },
+      { onSuccess: finish, onError: finish },
+    );
   };
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
-
-  const user = useMemo(() => userData?.response?.data, [userData]);
 
   return (
     <nav className="flex items-center gap-2.5">
@@ -129,7 +137,7 @@ export function HeaderToolbar() {
             </Avatar>
             <div className="flex flex-col">
               <span className="text-foreground text-sm font-semibold">
-                {user?.username}
+                {user?.fullName || "—"}
               </span>
               <span className="text-muted-foreground text-xs">Online</span>
             </div>

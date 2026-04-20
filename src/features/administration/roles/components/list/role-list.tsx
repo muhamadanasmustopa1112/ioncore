@@ -24,19 +24,28 @@ import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useRoles } from "@/features/user-service/api/roles";
 import { RoleData } from "../../types";
-import { DUMMY_ROLES } from "../../data/dummy-roles";
+import { mapRoleToRoleData } from "../../mappers";
 import { columns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 
 export function RoleList() {
-  const [data] = useState<RoleData[]>(DUMMY_ROLES);
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
     search: parseAsString,
   });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  const { data: rolesResp, isLoading } = useRoles({
+    page: filter.page || 1,
+    per_page: filter.limit || 10,
+  });
+  const data = useMemo<RoleData[]>(
+    () => (rolesResp?.data || []).map(mapRoleToRoleData),
+    [rolesResp],
+  );
 
   const filteredData = useMemo(() => {
     if (!filter.search) return data;
@@ -73,7 +82,7 @@ export function RoleList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={false}
+      isLoading={isLoading}
     >
       <Card className="mt-[10px]">
         <CardHeader>

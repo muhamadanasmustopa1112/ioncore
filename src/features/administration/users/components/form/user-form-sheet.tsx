@@ -1,9 +1,7 @@
-import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetBody,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -13,7 +11,6 @@ import { UserForm } from "./user-form";
 export function UserFormSheet() {
   const { userSheetOpen, closeUserFormSheet, form } = useUserStore();
   const isNewMode = form === "new";
-  const isDetailMode = form === "details";
 
   return (
     <Sheet open={userSheetOpen} onOpenChange={(open) => !open && closeUserFormSheet()}>
@@ -26,23 +23,6 @@ export function UserFormSheet() {
         <SheetBody className="flex-1 p-0 overflow-hidden">
           <UserForm />
         </SheetBody>
-        <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
-          <Button variant="ghost" onClick={closeUserFormSheet}>
-            Close
-          </Button>
-          <div className="flex-1" />
-          <Button variant="outline" onClick={closeUserFormSheet} className="mr-3">
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={closeUserFormSheet}
-            disabled={isDetailMode}
-            className="font-semibold"
-          >
-            {isNewMode ? "Create User" : "Save Changes"}
-          </Button>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { UserData } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
@@ -31,21 +30,7 @@ export const columns: ColumnDef<UserData>[] = [
       </div>
     ),
     enableSorting: true,
-    size: 240,
-  },
-  {
-    id: "employeeId",
-    accessorFn: (row) => row.employeeId,
-    header: ({ column }) => (
-      <DataGridColumnHeader title="Employee ID" column={column} className="text-foreground font-semibold" />
-    ),
-    cell: ({ row }) => (
-      <span className="font-mono text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded">
-        {row.original.employeeId}
-      </span>
-    ),
-    enableSorting: true,
-    size: 120,
+    size: 260,
   },
   {
     id: "phone",
@@ -54,46 +39,58 @@ export const columns: ColumnDef<UserData>[] = [
       <DataGridColumnHeader title="Phone" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
-      <span className="text-sm text-muted-foreground">{row.original.phone}</span>
+      <span className="text-sm text-muted-foreground">{row.original.phone || "—"}</span>
     ),
     enableSorting: false,
     size: 160,
   },
   {
+    id: "position",
+    accessorFn: (row) => row.position,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Job Title" column={column} className="text-foreground font-semibold" />
+    ),
+    cell: ({ row }) => (
+      <span className="text-sm text-foreground">{row.original.position || "—"}</span>
+    ),
+    enableSorting: true,
+    size: 160,
+  },
+  {
+    id: "homeBranch",
+    accessorFn: (row) => row.homeBranchName,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Home Branch" column={column} className="text-foreground font-semibold" />
+    ),
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">{row.original.homeBranchName || "—"}</span>
+    ),
+    enableSorting: true,
+    size: 180,
+  },
+  {
     id: "roleAssignments",
     accessorFn: (row) => row.roleAssignments.map((r) => r.roleName).join(", "),
     header: ({ column }) => (
-      <DataGridColumnHeader title="Role @ Branch" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Roles" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="flex flex-wrap gap-1">
+        {row.original.roleAssignments.length === 0 && (
+          <span className="text-xs text-muted-foreground">—</span>
+        )}
         {row.original.roleAssignments.map((assignment) => (
           <span
             key={assignment.id}
             className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 whitespace-nowrap"
           >
-            {assignment.roleName} @ {assignment.branchName}
+            {assignment.roleName}
           </span>
         ))}
       </div>
     ),
     enableSorting: false,
-    size: 280,
-  },
-  {
-    id: "department",
-    accessorFn: (row) => row.department,
-    header: ({ column }) => (
-      <DataGridColumnHeader title="Dept / Position" column={column} className="text-foreground font-semibold" />
-    ),
-    cell: ({ row }) => (
-      <div>
-        <p className="text-sm font-medium text-foreground">{row.original.department}</p>
-        <p className="text-[11px] text-muted-foreground">{row.original.position}</p>
-      </div>
-    ),
-    enableSorting: true,
-    size: 180,
+    size: 240,
   },
   {
     id: "status",
@@ -107,22 +104,6 @@ export const columns: ColumnDef<UserData>[] = [
     },
     enableSorting: true,
     size: 100,
-  },
-  {
-    id: "lastLoginAt",
-    accessorFn: (row) => row.lastLoginAt,
-    header: ({ column }) => (
-      <DataGridColumnHeader title="Last Login" column={column} className="text-foreground font-semibold" />
-    ),
-    cell: ({ row }) => (
-      <span className="text-xs text-muted-foreground">
-        {row.original.lastLoginAt
-          ? format(new Date(row.original.lastLoginAt), "dd MMM yyyy, HH:mm")
-          : "—"}
-      </span>
-    ),
-    enableSorting: true,
-    size: 160,
   },
   {
     id: "actions",

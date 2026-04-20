@@ -1,12 +1,10 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useUsers } from "@/features/auth/api";
 import {
   Bell,
   ChevronDown,
   Loader2,
   LogOut,
-  MessageSquareDot,
   Moon,
   Search,
   Settings,
@@ -14,10 +12,15 @@ import {
   User,
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { auth } from "@/config/constants";
 import { paths } from "@/config/paths";
-import { useLogout } from "@/lib/auth";
-import { clearAllCookies } from "@/lib/cookies";
+import { clearAllCookies, getCookie } from "@/lib/cookies";
 import { toAbsoluteUrl } from "@/lib/helpers";
+import { useAuthStore } from "@/store/auth-store";
+import {
+  useLogout,
+  useMyProfile,
+} from "@/features/user-service/api/auth";
 import {
   Avatar,
   AvatarFallback,
@@ -43,20 +46,30 @@ export function HeaderToolbar() {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
 
-  const { data: userData } = useUsers();
+  const { user, rawUser, setProfile, logout: clearAuth } = useAuthStore();
 
-  const { mutate: logout, isPending } = useLogout({
-    onSuccess: () => {
-      handleLogout();
-    },
-    onError: () => {
-      handleLogout();
-    },
-  });
+  const shouldFetchProfile = !user;
+  const { data: meResponse } = useMyProfile(shouldFetchProfile);
+
+  useEffect(() => {
+    if (meResponse?.data && !rawUser) {
+      setProfile(meResponse.data);
+    }
+  }, [meResponse, rawUser, setProfile]);
+
+  const { mutate: logoutApi, isPending } = useLogout();
 
   const handleLogout = () => {
-    clearAllCookies();
-    router.push(paths.auth.signin.getHref());
+    const refreshToken = getCookie(auth.refresh_token) || "";
+    const finish = () => {
+      clearAuth();
+      clearAllCookies();
+      router.push(paths.auth.signin.getHref());
+    };
+    logoutApi(
+      { refresh_token: refreshToken },
+      { onSuccess: finish, onError: finish },
+    );
   };
 
   const handleInputChange = () => { };
@@ -65,7 +78,13 @@ export function HeaderToolbar() {
     setTheme(theme === "light" ? "dark" : "light");
   };
 
-  const user = useMemo(() => userData?.response?.data, [userData]);
+  const displayName = user?.fullName || "—";
+  const displayRole = useMemo(() => {
+    if (!user) return "";
+    return (user.primaryRole || "USER").toUpperCase();
+  }, [user]);
+  const displayBranch = user?.primaryBranch || "";
+  const initials = user?.avatarInitials || "U";
 
   return (
     <nav className="flex items-center justify-between gap-4 lg:w-full px-4 h-full">
@@ -87,18 +106,24 @@ export function HeaderToolbar() {
       {/* Right Section: Actions & User */}
       <div className="flex items-center gap-3">
         {/* Branch Selector */}
-        {!isMobile && (
+        {!isMobile && displayBranch && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2 bg-muted/40 hover:bg-muted/60 transition-colors h-10 px-4 rounded-lg hidden md:flex font-medium text-muted-foreground">
-                Main Branch (HQ)
+                {displayBranch}
                 <ChevronDown className="size-4 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem className="font-semibold">Main Branch (HQ)</DropdownMenuItem>
-              <DropdownMenuItem>Branch Surabaya</DropdownMenuItem>
-              <DropdownMenuItem>Branch Jakarta</DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-64">
+              {rawUser?.branches?.length ? (
+                rawUser.branches.map((b) => (
+                  <DropdownMenuItem key={b.id} className={b.id === rawUser.active_branch_id ? "font-semibold" : ""}>
+                    {b.name || b.code || b.id}
+                  </DropdownMenuItem>
+                ))
+              ) : (
+                <DropdownMenuItem className="font-semibold">{displayBranch}</DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -114,7 +139,6 @@ export function HeaderToolbar() {
         </div>
 
         <div className="hidden sm:flex items-center gap-2">
-          {/* <LayoutSelector buttonMode="icon" buttonVariant="ghost" buttonClassName="size-10 rounded-lg" /> */}
           <ConfigSelector buttonMode="icon" buttonVariant="ghost" buttonClassName="size-10 rounded-lg" />
         </div>
 
@@ -127,18 +151,18 @@ export function HeaderToolbar() {
             <Button variant="ghost" className="flex items-center gap-3 h-12 p-1 px-2 rounded-xl hover:bg-muted/40 transition-all group">
               <div className="hidden sm:flex flex-col items-end text-right leading-none gap-1.5">
                 <span className="text-[13px] font-semibold text-foreground transition-colors group-hover:text-primary">
-                  {user?.username || "Alex Thompson"}
+                  {displayName}
                 </span>
                 <span className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-wider">
-                  ADMINISTRATOR
+                  {displayRole}
                 </span>
               </div>
               <Avatar className="size-9 rounded-lg border-2 border-primary/10 group-hover:border-primary/30 transition-all overflow-hidden bg-muted">
                 <AvatarImage
                   src={toAbsoluteUrl("/media/avatars/300-2.png")}
-                  alt="@reui"
+                  alt={displayName}
                 />
-                <AvatarFallback>AT</AvatarFallback>
+                <AvatarFallback>{initials}</AvatarFallback>
                 <AvatarIndicator className="-end-0.5 -top-0.5">
                   <AvatarStatus variant="online" className="size-2.5 border-2 border-background" />
                 </AvatarIndicator>
@@ -156,23 +180,27 @@ export function HeaderToolbar() {
               <Avatar className="size-10 rounded-lg">
                 <AvatarImage
                   src={toAbsoluteUrl("/media/avatars/300-2.png")}
-                  alt="@reui"
+                  alt={displayName}
                 />
-                <AvatarFallback>AT</AvatarFallback>
+                <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col items-start overflow-hidden">
                 <span className="text-foreground w-full truncate overflow-hidden text-sm font-bold text-ellipsis">
-                  {user?.username || "Alex Thompson"}
+                  {displayName}
                 </span>
                 <span className="text-muted-foreground text-[11px] font-medium uppercase tracking-tight">
-                  ADMINISTRATOR
+                  {displayRole}
                 </span>
+                {rawUser?.email && (
+                  <span className="text-muted-foreground/70 text-[11px] truncate w-full">
+                    {rawUser.email}
+                  </span>
+                )}
               </div>
             </div>
 
             <DropdownMenuSeparator />
 
-            {/* User Actions */}
             <DropdownMenuItem className="py-2.5">
               <User className="size-4 opacity-70" />
               <span className="font-medium">My Profile</span>
@@ -185,7 +213,6 @@ export function HeaderToolbar() {
 
             <DropdownMenuSeparator />
 
-            {/* Theme Toggle */}
             <DropdownMenuItem onClick={toggleTheme} className="py-2.5">
               {theme === "light" ? (
                 <Moon className="size-4 opacity-70" />
@@ -197,8 +224,7 @@ export function HeaderToolbar() {
 
             <DropdownMenuSeparator />
 
-            {/* Action Items */}
-            <DropdownMenuItem onClick={logout} className="py-2.5 text-destructive focus:text-destructive focus:bg-destructive/10">
+            <DropdownMenuItem onClick={handleLogout} className="py-2.5 text-destructive focus:text-destructive focus:bg-destructive/10">
               {isPending ? (
                 <Loader2 className="size-4 animate-spin" />
               ) : (

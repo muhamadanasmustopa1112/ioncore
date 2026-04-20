@@ -8,6 +8,7 @@ import { LayoutProvider } from "@/components/layouts/context/layout-context";
 import { LayoutProvider as SidebarLayoutProvider } from "./components/context";
 import { MAIN_NAV } from "@/config/layout-15.config";
 import { DOCS_MENU, DASHBOARD_MENU } from "@/config/menu";
+import { useFilteredMenu } from "@/lib/permissions";
 
 // Generate metadata for the layout
 // export async function generateMetadata(): Promise<Metadata> {
@@ -28,9 +29,11 @@ export function SidebarVerticalLayout({
   const pathname = usePathname();
   
   // Tentukan menu berdasarkan pathname
-  const currentMenu = useMemo(() => {
+  const baseMenu = useMemo(() => {
     return pathname.startsWith('/docs') ? DOCS_MENU : DASHBOARD_MENU;
   }, [pathname]);
+
+  const currentMenu = useFilteredMenu(baseMenu);
 
   return (
     <LayoutProvider
