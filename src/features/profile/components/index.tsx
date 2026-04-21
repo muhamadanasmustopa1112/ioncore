@@ -30,6 +30,7 @@ import {
   useMyActivityLogs,
 } from "@/features/user-service/api/auth";
 import { useAuthStore } from "@/store/auth-store";
+import { getPasswordRules, isPasswordValid } from "@/lib/password";
 
 function initials(name: string) {
   return name.split(/\s+/).map((p) => p.charAt(0).toUpperCase()).slice(0, 2).join("");
@@ -78,12 +79,8 @@ export function ProfilePage() {
   const loginHistory = loginHistoryResp?.data ?? [];
   const activityLogs = activityResp?.data ?? [];
 
-  const pwRules = {
-    length: newPassword.length >= 8,
-    uppercase: /[A-Z]/.test(newPassword),
-    special: /[^A-Za-z0-9]/.test(newPassword),
-  };
-  const pwValid = pwRules.length && pwRules.uppercase && pwRules.special;
+  const pwRules = getPasswordRules(newPassword);
+  const pwValid = isPasswordValid(newPassword);
 
   const handleUpdateProfile = () => {
     updateProfile(
@@ -273,9 +270,11 @@ export function ProfilePage() {
                     <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" />
                     {newPassword && (
                       <ul className="mt-1.5 space-y-1">
-                        <PwRule ok={pwRules.length} label="At least 8 characters" />
-                        <PwRule ok={pwRules.uppercase} label="At least one uppercase letter" />
-                        <PwRule ok={pwRules.special} label="At least one special character" />
+                        <PwRule ok={pwRules.length} label="Min 8 characters" />
+                        <PwRule ok={pwRules.uppercase} label="Min 1 uppercase letter" />
+                        <PwRule ok={pwRules.lowercase} label="Min 1 lowercase letter" />
+                        <PwRule ok={pwRules.special} label="Min 1 special character" />
+                        <PwRule ok={pwRules.noSpace} label="No spaces" />
                       </ul>
                     )}
                   </div>

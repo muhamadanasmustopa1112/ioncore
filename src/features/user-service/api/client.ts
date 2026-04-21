@@ -10,6 +10,23 @@ const isProxyMode =
 
 const BASE = isProxyMode ? "/api-proxy" : env.API_URL;
 
+// Maps full backend service paths to short proxy aliases.
+// Must match ionServices in next.config.mjs.
+const PROXY_PATH_ALIASES: Array<[string, string]> = [
+  ["/ion-user-service/api/v1", "/user"],
+  ["/ion-branch-service/api/v1", "/branch"],
+  ["/ion-networking-service/api/v1", "/networking"],
+  ["/ion-order-service", "/order"],
+  ["/ion-rule-scheme-service", "/rule-scheme"],
+];
+
+function toProxyAlias(url: string): string {
+  for (const [full, alias] of PROXY_PATH_ALIASES) {
+    if (url.startsWith(full)) return alias + url.slice(full.length);
+  }
+  return url;
+}
+
 export const userServiceApi = Axios.create({ baseURL: BASE });
 
 function requestInterceptor(config: InternalAxiosRequestConfig) {
@@ -22,6 +39,12 @@ function requestInterceptor(config: InternalAxiosRequestConfig) {
   const activeBranch = getCookie(auth.active_branch_id);
   if (activeBranch) config.headers["X-Branch-ID"] = activeBranch;
 
+  // In proxy mode, rewrite /ion-*-service/api/v1/... → /user/... etc.
+  // so Next.js rewrites can forward to the correct backend path.
+  if (isProxyMode && config.url) {
+    config.url = toProxyAlias(config.url);
+  }
+
   return config;
 }
 
@@ -33,32 +56,32 @@ async function doRefresh(): Promise<string> {
   const refreshToken = getCookie(auth.refresh_token);
   if (!refreshToken) throw new Error("no refresh token");
 
-  const resp = await Axios.post<unknown, { data: AuthPayload }>(
-    `${BASE}${services.user}/auth/refresh`,
+  // Use plain Axios (not userServiceApi) to avoid the response interceptor
+  // transforming the response, and to avoid triggering another 401 retry loop.
+  const servicePath = isProxyMode
+    ? toProxyAlias(services.user)
+    : services.user;
+  const resp = await Axios.post(
+    `${BASE}${servicePath}/auth/refresh`,
     { refresh_token: refreshToken },
     { headers: { Accept: "application/json" } },
   );
 
-  const payload = (resp as unknown as UserServiceEnvelope<AuthPayload>).data;
-  const tokens = payload?.tokens ?? (payload as unknown as AuthPayload["tokens"]);
+  // resp.data = UserServiceEnvelope<AuthPayload> = { status, message, data: AuthPayload }
+  const envelope = resp.data as UserServiceEnvelope<AuthPayload>;
+  const tokens = envelope?.data?.tokens;
 
-  const accessToken =
-    (payload as AuthPayload)?.tokens?.access_token ??
-    (tokens as unknown as { access_token: string })?.access_token;
-
-  const newRefresh =
-    (payload as AuthPayload)?.tokens?.refresh_token ??
-    (tokens as unknown as { refresh_token: string })?.refresh_token;
-
-  if (!accessToken) throw new Error("refresh response missing access_token");
+  if (!tokens?.access_token) throw new Error("refresh response missing access_token");
 
   const DAY = 1000 * 60 * 60 * 24;
-  setCookie(auth.token, accessToken, new Date(Date.now() + DAY));
-  if (newRefresh) {
-    setCookie(auth.refresh_token, newRefresh, new Date(Date.now() + 30 * DAY));
+  setCookie(auth.token, tokens.access_token, new Date(Date.now() + DAY));
+  if (tokens.refresh_token) {
+    setCookie(auth.refresh_token, tokens.refresh_token, new Date(Date.now() + 30 * DAY));
   }
+  // Keep logged_in alive so the auth guard doesn't redirect on next load
+  setCookie(auth.logged_in, "1", new Date(Date.now() + 30 * DAY));
 
-  return accessToken;
+  return tokens.access_token;
 }
 
 function redirectToSignin() {

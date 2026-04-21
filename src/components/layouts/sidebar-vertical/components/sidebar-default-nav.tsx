@@ -372,6 +372,7 @@ export function SidebarDefaultNav() {
         classNames={{
           root: 'grow space-y-4 shrink-0',
           item: 'group py-0 h-8 [&:has([data-state=open])]:bg-accent justify-between cursor-pointer',
+          subTrigger: 'h-8 py-0 px-3 gap-2.5 [&_svg:not([class*=size-])]:size-5',
         }}
       >
         {groupedNavItems.map((group, gIndex) => (

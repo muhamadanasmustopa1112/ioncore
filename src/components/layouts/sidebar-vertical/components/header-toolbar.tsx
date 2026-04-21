@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import {
   Bell,
   ChevronDown,
-  Loader2,
   LogOut,
   Moon,
   Search,
@@ -13,13 +12,10 @@ import {
   User,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { auth } from "@/config/constants";
 import { paths } from "@/config/paths";
-import { clearAllCookies, getCookie } from "@/lib/cookies";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import { useAuthStore } from "@/store/auth-store";
 import {
-  useLogout,
   useMyProfile,
   useSetActiveBranch,
 } from "@/features/user-service/api/auth";
@@ -48,7 +44,7 @@ export function HeaderToolbar() {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
 
-  const { user, rawUser, setProfile, logout: clearAuth } = useAuthStore();
+  const { user, rawUser, setProfile } = useAuthStore();
   const { mutate: setActiveBranch } = useSetActiveBranch();
 
   const shouldFetchProfile = !user;
@@ -60,19 +56,8 @@ export function HeaderToolbar() {
     }
   }, [meResponse, rawUser, setProfile]);
 
-  const { mutate: logoutApi, isPending } = useLogout();
-
   const handleLogout = () => {
-    const refreshToken = getCookie(auth.refresh_token) || "";
-    const finish = () => {
-      clearAuth();
-      clearAllCookies();
-      router.push(paths.auth.signin.getHref());
-    };
-    logoutApi(
-      { refresh_token: refreshToken },
-      { onSuccess: finish, onError: finish },
-    );
+    router.push(paths.auth.logout.getHref());
   };
 
   const handleInputChange = () => { };
@@ -234,11 +219,7 @@ export function HeaderToolbar() {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={handleLogout} className="py-2.5 text-destructive focus:text-destructive focus:bg-destructive/10">
-              {isPending ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <LogOut className="size-4" />
-              )}
+              <LogOut className="size-4" />
               <span className="font-bold">Sign out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

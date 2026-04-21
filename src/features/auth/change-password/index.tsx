@@ -19,14 +19,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useResetPassword } from "@/features/user-service/api/auth";
+import { passwordZodSchema } from "@/lib/password";
 
 const formSchema = z
   .object({
-    newPassword: z
-      .string()
-      .min(8, "At least 8 characters")
-      .regex(/[A-Z]/, "At least one uppercase letter")
-      .regex(/[^A-Za-z0-9]/, "At least one special character"),
+    newPassword: passwordZodSchema,
     confirmPassword: z.string(),
   })
   .refine((d) => d.newPassword === d.confirmPassword, {

@@ -7,6 +7,7 @@ const PUBLIC_PATHS = [
   "/change-password",
   "/verify-email",
   "/forms",
+  "/logout",
 ];
 
 const PUBLIC_PREFIXES = [
