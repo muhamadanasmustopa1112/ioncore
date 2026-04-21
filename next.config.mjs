@@ -20,31 +20,38 @@ const nextConfig = {
     }
     const normalizedBaseUrl = parsed.toString().replace(/\/$/, "");
 
-    const ionServices = [
-      "ion-user-service",
-      "ion-branch-service",
-      "ion-order-service",
-      "ion-networking-service",
-      "ion-rule-scheme-service",
-    ];
-
-    const serviceRewrites = ionServices.map((svc) => ({
-      source: `/${svc}/:path*`,
-      destination: `${normalizedBaseUrl}/${svc}/:path*`,
-    }));
+    // Maps short proxy alias → full backend service path (including version)
+    const ionServices = {
+      "ion-user-service/api/v1": "user",
+      "ion-branch-service/api/v1": "branch",
+      "ion-networking-service/api/v1": "networking",
+      "ion-order-service": "order",
+      "ion-rule-scheme-service": "rule-scheme",
+    };
 
     const useProxyMode =
       publicApiUrl === "/api-proxy" ||
       Boolean(publicApiUrl?.startsWith("/api-proxy/"));
 
     if (useProxyMode) {
-      serviceRewrites.push({
+      // /api-proxy/user/:path* → ${apiBaseUrl}/ion-user-service/api/v1/:path*
+      const rewrites = Object.entries(ionServices).map(([fullPath, alias]) => ({
+        source: `/api-proxy/${alias}/:path*`,
+        destination: `${normalizedBaseUrl}/${fullPath}/:path*`,
+      }));
+      // Generic fallback for any path not matched above
+      rewrites.push({
         source: "/api-proxy/:path*",
         destination: `${normalizedBaseUrl}/:path*`,
       });
+      return rewrites;
     }
 
-    return serviceRewrites;
+    // Non-proxy mode: /user/:path* → ${apiBaseUrl}/ion-user-service/api/v1/:path*
+    return Object.entries(ionServices).map(([fullPath, alias]) => ({
+      source: `/${alias}/:path*`,
+      destination: `${normalizedBaseUrl}/${fullPath}/:path*`,
+    }));
   },
 };
 

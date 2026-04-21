@@ -26,6 +26,7 @@ import { useUserStore } from "../../store/user";
 import { useRoles } from "@/features/user-service/api/roles";
 import { useBranches } from "@/features/user-service/api/branches";
 import { useCreateUser, useUpdateUser } from "@/features/user-service/api/users";
+import { getPasswordRules, isPasswordValid } from "@/lib/password";
 
 function PwRule({ ok, label }: { ok: boolean; label: string }) {
   return (
@@ -111,12 +112,8 @@ export function UserForm() {
   const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
   const isPending = isCreating || isUpdating;
 
-  const pwRules = {
-    length: password.length >= 8,
-    uppercase: /[A-Z]/.test(password),
-    special: /[^A-Za-z0-9]/.test(password),
-  };
-  const pwValid = pwRules.length && pwRules.uppercase && pwRules.special;
+  const pwRules = getPasswordRules(password);
+  const pwValid = isPasswordValid(password);
 
   const handleSave = () => {
     if (isDetailMode) { closeUserFormSheet(); return; }
@@ -235,9 +232,11 @@ export function UserForm() {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                   <ul className="mt-1.5 space-y-1 text-[11px]">
-                    <PwRule ok={pwRules.length} label="Password must be at least 8 characters" />
-                    <PwRule ok={pwRules.uppercase} label="Password must contain at least one uppercase letter" />
-                    <PwRule ok={pwRules.special} label="Password must contain at least one special character" />
+                    <PwRule ok={pwRules.length} label="Min 8 characters" />
+                    <PwRule ok={pwRules.uppercase} label="Min 1 uppercase letter" />
+                    <PwRule ok={pwRules.lowercase} label="Min 1 lowercase letter" />
+                    <PwRule ok={pwRules.special} label="Min 1 special character" />
+                    <PwRule ok={pwRules.noSpace} label="No spaces" />
                   </ul>
                 </div>
               )}

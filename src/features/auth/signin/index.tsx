@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,35 +39,10 @@ export function SigninForm() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showQuickAccess, setShowQuickAccess] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState<Record<string, number>>({});
+  const [lockedUntil, setLockedUntil] = useState<Record<string, number>>({});
+  const [countdown, setCountdown] = useState(0);
   const { loginFromPayload } = useAuthStore();
-
-  const { mutateAsync: login, isPending: isProcessing } = useLogin();
-
-  const handleLoginResult = async (email: string, password: string) => {
-    setError(null);
-    try {
-      const res = await login({ email, password });
-      const payload = res?.data;
-      if (!payload?.tokens?.access_token || !payload?.user) {
-        setError(res?.message || "Invalid login response.");
-        return false;
-      }
-      persistAuthPayload(payload);
-      loginFromPayload(payload);
-      return true;
-    } catch (err) {
-      if (isAxiosError(err)) {
-        const msg =
-          err?.response?.data?.message ||
-          err?.response?.data?.error ||
-          err.message;
-        setError(msg || "Login failed. Please try again.");
-      } else {
-        setError("Login failed. Please try again.");
-      }
-      return false;
-    }
-  };
 
   type ExtendedLoginInput = LoginInput & { rememberMe?: boolean };
 
@@ -85,12 +60,61 @@ export function SigninForm() {
     },
   });
 
+  const currentEmail = form.watch("username") || "";
+  const lockExpiry = lockedUntil[currentEmail] ?? 0;
+  const isLocked = lockExpiry > Date.now();
+
+  useEffect(() => {
+    if (!isLocked) { setCountdown(0); return; }
+    const tick = () => setCountdown(Math.max(0, Math.ceil((lockExpiry - Date.now()) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [isLocked, lockExpiry]);
+
+  const { mutateAsync: login, isPending: isProcessing } = useLogin();
+
+  const handleLoginResult = async (email: string, password: string) => {
+    setError(null);
+    try {
+      const res = await login({ email, password });
+      const payload = res?.data;
+      if (!payload?.tokens?.access_token || !payload?.user) {
+        setError(res?.message || "Invalid login response.");
+        return false;
+      }
+      setFailedAttempts((prev) => ({ ...prev, [email]: 0 }));
+      persistAuthPayload(payload);
+      loginFromPayload(payload);
+      return true;
+    } catch (err) {
+      const newCount = (failedAttempts[email] ?? 0) + 1;
+      setFailedAttempts((prev) => ({ ...prev, [email]: newCount }));
+      if (newCount >= 3) {
+        setLockedUntil((prev) => ({ ...prev, [email]: Date.now() + 5 * 60 * 1000 }));
+        setError(null);
+      } else {
+        if (isAxiosError(err)) {
+          const msg =
+            err?.response?.data?.message ||
+            err?.response?.data?.error ||
+            err.message;
+          setError(msg || "Login failed. Please try again.");
+        } else {
+          setError("Login failed. Please try again.");
+        }
+      }
+      return false;
+    }
+  };
+
   const handleQuickLogin = async (account: QuickLoginAccount) => {
     const ok = await handleLoginResult(account.email, account.password);
     if (ok) router.push(paths.dashboard.root.getHref());
   };
 
   async function onSubmit(values: ExtendedLoginInput) {
+    if (isLocked) return;
     try {
       if (values.rememberMe) {
         localStorage.setItem("rememberedUsername", values.username || "");
@@ -154,14 +178,22 @@ export function SigninForm() {
             </AlertTitle>
           </Alert> */}
 
-          {error && (
+          {isLocked ? (
             <Alert variant="destructive">
-              <AlertIcon>
-                <AlertCircle />
-              </AlertIcon>
+              <AlertIcon><AlertCircle /></AlertIcon>
+              <AlertTitle>
+                Account temporarily locked. Try again in {Math.floor(countdown / 60)}:{String(countdown % 60).padStart(2, "0")}.{" "}
+                <Link href="/reset-password" className="font-bold underline">
+                  Reset Password
+                </Link>
+              </AlertTitle>
+            </Alert>
+          ) : error ? (
+            <Alert variant="destructive">
+              <AlertIcon><AlertCircle /></AlertIcon>
               <AlertTitle>{error}</AlertTitle>
             </Alert>
-          )}
+          ) : null}
 
           <FormField
             control={form.control}
@@ -265,11 +297,11 @@ export function SigninForm() {
           </div>
 
           <div className="flex flex-col gap-2.5">
-            <Button type="submit" disabled={isProcessing}>
+            <Button type="submit" disabled={isProcessing || isLocked}>
               {isProcessing ? (
                 <LoaderCircleIcon className="size-4 animate-spin" />
               ) : null}
-              Login
+              {isLocked ? `Locked (${Math.floor(countdown / 60)}:${String(countdown % 60).padStart(2, "0")})` : "Login"}
             </Button>
           </div>
 
