@@ -24,8 +24,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "../../store/user";
 import { useRoles } from "@/features/user-service/api/roles";
-import { useBranches } from "@/features/user-service/api/branches";
-import { useCreateUser, useUpdateUser } from "@/features/user-service/api/users";
+import { useBranchList } from "@/features/administration/branch/api/branch-queries";
+import type { BranchData } from "@/features/administration/branch/types/branch";
+import { useCreateUser, useUpdateUser, useAssignUserRoles } from "@/features/user-service/api/users";
 import { getPasswordRules, isPasswordValid } from "@/lib/password";
 
 function PwRule({ ok, label }: { ok: boolean; label: string }) {
@@ -53,9 +54,9 @@ export function UserForm() {
   const isDetailMode = form === "details";
 
   const { data: rolesResp } = useRoles({ per_page: 100 });
-  const { data: branchesResp } = useBranches({ per_page: 100 });
+  const { data: branchList } = useBranchList({ per_page: 100 });
   const roles = rolesResp?.data || [];
-  const branches = branchesResp?.data || [];
+  const branches: BranchData[] = branchList ?? [];
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -108,19 +109,20 @@ export function UserForm() {
     setRoleRows(roleRows.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
   };
 
-  const { mutate: createUser, isPending: isCreating } = useCreateUser();
-  const { mutate: updateUser, isPending: isUpdating } = useUpdateUser();
-  const isPending = isCreating || isUpdating;
+  const { mutateAsync: createUser, isPending: isCreating } = useCreateUser();
+  const { mutateAsync: updateUser, isPending: isUpdating } = useUpdateUser();
+  const { mutateAsync: assignRoles, isPending: isAssigning } = useAssignUserRoles();
+  const isPending = isCreating || isUpdating || isAssigning;
 
   const pwRules = getPasswordRules(password);
   const pwValid = isPasswordValid(password);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (isDetailMode) { closeUserFormSheet(); return; }
 
     if (!isNewMode && selectedUser) {
-      updateUser(
-        {
+      try {
+        await updateUser({
           id: selectedUser.id,
           payload: {
             name: fullName.trim(),
@@ -130,17 +132,19 @@ export function UserForm() {
             unit_kerja: department.trim() || undefined,
             home_branch_id: homeBranchId || undefined,
           },
-        },
-        {
-          onSuccess: () => { toast.success("User updated"); closeUserFormSheet(); },
-          onError: (err: unknown) => {
-            toast.error(
-              (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-              "Failed to update user",
-            );
-          },
-        },
-      );
+        });
+        const role_ids = Array.from(new Set(roleRows.map((r) => r.roleId).filter(Boolean)));
+        if (role_ids.length) {
+          await assignRoles({ id: selectedUser.id, payload: { role_ids } });
+        }
+        toast.success("User updated");
+        closeUserFormSheet();
+      } catch (err: unknown) {
+        toast.error(
+          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Failed to update user",
+        );
+      }
       return;
     }
 
@@ -160,8 +164,8 @@ export function UserForm() {
         [...roleRows.map((r) => r.branchId), homeBranchId].filter(Boolean),
       ),
     );
-    createUser(
-      {
+    try {
+      await createUser({
         name: fullName.trim(),
         email: email.trim(),
         password,
@@ -171,20 +175,15 @@ export function UserForm() {
         home_branch_id: homeBranchId || undefined,
         role_ids: role_ids.length ? role_ids : undefined,
         branch_ids: branch_ids.length ? branch_ids : undefined,
-      },
-      {
-        onSuccess: () => {
-          toast.success("User created");
-          closeUserFormSheet();
-        },
-        onError: (err: unknown) => {
-          const msg =
-            (err as { response?: { data?: { message?: string } } })?.response?.data
-              ?.message || "Failed to create user";
-          toast.error(msg);
-        },
-      },
-    );
+      });
+      toast.success("User created");
+      closeUserFormSheet();
+    } catch (err: unknown) {
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "Failed to create user",
+      );
+    }
   };
 
   return (

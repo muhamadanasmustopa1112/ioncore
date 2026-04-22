@@ -6,7 +6,6 @@ export * from "./api/users";
 export * from "./api/roles";
 export * from "./api/permissions";
 export * from "./api/access-policies";
-export * from "./api/branches";
 export * from "./api/audit";
 export * from "./api/health";
 export * from "./utils";

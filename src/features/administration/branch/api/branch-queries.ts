@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { BranchData, BranchLevel, BranchType } from "../types";
-import { BranchFlatDto, BranchPayload, BranchTreeNode } from "../types/branch-api";
+import { BranchFlatDto, BranchPayload, BranchTreeNode, AreaTreeDto, SubAreaTreeDto } from "../types/branch-api";
 import {
   getBranchList,
   getBranchTree,
@@ -58,10 +58,9 @@ export function flattenBranchTree(nodes: BranchTreeNode[]): BranchData[] {
       active: regional.is_active,
       createdAt: regional.created_at,
       updatedAt: regional.updated_at,
-      // Extra IDs for mutations
       _regionalId: regional.id,
     });
-    for (const area of regional.areas ?? []) {
+    for (const area of (regional.areas ?? []) as AreaTreeDto[]) {
       result.push({
         id: area.id,
         name: area.name,
@@ -69,13 +68,13 @@ export function flattenBranchTree(nodes: BranchTreeNode[]): BranchData[] {
         level: "area",
         parentId: regional.id,
         parentName: regional.name,
-        active: area.is_active,
-        createdAt: area.created_at,
-        updatedAt: area.updated_at,
+        active: true,
+        createdAt: "",
+        updatedAt: "",
         _regionalId: regional.id,
         _areaId: area.id,
       });
-      for (const sub of area.sub_areas ?? []) {
+      for (const sub of (area.sub_areas ?? []) as SubAreaTreeDto[]) {
         result.push({
           id: sub.id,
           name: sub.name,
@@ -83,11 +82,11 @@ export function flattenBranchTree(nodes: BranchTreeNode[]): BranchData[] {
           level: "sub_area",
           parentId: area.id,
           parentName: area.name,
-          active: sub.is_active,
-          createdAt: sub.created_at,
-          updatedAt: sub.updated_at,
-          _regionalId: regional.id,
-          _areaId: area.id,
+          active: true,
+          createdAt: "",
+          updatedAt: "",
+          _regionalId: sub.branch_regional_id,
+          _areaId: sub.branch_area_id,
         });
       }
     }

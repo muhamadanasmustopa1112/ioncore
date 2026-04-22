@@ -10,6 +10,15 @@ export const paths = {
       getHref: (redirectTo?: string) =>
         `/signin${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ""}`,
     },
+    resetPassword: {
+      path: "/reset-password",
+      getHref: () => "/reset-password",
+    },
+    changePassword: {
+      path: "/change-password",
+      getHref: (token?: string) =>
+        `/change-password${token ? `?token=${encodeURIComponent(token)}` : ""}`,
+    },
     logout: {
       path: "/logout",
       getHref: () => "/logout",
