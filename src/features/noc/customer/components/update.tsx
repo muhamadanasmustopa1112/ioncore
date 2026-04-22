@@ -16,16 +16,62 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useCustomerStore } from "../store/customer";
 import { useEffect } from "react";
 
-export function CustomerUpdate() {
+import { RiCheckLine } from "@remixicon/react";
+import { useUpdatePPPCustomer } from "../api/put-ppp-customer";
+import { CreatePPPCustomerRequest } from "../types";
+
+export function CustomerUpdate({ id }: { id: string }) {
   const router = useRouter();
-  const { setForm } = useCustomerStore();
+  const { setForm, setSelectedId, formData } = useCustomerStore();
+
+  const updateMutation = useUpdatePPPCustomer({
+    mutationConfig: {
+      onSuccess: () => {
+        router.push(paths.dashboard.networkAndOrchestration.customer.root.getHref());
+      }
+    }
+  });
 
   useEffect(() => {
     setForm("edit");
-  }, [setForm]);
+    setSelectedId(id);
+  }, [setForm, setSelectedId, id]);
 
   const onBackClick = () => {
     router.back();
+  };
+
+  const handleSubmit = () => {
+    const payload: CreatePPPCustomerRequest = {
+      address: formData.address || "",
+      auth_status: formData.auth_status || "Enabled-Users",
+      bandwidth: formData.bandwidth || "",
+      bind_mac: formData.bind_mac || "NO",
+      created_at: formData.created_at || "",
+      email: formData.email || "",
+      expired_on: formData.expired_on || "",
+      fullname: formData.fullname || "",
+      mac_address: formData.mac_address || "",
+      member_id: formData.member_id || "",
+      method: formData.method || "pppoe",
+      nasporttype: formData.nasporttype || "Ethernet",
+      note: formData.note || "",
+      owner_name: formData.owner_name || "radius_admin",
+      password: formData.password || "",
+      payment_type: formData.payment_type || "POSTPAID",
+      phonenumber: formData.phonenumber || "",
+      plan_name: formData.plan_name || "",
+      remote_address: formData.remote_address || "Automatic",
+      renewed_on: formData.renewed_on || new Date().toISOString().slice(0, 19).replace('T', ' '),
+      server_name: formData.server_name || "",
+      servicetype: formData.servicetype || "Framed-User",
+      total: formData.total || "0",
+      trx_invoice: formData.trx_invoice || `INV-PPP-${Date.now()}`,
+      trx_status: formData.trx_status || "UNPAID",
+      username: formData.username || "",
+    };
+
+    updateMutation.mutate({ id, data: payload });
   };
 
   return (
@@ -66,10 +112,16 @@ export function CustomerUpdate() {
             <Button variant="outline" onClick={onBackClick}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={() => router.push("/noc/ion-radius/customer")}>
-              Update Customer
+            <Button
+              onClick={handleSubmit}
+              disabled={updateMutation.isPending}
+              className="gap-2 font-bold bg-primary text-white shadow-lg shadow-primary/20"
+            >
+              {updateMutation.isPending ? "Saving..." : "Save Change"}
+              <RiCheckLine className="size-4" />
             </Button>
           </CardFooter>
+
         </Card>
       </div>
     </>

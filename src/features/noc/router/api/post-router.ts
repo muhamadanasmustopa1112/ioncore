@@ -10,7 +10,6 @@ import { MutationConfig } from "@/lib/react-query";
 import { CreateRouterRequest, CreateRouterResponse } from "../types";
 import { ROUTER_KEYS } from "./keys";
 
-// --- Schema ---
 export const routerSchema = z.object({
   shortname: z.string().min(1, "Router Name (Shortname) is required"),
   nasname: z.string().min(1, "Router Address (NAS Name) is required"),

@@ -61,6 +61,7 @@ export function ActionsCell({ row }: { row: Row<PPPCustomer> }) {
     router.push(paths.dashboard.networkAndOrchestration.customer.detail.getHref(row.original.id));
   };
 
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

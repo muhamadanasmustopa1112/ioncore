@@ -8,10 +8,12 @@ export const metadata: Metadata = {
     description: "Modify an existing customer profile.",
 };
 
-export default function Page() {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     return (
         <Suspense fallback={<ScreenLoader />}>
-            <CustomerUpdate />
+            <CustomerUpdate id={id} />
         </Suspense>
     );
 }
+

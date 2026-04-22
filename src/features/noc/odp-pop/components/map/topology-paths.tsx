@@ -2,50 +2,50 @@
 
 import { useMemo } from "react";
 import { Polyline } from "react-leaflet";
-import { DUMMY_OLT_DETAILS } from "../../data/dummy-olt-details";
-import { DUMMY_ODP_LIST } from "../../data/dummy-odp-list";
-import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
+import { PopData } from "../../types/pop";
+import { OdpData } from "../../types/odp";
+
 
 interface TopologyPathsProps {
   selectedArea?: string | null;
   selectedPopId: string | null;
+  pops: PopData[];
+  odps: OdpData[];
 }
 
 /**
  * Renders topology paths (connection lines) between POPs and their child ODPs.
  * This visualizes the physical/logical connection between infrastructure points.
  */
-export function TopologyPaths({ selectedArea, selectedPopId }: TopologyPathsProps) {
+export function TopologyPaths({ selectedArea, selectedPopId, pops, odps }: TopologyPathsProps) {
   const paths = useMemo(() => {
     const result: { id: string; positions: [number, number][] }[] = [];
 
-    // 1. Determine which POPs to process based on filters
-    let popsToProcess = DUMMY_POP_DATA;
+    // Filter ODPs based on current view
+    let odpsToProcess = odps;
     if (selectedPopId) {
-      popsToProcess = DUMMY_POP_DATA.filter(p => p.id === selectedPopId);
+        odpsToProcess = odps.filter(o => String(o.parent_pop_id) === String(selectedPopId));
     } else if (selectedArea) {
-      popsToProcess = DUMMY_POP_DATA.filter(p => p.area === selectedArea);
+        odpsToProcess = odps.filter(o => o.area === selectedArea);
     }
 
-    // 2. Iterate through POPs -> OLTs -> ODPs to build connection paths
-    popsToProcess.forEach(pop => {
-      const olts = DUMMY_OLT_DETAILS[pop.id] || [];
-      olts.forEach(olt => {
-        const odps = DUMMY_ODP_LIST[olt.id] || [];
-        odps.forEach(odp => {
-          result.push({
-            id: `${pop.id}-${odp.id}`,
-            positions: [
-              [pop.latitude, pop.longitude],
-              [odp.latitude, odp.longitude]
-            ]
-          });
+    // Build paths by finding the parent POP location for each ODP
+    odpsToProcess.forEach(odp => {
+      const pop = pops.find(p => String(p.id) === String(odp.parent_pop_id));
+      if (pop) {
+        result.push({
+          id: `path-${pop.id}-${odp.id}`,
+          positions: [
+            [pop.latitude, pop.longitude],
+            [odp.latitude, odp.longitude]
+          ]
         });
-      });
+      }
     });
 
     return result;
-  }, [selectedArea, selectedPopId]);
+  }, [selectedArea, selectedPopId, pops, odps]);
+
 
   return (
     <>

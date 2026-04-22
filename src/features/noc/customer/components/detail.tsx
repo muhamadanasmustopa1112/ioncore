@@ -16,13 +16,15 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useCustomerStore } from "../store/customer";
 import { useEffect } from "react";
 
-export function CustomerDetail() {
+export function CustomerDetail({ id }: { id: string }) {
   const router = useRouter();
-  const { setForm } = useCustomerStore();
+  const { setForm, setSelectedId } = useCustomerStore();
 
   useEffect(() => {
     setForm("details");
-  }, [setForm]);
+    setSelectedId(id);
+  }, [setForm, setSelectedId, id]);
+
 
   const onBackClick = () => {
     router.back();

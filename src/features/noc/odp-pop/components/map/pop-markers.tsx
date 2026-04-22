@@ -20,11 +20,12 @@ export function PopMarkers({ data, markerRefs, onSelect }: PopMarkersProps) {
           position={[pop.latitude, pop.longitude]}
           icon={createStatusIcon("active")}
           eventHandlers={{
-            click: () => onSelect?.(pop.id),
+            click: () => onSelect?.(String(pop.id)),
           }}
           ref={(ref) => {
-            if (ref) markerRefs.current[pop.id] = ref;
+            if (ref) markerRefs.current[String(pop.id)] = ref;
           }}
+
         >
           <Popup className="odp-popup">
             <div className="w-[280px] p-1">
