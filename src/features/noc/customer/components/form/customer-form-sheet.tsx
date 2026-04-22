@@ -35,25 +35,6 @@ export function CustomerFormSheet() {
                 <SheetBody className="flex-1 p-0 overflow-hidden">
                     <CustomerForm />
                 </SheetBody>
-
-                {/* Footer */}
-                <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
-                    <Button variant="ghost" onClick={closeCustomerFormSheet}>
-                        Close
-                    </Button>
-                    <div className="flex-1" />
-                    <Button variant="outline" onClick={closeCustomerFormSheet} className="mr-3">
-                        Cancel
-                    </Button>
-                    <Button
-                        variant="primary"
-                        onClick={handleSave}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-                        disabled={isDetailMode}
-                    >
-                        {isNewMode ? "Create Customer" : "Save Changes"}
-                    </Button>
-                </SheetFooter>
             </SheetContent>
         </Sheet>
     );

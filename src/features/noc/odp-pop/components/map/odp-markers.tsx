@@ -3,51 +3,26 @@ import L from "leaflet";
 import { Radio } from "lucide-react";
 import { createStatusIcon } from "./map-utils";
 import { MutableRefObject, useMemo } from "react";
-import { DUMMY_OLT_DETAILS } from "../../data/dummy-olt-details";
-import { DUMMY_ODP_LIST } from "../../data/dummy-odp-list";
-import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
+import { OdpData } from "../../types/odp";
 
 interface OdpMarkersProps {
-  selectedArea?: string | null;
+  data: OdpData[];
   selectedPopId: string | null;
   markerRefs: MutableRefObject<Record<string, L.Marker>>;
 }
 
-export function OdpMarkers({ selectedArea, selectedPopId, markerRefs }: OdpMarkersProps) {
+export function OdpMarkers({ data, selectedPopId, markerRefs }: OdpMarkersProps) {
   // Get ODPs based on drill-down level
   const currentOdps = useMemo(() => {
     // 1. If a specific POP is selected, show ODPs for that POP only
     if (selectedPopId) {
-      const olts = DUMMY_OLT_DETAILS[selectedPopId] || [];
-      return olts.flatMap(olt => DUMMY_ODP_LIST[olt.id] || []);
+      return data.filter(odp => String(odp.parent_pop_id) === String(selectedPopId));
     }
 
-    // 2. If no POP is selected, show ODPs based on Area or Global
-    const allOdps = Object.values(DUMMY_ODP_LIST).flat();
+    // 2. Otherwise return the data as provided (already filtered by area in parent if applicable)
+    return data;
+  }, [selectedPopId, data]);
 
-    if (selectedArea) {
-      // Find all POPs in the selected area
-      const popsInArea = DUMMY_POP_DATA.filter(pop => pop.area === selectedArea);
-      const popIds = popsInArea.map(p => p.id);
-
-      // Find all OLTs for those POPs
-      const oltIdsInArea = popIds.flatMap(popId =>
-        (DUMMY_OLT_DETAILS[popId] || []).map(olt => olt.id)
-      );
-
-      // Return ODPs for those OLTs
-      return allOdps.filter(odp => {
-        // We find which OLT this ODP belongs to by checking the DUMMY_ODP_LIST keys
-        const oltId = Object.keys(DUMMY_ODP_LIST).find(key =>
-          DUMMY_ODP_LIST[key].some(o => o.id === odp.id)
-        );
-        return oltId && oltIdsInArea.includes(oltId);
-      });
-    }
-
-    // 3. Global View: Show all ODPs
-    return allOdps;
-  }, [selectedPopId, selectedArea]);
 
   if (currentOdps.length === 0) return null;
 
@@ -70,14 +45,21 @@ export function OdpMarkers({ selectedArea, selectedPopId, markerRefs }: OdpMarke
               </div>
               <div className="space-y-1.5 text-[10px]">
                 <div className="flex justify-between border-b border-border/30 pb-1">
-                  <span className="text-muted-foreground font-bold uppercase text-[8px]">PON Port:</span>
-                  <span className="font-black">{odp.ponPort}</span>
+                  <span className="text-muted-foreground font-bold uppercase text-[8px]">Port:</span>
+                  <span className="font-black">{odp.port || 0}</span>
                 </div>
+                {odp.olt_name && (
+                  <div className="flex justify-between border-b border-border/30 pb-1">
+                    <span className="text-muted-foreground font-bold uppercase text-[8px]">OLT:</span>
+                    <span className="font-black text-right">{odp.olt_name}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground font-bold uppercase text-[8px]">Capacity:</span>
-                  <span className="font-black">{odp.portsUsed}/{odp.totalPorts} Ports</span>
+                  <span className="text-muted-foreground font-bold uppercase text-[8px]">Area:</span>
+                  <span className="font-black">{odp.area}</span>
                 </div>
               </div>
+
             </div>
           </Popup>
         </Marker>

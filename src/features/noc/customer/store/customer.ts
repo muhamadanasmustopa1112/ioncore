@@ -1,73 +1,71 @@
 import { create } from "zustand";
-import { CustomerData } from "../types";
+import { CreatePPPCustomerRequest } from "../types";
 
 interface CustomerState {
   form: "new" | "edit" | "details" | null;
   customerSheetOpen: boolean;
-  formData: Partial<CustomerData>;
-  openCustomerFormSheet: (form: "new" | "edit" | "details" | null) => void;
+  selectedId: string | null;
+  formData: Partial<CreatePPPCustomerRequest>;
+  currentStep: number;
+  openCustomerFormSheet: (form: "new" | "edit" | "details" | null, id?: string) => void;
   closeCustomerFormSheet: () => void;
   setForm: (form: "new" | "edit" | "details" | null) => void;
+  setSelectedId: (id: string | null) => void;
   setCustomerFormSheetOpen: (open: boolean) => void;
-  updateFormData: (data: Partial<CustomerData>) => void;
+  updateFormData: (data: Partial<CreatePPPCustomerRequest>) => void;
+  setCurrentStep: (step: number) => void;
   resetForm: () => void;
 }
 
-const initialFormData: Partial<CustomerData> = {
-  // Identity & Contact Defaults
-  odpPop: "no odp | pop",
-  identityNo: "",
-  mobile: "",
-  countryCode: "+62",
-  email: "",
+
+const initialFormData: Partial<CreatePPPCustomerRequest> = {
   address: "",
-  latitude: "",
-  longitude: "",
-
-  // Login Credentials Defaults
-  loginMethod: "USERNAME AND PASSWORD",
-  username: "",
-  password: "",
-  confirmPassword: "",
-  clientAreaPassword: "",
+  auth_status: "Enabled-Users",
+  bandwidth: "",
+  bind_mac: "NO",
+  created_at: "",
+  email: "",
+  expired_on: "",
+  fullname: "",
+  mac_address: "",
+  member_id: "",
+  method: "pppoe",
+  nasporttype: "Ethernet",
   note: "",
-
-  // Existing Service Plan Defaults
-  registrationStatus: "active",
-  customerType: "regular",
-  serverName: "",
-  paymentType: "PREPAID",
-  payStatus: "PAID",
-  accountStatus: "ENABLED",
-  bindOnLogin: false,
-  collectVat: true,
-  autoProrate: false,
-  promo: false,
-  promoDuration: "1 MONTHS",
-  discount: 0,
-  sellerFee: 0,
-  installationFee: 0,
-  deviceFee: 0,
-  dueDate: "",
-  expirationAction: "DISCONNECT INTERNET ( SUSPENDED )",
-  ipAddressType: "Dynamic",
-  ipAddress: "",
+  owner_name: "radius_admin",
+  password: "",
+  payment_type: "POSTPAID",
+  phonenumber: "",
+  plan_name: "",
+  remote_address: "Automatic",
+  renewed_on: "",
+  server_name: "",
+  servicetype: "Framed-User",
+  total: "0",
+  trx_invoice: "",
+  trx_status: "UNPAID",
+  username: "",
 };
 
 const useCustomerStore = create<CustomerState>((set) => ({
   form: "new",
   customerSheetOpen: false,
+  selectedId: null,
   formData: initialFormData,
+  currentStep: 1,
   setForm: (form) => set((state) => ({ ...state, form })),
+  setSelectedId: (id) => set((state) => ({ ...state, selectedId: id })),
   setCustomerFormSheetOpen: (open: boolean) =>
     set((state) => ({ ...state, customerSheetOpen: open })),
-  openCustomerFormSheet: (form: "new" | "edit" | "details" | null) =>
-    set((state) => ({ ...state, customerSheetOpen: true, form })),
+  openCustomerFormSheet: (form, id) =>
+    set((state) => ({ ...state, customerSheetOpen: true, form, selectedId: id || null })),
   closeCustomerFormSheet: () =>
-    set((state) => ({ ...state, customerSheetOpen: false, form: null })),
+    set((state) => ({ ...state, customerSheetOpen: false, form: null, selectedId: null })),
   updateFormData: (data) =>
     set((state) => ({ ...state, formData: { ...state.formData, ...data } })),
-  resetForm: () => set((state) => ({ ...state, formData: initialFormData })),
+  setCurrentStep: (step) => set((state) => ({ ...state, currentStep: step })),
+  resetForm: () => set((state) => ({ ...state, formData: initialFormData, currentStep: 1, selectedId: null })),
 }));
+
 
 export { useCustomerStore };

@@ -2,9 +2,10 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ProfileGroupItem } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
-
+ 
 export const columns: ColumnDef<ProfileGroupItem>[] = [
   {
     id: "name",
@@ -17,6 +18,9 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
         {row.original.name}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-32" />,
+    },
     enableSorting: true,
     size: 200,
   },
@@ -31,6 +35,9 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
         {row.original.profile_type}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-16" />,
+    },
     enableSorting: true,
     size: 120,
   },
@@ -45,6 +52,9 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
         {row.original.parent_pool}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
     enableSorting: true,
     size: 150,
   },
@@ -59,6 +69,9 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
         {row.original.module}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-20" />,
+    },
     enableSorting: true,
     size: 150,
   },
@@ -73,6 +86,9 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
         {row.original.local_address}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-28" />,
+    },
     enableSorting: true,
     size: 150,
   },
@@ -87,6 +103,9 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
         {row.original.first_address}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-28" />,
+    },
     enableSorting: true,
     size: 150,
   },
@@ -101,6 +120,9 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
         {row.original.last_address}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-28" />,
+    },
     enableSorting: true,
     size: 150,
   },
@@ -115,6 +137,9 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
         {row.original.router_nas}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-36" />,
+    },
     enableSorting: true,
     size: 180,
   },
@@ -132,6 +157,14 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
         <span>{row.original.data_owner}</span>
       </div>
     ),
+    meta: {
+      skeleton: (
+        <div className="flex items-center gap-2">
+          <Skeleton className="size-6 rounded-full" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      ),
+    },
     enableSorting: true,
     size: 180,
   },
@@ -141,6 +174,13 @@ export const columns: ColumnDef<ProfileGroupItem>[] = [
       <DataGridColumnHeader title="Actions" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => <ActionsCell row={row as any} />,
+    meta: {
+      skeleton: (
+        <div className="flex justify-center">
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      ),
+    },
     enableSorting: false,
     size: 75,
   },

@@ -43,6 +43,8 @@ export interface CustomerData {
   expirationAction: string;
   ipAddressType: string;
   ipAddress: string;
+  macAddress: string;
+  total: string;
 }
 
 export interface KpiCardProps {

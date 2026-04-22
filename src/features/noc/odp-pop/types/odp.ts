@@ -31,3 +31,23 @@ export const DEFAULT_ODP_VALUES: Partial<OdpFormValues> = {
   portsUsed: 0,
   status: "active",
 };
+
+export interface OdpData {
+  id: number;
+  name: string;
+  ip_address?: string;
+  description?: string;
+  port?: number;
+  olt_name?: string;
+  olt_port?: number;
+  area: string;
+  latitude: number;
+  longitude: number;
+  parent_pop_id?: number;
+  parent_pop?: string;
+}
+
+export interface OdpResponse {
+  data: OdpData[];
+}
+

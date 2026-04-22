@@ -29,60 +29,72 @@ export function ExpirationNetworkingSection() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
                 <div className="space-y-2">
-                    <Label htmlFor="dueDate" className="text-xs font-medium text-muted-foreground">Change Due Date (Optional)</Label>
+                    <Label htmlFor="expired_on" className="text-xs font-medium text-muted-foreground">Expired On (Due Date)</Label>
                     <Input
-                        id="dueDate"
-                        type="date"
-                        value={formData.dueDate || ""}
-                        onChange={(e) => handleChange("dueDate", e.target.value)}
+                        id="expired_on"
+                        type="datetime-local"
+                        value={formData.expired_on || ""}
+                        onChange={(e) => handleChange("expired_on", e.target.value)}
                         disabled={isDetailMode}
                     />
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="expirationAction" className="text-xs font-medium text-muted-foreground">Action on Expiration</Label>
-                    <Select value={formData.expirationAction} onValueChange={(v) => handleChange("expirationAction", v)} disabled={isDetailMode}>
-                        <SelectTrigger id="expirationAction">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="DISCONNECT INTERNET ( SUSPENDED )">DISCONNECT INTERNET ( SUSPENDED )</SelectItem>
-                            <SelectItem value="DO NOTHING">DO NOTHING</SelectItem>
-                        </SelectContent>
-                    </Select>
+                    <Label htmlFor="renewed_on" className="text-xs font-medium text-muted-foreground">Renewed On</Label>
+                    <Input
+                        id="renewed_on"
+                        type="datetime-local"
+                        value={formData.renewed_on || ""}
+                        onChange={(e) => handleChange("renewed_on", e.target.value)}
+                        disabled={isDetailMode}
+                    />
                 </div>
 
                 <div className="space-y-2">
-                    <Label htmlFor="ipAddressType" className="text-xs font-medium text-muted-foreground">IP Address Tipe</Label>
-                    <Select value={formData.ipAddressType} onValueChange={(v) => handleChange("ipAddressType", v)} disabled={isDetailMode}>
-                        <SelectTrigger id="ipAddressType">
-                            <SelectValue placeholder="Select IP Type" />
+                    <Label htmlFor="remote_address" className="text-xs font-medium text-muted-foreground">Remote Address (IP)</Label>
+                    <Select 
+                        value={formData.remote_address === "Automatic" ? "Automatic" : "Static"} 
+                        onValueChange={(v) => handleChange("remote_address", v === "Automatic" ? "Automatic" : "")} 
+                        disabled={isDetailMode}
+                    >
+                        <SelectTrigger id="remote_address_type">
+                            <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Static">Static</SelectItem>
-                            <SelectItem value="Dynamic">Dynamic</SelectItem>
+                            <SelectItem value="Automatic">Automatic</SelectItem>
+                            <SelectItem value="Static">Static IP</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
-                {formData.ipAddressType === "Static" && (
+                {formData.remote_address !== "Automatic" && (
                     <div className="space-y-2">
-                        <Label htmlFor="ipAddress" className="text-xs font-medium text-muted-foreground">IP Address</Label>
+                        <Label htmlFor="remote_address" className="text-xs font-medium text-muted-foreground">Static IP Address</Label>
                         <Input
-                            id="ipAddress"
+                            id="remote_address"
                             placeholder="e.g. 10.0.0.1"
-                            value={formData.ipAddress || ""}
-                            onChange={(e) => handleChange("ipAddress", e.target.value)}
+                            value={formData.remote_address || ""}
+                            onChange={(e) => handleChange("remote_address", e.target.value)}
                             disabled={isDetailMode}
                         />
                     </div>
                 )}
+
+                <div className="space-y-2">
+                    <Label htmlFor="mac_address" className="text-xs font-medium text-muted-foreground">MAC Address (Optional)</Label>
+                    <Input
+                        id="mac_address"
+                        placeholder="AA:BB:CC:DD:EE:11"
+                        value={formData.mac_address || ""}
+                        onChange={(e) => handleChange("mac_address", e.target.value)}
+                        disabled={isDetailMode}
+                    />
+                </div>
             </div>
 
             <div className="p-3 bg-amber-50 rounded border border-amber-100">
                 <p className="text-[10px] text-amber-700 italic">
-                    Prorate & Duedate cannot changed if plan validty is unlimited or less than 3 days.
-                    If duedate not set, automatic prorate will be ignored.
+                    If remote address not set, it will be automatically assigned by the server.
                 </p>
             </div>
         </div>

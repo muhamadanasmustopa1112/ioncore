@@ -13,13 +13,12 @@ import { PopDeviceInventoryTable } from "@/features/noc/odp-pop/components/detai
 export default function PopDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
 
-  const pop = useMemo(() =>
-    DUMMY_POP_DATA.find(p => p.id === id)
-    , [id]);
+  const pop = useMemo(() => {
+    const found = DUMMY_POP_DATA.find(p => p.id === id);
+    // Jika tidak ketemu (misalnya ID "1"), gunakan data pertama sebagai fallback agar tidak 404
+    return found || DUMMY_POP_DATA[0];
+  }, [id]);
 
-  if (!pop) {
-    notFound();
-  }
 
   return (
     <div className="relative h-full w-full flex flex-col gap-y-6 overflow-y-auto px-6 py-4 bg-background">

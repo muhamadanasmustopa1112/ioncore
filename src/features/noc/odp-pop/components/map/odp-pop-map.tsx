@@ -14,8 +14,6 @@ import { PopMarkers } from "./pop-markers";
 import { OdpMarkers } from "./odp-markers";
 import { TopologyPaths } from "./topology-paths";
 import { usePop } from "../../api/get-pop";
-import { DUMMY_OLT_DETAILS } from "../../data/dummy-olt-details";
-import { DUMMY_ODP_LIST } from "../../data/dummy-odp-list";
 
 // --- Controllers ---
 
@@ -31,23 +29,13 @@ function MapFocusController({ selectedPopId, selectedOdpId, markerRefs, pops }: 
   const map = useMap();
 
   useEffect(() => {
-    // 1. Handle ODP Selection (Highest Priority)
+    // 1. Handle ODP Selection (Placeholder for now since odps are disabled)
     if (selectedOdpId) {
-      const allOdps = Object.values(DUMMY_ODP_LIST).flat();
-      const odp = allOdps.find(o => o.id === selectedOdpId);
-
-      if (odp) {
-        map.flyTo([odp.latitude, odp.longitude], 18, { animate: true, duration: 1.5 });
-
-        // Auto-open ODP popup
-        const marker = markerRefs.current[selectedOdpId];
-        if (marker) {
-          setTimeout(() => marker.openPopup(), 1500);
-        }
-      }
+      // Logic removed as requested
     }
     // 2. Handle POP Selection
     else if (selectedPopId) {
+
       const pop = pops.find(p => String(p.id) === String(selectedPopId));
       if (pop) {
         map.flyTo([pop.latitude, pop.longitude], 16, { animate: true, duration: 1.5 });
@@ -59,10 +47,12 @@ function MapFocusController({ selectedPopId, selectedOdpId, markerRefs, pops }: 
         }
       }
     }
-  }, [selectedPopId, selectedOdpId, map, markerRefs]);
+  }, [selectedPopId, selectedOdpId, map, markerRefs, pops]);
 
   return null;
 }
+
+
 
 /**
  * Fixes Leaflet "size" calculation issues in flex/dynamic layouts.
@@ -83,13 +73,15 @@ interface OdpPopMapProps {
   selectedPopId: string | null;
   selectedOdpId?: string | null;
   onSelect?: (id: string | null) => void;
+  showOdps?: boolean;
 }
 
 export default function OdpPopMap({
   selectedArea,
   selectedPopId,
   selectedOdpId,
-  onSelect
+  onSelect,
+  showOdps = false,
 }: OdpPopMapProps) {
   const [isMounted, setIsMounted] = useState(false);
   const { theme, resolvedTheme } = useTheme();
@@ -100,15 +92,17 @@ export default function OdpPopMap({
   }, []);
 
   const { data: popResponse } = usePop();
+  
   const pops = useMemo(() => popResponse?.data || [], [popResponse]);
 
-  // Filter POPs based on area (Enterprise logic moves here)
+  // Filter POPs based on area
   const filteredPops = useMemo(() => {
     if (!selectedArea) return pops;
     return pops.filter(pop => pop.area === selectedArea);
   }, [selectedArea, pops]);
 
   // Default center
+
   const defaultCenter = useMemo<[number, number]>(() => (
     filteredPops.length > 0
       ? [filteredPops[0].latitude, filteredPops[0].longitude]
@@ -160,24 +154,14 @@ export default function OdpPopMap({
             pops={pops}
           />
 
-          {/* Composed Data Layers */}
-          <TopologyPaths
-            selectedArea={selectedArea}
-            selectedPopId={selectedPopId}
-          />
-
           <PopMarkers
             data={filteredPops}
             markerRefs={markerRefs}
             onSelect={onSelect}
           />
-
-          <OdpMarkers
-            selectedArea={selectedArea}
-            selectedPopId={selectedPopId}
-            markerRefs={markerRefs}
-          />
         </MapContainer>
+
+
 
         <Button
           variant="outline"

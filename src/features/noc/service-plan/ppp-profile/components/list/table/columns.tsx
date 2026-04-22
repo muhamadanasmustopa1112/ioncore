@@ -7,9 +7,10 @@ import {
 } from "@remixicon/react";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PPPProfileItem } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
-
+ 
 export const columns: ColumnDef<PPPProfileItem>[] = [
   {
     id: "name",
@@ -22,6 +23,9 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
         {row.original.name}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-40" />,
+    },
     enableSorting: true,
     size: 220,
   },
@@ -36,6 +40,9 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
         {row.original.code}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-32" />,
+    },
     enableSorting: true,
     size: 220,
   },
@@ -50,6 +57,9 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
         {row.original.profile_group}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
     enableSorting: true,
     size: 200,
   },
@@ -68,6 +78,13 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
         {row.original.capital_price_display}
       </div>
     ),
+    meta: {
+      skeleton: (
+        <div className="flex justify-end">
+          <Skeleton className="h-4 w-24" />
+        </div>
+      ),
+    },
     enableSorting: true,
     size: 160,
   },
@@ -86,6 +103,13 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
         {row.original.sell_price_display}
       </div>
     ),
+    meta: {
+      skeleton: (
+        <div className="flex justify-end">
+          <Skeleton className="h-4 w-24" />
+        </div>
+      ),
+    },
     enableSorting: true,
     size: 160,
   },
@@ -101,6 +125,9 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
         {row.original.shared_users}
       </Badge>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-6 w-16 rounded-full" />,
+    },
     enableSorting: true,
     size: 180,
   },
@@ -116,6 +143,9 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
         {row.original.data_owner}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-32" />,
+    },
     enableSorting: true,
     size: 180,
   },
@@ -130,6 +160,9 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
         {row.original.vcr_customer_display || '-'}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-20" />,
+    },
     enableSorting: true,
     size: 160,
   },
@@ -143,6 +176,13 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
         <ActionsCell row={row as any} />
       </div>
     ),
+    meta: {
+      skeleton: (
+        <div className="flex justify-center">
+          <Skeleton className="h-8 w-8 rounded-md" />
+        </div>
+      ),
+    },
     enableSorting: false,
     size: 80,
   },

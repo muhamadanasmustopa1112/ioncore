@@ -56,12 +56,8 @@ export const RouterForm = forwardRef<RouterFormRef, RouterFormProps>(
         const { closeRouterFormSheet, selectedRouter } = useRouterStore();
         const isVerticalSidebar = process.env.NEXT_PUBLIC_SIDEBAR === "vertical";
 
-        const { data: routerData, isLoading: isLoadingRouter } = useGetRouter({
-            id: routerId || "",
-            queryConfig: { enabled: !!routerId },
-        });
 
-        const data = routerData?.data || selectedRouter;
+        const data = selectedRouter;
         const form = useForm<RouterFormData>({
             resolver: zodResolver(routerSchema),
             values: (data && mode !== "new") ? {
@@ -126,18 +122,6 @@ export const RouterForm = forwardRef<RouterFormRef, RouterFormProps>(
                 createRouter(formData as any);
             }
         };
-
-        if (isLoadingRouter) {
-            return (
-                <Card className="mt-[10px] mx-6">
-                    <CardContent className="py-6">
-                        <div className="text-center text-muted-foreground animate-pulse">
-                            Loading router data...
-                        </div>
-                    </CardContent>
-                </Card>
-            );
-        }
 
         return (
             <Form {...form}>
