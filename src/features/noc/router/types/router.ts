@@ -46,3 +46,20 @@ export type RouterParams = {
 };
 
 export type RouterData = RouterItem;
+
+export type CreateRouterRequest = {
+  community: string;
+  description: string;
+  nasname: string;
+  ports: number;
+  secret: string;
+  server: string;
+  shortname: string;
+  time_zone: string;
+  type: string;
+};
+
+export type CreateRouterResponse = {
+  message: string;
+  data: RouterItem;
+};

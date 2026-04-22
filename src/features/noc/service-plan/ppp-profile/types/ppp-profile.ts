@@ -2,7 +2,6 @@ export type PPPProfileItem = {
   id: number;
   type: string;
   code: string;
-  group_name: string;
   name: string;
   data_owner: string;
   plan_validity: string;
@@ -11,15 +10,20 @@ export type PPPProfileItem = {
   privileges: string;
   vat: string;
   profile_group: string;
+  group_name?: string;
   promo: string;
+  capital_price?: number;
+  sell_price?: number;
+  customer_count?: number;
+  voucher_count?: number;
+  attributes?: {
+    realm: string;
+  };
   capital_price_display: string;
   sell_price_display: string;
   vcr_customer_display: string;
   vcr_customer_tooltip: string;
   popover_content: string;
-  capital_price?: number;
-  sell_price?: number;
-  customer_count?: number;
 };
 
 export type PPPProfileMetadata = {
@@ -41,6 +45,31 @@ export type PPPProfileParams = {
   page?: number;
   limit?: number;
   search?: string;
+};
+
+export type CreatePPPProfileRequest = {
+  name: string;
+  code: string;
+  data_owner: string;
+  plan_validity: string;
+  shared_users: string;
+  service_type: string;
+  privileges: string;
+  vat: string;
+  profile_group: string;
+  promo: string;
+  capital_price: number;
+  sell_price: number;
+  customer_count: number;
+  voucher_count: number;
+  attributes: {
+    realm: string;
+  };
+};
+
+export type CreatePPPProfileResponse = {
+  message: string;
+  data: PPPProfileItem;
 };
 
 export type TimeUnit = "MINUTES" | "HOURS" | "DAYS" | "WEEKS" | "MONTHS";

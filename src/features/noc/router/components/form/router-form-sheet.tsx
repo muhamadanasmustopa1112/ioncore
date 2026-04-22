@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -8,18 +9,18 @@ import {
     SheetTitle,
 } from "@/components/ui/sheet";
 import { useRouterStore } from "../../store/router";
-import { RouterForm } from "./router-form";
+import { RouterForm, RouterFormRef } from "./router-form";
 
 export function RouterFormSheet() {
-    const { routerSheetOpen, closeRouterFormSheet, form } = useRouterStore();
+    const { routerSheetOpen, closeRouterFormSheet, form: formMode, selectedRouter } = useRouterStore();
+    const formRef = useRef<RouterFormRef>(null);
 
-    const isNewMode = form === "new";
-    const isEditMode = form === "edit";
-    const isDetailMode = form === "details";
+    const isNewMode = formMode === "new";
+    const isEditMode = formMode === "edit";
+    const isDetailMode = formMode === "details";
 
     const handleSave = () => {
-        // Logic for saving will be handled here or inside the form
-        closeRouterFormSheet();
+        formRef.current?.submit();
     };
 
     return (
@@ -34,7 +35,12 @@ export function RouterFormSheet() {
 
                 {/* Body */}
                 <SheetBody className="flex-1 p-0 overflow-hidden">
-                    <RouterForm />
+                    <RouterForm 
+                        ref={formRef}
+                        mode={formMode || "new"}
+                        routerId={selectedRouter?.id ? String(selectedRouter.id) : undefined}
+                        readOnly={isDetailMode}
+                    />
                 </SheetBody>
 
                 {/* Footer */}
@@ -46,14 +52,16 @@ export function RouterFormSheet() {
                     <Button variant="outline" onClick={closeRouterFormSheet} className="mr-3">
                         Cancel
                     </Button>
-                    <Button
-                        variant="primary"
-                        onClick={handleSave}
-                        className="font-semibold"
-                        disabled={isDetailMode}
-                    >
-                        {isNewMode ? "Create Router" : "Save Changes"}
-                    </Button>
+                    {!isDetailMode && (
+                        <Button
+                            variant="primary"
+                            onClick={handleSave}
+                            className="font-semibold"
+                            disabled={formRef.current?.isPending}
+                        >
+                            {isNewMode ? "Create Router" : "Save Changes"}
+                        </Button>
+                    )}
                 </SheetFooter>
             </SheetContent>
         </Sheet>

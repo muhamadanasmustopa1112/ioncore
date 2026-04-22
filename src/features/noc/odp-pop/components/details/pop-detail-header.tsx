@@ -22,16 +22,16 @@ export function PopDetailHeader({ pop }: { pop: PopData }) {
               {pop.name}
             </h1>
             <Badge
-              variant={pop.status === 'active' ? 'success' : 'warning'}
+              variant={'success'}
               appearance="light"
               className="px-3 py-1 text-[10px] font-black uppercase tracking-widest"
             >
-              {pop.status}
+              Active
             </Badge>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground font-medium">
             <RiMapPinLine className="size-4" />
-            <span className="text-sm">{pop.address}</span>
+            <span className="text-sm">{pop.area}</span>
           </div>
         </div>
       </div>

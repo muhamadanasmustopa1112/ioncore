@@ -1,350 +1,404 @@
 "use client";
 
-import { useEffect } from "react";
+import { useImperativeHandle, forwardRef } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
-    RiInformationLine,
-    RiMoneyDollarCircleLine,
-    RiSettings4Line,
-    RiCalendarEventLine,
-    RiTimeLine,
-    RiDatabase2Line
+  RiInformationLine,
+  RiMoneyDollarCircleLine,
+  RiSettings4Line,
+  RiDatabase2Line,
+  RiShieldLine,
+  RiGroupLine,
 } from "@remixicon/react";
+
+import { Card, CardContent } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { usePPPProfileStore } from "../../store/ppp-profile";
-import { TimeUnit } from "../../types";
+import { pppProfileSchema, PPPProfileFormData, useCreatePPPProfile } from "../../api/post-ppp-profile";
+import { CreatePPPProfileRequest } from "../../types/ppp-profile";
+import { useGetPPPProfile } from "../../api/get-ppp-profile";
+import { useUpdatePPPProfile } from "../../api/put-ppp-profile";
 
-const DAYS_OF_WEEK = [
-    { id: "MONDAY", label: "MONDAY" },
-    { id: "TUESDAY", label: "TUESDAY" },
-    { id: "WEDNESDAY", label: "WEDNESDAY" },
-    { id: "THURSDAY", label: "THURSDAY" },
-    { id: "FRIDAY", label: "FRIDAY" },
-    { id: "SATURDAY", label: "SATURDAY" },
-    { id: "SUNDAY", label: "SUNDAY" },
-];
+interface PPPProfileFormProps {
+  mode: "new" | "edit" | "details";
+  pppProfileCode?: string;
+}
 
-const TIME_UNITS: TimeUnit[] = ["MINUTES", "HOURS", "DAYS", "WEEKS", "MONTHS"];
+export type PPPProfileFormRef = {
+  submit: () => void;
+  isPending: boolean;
+};
 
-export function PPPProfileForm() {
-    const { form, formData, setFormData } = usePPPProfileStore();
-    const isDetailMode = form === "details";
+export const PPPProfileForm = forwardRef<PPPProfileFormRef, PPPProfileFormProps>(
+  ({ mode, pppProfileCode }, ref) => {
+    const isNewMode = mode === "new";
+    const isDetailMode = mode === "details";
+    const { closePPPProfileFormSheet } = usePPPProfileStore();
 
-    const handleInputChange = (field: string, value: any) => {
-        setFormData({ [field]: value });
+    const { data: pppProfileData, isLoading: isLoadingProfile } = useGetPPPProfile({
+      id: pppProfileCode || "",
+      queryConfig: {
+        enabled: !!pppProfileCode && mode !== "new",
+      },
+    });
+
+    const { mutate: createPPPProfile, isPending: isCreating } = useCreatePPPProfile({
+      mutationConfig: {
+        onSuccess: () => closePPPProfileFormSheet(),
+      },
+    });
+
+    const { mutate: updatePPPProfile, isPending: isUpdating } = useUpdatePPPProfile({
+      mutationConfig: {
+        onSuccess: () => closePPPProfileFormSheet(),
+      },
+    });
+
+    const isPending = isCreating || isUpdating;
+
+    const profile = pppProfileData?.data;
+
+    const form = useForm<PPPProfileFormData>({
+      resolver: zodResolver(pppProfileSchema) as any,
+      values: (profile && mode !== "new") ? {
+        name: profile.name || "",
+        code: profile.code || "",
+        data_owner: profile.data_owner || "radius_admin",
+        plan_validity: profile.plan_validity || "30 Days",
+        shared_users: profile.shared_users || "1",
+        service_type: profile.service_type || "PPP",
+        privileges: profile.privileges || "GLOBAL",
+        vat: profile.vat || "11%",
+        profile_group: profile.profile_group || "",
+        promo: profile.promo || "-",
+        capital_price: profile.capital_price?.toString() || "0",
+        sell_price: profile.sell_price?.toString() || "0",
+        customer_count: profile.customer_count?.toString() || "100",
+        voucher_count: profile.voucher_count?.toString() || "100",
+        attributes: {
+          realm: profile.attributes?.realm || "pppoe",
+        },
+      } : {
+        name: "",
+        code: "",
+        data_owner: "radius_admin",
+        plan_validity: "30 Days",
+        shared_users: "1",
+        service_type: "PPP",
+        privileges: "GLOBAL",
+        vat: "11%",
+        profile_group: "",
+        promo: "-",
+        capital_price: "0",
+        sell_price: "0",
+        customer_count: "0",
+        voucher_count: "0",
+        attributes: {
+          realm: "pppoe",
+        },
+      },
+    });
+
+    useImperativeHandle(ref, () => ({
+      submit: () => {
+        form.handleSubmit(onSubmit)();
+      },
+      isPending,
+    }));
+
+    const onSubmit = (data: PPPProfileFormData) => {
+      const payload: CreatePPPProfileRequest = {
+        ...data,
+        capital_price: parseInt(data.capital_price),
+        sell_price: parseInt(data.sell_price),
+        customer_count: parseInt(data.customer_count),
+        voucher_count: parseInt(data.voucher_count),
+      };
+
+      if (mode === "edit" && pppProfileCode) {
+        updatePPPProfile({ code: pppProfileCode, data: payload });
+      } else {
+        createPPPProfile(payload);
+      }
     };
 
-    const toggleDay = (dayId: string) => {
-        const current = [...formData.loginPeriod];
-        if (current.includes(dayId)) {
-            setFormData({ loginPeriod: current.filter(d => d !== dayId) });
-        } else {
-            setFormData({ loginPeriod: [...current, dayId] });
-        }
-    };
-
-    const toggleAllDays = () => {
-        if (formData.loginPeriod.length === 7) {
-            setFormData({ loginPeriod: [] });
-        } else {
-            setFormData({ loginPeriod: DAYS_OF_WEEK.map(d => d.id) });
-        }
-    };
+    if (isLoadingProfile) {
+      return (
+        <Card className="mt-[10px] mx-6">
+          <CardContent className="py-6">
+            <div className="text-center text-muted-foreground animate-pulse">
+              Loading PPP Profile data...
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
 
     return (
-        <div className="flex h-full flex-col overflow-hidden">
-            <ScrollArea className="flex-1 px-6 py-6">
-                <div className="space-y-10 pb-10">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
+          <Card className="flex-1 border-none shadow-none bg-transparent">
+            <CardContent className="p-0 flex flex-col h-full overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="p-6 space-y-10 pb-10">
 
-                    {/* General Information */}
-                    <section className="space-y-5">
-                        <div className="flex items-center gap-2.5 pb-2.5 border-b border-border/60">
-                            <div className="p-1.5 bg-blue-500/10 rounded-lg">
-                                <RiInformationLine className="size-4 text-blue-600" />
-                            </div>
-                            <h3 className="font-black text-foreground">General Information</h3>
-                        </div>
+                  {/* General Information */}
+                  <section className="space-y-4">
+                    <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                      <RiInformationLine className="size-4 text-blue-500" />
+                      <h3 className="text-sm font-semibold">General Information</h3>
+                    </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2.5">
-                                <Label htmlFor="name" className="text-muted-foreground">Name</Label>
-                                <Input
-                                    id="name"
-                                    placeholder="Profile Name"
-                                    value={formData.name}
-                                    onChange={(e) => handleInputChange("name", e.target.value)}
-                                    disabled={isDetailMode}
-                                    className="h-11"
-                                />
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label htmlFor="planeName" className="text-muted-foreground">Plan Name</Label>
-                                <Input
-                                    id="planeName"
-                                    placeholder="Plan Name"
-                                    value={formData.planeName}
-                                    onChange={(e) => handleInputChange("planeName", e.target.value)}
-                                    disabled={isDetailMode}
-                                    className="h-11"
-                                />
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label htmlFor="dataOwner" className="text-muted-foreground">Data Owner</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="dataOwner"
-                                        value={formData.dataOwner}
-                                        onChange={(e) => handleInputChange("dataOwner", e.target.value)}
-                                        disabled={isDetailMode}
-                                        className="h-11 pl-10"
-                                    />
-                                    <RiDatabase2Line className="size-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Profile Name</FormLabel>
+                            <FormControl>
+                              <Input {...field} disabled={isDetailMode || isPending} className="h-10" placeholder="e.g. PPP Basic" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="code"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Profile Code</FormLabel>
+                            <FormControl>
+                              <Input {...field} disabled={isDetailMode || !isNewMode || isPending} className="h-10 uppercase" placeholder="e.g. PPP-BASIC" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="data_owner"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Data Owner</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Input {...field} disabled={isDetailMode || isPending} className="h-10 pl-9" />
+                                <RiDatabase2Line className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="attributes.realm"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Realm</FormLabel>
+                            <FormControl>
+                              <Input {...field} disabled={isDetailMode || isPending} className="h-10" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </section>
 
-                    {/* Pricing & Tax Section */}
-                    <section className="space-y-5">
-                        <div className="flex items-center gap-2.5 pb-2.5 border-b border-border/60">
-                            <div className="p-1.5 bg-emerald-500/10 rounded-lg">
-                                <RiMoneyDollarCircleLine className="size-4 text-emerald-600" />
-                            </div>
-                            <h3 className="text-foreground">Pricing & Tax Information</h3>
-                        </div>
+                  {/* Pricing & Capacity */}
+                  <section className="space-y-4">
+                    <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                      <RiMoneyDollarCircleLine className="size-4 text-emerald-500" />
+                      <h3 className="text-sm font-semibold">Pricing & Capacity</h3>
+                    </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="space-y-2.5">
-                                <Label htmlFor="capitalPrice" className="text-muted-foreground">Capital Price</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="capitalPrice"
-                                        type="number"
-                                        value={formData.capitalPrice}
-                                        onChange={(e) => handleInputChange("capitalPrice", Number(e.target.value))}
-                                        disabled={isDetailMode}
-                                        className="h-11 pl-10"
-                                    />
-                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground">Rp</span>
-                                </div>
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label htmlFor="sellPrice" className="text-muted-foreground">Sell Price</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="sellPrice"
-                                        type="number"
-                                        value={formData.sellPrice}
-                                        onChange={(e) => handleInputChange("sellPrice", Number(e.target.value))}
-                                        disabled={isDetailMode}
-                                        className="h-11 pl-10"
-                                    />
-                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground">Rp</span>
-                                </div>
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label htmlFor="promoPrice" className="text-muted-foreground">Promo Price</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="promoPrice"
-                                        type="number"
-                                        value={formData.promoPrice}
-                                        onChange={(e) => handleInputChange("promoPrice", Number(e.target.value))}
-                                        disabled={isDetailMode}
-                                        className="h-11 pl-10"
-                                    />
-                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground">Rp</span>
-                                </div>
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label htmlFor="vat" className="text-muted-foreground">VAT (%)</Label>
-                                <div className="relative">
-                                    <Input
-                                        id="vat"
-                                        type="number"
-                                        value={formData.vat}
-                                        onChange={(e) => handleInputChange("vat", Number(e.target.value))}
-                                        disabled={isDetailMode}
-                                        className="h-11 pr-10"
-                                    />
-                                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground">%</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+                      <FormField
+                        control={form.control}
+                        name="capital_price"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Capital Price</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Input {...field} type="number" disabled={isDetailMode || isPending} className="h-10 pl-9" />
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">Rp</span>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="sell_price"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Sell Price</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Input {...field} type="number" disabled={isDetailMode || isPending} className="h-10 pl-9" />
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">Rp</span>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="customer_count"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Customer Count</FormLabel>
+                            <FormControl>
+                              <Input {...field} type="number" disabled={isDetailMode || isPending} className="h-10" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="voucher_count"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Voucher Count</FormLabel>
+                            <FormControl>
+                              <Input {...field} type="number" disabled={isDetailMode || isPending} className="h-10" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </section>
 
-                    {/* Plan Settings Section */}
-                    <section className="space-y-5">
-                        <div className="flex items-center gap-2.5 pb-2.5 border-b border-border/60">
-                            <div className="p-1.5 bg-orange-500/10 rounded-lg">
-                                <RiSettings4Line className="size-4 text-orange-600" />
-                            </div>
-                            <h3 className="text-foreground">Plan Configuration</h3>
-                        </div>
+                  {/* Plan Configuration */}
+                  <section className="space-y-4">
+                    <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                      <RiSettings4Line className="size-4 text-orange-500" />
+                      <h3 className="text-sm font-semibold">Plan Configuration</h3>
+                    </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-2.5">
-                                <Label htmlFor="profileGroup" className="text-muted-foreground">Profile Group</Label>
-                                <Input
-                                    id="profileGroup"
-                                    placeholder="e.g. PLATINUM"
-                                    value={formData.profileGroup}
-                                    onChange={(e) => handleInputChange("profileGroup", e.target.value)}
-                                    disabled={isDetailMode}
-                                    className="h-11 uppercase"
-                                />
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label htmlFor="bandwidth" className="text-muted-foreground">Bandwidth</Label>
-                                <Input
-                                    id="bandwidth"
-                                    placeholder="e.g. 100M"
-                                    value={formData.bandwidth}
-                                    onChange={(e) => handleInputChange("bandwidth", e.target.value)}
-                                    disabled={isDetailMode}
-                                    className="h-11 uppercase"
-                                />
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label htmlFor="priority" className="text-muted-foreground">Priority</Label>
-                                <Input
-                                    id="priority"
-                                    type="number"
-                                    value={formData.priority}
-                                    onChange={(e) => handleInputChange("priority", Number(e.target.value))}
-                                    disabled={isDetailMode}
-                                    className="h-11"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
-                            <div className="space-y-2.5">
-                                <Label htmlFor="planValidity" className="text-muted-foreground">Plan Validity</Label>
-                                <Input
-                                    id="planValidity"
-                                    type="number"
-                                    value={formData.planValidity}
-                                    onChange={(e) => handleInputChange("planValidity", Number(e.target.value))}
-                                    disabled={isDetailMode}
-                                    className="h-11"
-                                />
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label className="text-muted-foreground">Time Unit</Label>
-                                <Select
-                                    disabled={isDetailMode}
-                                    value={formData.timeUnit}
-                                    onValueChange={(val) => handleInputChange("timeUnit", val)}
-                                >
-                                    <SelectTrigger className="h-11">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {TIME_UNITS.map(unit => (
-                                            <SelectItem key={unit} value={unit} className="text-xs">{unit}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label htmlFor="sharedUsers" className="text-muted-foreground">Shared Users</Label>
-                                <Input
-                                    id="sharedUsers"
-                                    type="number"
-                                    value={formData.sharedUsers}
-                                    onChange={(e) => handleInputChange("sharedUsers", Number(e.target.value))}
-                                    disabled={isDetailMode}
-                                    className="h-11"
-                                />
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Schedule Section */}
-                    <section className="space-y-6">
-                        <div className="flex items-center gap-2.5 pb-2.5 border-b border-border/60">
-                            <div className="p-1.5 bg-violet-500/10 rounded-lg">
-                                <RiCalendarEventLine className="size-4 text-violet-600" />
-                            </div>
-                            <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Login Period & Session Schedule</h3>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between mb-2">
-                                <Label className="text-muted-foreground">Login Period</Label>
-                                <button
-                                    type="button"
-                                    onClick={toggleAllDays}
-                                    disabled={isDetailMode}
-                                    className="text-xs text-blue-600 hover:text-blue-700 transition-colors"
-                                >
-                                    {formData.loginPeriod.length === 7 ? "Deselect All" : "Check All"}
-                                </button>
-                            </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                {DAYS_OF_WEEK.map((day) => (
-                                    <div key={day.id} className="flex items-center space-x-2.5 p-3 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer" onClick={() => !isDetailMode && toggleDay(day.id)}>
-                                        <Checkbox
-                                            id={day.id}
-                                            checked={formData.loginPeriod.includes(day.id)}
-                                            onCheckedChange={() => toggleDay(day.id)}
-                                            disabled={isDetailMode}
-                                        />
-                                        <label
-                                            htmlFor={day.id}
-                                            className="cursor-pointer leading-none"
-                                        >
-                                            {day.label}
-                                        </label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                            <div className="space-y-2.5">
-                                <Label htmlFor="fromTime" className="text-muted-foreground flex items-center gap-1.5">
-                                    <RiTimeLine className="size-3 text-emerald-500" />
-                                    From Time
-                                </Label>
-                                <Input
-                                    id="fromTime"
-                                    type="time"
-                                    value={formData.fromTime}
-                                    onChange={(e) => handleInputChange("fromTime", e.target.value)}
-                                    disabled={isDetailMode}
-                                    className="h-11"
-                                />
-                            </div>
-                            <div className="space-y-2.5">
-                                <Label htmlFor="toTime" className="text-muted-foreground flex items-center gap-1.5">
-                                    <RiTimeLine className="size-3 text-rose-500" />
-                                    To Time
-                                </Label>
-                                <Input
-                                    id="toTime"
-                                    type="time"
-                                    value={formData.toTime}
-                                    onChange={(e) => handleInputChange("toTime", e.target.value)}
-                                    disabled={isDetailMode}
-                                    className="h-11"
-                                />
-                            </div>
-                        </div>
-                    </section>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
+                      <FormField
+                        control={form.control}
+                        name="profile_group"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Profile Group</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Input {...field} disabled={isDetailMode || isPending} className="h-10 pl-9" />
+                                <RiGroupLine className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="plan_validity"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Plan Validity</FormLabel>
+                            <FormControl>
+                              <Input {...field} disabled={isDetailMode || isPending} className="h-10" placeholder="e.g. 30 Days" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="shared_users"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Shared Users</FormLabel>
+                            <FormControl>
+                              <Input {...field} disabled={isDetailMode || isPending} className="h-10" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="service_type"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Service Type</FormLabel>
+                            <FormControl>
+                              <Input {...field} disabled={isDetailMode || isPending} className="h-10" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="privileges"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">Privileges</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Input {...field} disabled={isDetailMode || isPending} className="h-10 pl-9" />
+                                <RiShieldLine className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="vat"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-xs text-muted-foreground">VAT</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <Input {...field} disabled={isDetailMode || isPending} className="h-10 pr-8 text-right" />
+                                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">%</span>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="promo"
+                        render={({ field }) => (
+                          <FormItem className="md:col-span-3">
+                            <FormLabel className="text-xs text-muted-foreground">Promo</FormLabel>
+                            <FormControl>
+                              <Input {...field} disabled={isDetailMode || isPending} className="h-10" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </section>
 
                 </div>
-            </ScrollArea>
-        </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </form>
+      </Form>
     );
-}
+  }
+);
+
+PPPProfileForm.displayName = "PPPProfileForm";

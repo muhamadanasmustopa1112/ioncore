@@ -3,107 +3,186 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { ActionsCell, RenewPrintCell } from "./data-table-actions-cell";
-import { CustomerData } from "../../../types";
+import { PPPCustomer } from "../../../types";
 
-export const columns: ColumnDef<CustomerData>[] = [
+export const columns: ColumnDef<PPPCustomer>[] = [
   {
-    id: "customerId",
-    accessorFn: (row) => row.customerId,
+    id: "member_id",
+    accessorFn: (row) => row.member_id,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Customer ID" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Member ID" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="font-medium text-foreground">
-        {row.original.customerId}
+        {row.original.member_id}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
     enableSorting: true,
     size: 130,
   },
   {
-    id: "name",
-    accessorFn: (row) => row.name,
+    id: "username",
+    accessorFn: (row) => row.username,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Username" column={column} className="text-foreground font-semibold" />
+    ),
+    cell: ({ row }) => (
+      <div className="font-medium text-foreground">
+        {row.original.username}
+      </div>
+    ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
+    enableSorting: true,
+    size: 135,
+  },
+  {
+    id: "fullname",
+    accessorFn: (row) => row.fullname,
     header: ({ column }) => (
       <DataGridColumnHeader title="Name" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="font-semibold text-foreground">
-        {row.original.name}
+        {row.original.fullname}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-32" />,
+    },
     enableSorting: true,
     size: 180,
   },
   {
-    id: "serviceType",
-    accessorFn: (row) => row.serviceType,
+    id: "servicetype",
+    accessorFn: (row) => row.servicetype,
     header: ({ column }) => (
       <DataGridColumnHeader title="Service Type" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => <div>{row.original.serviceType}</div>,
+    cell: ({ row }) => <div>{row.original.servicetype}</div>,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-20" />,
+    },
     enableSorting: true,
     size: 130,
   },
   {
-    id: "servicePlan",
-    accessorFn: (row) => row.servicePlan,
+    id: "plan_name",
+    accessorFn: (row) => row.plan_name,
     header: ({ column }) => (
       <DataGridColumnHeader title="Service Plan" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="text-primary font-medium">
-        {row.original.servicePlan}
+        {row.original.plan_name}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-28" />,
+    },
     enableSorting: true,
-    size: 140,
+    size: 150,
   },
   {
-    id: "ipAddress",
-    accessorFn: (row) => row.ipAddress,
+    id: "auth_status",
+    accessorFn: (row) => row.auth_status,
     header: ({ column }) => (
-      <DataGridColumnHeader title="IP Address" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Auth Status" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => <code className="text-xs">{row.original.ipAddress}</code>,
+    cell: ({ row }) => (
+      <div className={`font-semibold ${row.original.auth_status === "Enabled-Users" ? "text-emerald-600" : "text-rose-600"}`}>
+        {row.original.auth_status}
+      </div>
+    ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
     enableSorting: true,
     size: 130,
   },
   {
-    id: "renewedOn",
-    accessorFn: (row) => row.renewedOn,
+    id: "remote_address",
+    accessorFn: (row) => row.remote_address,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="IP Address" column={column} className="text-foreground font-semibold" />
+    ),
+    cell: ({ row }) => <code className="text-xs">{row.original.remote_address}</code>,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
+    enableSorting: true,
+    size: 130,
+  },
+  {
+    id: "trx_status",
+    accessorFn: (row) => row.trx_status,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Tx Status" column={column} className="text-foreground font-semibold" />
+    ),
+    cell: ({ row }) => (
+      <Badge color={row.original.trx_status === "PAID" ? "emerald" : "orange"} variant="primary" className="font-bold">
+        {row.original.trx_status}
+      </Badge>
+    ),
+    meta: {
+      skeleton: <Skeleton className="h-6 w-16" />,
+    },
+    enableSorting: true,
+    size: 110,
+  },
+  {
+    id: "renewed_on",
+    accessorFn: (row) => row.renewed_on,
     header: ({ column }) => (
       <DataGridColumnHeader title="Renewed On" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div>
-        {format(new Date(row.original.renewedOn), "dd MMM yyyy")}
+        {format(new Date(row.original.renewed_on), "dd MMM yyyy")}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
     enableSorting: true,
     size: 150,
   },
   {
-    id: "dueDate",
-    accessorFn: (row) => row.dueDate,
+    id: "expired_on",
+    accessorFn: (row) => row.expired_on,
     header: ({ column }) => (
       <DataGridColumnHeader title="Due Date" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="font-medium text-tertiary">
-        {format(new Date(row.original.dueDate), "dd MMM yyyy")}
+        {row.original.expired_on !== "0000-00-00 00:00:00"
+          ? format(new Date(row.original.expired_on), "dd MMM yyyy")
+          : "-"}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
     enableSorting: true,
     size: 150,
   },
   {
-    id: "dataOwner",
-    accessorFn: (row) => row.dataOwner,
+    id: "owner_name",
+    accessorFn: (row) => row.owner_name,
     header: ({ column }) => (
       <DataGridColumnHeader title="Data Owner" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => <div>{row.original.dataOwner}</div>,
+    cell: ({ row }) => <div>{row.original.owner_name}</div>,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
     enableSorting: true,
     size: 150,
   },
@@ -114,6 +193,9 @@ export const columns: ColumnDef<CustomerData>[] = [
       <DataGridColumnHeader title="Renew | Print" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => <RenewPrintCell row={row} />,
+    meta: {
+      skeleton: <Skeleton className="h-8 w-16 rounded-md" />,
+    },
     enableSorting: false,
     size: 110,
   },
@@ -124,6 +206,9 @@ export const columns: ColumnDef<CustomerData>[] = [
       <DataGridColumnHeader title="Actions" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => <ActionsCell row={row} />,
+    meta: {
+      skeleton: <Skeleton className="h-8 w-8 rounded-full" />,
+    },
     enableSorting: false,
     size: 75,
   },

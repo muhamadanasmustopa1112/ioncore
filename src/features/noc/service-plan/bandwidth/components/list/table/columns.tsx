@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { BandwidthItem } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const columns: ColumnDef<BandwidthItem>[] = [
   {
@@ -19,6 +20,9 @@ export const columns: ColumnDef<BandwidthItem>[] = [
     ),
     enableSorting: true,
     size: 200,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-[150px]" />,
+    },
   },
   {
     id: "upload",
@@ -33,6 +37,9 @@ export const columns: ColumnDef<BandwidthItem>[] = [
     ),
     enableSorting: true,
     size: 180,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-[100px]" />,
+    },
   },
   {
     id: "download",
@@ -47,6 +54,9 @@ export const columns: ColumnDef<BandwidthItem>[] = [
     ),
     enableSorting: true,
     size: 180,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-[100px]" />,
+    },
   },
   {
     id: "data_owner",
@@ -64,6 +74,14 @@ export const columns: ColumnDef<BandwidthItem>[] = [
     ),
     enableSorting: true,
     size: 200,
+    meta: {
+      skeleton: (
+        <div className="flex items-center gap-2">
+          <Skeleton className="size-6 rounded-full" />
+          <Skeleton className="h-4 w-[100px]" />
+        </div>
+      ),
+    },
   },
   {
     id: "type",
@@ -74,6 +92,9 @@ export const columns: ColumnDef<BandwidthItem>[] = [
     cell: ({ row }) => <div className="capitalize">{row.original.type}</div>,
     enableSorting: true,
     size: 130,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-[80px]" />,
+    },
   },
   {
     id: "actions",
@@ -83,5 +104,8 @@ export const columns: ColumnDef<BandwidthItem>[] = [
     cell: ({ row }) => <ActionsCell row={row as any} />,
     enableSorting: false,
     size: 75,
+    meta: {
+      skeleton: <Skeleton className="size-8 rounded-md" />,
+    },
   },
 ];

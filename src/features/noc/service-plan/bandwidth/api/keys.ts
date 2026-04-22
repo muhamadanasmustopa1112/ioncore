@@ -1,5 +1,6 @@
 export const BANDWIDTH_KEYS = {
-  root: () => ["BANDWIDTH"],
-  list: (args?: any) => [BANDWIDTH_KEYS.root(), "LIST", { ...(args || {}) }],
-  detail: (id: string) => [BANDWIDTH_KEYS.root(), "DETAIL", id],
+  all: () => ["BANDWIDTH"],
+  root: () => BANDWIDTH_KEYS.all(),
+  list: (args?: any) => [...BANDWIDTH_KEYS.all(), "LIST", { ...(args || {}) }],
+  detail: (id: string) => [...BANDWIDTH_KEYS.all(), "DETAIL", id],
 };

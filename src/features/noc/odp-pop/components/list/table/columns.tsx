@@ -26,30 +26,30 @@ export const columns: ColumnDef<PopData>[] = [
     size: 200,
   },
   {
-    accessorKey: "oltCount",
+    accessorKey: "ip_address",
     header: ({ column }) => (
-      <DataGridColumnHeader title="OLT" column={column} className="text-foreground justify-center text-center" />
+      <DataGridColumnHeader title="IP Address" column={column} className="text-foreground" />
     ),
     cell: ({ getValue }) => (
-      <div className="text-center text-foreground/80">
-        {getValue() as number}
+      <div className="text-foreground/80">
+        {getValue() as string || "-"}
       </div>
     ),
     enableSorting: true,
-    size: 50,
+    size: 120,
   },
   {
-    accessorKey: "odpCount",
+    accessorKey: "port",
     header: ({ column }) => (
-      <DataGridColumnHeader title="ODP" column={column} className="text-foreground font-semibold justify-center " />
+      <DataGridColumnHeader title="Port" column={column} className="text-foreground justify-center text-center" />
     ),
     cell: ({ getValue }) => (
-      <div className="text-center text-foreground/80">
+      <div className="text-center text-foreground/80 font-mono">
         {getValue() as number}
       </div>
     ),
     enableSorting: true,
-    size: 50,
+    size: 60,
   },
   {
     accessorKey: "area",
@@ -57,12 +57,25 @@ export const columns: ColumnDef<PopData>[] = [
       <DataGridColumnHeader title="Area" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
-      <div className="text-center text-foreground/80">
+      <div className="text-foreground/80">
         {row.original.area}
       </div>
     ),
     enableSorting: true,
-    size: 100,
+    size: 150,
+  },
+  {
+    accessorKey: "description",
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Description" column={column} className="text-foreground font-semibold" />
+    ),
+    cell: ({ getValue }) => (
+      <div className="text-foreground/60 text-xs truncate max-w-[200px]" title={getValue() as string}>
+        {getValue() as string}
+      </div>
+    ),
+    enableSorting: true,
+    size: 200,
   },
   {
     accessorKey: "latitude",
@@ -70,12 +83,12 @@ export const columns: ColumnDef<PopData>[] = [
       <DataGridColumnHeader title="Latitude" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ getValue }) => (
-      <div className="text-center text-foreground/80">
+      <div className="text-foreground/80 font-mono text-xs">
         {getValue() as number}
       </div>
     ),
     enableSorting: true,
-    size: 50,
+    size: 100,
   },
   {
     accessorKey: "longitude",
@@ -83,48 +96,12 @@ export const columns: ColumnDef<PopData>[] = [
       <DataGridColumnHeader title="Longitude" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ getValue }) => (
-      <div className="text-center text-foreground/80">
+      <div className="text-foreground/80 font-mono text-xs">
         {getValue() as number}
       </div>
     ),
     enableSorting: true,
-    size: 50,
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <DataGridColumnHeader title="Status" column={column} className="text-foreground font-semibold" />
-    ),
-    cell: ({ getValue }) => {
-      const status = getValue() as string;
-      const statusConfig: Record<string, { label: string; variant: "success" | "warning" | "destructive"; className: string }> = {
-        active: {
-          label: "Active",
-          variant: "success",
-          className: "bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 border-emerald-500/20"
-        },
-        warning: {
-          label: "Warning",
-          variant: "warning",
-          className: "bg-amber-500/15 text-amber-600 hover:bg-amber-500/25 border-amber-500/20"
-        },
-        down: {
-          label: "Down",
-          variant: "destructive",
-          className: "bg-rose-500/15 text-rose-600 hover:bg-rose-500/25 border-rose-500/20"
-        },
-      };
-
-      const config = statusConfig[status] || statusConfig.active;
-
-      return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${config.className}`}>
-          {config.label}
-        </span>
-      );
-    },
-    enableSorting: true,
-    size: 70,
+    size: 100,
   },
   {
     id: "actions",
@@ -134,6 +111,6 @@ export const columns: ColumnDef<PopData>[] = [
     ),
     cell: ({ row }) => <ActionsCell row={row} />,
     enableSorting: false,
-    size: 30,
+    size: 50,
   },
 ];

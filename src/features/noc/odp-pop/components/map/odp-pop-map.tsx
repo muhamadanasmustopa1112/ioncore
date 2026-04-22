@@ -13,7 +13,7 @@ import { useTheme } from "next-themes";
 import { PopMarkers } from "./pop-markers";
 import { OdpMarkers } from "./odp-markers";
 import { TopologyPaths } from "./topology-paths";
-import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
+import { usePop } from "../../api/get-pop";
 import { DUMMY_OLT_DETAILS } from "../../data/dummy-olt-details";
 import { DUMMY_ODP_LIST } from "../../data/dummy-odp-list";
 
@@ -22,10 +22,11 @@ import { DUMMY_ODP_LIST } from "../../data/dummy-odp-list";
 /**
  * Handles smooth map pan/zoom and automatic popup opening when selections change.
  */
-function MapFocusController({ selectedPopId, selectedOdpId, markerRefs }: {
+function MapFocusController({ selectedPopId, selectedOdpId, markerRefs, pops }: {
   selectedPopId: string | null;
   selectedOdpId?: string | null;
   markerRefs: React.MutableRefObject<Record<string, L.Marker>>;
+  pops: any[];
 }) {
   const map = useMap();
 
@@ -37,20 +38,20 @@ function MapFocusController({ selectedPopId, selectedOdpId, markerRefs }: {
 
       if (odp) {
         map.flyTo([odp.latitude, odp.longitude], 18, { animate: true, duration: 1.5 });
-        
+
         // Auto-open ODP popup
         const marker = markerRefs.current[selectedOdpId];
         if (marker) {
           setTimeout(() => marker.openPopup(), 1500);
         }
       }
-    } 
+    }
     // 2. Handle POP Selection
     else if (selectedPopId) {
-      const pop = DUMMY_POP_DATA.find(p => p.id === selectedPopId);
+      const pop = pops.find(p => String(p.id) === String(selectedPopId));
       if (pop) {
         map.flyTo([pop.latitude, pop.longitude], 16, { animate: true, duration: 1.5 });
-        
+
         // Auto-open POP popup
         const marker = markerRefs.current[selectedPopId];
         if (marker) {
@@ -98,11 +99,14 @@ export default function OdpPopMap({
     setIsMounted(true);
   }, []);
 
+  const { data: popResponse } = usePop();
+  const pops = useMemo(() => popResponse?.data || [], [popResponse]);
+
   // Filter POPs based on area (Enterprise logic moves here)
   const filteredPops = useMemo(() => {
-    if (!selectedArea) return DUMMY_POP_DATA;
-    return DUMMY_POP_DATA.filter(pop => pop.area === selectedArea);
-  }, [selectedArea]);
+    if (!selectedArea) return pops;
+    return pops.filter(pop => pop.area === selectedArea);
+  }, [selectedArea, pops]);
 
   // Default center
   const defaultCenter = useMemo<[number, number]>(() => (
@@ -113,7 +117,7 @@ export default function OdpPopMap({
 
   if (!isMounted) {
     return (
-      <div className="h-[500px] w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center text-muted-foreground uppercase font-black text-xs tracking-widest">
+      <div className="h-full w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center text-muted-foreground uppercase font-black text-xs tracking-widest">
         Initializing Base Map...
       </div>
     );
@@ -140,7 +144,7 @@ export default function OdpPopMap({
         </div>
       </CardHeader>
 
-      <CardContent className="p-0 flex-1 relative overflow-hidden min-h-[500px]">
+      <CardContent className="p-0 flex-1 relative overflow-hidden">
         <MapContainer center={defaultCenter} zoom={10} className="h-full w-full z-0">
           <TileLayer
             attribution='&copy; Google Maps'
@@ -153,6 +157,7 @@ export default function OdpPopMap({
             selectedPopId={selectedPopId}
             selectedOdpId={selectedOdpId}
             markerRefs={markerRefs}
+            pops={pops}
           />
 
           {/* Composed Data Layers */}
