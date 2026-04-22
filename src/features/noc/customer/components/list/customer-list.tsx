@@ -30,18 +30,25 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { CustomerData } from "../../types";
+import { usePPPCustomers } from "../../api/get-ppp-customers";
 import { columns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { CustomerAdvancedFilter } from "./customer-advanced-filter";
-import { DUMMY_CUSTOMERS } from "../../data/dummy-customers";
 
 export function CustomerList() {
-  const [data] = useState<CustomerData[]>(DUMMY_CUSTOMERS);
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
     search: parseAsString,
+  });
+
+  const { data: pppData, isLoading } = usePPPCustomers({
+    params: {
+      draw: filter.page, // Using page as draw counter
+      start: (filter.page - 1) * filter.limit,
+      length: filter.limit,
+      search: filter.search || undefined,
+    },
   });
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
@@ -49,24 +56,22 @@ export function CustomerList() {
 
   const table = useReactTable({
     columns,
-    data,
-    pageCount: Math.ceil(data.length / (filter.limit || 10)),
+    data: pppData?.data || [],
+    pageCount: pppData?.metadata.total_page || 0,
     getRowId: (row) => row.id,
     state: {
       rowSelection,
     },
+    manualPagination: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
     <DataGrid
       table={table}
-      recordCount={data.length}
+      recordCount={pppData?.metadata.total_data || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -74,7 +79,7 @@ export function CustomerList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={false}
+      isLoading={isLoading}
     >
       <Card className="mt-[10px]">
         <CardHeader className="flex-col items-stretch pt-4 pb-2">

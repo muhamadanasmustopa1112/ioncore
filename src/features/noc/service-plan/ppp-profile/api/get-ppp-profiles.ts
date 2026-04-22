@@ -1,4 +1,4 @@
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { useQuery, queryOptions } from "@tanstack/react-query";
 
 import { services } from "@/config/constants";
 import { api } from "@/lib/api-client";

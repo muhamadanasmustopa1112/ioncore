@@ -11,7 +11,7 @@ const OdpPopMap = dynamic(
     {
         ssr: false,
         loading: () => (
-            <div className="h-full min-h-[500px] w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center text-muted-foreground uppercase font-black text-xs tracking-widest shadow-inner">
+            <div className="h-full min-h-[800px] w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center text-muted-foreground uppercase font-black text-xs tracking-widest shadow-inner">
                 Loading Map Data...
             </div>
         )
@@ -38,7 +38,7 @@ export default function Page() {
     }, []);
 
     return (
-        <div className="flex flex-col gap-6 p-6 h-[calc(100vh-80px)]">
+        <div className="flex flex-col gap-6 p-6 h-auto">
             {/* Header Section */}
             <div className="flex flex-col gap-1">
                 <h1 className="text-2xl font-black uppercase tracking-widest text-foreground">Infrastructure Map</h1>
@@ -53,7 +53,7 @@ export default function Page() {
             />
 
             {/* Map Section */}
-            <div className="flex-1 min-h-0">
+            <div className="h-[800px] flex-none">
                 <OdpPopMap
                     selectedArea={filters.area}
                     selectedPopId={filters.popId}

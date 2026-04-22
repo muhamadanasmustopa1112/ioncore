@@ -29,7 +29,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useBandwidths } from "../../api/get-bandwidth";
+import { useBandwidths } from "../../api/get-bandwidths";
 import { columns as columnsDef } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { BandwidthItem } from "../../types";

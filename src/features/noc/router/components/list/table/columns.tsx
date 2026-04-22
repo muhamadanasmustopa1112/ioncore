@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
+import { Skeleton } from "@/components/ui/skeleton";
 import { RouterItem } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
 
@@ -29,6 +30,9 @@ export const columns: ColumnDef<RouterItem>[] = [
         <span className="capitalize">{row.original.ping_status_label || row.original.ping_status}</span>
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
     enableSorting: true,
     size: 130,
   },
@@ -43,6 +47,9 @@ export const columns: ColumnDef<RouterItem>[] = [
         {row.original.router_name}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-32" />,
+    },
     enableSorting: true,
     size: 200,
   },
@@ -53,6 +60,9 @@ export const columns: ColumnDef<RouterItem>[] = [
       <DataGridColumnHeader title="IP Address" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => <div>{row.original.ip_address}</div>,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-28" />,
+    },
     enableSorting: true,
     size: 150,
   },
@@ -63,6 +73,9 @@ export const columns: ColumnDef<RouterItem>[] = [
       <DataGridColumnHeader title="Time Zone" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => <div>{row.original.time_zone}</div>,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-24" />,
+    },
     enableSorting: true,
     size: 150,
   },
@@ -77,6 +90,9 @@ export const columns: ColumnDef<RouterItem>[] = [
         {row.original.description}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-40" />,
+    },
     enableSorting: true,
     size: 220,
   },
@@ -87,6 +103,9 @@ export const columns: ColumnDef<RouterItem>[] = [
       <DataGridColumnHeader title="Online Users" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => <div>{row.original.online_users}</div>,
+    meta: {
+      skeleton: <Skeleton className="h-4 w-12" />,
+    },
     enableSorting: true,
     size: 130,
   },
@@ -101,6 +120,9 @@ export const columns: ColumnDef<RouterItem>[] = [
         {row.original.last_checked ? format(new Date(row.original.last_checked), "dd MMM yyyy, HH:mm") : "-"}
       </div>
     ),
+    meta: {
+      skeleton: <Skeleton className="h-4 w-32" />,
+    },
     enableSorting: true,
     size: 180,
   },
@@ -110,6 +132,9 @@ export const columns: ColumnDef<RouterItem>[] = [
       <DataGridColumnHeader title="Actions" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => <ActionsCell row={row as any} />,
+    meta: {
+      skeleton: <Skeleton className="h-8 w-8 rounded-full" />,
+    },
     enableSorting: false,
     size: 75,
   },

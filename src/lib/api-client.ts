@@ -45,7 +45,7 @@ async function authRequestInterceptorLocal(config: InternalAxiosRequestConfig) {
 
   const token = getCookie(auth.token);
   if (token) {
-    config.headers.token = token;
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;

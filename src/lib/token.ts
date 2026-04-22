@@ -1,5 +1,5 @@
 /*
-	Installed from github/Few-IT/few-it-registries/tree/master
+  Installed from github/Few-IT/few-it-registries/tree/master
 */
 
 import Axios from "axios";

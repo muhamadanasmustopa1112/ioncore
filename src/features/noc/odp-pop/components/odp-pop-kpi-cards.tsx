@@ -13,11 +13,9 @@ import { DUMMY_POP_DATA } from "../data/dummy-odp-pop";
 export function OdpPopKpiCards() {
   const stats = useMemo(() => {
     const total = DUMMY_POP_DATA.length;
-    const validated = DUMMY_POP_DATA.filter(p => p.isValidated).length;
-    const pending = total - validated;
-    
-    // Calculate total ODPs for additional context
-    const totalOdp = DUMMY_POP_DATA.reduce((acc, curr) => acc + curr.odpCount, 0);
+    const validated = total; // Hardcode all as validated for now
+    const pending = 0;
+    const totalOdp = 0;
 
     return { total, validated, pending, totalOdp };
   }, []);

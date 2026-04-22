@@ -5,12 +5,12 @@ import { PopData } from "../../types/pop";
  * Creates a Leaflet DivIcon for POP and ODP markers.
  * Uses L.point to ensure compatibility with Next.js 15 read-only props.
  */
-export const createStatusIcon = (status: PopData['status'] | 'odp', isOdp = false) => {
-  let color = '#3b82f6'; // blue default
-  if (status === 'active') color = '#10b981'; // emerald-500
-  if (status === 'warning') color = '#f59e0b'; // amber-500
-  if (status === 'down') color = '#f43f5e'; // rose-500
-  if (status === 'odp') color = '#8b5cf6'; // violet-500 for ODP
+export const createStatusIcon = (status: 'active' | 'warning' | 'down' | 'odp', isOdp = false) => {
+  let color = '#3b82f6';
+  if (status === 'active') color = '#10b981';
+  if (status === 'warning') color = '#f59e0b';
+  if (status === 'down') color = '#f43f5e';
+  if (status === 'odp') color = '#8b5cf6';
 
   const size = isOdp ? [24, 32] : [36, 48];
   const anchor = isOdp ? [12, 32] : [18, 48];

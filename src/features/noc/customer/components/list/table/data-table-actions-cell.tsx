@@ -9,12 +9,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CustomerData } from "../../../types";
+import { PPPCustomer } from "../../../types";
 import { paths } from "@/config/paths";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 
-export function RenewPrintCell({ row }: { row: Row<CustomerData> }) {
+export function RenewPrintCell({ row }: { row: Row<PPPCustomer> }) {
   return (
     <div className="flex items-center gap-1">
       <TooltipProvider>
@@ -50,7 +50,7 @@ export function RenewPrintCell({ row }: { row: Row<CustomerData> }) {
   );
 }
 
-export function ActionsCell({ row }: { row: Row<CustomerData> }) {
+export function ActionsCell({ row }: { row: Row<PPPCustomer> }) {
   const router = useRouter();
 
   const handleEditClick = () => {

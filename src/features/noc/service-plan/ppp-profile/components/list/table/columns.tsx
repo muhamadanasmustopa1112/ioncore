@@ -26,6 +26,20 @@ export const columns: ColumnDef<PPPProfileItem>[] = [
     size: 220,
   },
   {
+    id: "code",
+    accessorFn: (row) => row.code,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Code" column={column} className="text-foreground font-semibold" />
+    ),
+    cell: ({ row }) => (
+      <div className="font-bold text-foreground py-1">
+        {row.original.code}
+      </div>
+    ),
+    enableSorting: true,
+    size: 220,
+  },
+  {
     id: "profile_group",
     accessorFn: (row) => row.profile_group,
     header: ({ column }) => (

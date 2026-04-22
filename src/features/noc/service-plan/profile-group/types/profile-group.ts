@@ -37,36 +37,22 @@ export type ProfileGroupParams = {
   search?: string;
 };
 
-export const profileGroupSchema = z.object({
-  groupName: z.string().min(1, "Group Name is required"),
-  dataOwner: z.string().min(1, "Data Owner is required"),
-  routersNas: z.string().min(1, "Router is required"),
-  type: z.string().min(1, "Type is required"),
-  ipPoolModule: z.string().min(1, "IP Pool Module is required"),
-  dnsServer: z.string().optional(),
-  parentQueue: z.string().optional(),
-});
-
-export type ProfileGroupFormValues = z.infer<typeof profileGroupSchema>;
-
-export const DEFAULT_PROFILE_GROUP_VALUES: ProfileGroupFormValues = {
-  groupName: "",
-  dataOwner: "Sales Retail",
-  routersNas: "MikroTik-Bengkulu",
-  type: "PPP",
-  ipPoolModule: "GROUP ONLY",
-  dnsServer: "8.8.8.8",
-  parentQueue: "",
-};
-
-export const MOCK_PROFILE_GROUP_VALUES: ProfileGroupFormValues = {
-  groupName: "Premium Home 50M",
-  dataOwner: "Sales Retail",
-  routersNas: "MikroTik-Bengkulu",
-  type: "PPP",
-  ipPoolModule: "GROUP ONLY",
-  dnsServer: "8.8.8.8, 1.1.1.1",
-  parentQueue: "none",
-};
-
 export type ProfileGroupData = ProfileGroupItem;
+
+export type CreateProfileGroupRequest = {
+  code: string;
+  data_owner: string;
+  first_address: string;
+  last_address: string;
+  local_address: string;
+  module: string;
+  name: string;
+  parent_pool: string;
+  profile_type: string;
+  router_nas: string;
+};
+
+export type CreateProfileGroupResponse = {
+  message: string;
+  data: ProfileGroupItem;
+};

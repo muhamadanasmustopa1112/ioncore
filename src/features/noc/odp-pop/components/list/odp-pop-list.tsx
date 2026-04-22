@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/collapsible";
 import { columns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
-import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
+import { usePop } from "../../api/get-pop";
 
 export function OdpPopList({
   onPopSelect
@@ -44,7 +44,9 @@ export function OdpPopList({
     search: parseAsString,
   });
 
-  const data = DUMMY_POP_DATA;
+  const { data: popData, isLoading } = usePop();
+
+  const data = useMemo(() => popData?.data || [], [popData]);
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -55,8 +57,8 @@ export function OdpPopList({
     meta: {
       onPopSelect,
     },
-    pageCount: Math.ceil(data.length / (filter.limit || 10)),
-    getRowId: (row) => row.id,
+    pageCount: Math.ceil((popData?.recordsTotal || 0) / (filter.limit || 10)),
+    getRowId: (row) => String(row.id),
     state: {
       rowSelection,
     },
@@ -71,7 +73,7 @@ export function OdpPopList({
   return (
     <DataGrid
       table={table}
-      recordCount={data.length}
+      recordCount={popData?.recordsTotal || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -83,27 +85,28 @@ export function OdpPopList({
       tableClassNames={{
         base: "w-auto min-w-full",
       }}
-      isLoading={false}
+      isLoading={isLoading}
     >
       <Card className="mt-0">
-        <CardHeader className="flex-col items-stretch pt-4 pb-2 px-4 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+        <CardHeader className="flex-col items-stretch pt-4 pb-2 px-4 shadow-none border-none">
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
             <div className="flex items-center justify-between w-full mb-2">
               <div className="flex items-center gap-2">
                 <CollapsibleTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Filter className="size-3" />
+                  <Button variant="outline" size="sm" className="h-8 px-2">
+                    <Filter className="size-3.5 mr-2" />
+                    <span className="text-xs">Filter</span>
                   </Button>
                 </CollapsibleTrigger>
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-3.5 -translate-y-1/2" />
                   <Input
-                    placeholder="Search Router..."
+                    placeholder="Search POP..."
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
                     }
-                    className="h-8 w-32 ps-9 text-xs"
+                    className="h-8 w-48 ps-9 text-xs"
                   />
                   {filter.search && (
                     <Button
@@ -122,8 +125,9 @@ export function OdpPopList({
             </div>
 
             <CollapsibleContent className="border-t border-border/50 mt-4 pt-4">
-              {/* <CustomerAdvancedFilter /> */}
-              Filter Test
+              <div className="p-4 text-center text-xs text-muted-foreground italic">
+                Advanced filtering options will be available soon.
+              </div>
             </CollapsibleContent>
           </Collapsible>
         </CardHeader>
@@ -135,8 +139,11 @@ export function OdpPopList({
             </div>
           </div>
         </CardTable>
-        <CardFooter>
-          <DataGridPagination setFilter={setFilter} filter={filter} />
+        <CardFooter className="py-3 mt-auto">
+          <DataGridPagination 
+            setFilter={setFilter} 
+            filter={filter} 
+          />
         </CardFooter>
       </Card>
     </DataGrid>

@@ -21,12 +21,27 @@ export const DEFAULT_POP_VALUES: Partial<PopFormValues> = {
 export interface PopData {
   id: string;
   name: string;
-  address: string;
-  oltCount: number;
-  odpCount: number;
+  ip_address?: string;
+  description?: string;
+  port?: number;
   area: string;
   latitude: number;
   longitude: number;
-  status: "active" | "warning" | "down";
-  isValidated: boolean;
+  address?: string;
+  oltCount?: number;
+  odpCount?: number;
+  status?: "active" | "warning" | "down";
+  isValidated?: boolean;
 }
+
+export interface PopResponse {
+  data: PopData[];
+  recordsFiltered: number;
+  recordsTotal: number;
+}
+
+export type PopParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+};

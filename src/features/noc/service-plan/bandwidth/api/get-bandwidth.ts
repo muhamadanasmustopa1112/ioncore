@@ -4,36 +4,28 @@ import { services } from "@/config/constants";
 import { api } from "@/lib/api-client";
 import { QueryConfig } from "@/lib/react-query";
 
-import { BandwidthParams, BandwidthResponse } from "../types";
-
+import { BandwidthItem } from "../types/bandwidth";
 import { BANDWIDTH_KEYS } from "./keys";
 
-export const getBandwidths = (
-  params: BandwidthParams,
-): Promise<BandwidthResponse> => {
-  return api.get(`${services.networking}/ion-radius/service-plans/bandwidth/`, {
-    params,
-  });
+export const getBandwidth = ({ code }: { code: string }): Promise<{ data: BandwidthItem }> => {
+  return api.get(`${services.networking}/ion-radius/service-plans/bandwidth/${code}/`);
 };
 
-export const getBandwidthsQueryOptions = (params: BandwidthParams) => {
+export const getBandwidthQueryOptions = (code: string) => {
   return queryOptions({
-    queryKey: BANDWIDTH_KEYS.list(params),
-    queryFn: () => getBandwidths(params),
+    queryKey: BANDWIDTH_KEYS.detail(code),
+    queryFn: () => getBandwidth({ code }),
   });
 };
 
-type UseBandwidthsOptions = {
-  params: BandwidthParams;
-  queryConfig?: QueryConfig<typeof getBandwidthsQueryOptions>;
+type UseBandwidthOptions = {
+  code: string;
+  queryConfig?: QueryConfig<typeof getBandwidthQueryOptions>;
 };
 
-export const useBandwidths = ({
-  params,
-  queryConfig,
-}: UseBandwidthsOptions) => {
+export const useBandwidth = ({ code, queryConfig }: UseBandwidthOptions) => {
   return useQuery({
-    ...getBandwidthsQueryOptions(params),
+    ...getBandwidthQueryOptions(code),
     ...queryConfig,
   });
 };

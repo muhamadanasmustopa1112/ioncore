@@ -52,7 +52,7 @@ export function HierarchicalFilter({ onFilterChange }: HierarchicalFilterProps) 
   }, [selectedArea, selectedPopId, selectedOdpId, onFilterChange]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-card/50 backdrop-blur-md p-6 rounded-3xl border-2 border-border/40 shadow-xl">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-card/50 backdrop-blur-md p-6 rounded-3xl border-2 border-border/40 shadow-xl relative z-20">
       {/* Area Filter */}
       <div className="flex flex-col gap-2">
         <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">
@@ -85,7 +85,7 @@ export function HierarchicalFilter({ onFilterChange }: HierarchicalFilterProps) 
           }}
           placeholder="Select POP..."
           triggerClassName="rounded-2xl border-2 border-border/40 h-12 bg-background/80"
-          disabled={!selectedArea && DUMMY_POP_DATA.length > 50} // Optional soft disable
+          disabled={!selectedArea && DUMMY_POP_DATA.length > 50}
         />
       </div>
 

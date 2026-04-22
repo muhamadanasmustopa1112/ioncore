@@ -21,9 +21,11 @@ export function ActionsCell({ row }: { row: Row<PopData> }) {
 
   const handleEditClick = () => {
     setSelectedPop({
-      ...row.original,
+      name: row.original.name,
+      area: row.original.area,
       latitude: String(row.original.latitude),
       longitude: String(row.original.longitude),
+      status: "active",
     });
     openPopFormSheet("edit");
   };
