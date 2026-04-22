@@ -5,7 +5,6 @@ import {
   BranchPayload,
   BranchListParams,
   BranchFlatDto,
-  BranchFlatMeta,
   BranchTreeNode,
   PaginationMeta,
   RegionalBranchDto,
@@ -44,7 +43,7 @@ interface BranchState {
 
   // ─── Flat list (GET /branch) ─────────────────────────────────────────────────
   flatList: BranchFlatDto[];
-  flatMeta: BranchFlatMeta | null;
+  flatMeta: PaginationMeta | null;
   flatListLoading: boolean;
   flatListError: string | null;
   fetchFlatList: (params?: BranchListParams) => Promise<void>;
@@ -113,7 +112,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
     set({ flatListLoading: true, flatListError: null });
     try {
       const res = await getBranchList(params);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         set({ flatList: res.data.branches, flatMeta: res.data.metadata });
       } else {
         set({ flatListError: res.message });
@@ -135,8 +134,8 @@ const useBranchStore = create<BranchState>((set, get) => ({
     set({ treeLoading: true, treeError: null });
     try {
       const res = await getBranchTree(params);
-      if (res.status === "Success" && res.data) {
-        set({ tree: res.data.branches, treePagination: res.data.pagination });
+      if (res.data !== null && res.data) {
+        set({ tree: res.data.branches, treePagination: res.data.metadata });
       } else {
         set({ treeError: res.message });
       }
@@ -157,8 +156,8 @@ const useBranchStore = create<BranchState>((set, get) => ({
     set({ regionalsLoading: true, regionalsError: null });
     try {
       const res = await listRegional(params);
-      if (res.status === "Success" && res.data) {
-        set({ regionals: res.data.branches, regionalPagination: res.data.pagination });
+      if (res.data !== null && res.data) {
+        set({ regionals: res.data.branches, regionalPagination: res.data.metadata });
       } else {
         set({ regionalsError: res.message });
       }
@@ -172,7 +171,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
   fetchRegional: async (id) => {
     try {
       const res = await getRegional(id);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         // Upsert into regionals list
         set((state) => {
           const exists = state.regionals.findIndex((r) => r.id === id);
@@ -193,7 +192,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
   createRegional: async (payload) => {
     try {
       const res = await apiCreateRegional(payload);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         set((state) => ({ regionals: [...state.regionals, res.data!] }));
         return res.data;
       }
@@ -206,7 +205,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
   updateRegional: async (id, payload) => {
     try {
       const res = await apiUpdateRegional(id, payload);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         set((state) => ({
           regionals: state.regionals.map((r) => (r.id === id ? res.data! : r)),
         }));
@@ -221,7 +220,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
   deleteRegional: async (id) => {
     try {
       const res = await apiDeleteRegional(id);
-      if (res.status === "Success") {
+      if (res.data !== null) {
         set((state) => ({
           regionals: state.regionals.filter((r) => r.id !== id),
         }));
@@ -243,10 +242,10 @@ const useBranchStore = create<BranchState>((set, get) => ({
     set({ areasLoading: true, areasError: null });
     try {
       const res = await listArea(regionalId, params);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         set((state) => ({
           areas: { ...state.areas, [regionalId]: res.data!.branches },
-          areaPagination: { ...state.areaPagination, [regionalId]: res.data!.pagination },
+          areaPagination: { ...state.areaPagination, [regionalId]: res.data!.metadata },
         }));
       } else {
         set({ areasError: res.message });
@@ -261,7 +260,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
   createArea: async (regionalId, payload) => {
     try {
       const res = await apiCreateArea(regionalId, payload);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         set((state) => ({
           areas: {
             ...state.areas,
@@ -279,7 +278,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
   updateArea: async (regionalId, areaId, payload) => {
     try {
       const res = await apiUpdateArea(regionalId, areaId, payload);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         set((state) => ({
           areas: {
             ...state.areas,
@@ -299,7 +298,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
   deleteArea: async (regionalId, areaId) => {
     try {
       const res = await apiDeleteArea(regionalId, areaId);
-      if (res.status === "Success") {
+      if (res.data !== null) {
         set((state) => ({
           areas: {
             ...state.areas,
@@ -325,10 +324,10 @@ const useBranchStore = create<BranchState>((set, get) => ({
     set({ subAreasLoading: true, subAreasError: null });
     try {
       const res = await listSubArea(regionalId, areaId, params);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         set((state) => ({
           subAreas: { ...state.subAreas, [key]: res.data!.branches },
-          subAreaPagination: { ...state.subAreaPagination, [key]: res.data!.pagination },
+          subAreaPagination: { ...state.subAreaPagination, [key]: res.data!.metadata },
         }));
       } else {
         set({ subAreasError: res.message });
@@ -344,7 +343,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
     const key = `${regionalId}:${areaId}`;
     try {
       const res = await apiCreateSubArea(regionalId, areaId, payload);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         set((state) => ({
           subAreas: {
             ...state.subAreas,
@@ -363,7 +362,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
     const key = `${regionalId}:${areaId}`;
     try {
       const res = await apiUpdateSubArea(regionalId, areaId, subAreaId, payload);
-      if (res.status === "Success" && res.data) {
+      if (res.data !== null && res.data) {
         set((state) => ({
           subAreas: {
             ...state.subAreas,
@@ -384,7 +383,7 @@ const useBranchStore = create<BranchState>((set, get) => ({
     const key = `${regionalId}:${areaId}`;
     try {
       const res = await apiDeleteSubArea(regionalId, areaId, subAreaId);
-      if (res.status === "Success") {
+      if (res.data !== null) {
         set((state) => ({
           subAreas: {
             ...state.subAreas,

@@ -4,99 +4,107 @@ export interface BranchPayload {
   name: string;
   code: string;
   is_active: boolean;
+  type?: string;
+  level?: string;
+  branch_parent_id?: string | null;
 }
 
-// ─── API Response Shapes ──────────────────────────────────────────────────────
+// ─── API Response Envelope ────────────────────────────────────────────────────
+// Matches response.Base from Swagger: { data, error, message, metadata }
 
 export interface ApiResponse<T> {
-  status: "Success" | "Error";
-  message: string;
   data: T | null;
+  error: string;
+  message: string;
+  metadata?: unknown;
 }
 
 export interface PaginationMeta {
   page: number;
   per_page: number;
   total: number;
-  total_pages: number;
 }
 
 export interface BranchListResponse<T> {
   branches: T[];
-  pagination: PaginationMeta;
+  metadata: PaginationMeta;
 }
 
 // ─── Branch Entity Shapes (from API) ─────────────────────────────────────────
+// All CRUD endpoints return dto.ResponseBranch regardless of level
 
-export interface RegionalBranchDto {
+export interface BranchDto {
   id: string;
   name: string;
   code: string;
-  level: "regional";
+  level: string;
+  type?: string;
+  branch_parent_id?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  created_by?: string;
+  updated_by?: string;
 }
 
-export interface AreaBranchDto {
-  id: string;
-  name: string;
-  code: string;
-  level: "area";
-  is_active: boolean;
-  regional_branch_id: string;
-  created_at: string;
-  updated_at: string;
-}
+// Keep level-specific aliases for backwards compat with branch-queries.ts
+export type RegionalBranchDto = BranchDto;
+export type AreaBranchDto = BranchDto;
+export type SubAreaBranchDto = BranchDto;
 
-export interface SubAreaBranchDto {
-  id: string;
-  name: string;
-  code: string;
-  level: "sub_area";
-  is_active: boolean;
-  area_branch_id: string;
-  regional_branch_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-// ─── Flat List (GET /branch) ──────────────────────────────────────────────────
+// ─── Flat List (GET /branch/) ─────────────────────────────────────────────────
+// dto.ResponseBranchWithParent
 
 export interface BranchFlatDto {
   id: string;
   name: string;
   code: string;
-  level_name: "REGIONAL" | "AREA" | "SUB_AREA";
+  level_name: string;
   branch_type: string;
   is_active: boolean;
   parent_branch_name: string | null;
 }
 
-export interface BranchFlatMeta {
-  page: number;
-  per_page: number;
-  total: number;
-}
-
 export interface BranchFlatListResponse {
   branches: BranchFlatDto[];
-  metadata: BranchFlatMeta;
+  metadata: PaginationMeta;
 }
 
 // ─── Tree Structure ───────────────────────────────────────────────────────────
+// dto.ResponseRegional → dto.ResponseArea → dto.ResponseSubArea
 
-export interface BranchTreeArea extends AreaBranchDto {
-  sub_areas: SubAreaBranchDto[];
+export interface SubAreaTreeDto {
+  id: string;
+  name: string;
+  code: string;
+  level_name: string;
+  branch_area_id: string;
+  branch_regional_id: string;
 }
 
-export interface BranchTreeNode extends RegionalBranchDto {
-  areas: BranchTreeArea[];
+export interface AreaTreeDto {
+  id: string;
+  name: string;
+  code: string;
+  level_name: string;
+  branch_regional_id: string;
+  sub_areas: SubAreaTreeDto[];
+}
+
+export interface BranchTreeNode {
+  id: string;
+  name: string;
+  code: string;
+  level_name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  areas: AreaTreeDto[];
 }
 
 export interface BranchTreeResponse {
   branches: BranchTreeNode[];
-  pagination: PaginationMeta;
+  metadata: PaginationMeta;
 }
 
 // ─── Query Params ─────────────────────────────────────────────────────────────

@@ -21,9 +21,6 @@ export const userServiceKeys = {
   accessPolicies: (params?: unknown) =>
     [...userServiceKeys.all, "access-policies", params] as const,
 
-  branches: (params?: unknown) =>
-    [...userServiceKeys.all, "branches", params] as const,
-
   loginHistories: (params?: unknown) =>
     [...userServiceKeys.all, "login-histories", params] as const,
   activityLogs: (params?: unknown) =>

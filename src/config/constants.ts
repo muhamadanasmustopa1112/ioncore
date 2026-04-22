@@ -44,6 +44,7 @@ export const services = {
   networking: "/ion-networking-service/api/v1",
   user: "/ion-user-service/api/v1",
   userOrigin: "/ion-user-service",
+  branch: "/ion-branch-service",
   ruleScheme: "/ion-rule-scheme-service",
 };
 

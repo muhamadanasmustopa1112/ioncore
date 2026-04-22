@@ -1,4 +1,5 @@
-import { api } from "@/lib/api-client";
+import { services } from "@/config/constants";
+import { userServiceApi } from "@/features/user-service/api/client";
 import {
   ApiResponse,
   BranchListResponse,
@@ -11,10 +12,8 @@ import {
   SubAreaBranchDto,
 } from "../types/branch-api";
 
-// Base path for the branch service
-const BASE = "/branch";
+const BASE = `${services.branch}/branch`;
 
-// The api client interceptor returns response.data, so we cast through unknown
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;
 }
@@ -23,16 +22,17 @@ function cast<T>(p: unknown): Promise<T> {
 
 export function getBranchList(params: BranchListParams = {}) {
   return cast<ApiResponse<BranchFlatListResponse>>(
-    api.get(BASE, {
+    userServiceApi.get(`${BASE}/`, {
       params: { page: params.page ?? 1, per_page: params.per_page ?? 100 },
     })
   );
 }
+
 // ─── Tree ─────────────────────────────────────────────────────────────────────
 
 export function getBranchTree(params: BranchListParams = {}) {
   return cast<ApiResponse<BranchTreeResponse>>(
-    api.get(`${BASE}/tree`, {
+    userServiceApi.get(`${BASE}/tree`, {
       params: { page: params.page ?? 1, per_page: params.per_page ?? 100 },
     })
   );
@@ -42,7 +42,7 @@ export function getBranchTree(params: BranchListParams = {}) {
 
 export function listRegional(params: BranchListParams = {}) {
   return cast<ApiResponse<BranchListResponse<RegionalBranchDto>>>(
-    api.get(`${BASE}/regional`, {
+    userServiceApi.get(`${BASE}/regional`, {
       params: { page: params.page ?? 1, per_page: params.per_page ?? 100 },
     })
   );
@@ -50,31 +50,31 @@ export function listRegional(params: BranchListParams = {}) {
 
 export function getRegional(id: string) {
   return cast<ApiResponse<RegionalBranchDto>>(
-    api.get(`${BASE}/regional/${id}`)
+    userServiceApi.get(`${BASE}/regional/${id}`)
   );
 }
 
 export function createRegional(payload: BranchPayload) {
   return cast<ApiResponse<RegionalBranchDto>>(
-    api.post(`${BASE}/regional`, payload)
+    userServiceApi.post(`${BASE}/regional`, payload)
   );
 }
 
 export function updateRegional(id: string, payload: BranchPayload) {
   return cast<ApiResponse<RegionalBranchDto>>(
-    api.put(`${BASE}/regional/${id}`, payload)
+    userServiceApi.put(`${BASE}/regional/${id}`, payload)
   );
 }
 
 export function deleteRegional(id: string) {
-  return cast<ApiResponse<null>>(api.delete(`${BASE}/regional/${id}`));
+  return cast<ApiResponse<null>>(userServiceApi.delete(`${BASE}/regional/${id}`));
 }
 
 // ─── Area ─────────────────────────────────────────────────────────────────────
 
 export function listArea(regionalId: string, params: BranchListParams = {}) {
   return cast<ApiResponse<BranchListResponse<AreaBranchDto>>>(
-    api.get(`${BASE}/regional/${regionalId}/area`, {
+    userServiceApi.get(`${BASE}/regional/${regionalId}/area`, {
       params: { page: params.page ?? 1, per_page: params.per_page ?? 100 },
     })
   );
@@ -82,7 +82,7 @@ export function listArea(regionalId: string, params: BranchListParams = {}) {
 
 export function createArea(regionalId: string, payload: BranchPayload) {
   return cast<ApiResponse<AreaBranchDto>>(
-    api.post(`${BASE}/regional/${regionalId}/area`, payload)
+    userServiceApi.post(`${BASE}/regional/${regionalId}/area`, payload)
   );
 }
 
@@ -92,13 +92,13 @@ export function updateArea(
   payload: BranchPayload
 ) {
   return cast<ApiResponse<AreaBranchDto>>(
-    api.put(`${BASE}/regional/${regionalId}/area/${areaId}`, payload)
+    userServiceApi.put(`${BASE}/regional/${regionalId}/area/${areaId}`, payload)
   );
 }
 
 export function deleteArea(regionalId: string, areaId: string) {
   return cast<ApiResponse<null>>(
-    api.delete(`${BASE}/regional/${regionalId}/area/${areaId}`)
+    userServiceApi.delete(`${BASE}/regional/${regionalId}/area/${areaId}`)
   );
 }
 
@@ -110,7 +110,7 @@ export function listSubArea(
   params: BranchListParams = {}
 ) {
   return cast<ApiResponse<BranchListResponse<SubAreaBranchDto>>>(
-    api.get(`${BASE}/regional/${regionalId}/area/${areaId}/sub-area`, {
+    userServiceApi.get(`${BASE}/regional/${regionalId}/area/${areaId}/sub-area`, {
       params: { page: params.page ?? 1, per_page: params.per_page ?? 100 },
     })
   );
@@ -122,7 +122,7 @@ export function createSubArea(
   payload: BranchPayload
 ) {
   return cast<ApiResponse<SubAreaBranchDto>>(
-    api.post(
+    userServiceApi.post(
       `${BASE}/regional/${regionalId}/area/${areaId}/sub-area`,
       payload
     )
@@ -136,7 +136,7 @@ export function updateSubArea(
   payload: BranchPayload
 ) {
   return cast<ApiResponse<SubAreaBranchDto>>(
-    api.put(
+    userServiceApi.put(
       `${BASE}/regional/${regionalId}/area/${areaId}/sub-area/${subAreaId}`,
       payload
     )
@@ -149,7 +149,7 @@ export function deleteSubArea(
   subAreaId: string
 ) {
   return cast<ApiResponse<null>>(
-    api.delete(
+    userServiceApi.delete(
       `${BASE}/regional/${regionalId}/area/${areaId}/sub-area/${subAreaId}`
     )
   );

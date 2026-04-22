@@ -3,6 +3,9 @@ export const ruleSchemaKeys = {
 
   types: () => [...ruleSchemaKeys.all, "types"] as const,
 
+  branches: (params?: unknown) =>
+    [...ruleSchemaKeys.all, "branches", params] as const,
+
   schemas: (params?: unknown) =>
     [...ruleSchemaKeys.all, "schemas", params] as const,
   schema: (id: string) =>
