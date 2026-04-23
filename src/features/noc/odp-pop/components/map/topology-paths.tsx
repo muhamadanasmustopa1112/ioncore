@@ -24,20 +24,20 @@ export function TopologyPaths({ selectedArea, selectedPopId, pops, odps }: Topol
     // Filter ODPs based on current view
     let odpsToProcess = odps;
     if (selectedPopId) {
-        odpsToProcess = odps.filter(o => String(o.parent_pop_id) === String(selectedPopId));
+      odpsToProcess = odps.filter(o => String(o.olt_id) === String(selectedPopId));
     } else if (selectedArea) {
-        odpsToProcess = odps.filter(o => o.area === selectedArea);
+      odpsToProcess = odps.filter(o => o.area === selectedArea);
     }
 
     // Build paths by finding the parent POP location for each ODP
     odpsToProcess.forEach(odp => {
-      const pop = pops.find(p => String(p.id) === String(odp.parent_pop_id));
+      const pop = pops.find(p => String(p.id) === String(odp.olt_id));
       if (pop) {
         result.push({
           id: `path-${pop.id}-${odp.id}`,
           positions: [
-            [pop.latitude, pop.longitude],
-            [odp.latitude, odp.longitude]
+            [pop.gps_lat, pop.gps_lng],
+            [odp.gps_lat, odp.gps_lng]
           ]
         });
       }

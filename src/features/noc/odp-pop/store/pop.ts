@@ -1,15 +1,15 @@
 import { create } from "zustand";
-import { PopFormValues } from "../types/pop";
+import { PopData } from "../types/pop";
 
 interface PopState {
     form: "new" | "edit" | "details" | null;
     popSheetOpen: boolean;
-    selectedPop: PopFormValues | null;
+    selectedPop: PopData | null;
     openPopFormSheet: (form: "new" | "edit" | "details" | null) => void;
     closePopFormSheet: () => void;
     setForm: (form: "new" | "edit" | "details" | null) => void;
     setPopFormSheetOpen: (open: boolean) => void;
-    setSelectedPop: (pop: PopFormValues | null) => void;
+    setSelectedPop: (pop: PopData | null) => void;
 }
 
 const usePopStore = create<PopState>((set) => ({

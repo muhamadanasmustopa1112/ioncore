@@ -20,18 +20,13 @@ export function ActionsCell({ row }: { row: Row<PopData> }) {
   const { openPopFormSheet, setSelectedPop } = usePopStore();
 
   const handleEditClick = () => {
-    setSelectedPop({
-      name: row.original.name,
-      area: row.original.area,
-      latitude: String(row.original.latitude),
-      longitude: String(row.original.longitude),
-      status: "active",
-    });
+    setSelectedPop(row.original);
     openPopFormSheet("edit");
   };
 
   const handleDetailClick = () => {
-    router.push(`${paths.dashboard.networkAndOrchestration.odpPop.manage.getHref()}/${row.original.id}`);
+    setSelectedPop(row.original);
+    router.push(`${paths.dashboard.networkAndOrchestration.odpPop.manage.detail.getHref()}`);
   };
 
   return (

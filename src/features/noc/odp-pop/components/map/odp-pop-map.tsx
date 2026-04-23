@@ -14,6 +14,7 @@ import { PopMarkers } from "./pop-markers";
 import { OdpMarkers } from "./odp-markers";
 import { TopologyPaths } from "./topology-paths";
 import { usePop } from "../../api/get-pop";
+import { useOdp } from "../../api/get-odp";
 
 // --- Controllers ---
 
@@ -38,7 +39,7 @@ function MapFocusController({ selectedPopId, selectedOdpId, markerRefs, pops }: 
 
       const pop = pops.find(p => String(p.id) === String(selectedPopId));
       if (pop) {
-        map.flyTo([pop.latitude, pop.longitude], 16, { animate: true, duration: 1.5 });
+        map.flyTo([pop.gps_lat, pop.gps_lng], 16, { animate: true, duration: 1.5 });
 
         // Auto-open POP popup
         const marker = markerRefs.current[selectedPopId];
@@ -91,8 +92,16 @@ export default function OdpPopMap({
     setIsMounted(true);
   }, []);
 
-  const { data: popResponse } = usePop();
-  
+  const { data: popResponse } = usePop({
+    params: {
+      limit: 10,
+      page: 1,
+      search: "",
+      sort_by: "name",
+      sort_order: "asc",
+    },
+  });
+
   const pops = useMemo(() => popResponse?.data || [], [popResponse]);
 
   // Filter POPs based on area
@@ -101,11 +110,30 @@ export default function OdpPopMap({
     return pops.filter(pop => pop.area === selectedArea);
   }, [selectedArea, pops]);
 
+  const { data: odpResponse } = useOdp({
+    params: {
+      limit: 10,
+    },
+  });
+
+  const odps = useMemo(() => odpResponse?.data || [], [odpResponse]);
+
+  const filteredOdps = useMemo(() => {
+    if (!showOdps) return [];
+    let result = odps;
+    if (selectedPopId) {
+      result = result.filter(odp => String(odp.olt_id) === String(selectedPopId));
+    } else if (selectedArea) {
+      result = result.filter(odp => odp.area === selectedArea);
+    }
+    return result;
+  }, [odps, showOdps, selectedPopId, selectedArea]);
+
   // Default center
 
   const defaultCenter = useMemo<[number, number]>(() => (
     filteredPops.length > 0
-      ? [filteredPops[0].latitude, filteredPops[0].longitude]
+      ? [filteredPops[0].gps_lat, filteredPops[0].gps_lng]
       : [-6.2088, 106.8456]
   ), [filteredPops]);
 
@@ -159,6 +187,23 @@ export default function OdpPopMap({
             markerRefs={markerRefs}
             onSelect={onSelect}
           />
+
+          {showOdps && (
+            <>
+              <TopologyPaths
+                pops={pops}
+                odps={filteredOdps}
+                selectedPopId={selectedPopId}
+                selectedArea={selectedArea}
+              />
+              <OdpMarkers
+                data={filteredOdps}
+                selectedPopId={selectedPopId}
+                markerRefs={markerRefs}
+                onSelect={(id) => onSelect?.(id)}
+              />
+            </>
+          )}
         </MapContainer>
 
 

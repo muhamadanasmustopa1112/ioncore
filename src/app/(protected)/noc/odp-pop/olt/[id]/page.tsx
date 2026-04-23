@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import { DUMMY_OLT_DETAILS } from "@/features/noc/odp-pop/data/dummy-olt-details";
-import { OltDetailContent } from "@/features/noc/odp-pop/components/details/olt-detail-content";
+import { OltDetailContent } from "@/features/noc/odp-pop/components/details/components/olt-detail-content";
 
 export default function OltDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);

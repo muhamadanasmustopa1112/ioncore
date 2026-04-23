@@ -12,7 +12,7 @@ import type {
   ChecklistDto,
 } from "../types/work-order-api";
 
-const BASE = "/v1/order/work-orders";
+const BASE = "/order/api/v1/work-orders";
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;

@@ -3,9 +3,10 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { ActionsCell } from "./data-table-actions-cell";
+import { ActionsCellOdp } from "./data-table-actions-odp";
 import { PopData } from "../../../types/pop";
 
-export const columns: ColumnDef<PopData>[] = [
+export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[] => [
   {
     id: "name",
     accessorFn: (row) => row.name,
@@ -26,9 +27,9 @@ export const columns: ColumnDef<PopData>[] = [
     size: 200,
   },
   {
-    accessorKey: "ip_address",
+    accessorKey: "code",
     header: ({ column }) => (
-      <DataGridColumnHeader title="IP Address" column={column} className="text-foreground" />
+      <DataGridColumnHeader title="Code" column={column} className="text-foreground" />
     ),
     cell: ({ getValue }) => (
       <div className="text-foreground/80">
@@ -37,19 +38,6 @@ export const columns: ColumnDef<PopData>[] = [
     ),
     enableSorting: true,
     size: 120,
-  },
-  {
-    accessorKey: "port",
-    header: ({ column }) => (
-      <DataGridColumnHeader title="Port" column={column} className="text-foreground justify-center text-center" />
-    ),
-    cell: ({ getValue }) => (
-      <div className="text-center text-foreground/80 font-mono">
-        {getValue() as number}
-      </div>
-    ),
-    enableSorting: true,
-    size: 60,
   },
   {
     accessorKey: "area",
@@ -65,9 +53,9 @@ export const columns: ColumnDef<PopData>[] = [
     size: 150,
   },
   {
-    accessorKey: "description",
+    accessorKey: "address",
     header: ({ column }) => (
-      <DataGridColumnHeader title="Description" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Address" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ getValue }) => (
       <div className="text-foreground/60 text-xs truncate max-w-[200px]" title={getValue() as string}>
@@ -78,7 +66,7 @@ export const columns: ColumnDef<PopData>[] = [
     size: 200,
   },
   {
-    accessorKey: "latitude",
+    accessorKey: "gps_lat",
     header: ({ column }) => (
       <DataGridColumnHeader title="Latitude" column={column} className="text-foreground font-semibold" />
     ),
@@ -91,7 +79,7 @@ export const columns: ColumnDef<PopData>[] = [
     size: 100,
   },
   {
-    accessorKey: "longitude",
+    accessorKey: "gps_lng",
     header: ({ column }) => (
       <DataGridColumnHeader title="Longitude" column={column} className="text-foreground font-semibold" />
     ),
@@ -104,12 +92,25 @@ export const columns: ColumnDef<PopData>[] = [
     size: 100,
   },
   {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Status" column={column} className="text-foreground font-semibold" />
+    ),
+    cell: ({ getValue }) => (
+      <div className="text-foreground/80 font-mono text-xs">
+        {getValue() as string}
+      </div>
+    ),
+    enableSorting: true,
+    size: 100,
+  },
+  {
     id: "actions",
     accessorFn: (row) => row.id,
     header: ({ column }) => (
       <DataGridColumnHeader title="Actions" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => <ActionsCell row={row} />,
+    cell: ({ row }) => type === 'odp' ? <ActionsCellOdp row={row} /> : <ActionsCell row={row} />,
     enableSorting: false,
     size: 50,
   },
