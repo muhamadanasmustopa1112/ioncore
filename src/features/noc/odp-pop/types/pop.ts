@@ -20,7 +20,7 @@ export const DEFAULT_POP_VALUES: Partial<PopFormValues> = {
 
 export interface PopData {
   id: string;
-  code: string;
+  code?: string;
   name: string;
   ip_address?: string;
   description?: string;
@@ -35,6 +35,7 @@ export interface PopData {
   created_at?: string;
   updated_at?: string;
   status?: "ACTIVE" | "INACTIVE" | "WARNING" | "UNKNOWN";
+  isValidated?: boolean;
 }
 
 export interface MetaData {
