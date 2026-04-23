@@ -7,24 +7,25 @@ import { QueryConfig } from "@/lib/react-query";
 import { POP_KEYS } from "./key";
 import { PopParams, PopResponse } from "../types/pop";
 
-export const getPop = (): Promise<PopResponse> => {
-    return api.get(`${services.networking}/odp-pop/view-map/pops`);
+export const getPop = (params: PopParams): Promise<PopResponse> => {
+    return api.get(`${services.networking}/odp-pop/pops`, { params });
 };
 
-export const getPopQueryOptions = () => {
+export const getPopQueryOptions = (params: PopParams) => {
     return queryOptions({
-        queryKey: POP_KEYS.list(),
-        queryFn: () => getPop(),
+        queryKey: POP_KEYS.list(params),
+        queryFn: () => getPop(params),
     });
 };
 
 type UsePopOptions = {
+    params: PopParams;
     queryConfig?: QueryConfig<typeof getPopQueryOptions>;
 };
 
-export const usePop = ({ queryConfig }: UsePopOptions = {}) => {
+export const usePop = ({ params, queryConfig }: UsePopOptions) => {
     return useQuery({
-        ...getPopQueryOptions(),
+        ...getPopQueryOptions(params),
         ...queryConfig,
     });
 };

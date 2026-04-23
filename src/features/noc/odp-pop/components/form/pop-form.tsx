@@ -25,7 +25,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import { DEFAULT_POP_VALUES, popSchema, type PopFormValues } from "../../types/pop";
+import { DEFAULT_POP_VALUES, PopData, popSchema, type PopFormValues } from "../../types/pop";
 import { usePopStore } from "../../store/pop";
 import { useEffect } from "react";
 
@@ -33,20 +33,32 @@ export function PopForm() {
     const { form: formMode, selectedPop } = usePopStore();
     const isEditMode = formMode === "edit";
 
+    const mapPopToFormValues = (pop: PopData): PopFormValues => ({
+        name: pop.name,
+        area: pop.area,
+        latitude: pop.gps_lat?.toString() ?? "",
+        longitude: pop.gps_lng?.toString() ?? "",
+        status: (pop.status === "ACTIVE"
+            ? "active"
+            : pop.status === "WARNING"
+                ? "warning"
+                : "down") as PopFormValues["status"],
+    });
+
     const form = useForm<PopFormValues>({
         resolver: zodResolver(popSchema),
         defaultValues: isEditMode && selectedPop
-            ? selectedPop
-            : DEFAULT_POP_VALUES,
+            ? mapPopToFormValues(selectedPop)
+            : (DEFAULT_POP_VALUES as PopFormValues),
     });
 
     useEffect(() => {
         if (isEditMode && selectedPop) {
-            form.reset(selectedPop);
+            form.reset(mapPopToFormValues(selectedPop));
         } else {
-            form.reset(DEFAULT_POP_VALUES);
+            form.reset(DEFAULT_POP_VALUES as PopFormValues);
         }
-    }, [isEditMode, selectedPop]);
+    }, [isEditMode, selectedPop, form]);
 
     const onSubmit = (data: PopFormValues) => {
         console.log("Form submitted:", data);
@@ -156,7 +168,7 @@ export function PopForm() {
                                                     step="any"
                                                     placeholder="-6.12345"
                                                     {...field}
-                                                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                                                    onChange={(e) => field.onChange(e.target.value)}
                                                 />
                                             </FormControl>
                                             <FormMessage />
@@ -178,7 +190,7 @@ export function PopForm() {
                                                     step="any"
                                                     placeholder="106.12345"
                                                     {...field}
-                                                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                                                    onChange={(e) => field.onChange(e.target.value)}
                                                 />
                                             </FormControl>
                                             <FormMessage />

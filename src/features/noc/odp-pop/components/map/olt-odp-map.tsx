@@ -10,12 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RiFocus2Line } from "@remixicon/react";
 import { useTheme } from "next-themes";
-import { DUMMY_ODP_LIST, OdpListItem } from "../../data/dummy-odp-list";
+import { useOdp } from "../../api/get-odp";
+import { useMemo } from "react";
 
 // Controller to handle programmatic map changes
 function MapFocusController({ selectedOdpName, points, markerRefs }: {
   selectedOdpName: string | null,
-  points: OdpListItem[],
+  points: any[],
   markerRefs: MutableRefObject<Record<string, L.Marker>>
 }) {
   const map = useMap();
@@ -25,7 +26,7 @@ function MapFocusController({ selectedOdpName, points, markerRefs }: {
       const odp = points.find(p => p.name === selectedOdpName);
       if (odp) {
         // Pan and Zoom
-        map.flyTo([odp.latitude, odp.longitude], 18, {
+        map.flyTo([odp.gps_lat, odp.gps_lng], 18, {
           animate: true,
           duration: 1.5
         });
@@ -45,12 +46,12 @@ function MapFocusController({ selectedOdpName, points, markerRefs }: {
 }
 
 // Update map bounds to fit all markers initially
-function MapBoundsController({ points }: { points: OdpListItem[] }) {
+function MapBoundsController({ points }: { points: any[] }) {
   const map = useMap();
 
   useEffect(() => {
     if (points.length > 0) {
-      const bounds = L.latLngBounds(points.map(p => [p.latitude, p.longitude]));
+      const bounds = L.latLngBounds(points.map(p => [p.gps_lat, p.gps_lng]));
       map.fitBounds(bounds, { padding: [50, 50], animate: true });
     }
   }, [points, map]);
@@ -74,27 +75,34 @@ const odpIcon = L.divIcon({
 });
 
 export default function OltOdpMap({ oltId }: { oltId: string }) {
-  const [points, setPoints] = useState<OdpListItem[]>(DUMMY_ODP_LIST[oltId] || []);
   const [isMounted, setIsMounted] = useState(false);
   const { resolvedTheme } = useTheme();
   const [selectedOdpName, setSelectedOdpName] = useState<string | null>(null);
   const markerRefs = useRef<Record<string, L.Marker>>({});
 
+  const { data: odpResponse, isLoading } = useOdp({
+    params: {
+      limit: 10,
+      olt_id: oltId,
+    }
+  });
+
+  const points = useMemo(() => odpResponse?.data || [], [odpResponse]);
+
   useEffect(() => {
     setIsMounted(true);
-    setPoints(DUMMY_ODP_LIST[oltId] || []);
-  }, [oltId]);
+  }, []);
 
-  if (!isMounted) {
+  if (!isMounted || isLoading) {
     return (
       <div className="h-[500px] w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center text-muted-foreground font-bold uppercase tracking-widest text-xs">
-        Loading Infrastructure Map...
+        {isLoading ? "Fetching ODP Data..." : "Loading Infrastructure Map..."}
       </div>
     );
   }
 
   const defaultCenter: [number, number] = points.length > 0
-    ? [points[0].latitude, points[0].longitude]
+    ? [points[0].gps_lat, points[0].gps_lng]
     : [-6.2088, 106.8456];
 
   return (
@@ -184,7 +192,7 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
           {points.map((odp) => (
             <Marker
               key={odp.name}
-              position={[odp.latitude, odp.longitude]}
+              position={[odp.gps_lat, odp.gps_lng]}
               icon={odpIcon}
               ref={(ref) => {
                 if (ref) {
@@ -203,11 +211,11 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
                   <div className="space-y-1.5 pt-2 border-t border-border/50">
                     <div className="flex justify-between text-[9px] font-bold">
                       <span className="text-muted-foreground uppercase">Latitude</span>
-                      <span className="text-foreground">{odp.latitude.toFixed(6)}</span>
+                      <span className="text-foreground">{odp.gps_lat.toFixed(6)}</span>
                     </div>
                     <div className="flex justify-between text-[9px] font-bold">
                       <span className="text-muted-foreground uppercase">Longitude</span>
-                      <span className="text-foreground">{odp.longitude.toFixed(6)}</span>
+                      <span className="text-foreground">{odp.gps_lng.toFixed(6)}</span>
                     </div>
                   </div>
                 </div>

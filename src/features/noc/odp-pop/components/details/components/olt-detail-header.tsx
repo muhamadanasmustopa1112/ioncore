@@ -2,7 +2,7 @@
 
 import { RiRouterLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
-import { PopOltDetail } from "../../data/dummy-olt-details";
+import { PopOltDetail } from "../../../data/dummy-olt-details";
 
 export function OltDetailHeader({ olt }: { olt: PopOltDetail }) {
   return (

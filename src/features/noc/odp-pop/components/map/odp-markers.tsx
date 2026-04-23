@@ -9,14 +9,15 @@ interface OdpMarkersProps {
   data: OdpData[];
   selectedPopId: string | null;
   markerRefs: MutableRefObject<Record<string, L.Marker>>;
+  onSelect?: (id: string) => void;
 }
 
-export function OdpMarkers({ data, selectedPopId, markerRefs }: OdpMarkersProps) {
+export function OdpMarkers({ data, selectedPopId, markerRefs, onSelect }: OdpMarkersProps) {
   // Get ODPs based on drill-down level
   const currentOdps = useMemo(() => {
     // 1. If a specific POP is selected, show ODPs for that POP only
     if (selectedPopId) {
-      return data.filter(odp => String(odp.parent_pop_id) === String(selectedPopId));
+      return data.filter(odp => String(odp.olt_id) === String(selectedPopId));
     }
 
     // 2. Otherwise return the data as provided (already filtered by area in parent if applicable)
@@ -31,8 +32,11 @@ export function OdpMarkers({ data, selectedPopId, markerRefs }: OdpMarkersProps)
       {currentOdps.map((odp) => (
         <Marker
           key={`odp-${odp.id}`}
-          position={[odp.latitude, odp.longitude]}
+          position={[odp.gps_lat, odp.gps_lng]}
           icon={createStatusIcon('odp', true)}
+          eventHandlers={{
+            click: () => onSelect?.(String(odp.id)),
+          }}
           ref={(ref) => {
             if (ref) markerRefs.current[odp.id] = ref;
           }}

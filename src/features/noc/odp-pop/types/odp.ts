@@ -33,21 +33,48 @@ export const DEFAULT_ODP_VALUES: Partial<OdpFormValues> = {
 };
 
 export interface OdpData {
-  id: number;
+  id: string;
+  olt_id: string;
   name: string;
+  code: string;
   ip_address?: string;
   description?: string;
   port?: number;
   olt_name?: string;
   olt_port?: number;
   area: string;
-  latitude: number;
-  longitude: number;
-  parent_pop_id?: number;
-  parent_pop?: string;
+  gps_lat: number;
+  gps_lng: number;
+  status: string;
+  address: string;
+  heartbeat_at?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface OdpResponse {
   data: OdpData[];
+  metadata: MetaData;
+  recordsFiltered: number;
+  recordsTotal: number;
+}
+
+export type OdpParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sort_by?: string;
+  sort_order?: string;
+  olt_id?: string;
+};
+
+export interface MetaData {
+  current_page: number;
+  limit: number;
+  total_page: number;
+  total_data: number;
+  sort_by: string;
+  sort_order: string;
+  filter_by: string;
 }
 

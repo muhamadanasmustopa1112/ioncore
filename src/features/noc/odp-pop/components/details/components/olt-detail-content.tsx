@@ -1,12 +1,12 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { PopOltDetail } from "../../data/dummy-olt-details";
+import { PopOltDetail } from "../../../data/dummy-olt-details";
 import { OltDetailHeader } from "./olt-detail-header";
 import { OltDetailKpi } from "./olt-detail-kpi";
 import { OltOdpListTable } from "./olt-odp-list-table";
 
-const OltOdpMap = dynamic(() => import("../map/olt-odp-map"), {
+const OltOdpMap = dynamic(() => import("../../map/olt-odp-map"), {
   ssr: false,
   loading: () => <div className="h-[500px] w-full bg-muted animate-pulse rounded-3xl" />,
 });

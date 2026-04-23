@@ -3,7 +3,7 @@
 import { RiSignalTowerLine, RiHashtag, RiGlobalLine } from "@remixicon/react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { PopOltDetail } from "../../data/dummy-olt-details";
+import { PopOltDetail } from "../../../data/dummy-olt-details";
 
 export function OltDetailKpi({ olt }: { olt: PopOltDetail }) {
   const capacityPercentage = (olt.portsUsed / olt.totalPorts) * 100;
@@ -24,19 +24,18 @@ export function OltDetailKpi({ olt }: { olt: PopOltDetail }) {
             <h3 className="text-3xl font-black text-foreground">
               {olt.portsUsed} <span className="text-lg text-muted-foreground ml-1">/ {olt.totalPorts}</span>
             </h3>
-            <span className={`text-sm font-black ${
-              capacityPercentage > 90 ? 'text-destructive' : 
-              capacityPercentage > 70 ? 'text-orange-500' : 'text-primary'
-            }`}>
+            <span className={`text-sm font-black ${capacityPercentage > 90 ? 'text-destructive' :
+                capacityPercentage > 70 ? 'text-orange-500' : 'text-primary'
+              }`}>
               {Math.round(capacityPercentage)}%
             </span>
           </div>
-          <Progress 
-            value={capacityPercentage} 
+          <Progress
+            value={capacityPercentage}
             className="h-2"
             indicatorClassName={
-              capacityPercentage > 90 ? 'bg-destructive' : 
-              capacityPercentage > 70 ? 'bg-orange-500' : 'bg-primary'
+              capacityPercentage > 90 ? 'bg-destructive' :
+                capacityPercentage > 70 ? 'bg-orange-500' : 'bg-primary'
             }
           />
         </div>

@@ -98,6 +98,10 @@ export const paths = {
         manage: {
           path: "/noc/odp-pop/manage",
           getHref: () => "/noc/odp-pop/manage",
+          detail: {
+            path: "/noc/odp-pop/manage/detail",
+            getHref: () => `/noc/odp-pop/manage/detail`,
+          },
         },
         map: {
           path: "/noc/odp-pop/map",

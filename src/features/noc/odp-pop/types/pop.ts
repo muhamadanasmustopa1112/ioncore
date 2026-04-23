@@ -20,22 +20,37 @@ export const DEFAULT_POP_VALUES: Partial<PopFormValues> = {
 
 export interface PopData {
   id: string;
+  code?: string;
   name: string;
   ip_address?: string;
   description?: string;
   port?: number;
   area: string;
-  latitude: number;
-  longitude: number;
+  gps_lat: number;
+  gps_lng: number;
   address?: string;
   oltCount?: number;
   odpCount?: number;
-  status?: "active" | "warning" | "down";
+  heartbeat_at?: string;
+  created_at?: string;
+  updated_at?: string;
+  status?: "ACTIVE" | "INACTIVE" | "WARNING" | "UNKNOWN";
   isValidated?: boolean;
+}
+
+export interface MetaData {
+  current_page: number;
+  limit: number;
+  total_page: number;
+  total_data: number;
+  sort_by: string;
+  sort_order: string;
+  filter_by: string;
 }
 
 export interface PopResponse {
   data: PopData[];
+  metadata: MetaData;
   recordsFiltered: number;
   recordsTotal: number;
 }
@@ -44,4 +59,6 @@ export type PopParams = {
   page?: number;
   limit?: number;
   search?: string;
+  sort_by?: string;
+  sort_order?: string;
 };

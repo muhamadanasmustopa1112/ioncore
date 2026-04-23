@@ -17,7 +17,7 @@ export function PopMarkers({ data, markerRefs, onSelect }: PopMarkersProps) {
       {data.map((pop) => (
         <Marker
           key={`pop-${pop.id}`}
-          position={[pop.latitude, pop.longitude]}
+          position={[pop.gps_lat, pop.gps_lng]}
           icon={createStatusIcon("active")}
           eventHandlers={{
             click: () => onSelect?.(String(pop.id)),
@@ -46,13 +46,13 @@ export function PopMarkers({ data, markerRefs, onSelect }: PopMarkersProps) {
                 <div className="flex justify-between pb-1 border-b border-border/50">
                   <span className="text-muted-foreground font-bold tracking-tight uppercase text-[9px]">Infrastructure:</span>
                   <div className="text-right font-black uppercase text-[10px]">
-                    <span className="text-primary">0</span> OLT{" - "}
-                    <span className="text-primary">0</span> ODP
+                    <span className="text-primary">{pop.oltCount}</span> OLT{" - "}
+                    <span className="text-primary">{pop.odpCount}</span> ODP
                   </div>
                 </div>
                 <div className="pt-1">
                   <p className="text-[10px] text-muted-foreground font-medium leading-tight line-clamp-2">
-                    {pop.area}
+                    {pop.address}
                   </p>
                 </div>
               </div>

@@ -29,22 +29,34 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { columns } from "./table/columns";
+import { getPopColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { usePop } from "../../api/get-pop";
 
 export function OdpPopList({
-  onPopSelect
+  onPopSelect,
+  type = 'pop'
 }: {
-  onPopSelect: (id: string) => void;
+  onPopSelect?: (id: string) => void;
+  type?: 'pop' | 'odp';
 }) {
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
     search: parseAsString,
+    sort_by: parseAsString.withDefault("name"),
+    sort_order: parseAsString.withDefault("asc"),
   });
 
-  const { data: popData, isLoading } = usePop();
+  const params = useMemo(() => ({
+    limit: filter.limit,
+    page: filter.page,
+    search: filter.search || "",
+    sort_by: filter.sort_by,
+    sort_order: filter.sort_order,
+  }), [filter]);
+
+  const { data: popData, isLoading } = usePop({ params });
 
   const data = useMemo(() => popData?.data || [], [popData]);
 
@@ -52,7 +64,7 @@ export function OdpPopList({
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const table = useReactTable({
-    columns,
+    columns: useMemo(() => getPopColumns(type), [type]),
     data,
     meta: {
       onPopSelect,
@@ -140,9 +152,9 @@ export function OdpPopList({
           </div>
         </CardTable>
         <CardFooter className="py-3 mt-auto">
-          <DataGridPagination 
-            setFilter={setFilter} 
-            filter={filter} 
+          <DataGridPagination
+            setFilter={setFilter}
+            filter={filter}
           />
         </CardFooter>
       </Card>

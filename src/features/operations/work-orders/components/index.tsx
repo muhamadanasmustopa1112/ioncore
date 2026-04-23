@@ -528,12 +528,14 @@ function WorkOrderList() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  const { data, isLoading, isError, refetch } = useWorkOrderList({
+  const filters = useMemo(() => ({
     status: statusFilter !== "all" ? (statusFilter as WoStatus) : undefined,
     type: typeFilter !== "all" ? (typeFilter as WoType) : undefined,
-  });
+  }), [statusFilter, typeFilter]);
 
-  const workOrders = data?.workOrders ?? [];
+  const { data, isLoading, isError, refetch } = useWorkOrderList(filters);
+
+  const workOrders = useMemo(() => data?.workOrders ?? [], [data?.workOrders]);
 
   const filtered = useMemo(() => {
     if (!search) return workOrders;

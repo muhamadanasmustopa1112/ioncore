@@ -5,31 +5,27 @@ import { api } from "@/lib/api-client";
 import { QueryConfig } from "@/lib/react-query";
 
 import { ODP_KEYS } from "./key";
-import { OdpResponse } from "../types/odp";
+import { OdpResponse, OdpParams } from "../types/odp";
 
-export const getOdps = (pop_id?: string): Promise<OdpResponse> => {
-    const url = pop_id 
-        ? `${services.networking}/odp-pop/view-map/odps?pop_id=${pop_id}`
-        : `${services.networking}/odp-pop/view-map/odps`;
-    return api.get(url);
+export const getOdps = (params: OdpParams): Promise<OdpResponse> => {
+    return api.get(`${services.networking}/odp-pop/odps`, { params });
 };
 
-export const getOdpsQueryOptions = (pop_id?: string) => {
+export const getOdpsQueryOptions = (params: OdpParams) => {
     return queryOptions({
-        queryKey: ODP_KEYS.list({ pop_id }),
-        queryFn: () => getOdps(pop_id),
+        queryKey: ODP_KEYS.list(params),
+        queryFn: () => getOdps(params),
     });
 };
 
-type UseOdpsOptions = {
-    pop_id?: string;
+type UseOdpOptions = {
+    params: OdpParams;
     queryConfig?: QueryConfig<typeof getOdpsQueryOptions>;
 };
 
-export const useOdps = ({ pop_id, queryConfig }: UseOdpsOptions = {}) => {
+export const useOdp = ({ params, queryConfig }: UseOdpOptions) => {
     return useQuery({
-        ...getOdpsQueryOptions(pop_id),
+        ...getOdpsQueryOptions(params),
         ...queryConfig,
     });
 };
-

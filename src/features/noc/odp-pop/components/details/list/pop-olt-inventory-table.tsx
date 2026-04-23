@@ -29,28 +29,25 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { RiRouterLine } from "@remixicon/react";
-import { DUMMY_ODP_LIST } from "@/features/noc/odp-pop/data/dummy-odp-list";
-import { columns } from "./table/columns_odp";
-import { AddOdpDialog } from "../form/add-odp-dialog";
+import { DUMMY_OLT_DETAILS } from "@/features/noc/odp-pop/data/dummy-olt-details";
+import { RiListCheck } from "@remixicon/react";
+import { columns } from "../table/columns_olt";
+import { AddOltDialog } from "../../form/olt-dialog";
 
-export function OltOdpListTable({ oltId }: { oltId: string }) {
-  const data = useMemo(() => DUMMY_ODP_LIST[oltId] || [], [oltId]);
+export function PopOltInventoryTable({ popId }: { popId: string }) {
+  const data = useMemo(() => DUMMY_OLT_DETAILS[popId] || [], [popId]);
 
-  const [filter, setFilter] = useQueryStates(
-    {
-      limit: parseAsInteger.withDefault(10),
-      page: parseAsInteger.withDefault(1),
-      search: parseAsString,
-    },
-    {
-      urlKeys: {
-        limit: "odp_limit",
-        page: "odp_page",
-        search: "odp_search",
-      },
+  const [filter, setFilter] = useQueryStates({
+    limit: parseAsInteger.withDefault(10),
+    page: parseAsInteger.withDefault(1),
+    search: parseAsString,
+  }, {
+    urlKeys: {
+      limit: 'olt_limit',
+      page: 'olt_page',
+      search: 'olt_search',
     }
-  );
+  });
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
 
@@ -85,11 +82,10 @@ export function OltOdpListTable({ oltId }: { oltId: string }) {
         <CardHeader className="flex-col items-stretch pt-6 pb-2 px-6">
           <div className="flex items-center justify-between mb-4">
             <CardHeading className="flex items-center gap-3 text-lg font-black tracking-tight text-foreground uppercase">
-              <RiRouterLine className="size-5 text-primary" />
-              List ODP
+              <RiListCheck className="size-5 text-primary" />
+              List OLT
             </CardHeading>
-            <AddOdpDialog />
-
+            <AddOltDialog />
           </div>
 
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
@@ -103,7 +99,7 @@ export function OltOdpListTable({ oltId }: { oltId: string }) {
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-3.5 -translate-y-1/2" />
                   <Input
-                    placeholder="Search ODP..."
+                    placeholder="Search OLT..."
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })

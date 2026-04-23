@@ -3,9 +3,9 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RiMapPinLine, RiPencilLine, RiAddLine, RiSignalTowerLine } from "@remixicon/react";
-import { PopData } from "../../types/pop";
-import { useProvisioningStore } from "../../store/provisioning";
-import { ProvisionDeviceFormSheet } from "../form/provision-device-form-sheet";
+import { PopData } from "../../../types/pop";
+import { useProvisioningStore } from "../../../store/provisioning";
+import { ProvisionDeviceFormSheet } from "../../form/provision-device-form-sheet";
 
 export function PopDetailHeader({ pop }: { pop: PopData }) {
   const { openProvisioningSheet } = useProvisioningStore();
@@ -31,7 +31,7 @@ export function PopDetailHeader({ pop }: { pop: PopData }) {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground font-medium">
             <RiMapPinLine className="size-4" />
-            <span className="text-sm">{pop.area}</span>
+            <span className="text-sm">{pop?.address}</span>
           </div>
         </div>
       </div>
