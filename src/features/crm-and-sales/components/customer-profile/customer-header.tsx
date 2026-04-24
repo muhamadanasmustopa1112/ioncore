@@ -1,48 +1,73 @@
 import * as React from "react";
-import { Mail, Phone, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-export function CustomerHeader() {
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import type { CustomerDetail } from "@/features/customers/types/customers-api";
+
+function initials(name: string) {
+  return name
+    .split(/\s+/)
+    .map((s) => s[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+interface Props {
+  customer?: CustomerDetail;
+}
+
+export function CustomerHeader({ customer }: Props) {
+  const name = customer?.full_name ?? "—";
+  const display = customer?.company_name
+    ? `${customer.full_name} (${customer.company_name})`
+    : name;
+  const status = customer?.status ?? "pending";
+  const statusVariant =
+    status === "active"
+      ? "success"
+      : status === "suspended"
+        ? "warning"
+        : status === "deactivated" || status === "churned"
+          ? "destructive"
+          : "secondary";
+
   return (
     <div className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
       <div className="flex gap-6 items-center">
         <div className="rounded-xl overflow-hidden ring-4 ring-primary/5 shrink-0">
           <Avatar className="size-24 rounded-none">
-            <AvatarImage
-              className="object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuDP81qMLglbk_qrGooW7ga7YNaCzZizJPnKzbyRhHjhUqj3-eBMB9qDV8ICGLnenWFVVfjsCMWhamarXaN_vjnsAEkG0Jih9FHn6xCSXrLvRF0f0Hl0znDOy6mVJG4Eaty7L55vuXwVn8cfwlj4UJJDpTcXdbC2gaocnPhGFQgcSSDqpiKEahZuID4LnbOGGFIFYJX940gkN98Qw62d20poiSJ2HbZrXf8XFoBEanQiLghHNa0KA5kBB3xAEvA34l9-kPX4VqcTeZX8"
-              alt="Sarah Jenkins"
-            />
-            <AvatarFallback>SJ</AvatarFallback>
+            <AvatarFallback>{initials(name)}</AvatarFallback>
           </Avatar>
         </div>
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">Sarah Jenkins</h1>
-            <Badge variant="success" appearance="light" size="md">Active</Badge>
+            <h1 className="text-2xl font-bold">{display}</h1>
+            <Badge variant={statusVariant} appearance="light" size="md">
+              {status}
+            </Badge>
           </div>
           <p className="text-muted-foreground font-medium">
-            ID: ISP-992831 • Platinum Member
+            ID: {customer?.id ?? "—"} · {customer?.customer_type ?? "—"}
           </p>
-          <div className="flex items-center gap-4 mt-1 text-sm text-slate-600 dark:text-slate-400">
-            <span className="flex items-center gap-1.5">
-              <Mail className="size-4" /> s.jenkins@email.com
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Phone className="size-4" /> +1 (555) 012-3456
-            </span>
-          </div>
+          {customer?.activation_date && (
+            <p className="text-sm text-muted-foreground">
+              Activated: {customer.activation_date}
+            </p>
+          )}
         </div>
       </div>
       <div className="flex flex-wrap gap-3">
         <Button variant="primary">
           <PlusCircle className="size-4" /> Add Service
         </Button>
-        <Button variant="secondary">
-          Change Plan
-        </Button>
-        <Button className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20" variant="outline">
+        <Button variant="secondary">Change Plan</Button>
+        <Button
+          className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20"
+          variant="outline"
+        >
           Deactivate Service
         </Button>
       </div>
