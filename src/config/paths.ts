@@ -366,5 +366,9 @@ export const paths = {
       path: "/docs/dashboard/transaction",
       getHref: () => "/docs/dashboard/transaction",
     },
+    s3Test: {
+      path: "/docs/s3-test",
+      getHref: () => "/docs/s3-test",
+    },
   },
 };
