@@ -46,6 +46,10 @@ export const services = {
   userOrigin: "/ion-user-service",
   branch: "/ion-branch-service",
   ruleScheme: "/ion-rule-scheme-service",
+  product: "/ion-product-service",
+  sales: "/ion-sales-service",
+  order: "/ion-order-service",
+  customer: "/ion-customer-service",
 };
 
 // devices

@@ -38,6 +38,22 @@ export const paths = {
         path: "/crm-and-sales",
         getHref: () => "/crm-and-sales",
       },
+      customer: {
+        detail: {
+          path: "/crm-and-sales/:customerId",
+          getHref: (customerId: string) => `/crm-and-sales/${customerId}`,
+        },
+      },
+      leads: {
+        root: {
+          path: "/crm-and-sales/leads",
+          getHref: () => "/crm-and-sales/leads",
+        },
+        detail: {
+          path: "/crm-and-sales/leads/:id",
+          getHref: (id: string) => `/crm-and-sales/leads/${id}`,
+        },
+      },
     },
     networkAndOrchestration: {
       root: {
