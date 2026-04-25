@@ -50,8 +50,8 @@ export function useAuditLogList(filters: Partial<AuditLogFilters> = {}) {
         pagination: {
           page: res.metadata?.page ?? 1,
           per_page: res.metadata?.per_page ?? 20,
-          total: res.metadata?.count ?? 0,
-          total_pages: Math.ceil((res.metadata?.count ?? 0) / (res.metadata?.per_page ?? 20)) || 1,
+          total: res.metadata?.total ?? 0,
+          total_pages: Math.ceil((res.metadata?.total ?? 0) / (res.metadata?.per_page ?? 20)) || 1,
         },
       };
     },

@@ -227,7 +227,7 @@ export function OrdersPage() {
     <div className="flex flex-col gap-6 p-4">
       <PageBreadcrumb
         items={[
-          { title: "Operations", href: paths.dashboard.operations.root.getHref() },
+          { title: "Operations", path: paths.dashboard.operations.root.getHref() },
           { title: "Orders" },
         ]}
       />
