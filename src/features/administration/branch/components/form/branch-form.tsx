@@ -33,23 +33,11 @@ const branchSchema = z
     address: z.string().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.level === "area" || data.level === "sub_area") {
-      if (!data.regionalId) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Regional branch is required",
-          path: ["regionalId"],
-        });
-      }
+    if ((data.level === "area" || data.level === "sub_area") && !data.regionalId) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Regional (Parent) is required", path: ["regionalId"] });
     }
-    if (data.level === "sub_area") {
-      if (!data.areaId) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Area branch is required",
-          path: ["areaId"],
-        });
-      }
+    if (data.level === "sub_area" && !data.areaId) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Area (Parent) is required", path: ["areaId"] });
     }
   });
 

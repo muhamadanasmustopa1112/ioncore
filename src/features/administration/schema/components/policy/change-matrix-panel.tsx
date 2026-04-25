@@ -15,7 +15,7 @@ import { CustomerType } from "../../types";
 
 const CUSTOMER_TYPES: CustomerType[] = ["residential", "business", "enterprise", "corporate"];
 
-const CUSTOMER_TYPE_LABELS: Record<CustomerType, string> = {
+const CUSTOMER_TYPE_LABELS: Record<string, string> = {
   residential: "Residential",
   business: "Business",
   enterprise: "Enterprise",

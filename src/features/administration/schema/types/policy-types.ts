@@ -113,4 +113,5 @@ export interface ChangeMatrixEntry {
   enterprise: ChangeAction;
   corporate: ChangeAction;
   note?: string;
+  [key: string]: unknown;
 }

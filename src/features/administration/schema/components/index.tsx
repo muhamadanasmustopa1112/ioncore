@@ -21,8 +21,8 @@ import {
 } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
-import { DUMMY_SCHEMAS } from "../data/dummy-schemas";
 import { useSchemaStore, SchemaView } from "../store/schema";
+import { useSchemaList } from "../api/schema-queries";
 import { SchemaList } from "./list/schema-list";
 import { SchemaFormSheet } from "./schema-form-sheet";
 import { ApprovalPanel } from "./workflow/approval-panel";
@@ -64,7 +64,9 @@ function ViewContent({ view }: { view: SchemaView }) {
 }
 
 export function SchemaManagementPage() {
-  const { openSchemaSheet, view, setView } = useSchemaStore();
+  const { openSchemaSheet, view, setView, activeSchemaType } = useSchemaStore();
+  const { data: schemaResult } = useSchemaList({ schemaType: activeSchemaType });
+  const schemaCount = schemaResult?.metadata?.total ?? schemaResult?.schemas?.length ?? 0;
 
   return (
     <div className="relative h-full w-full overflow-hidden">
@@ -85,7 +87,7 @@ export function SchemaManagementPage() {
           <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
             <Badge variant="info" appearance="light" className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs">
               <RiFileTextLine className="size-3.5" />
-              {DUMMY_SCHEMAS.length} Schemas
+              {schemaCount} Schemas
             </Badge>
             <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
             <span className="text-muted-foreground font-normal text-xs sm:text-sm">

@@ -26,8 +26,8 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SchemaRecord, SchemaType } from "../../types";
-import { DUMMY_SCHEMAS } from "../../data/dummy-schemas";
 import { useSchemaStore } from "../../store/schema";
+import { useSchemaList } from "../../api/schema-queries";
 import { columns } from "./table/columns";
 
 const SCHEMA_TABS: { value: SchemaType; label: string }[] = [
@@ -42,7 +42,6 @@ export function SchemaList() {
   const { activeSchemaType, setActiveSchemaType } =
     useSchemaStore();
 
-  const [data] = useState<SchemaRecord[]>(DUMMY_SCHEMAS);
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -50,26 +49,31 @@ export function SchemaList() {
   });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const { data: queryResult, isLoading } = useSchemaList({
+    schemaType: activeSchemaType,
+    page: filter.page,
+    size: filter.limit,
+  });
+
+  const rows = queryResult?.schemas ?? [];
+
   const filteredData = useMemo(() => {
-    let result = data.filter((r) => r.schema_type === activeSchemaType);
+    if (!filter.search) return rows;
+    const q = filter.search.toLowerCase();
+    return rows.filter(
+      (r: SchemaRecord) =>
+        r.name.toLowerCase().includes(q) ||
+        r.customer_type.toLowerCase().includes(q) ||
+        (r.latest_version ?? "").toLowerCase().includes(q)
+    );
+  }, [rows, filter.search]);
 
-    if (filter.search) {
-      const q = filter.search.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.name.toLowerCase().includes(q) ||
-          r.customer_type.toLowerCase().includes(q) ||
-          r.version.toLowerCase().includes(q)
-      );
-    }
-
-    return result;
-  }, [data, activeSchemaType, filter.search]);
+  const total = queryResult?.metadata?.total ?? filteredData.length;
 
   const table = useReactTable({
     columns,
     data: filteredData,
-    pageCount: Math.ceil(filteredData.length / (filter.limit || 10)),
+    pageCount: Math.ceil(total / (filter.limit || 10)),
     getRowId: (row) => row.id,
     state: { rowSelection },
     enableRowSelection: true,
@@ -91,7 +95,7 @@ export function SchemaList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={false}
+      isLoading={isLoading}
     >
       {/* Schema Type Tabs */}
       <Tabs value={activeSchemaType} onValueChange={(v) => setActiveSchemaType(v as SchemaType)}>

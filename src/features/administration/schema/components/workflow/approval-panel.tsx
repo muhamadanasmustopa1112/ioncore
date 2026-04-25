@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { RiCheckLine, RiCheckboxCircleLine, RiCloseLine, RiTimeLine } from "@remixicon/react";
-import { toast } from "sonner";
+import { RiCheckLine, RiCheckboxCircleLine, RiCloseLine, RiTimeLine, RiSendPlaneLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,27 +15,42 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { useSchemaStore } from "../../store/schema";
-import { DUMMY_APPROVALS, DUMMY_APPROVAL_DECISIONS } from "../../data/dummy-approvals";
-import { DUMMY_SCHEMAS } from "../../data/dummy-schemas";
+import {
+  usePublishSchemaVersion,
+  useSchema,
+  useSchemaVersions,
+  useVersionApproval,
+  useApprovalDecisions,
+  useSubmitForReview,
+  useAddApprovalDecision,
+} from "../../api/schema-queries";
 
 export function ApprovalPanel() {
   const { approvalPanelOpen, closeApprovalPanel, selectedSchemaId } = useSchemaStore();
   const [comment, setComment] = useState("");
   const [changeReason, setChangeReason] = useState("");
+  const publishVersion = usePublishSchemaVersion();
+  const submitForReview = useSubmitForReview();
+  const addDecision = useAddApprovalDecision();
 
-  const schema = DUMMY_SCHEMAS.find((s) => s.id === selectedSchemaId);
-  const approval = DUMMY_APPROVALS.find((a) => a.schema_id === selectedSchemaId);
-  const decisions = approval
-    ? DUMMY_APPROVAL_DECISIONS.filter((d) => d.schema_approval_id === approval.id)
-    : [];
+  const { data: schema } = useSchema(approvalPanelOpen ? selectedSchemaId : null);
+  const { data: versions } = useSchemaVersions(approvalPanelOpen ? selectedSchemaId : null);
 
-  const approvedCount = decisions.filter((d) => d.decision === "approved").length;
+  const latestDraftVersion = versions?.find((v) => {
+    const s = v.status?.toUpperCase();
+    return s === "DRAFT" || s === "APPROVED" || s === "REVIEW";
+  }) ?? versions?.[0];
+
+  const { data: approval } = useVersionApproval(approvalPanelOpen ? latestDraftVersion?.id ?? null : null);
+  const { data: decisions = [] } = useApprovalDecisions(approvalPanelOpen ? approval?.id ?? null : null);
+
+  const versionStatus = latestDraftVersion?.status?.toUpperCase();
+  const isDraft = versionStatus === "DRAFT";
+  const isInReview = versionStatus === "REVIEW";
+
+  const approvedCount = decisions.filter((d) => d.decision === "APPROVED").length;
   const minRequired = approval?.min_approvals ?? 0;
   const progressPercent = minRequired > 0 ? Math.min((approvedCount / minRequired) * 100, 100) : 0;
-
-  const decidedRoles = new Set(
-    decisions.map((d) => d.approver_role)
-  );
 
   return (
     <Sheet open={approvalPanelOpen} onOpenChange={(open) => !open && closeApprovalPanel()}>
@@ -64,139 +78,108 @@ export function ApprovalPanel() {
             </div>
           </div>
 
-          {/* Approver list */}
+          {/* Approver decisions list */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Required Approvers</h3>
-            {approval?.required_approvers.map((roleId) => {
-              const decision = decisions.find((d) => {
-                // Match by role name derived from roleId (e.g. "role-product-admin" → "Product Admin")
-                const roleName = roleId
-                  .replace("role-", "")
-                  .split("-")
-                  .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                  .join(" ");
-                return d.approver_role === roleName;
-              });
-
-              if (decision) {
-                const isApproved = decision.decision === "approved";
-                return (
-                  <div
-                    key={roleId}
-                    className="flex items-start gap-3 rounded-lg border p-3"
-                  >
-                    <div
-                      className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-                        isApproved
-                          ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
-                          : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                      }`}
-                    >
-                      {isApproved ? (
-                        <RiCheckLine className="h-4 w-4" />
-                      ) : (
-                        <RiCloseLine className="h-4 w-4" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-medium">{decision.approver_name}</span>
-                        <span
-                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                            isApproved
-                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                          }`}
-                        >
-                          {isApproved ? "Approved" : "Rejected"}
-                        </span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">{decision.approver_role}</p>
-                      {decision.comment && (
-                        <p className="mt-1 text-sm text-foreground/80 italic">
-                          &ldquo;{decision.comment}&rdquo;
-                        </p>
-                      )}
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {format(new Date(decision.decided_at), "dd MMM yyyy, HH:mm")}
-                      </p>
-                    </div>
-                  </div>
-                );
-              }
-
-              // Pending — no decision yet
-              const roleName = roleId
-                .replace("role-", "")
-                .split("-")
-                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(" ");
-
+            <h3 className="text-sm font-semibold text-foreground">Approval Decisions</h3>
+            {decisions.length > 0 ? decisions.map((d) => {
+              const isApproved = d.decision === "APPROVED";
+              const isRejected = d.decision === "REJECTED";
               return (
-                <div
-                  key={roleId}
-                  className="flex items-start gap-3 rounded-lg border p-3"
-                >
-                  <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
-                    <RiTimeLine className="h-4 w-4" />
+                <div key={d.id} className="flex items-start gap-3 rounded-lg border p-3">
+                  <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+                    isApproved ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+                    : isRejected ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                    : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                  }`}>
+                    {isApproved ? <RiCheckLine className="h-4 w-4" /> : isRejected ? <RiCloseLine className="h-4 w-4" /> : <RiTimeLine className="h-4 w-4" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium text-muted-foreground">
-                        {roleName}
-                      </span>
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
-                        Pending
+                      <span className="text-sm font-medium">{d.approver_user_id}</span>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        isApproved ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                        : isRejected ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                        : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                      }`}>
+                        {d.decision.charAt(0) + d.decision.slice(1).toLowerCase()}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground">Awaiting decision</p>
+                    {d.comment && (
+                      <p className="mt-1 text-sm text-foreground/80 italic">&ldquo;{d.comment}&rdquo;</p>
+                    )}
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {format(new Date(d.decided_at), "dd MMM yyyy, HH:mm")}
+                    </p>
                   </div>
                 </div>
               );
-            })}
-
-            {!approval && (
+            }) : (
               <p className="text-sm text-muted-foreground">
-                No approval workflow found for this schema.
+                {isInReview ? "No decisions yet — waiting for approvers." : "Submit for review to start the approval process."}
               </p>
             )}
           </div>
 
-          {/* Your Decision */}
-          <div className="space-y-3 border-t pt-5">
-            <h3 className="text-sm font-semibold text-foreground">Your Decision</h3>
-            <Textarea
-              placeholder="Add a comment (optional)..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="min-h-[80px] resize-none"
-            />
-            <div className="flex gap-2">
+          {/* Submit for Review */}
+          {isDraft && latestDraftVersion && (
+            <div className="space-y-3 border-t pt-5">
+              <h3 className="text-sm font-semibold text-foreground">Submit for Review</h3>
+              <p className="text-xs text-muted-foreground">
+                Send this draft version to approvers for review.
+              </p>
               <Button
                 variant="outline"
-                className="flex-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
-                onClick={() => {
-                  setComment("");
-                  closeApprovalPanel();
-                }}
+                className="w-full"
+                disabled={submitForReview.isPending}
+                onClick={() => submitForReview.mutate({
+                  versionId: latestDraftVersion.id,
+                  payload: { min_approvals: 1, required_approvers: "" },
+                })}
               >
-                Reject
-              </Button>
-              <Button
-                variant="primary"
-                className="flex-1"
-                onClick={() => {
-                  setComment("");
-                  closeApprovalPanel();
-                }}
-              >
-                Approve
+                <RiSendPlaneLine className="mr-2 size-4" /> Submit for Review
               </Button>
             </div>
-          </div>
+          )}
+
+          {/* Your Decision */}
+          {isInReview && latestDraftVersion && (
+            <div className="space-y-3 border-t pt-5">
+              <h3 className="text-sm font-semibold text-foreground">Your Decision</h3>
+              <Textarea
+                placeholder="Add a comment (optional)..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                className="min-h-[80px] resize-none"
+              />
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                  disabled={addDecision.isPending}
+                  onClick={() => {
+                    addDecision.mutate({ versionId: latestDraftVersion.id, payload: { decision: "REJECTED", notes: comment } });
+                    setComment("");
+                  }}
+                >
+                  Reject
+                </Button>
+                <Button
+                  variant="primary"
+                  className="flex-1"
+                  disabled={addDecision.isPending}
+                  onClick={() => {
+                    addDecision.mutate({ versionId: latestDraftVersion.id, payload: { decision: "APPROVED", notes: comment } });
+                    setComment("");
+                  }}
+                >
+                  Approve
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Publish */}
-          {approval?.status === "approved" && (
+          {approval?.status?.toUpperCase() === "APPROVED" && (
             <div className="space-y-3 border-t border-border/50 pt-4">
               <p className="text-sm font-semibold">Publish Schema</p>
               <p className="text-xs text-muted-foreground">
@@ -210,10 +193,9 @@ export function ApprovalPanel() {
               <Button
                 variant="primary"
                 className="w-full font-semibold"
-                disabled={changeReason.length < 10}
+                disabled={changeReason.length < 10 || publishVersion.isPending || !latestDraftVersion}
                 onClick={() => {
-                  toast.success(`Schema published with reason: "${changeReason}"`);
-                  closeApprovalPanel();
+                  if (latestDraftVersion) publishVersion.mutate(latestDraftVersion.id);
                 }}
               >
                 <RiCheckboxCircleLine className="mr-2 size-4" /> Publish Schema

@@ -1,3 +1,6 @@
+"use client";
+
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,18 +18,41 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-const potentialLeads = [
-  { name: "David Miller", source: "LinkedIn", interest: "High", interestVariant: "success" as const, agent: "R. Simmons" },
-  { name: "Nexus Corp", source: "Referral", interest: "Medium", interestVariant: "warning" as const, agent: "T. Hall" },
-  { name: "Emily Clark", source: "Direct", interest: "High", interestVariant: "success" as const, agent: "A. Rivera" },
-];
+import { useAdminLeads } from "@/features/leads/api/leads-queries";
+import type { LeadStatus } from "@/features/leads/types/leads-api";
+import { paths } from "@/config/paths";
+
+const STATUS_VARIANT: Record<
+  LeadStatus,
+  "success" | "warning" | "destructive" | "secondary" | "primary"
+> = {
+  new: "secondary",
+  active: "primary",
+  warm: "warning",
+  hot: "success",
+  converted: "success",
+  lost: "destructive",
+  potential: "secondary",
+};
+
 export function CrmLeadsTable() {
+  const { data, isLoading, isError } = useAdminLeads({
+    sort_by: "created_at",
+    sort_dir: "desc",
+  });
+
+  const leads = data?.leads ?? [];
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Potential Leads</CardTitle>
         <CardToolbar>
-          <Button variant="ghost" mode="link">View All</Button>
+          <Button variant="ghost" mode="link" asChild>
+            <Link href={paths.dashboard.crmAndSales.leads.root.getHref()}>
+              View All
+            </Link>
+          </Button>
         </CardToolbar>
       </CardHeader>
       <CardTable>
@@ -35,24 +61,51 @@ export function CrmLeadsTable() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Source</TableHead>
-              <TableHead>Interest</TableHead>
-              <TableHead>Agent</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {potentialLeads.map((row) => (
-              <TableRow key={row.name}>
-                <TableCell className="font-medium">{row.name}</TableCell>
-                <TableCell className="text-muted-foreground">{row.source}</TableCell>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
+                  Loading…
+                </TableCell>
+              </TableRow>
+            )}
+            {isError && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-6 text-center text-destructive">
+                  Failed to load leads
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && !isError && leads.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
+                  No leads found
+                </TableCell>
+              </TableRow>
+            )}
+            {leads.slice(0, 5).map((lead) => (
+              <TableRow key={lead.id}>
+                <TableCell className="font-medium">{lead.lead_name}</TableCell>
+                <TableCell className="text-muted-foreground capitalize">{lead.source}</TableCell>
                 <TableCell>
-                  <Badge variant={row.interestVariant} appearance="light" size="md">
-                    {row.interest}
+                  <Badge variant={STATUS_VARIANT[lead.status]} appearance="light" size="md">
+                    {lead.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{row.agent}</TableCell>
+                <TableCell className="text-muted-foreground capitalize">
+                  {lead.lead_type}
+                </TableCell>
                 <TableCell>
-                  <Button variant="ghost" mode="link" size="sm">Detail</Button>
+                  <Button variant="ghost" mode="link" size="sm" asChild>
+                    <Link href={paths.dashboard.crmAndSales.leads.detail.getHref(lead.id)}>
+                      Detail
+                    </Link>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

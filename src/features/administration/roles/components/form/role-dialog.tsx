@@ -72,7 +72,7 @@ export function RoleDialog() {
     }
     try {
       const resp = await createRoleAsync({
-        name: toSnakeCase(name),
+        name: name.trim(),
         description: description.trim() || undefined,
       });
       const newRoleId = resp.data?.id;
@@ -134,12 +134,6 @@ export function RoleDialog() {
                   onChange={(e) => setName(e.target.value)}
                   disabled={isDetailMode || !isNewMode || busy}
                 />
-                {isNewMode && name.trim() && (
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    Stored as:{" "}
-                    <span className="font-mono text-foreground">{toSnakeCase(name)}</span>
-                  </p>
-                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="roleDescription" className="text-xs font-medium text-muted-foreground">

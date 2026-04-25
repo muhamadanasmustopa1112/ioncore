@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RiInformationLine } from "@remixicon/react";
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { onboardingFormSchema, type OnboardingFormValues } from "../../../types/onboarding-schema";
 import { useSchemaStore } from "../../../store/schema";
+import { useCreateSchema, useUpdateSchemaContent, useSchema, useSchemaVersions } from "../../../api/schema-queries";
 import { StepsSection } from "./steps-section";
 import { DocumentsSection } from "./documents-section";
 
@@ -50,15 +52,95 @@ const DEFAULT_ONBOARDING: OnboardingFormValues = {
 };
 
 export function OnboardingForm() {
-  const { form } = useSchemaStore();
+  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter } = useSchemaStore();
   const isDetailMode = form === "details";
+  const createSchema = useCreateSchema();
+  const updateSchema = useUpdateSchemaContent();
 
   const rhfForm = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingFormSchema),
     defaultValues: DEFAULT_ONBOARDING,
   });
 
-  const { register, watch, setValue, formState: { errors } } = rhfForm;
+  const { register, watch, setValue, handleSubmit, reset, formState: { errors } } = rhfForm;
+
+  const { data: schemaDetail } = useSchema((form === "edit" || form === "details") ? selectedSchemaId : null);
+  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details") ? selectedSchemaId : null);
+
+  function fromApiContent(c: Record<string, unknown>): Partial<OnboardingFormValues> {
+    const timeline = (c.timeline ?? {}) as Record<string, unknown>;
+    return {
+      steps: c.steps as OnboardingFormValues["steps"],
+      expected_duration_hours: timeline.expected_duration_hours as number,
+      sla_hours: timeline.sla_hours as number,
+      required_documents: c.required_documents as OnboardingFormValues["required_documents"],
+    };
+  }
+
+  useEffect(() => {
+    if ((form !== "edit" && form !== "details") || !schemaDetail) return;
+    const latestVer = schemaVersions?.find((v) => v.version === schemaDetail.latest_version) ?? schemaVersions?.[0];
+    const raw = (latestVer?.content ?? {}) as Record<string, unknown>;
+    const content = fromApiContent(raw);
+    reset({
+      ...DEFAULT_ONBOARDING,
+      name: schemaDetail.name,
+      customer_type: schemaDetail.customer_type as OnboardingFormValues["customer_type"],
+      ...content,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, schemaDetail, schemaVersions]);
+
+  function toApiContent(values: OnboardingFormValues) {
+    return {
+      steps: values.steps.map((step) => ({
+        step_id: step.step_id,
+        step_name: step.step_name,
+        required: step.required,
+        automated: step.automated,
+        work_order_type: step.work_order_type,
+        priority: step.priority,
+        equipment_template: step.equipment_template,
+        requires_approval: step.requires_approval,
+        approval_workflow: step.approval_workflow,
+        validation_rules: [],
+        logic: "",
+        approvers: [],
+        notifications: [],
+      })),
+      timeline: {
+        expected_duration_hours: values.expected_duration_hours,
+        sla_hours: values.sla_hours,
+      },
+      required_documents: values.required_documents.map((doc) => ({
+        document_id: doc.document_id,
+        document_name: doc.document_name,
+        required: doc.required,
+        description: doc.description,
+        accepted_formats: doc.accepted_formats,
+        max_size_mb: doc.max_size_mb,
+        validation: doc.validation,
+        validation_rules: [],
+      })),
+      additional_approvals: [],
+    };
+  }
+
+  function onSubmit(values: OnboardingFormValues) {
+    const { name, customer_type } = values;
+    const content = toApiContent(values);
+    if (form === "new") {
+      createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
+    } else if (form === "edit" && selectedSchemaId) {
+      updateSchema.mutate({ id: selectedSchemaId, payload: { content } });
+    }
+  }
+
+  useEffect(() => {
+    setFormSubmitter(handleSubmit(onSubmit));
+    return () => setFormSubmitter(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, selectedSchemaId]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">

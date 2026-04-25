@@ -28,6 +28,7 @@ export function SchemaFormSheet() {
     activeSchemaType,
     selectedSchemaId,
     openApprovalPanel,
+    formSubmitter,
   } = useSchemaStore();
   const isNewMode = form === "new";
   const isDetailMode = form === "details";
@@ -60,7 +61,7 @@ export function SchemaFormSheet() {
               </Button>
               {form === "edit" && (
                 <>
-                  <Button variant="outline" onClick={closeSchemaSheet} className="mr-3">
+                  <Button variant="outline" onClick={() => formSubmitter?.()} className="mr-3">
                     Save as Draft
                   </Button>
                   <Button
@@ -78,7 +79,7 @@ export function SchemaFormSheet() {
                 <Button
                   variant="primary"
                   className="font-semibold"
-                  onClick={closeSchemaSheet}
+                  onClick={() => formSubmitter?.()}
                 >
                   Create Schema
                 </Button>

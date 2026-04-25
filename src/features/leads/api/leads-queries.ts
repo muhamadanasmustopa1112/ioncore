@@ -14,6 +14,8 @@ import {
   updateLeadCableDistance,
   updateLeadStatus,
 } from "./leads-api";
+import { listSales } from "./sales-api";
+import type { SalesListParams } from "./sales-api";
 import type {
   CreateLeadActivityPayload,
   CreateLeadPayload,
@@ -22,6 +24,18 @@ import type {
   UpdateLeadPayload,
   UpdateLeadStatusPayload,
 } from "../types/leads-api";
+
+export const salesKeys = {
+  all: ["sales"] as const,
+  list: (params: SalesListParams) => [...salesKeys.all, "list", params] as const,
+};
+
+export function useSalesList(params: SalesListParams = {}) {
+  return useQuery({
+    queryKey: salesKeys.list(params),
+    queryFn: async () => (await listSales({ ...params, per_page: 100 })).data?.saleses ?? [],
+  });
+}
 
 export const leadKeys = {
   all: ["leads"] as const,

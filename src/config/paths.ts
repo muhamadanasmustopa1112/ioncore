@@ -155,6 +155,12 @@ export const paths = {
           getHref: (id: string) => `/operations/work-orders/${id}`,
         },
       },
+      orders: {
+        root: {
+          path: "/operations/orders",
+          getHref: () => "/operations/orders",
+        },
+      },
       connectivity: {
         path: "/operations/connectivity/:id",
         getHref: (id: string) => `/operations/connectivity/${id}`,
@@ -294,6 +300,22 @@ export const paths = {
       auditLog: {
         path: "/administration/audit-log",
         getHref: () => "/administration/audit-log",
+      },
+      accessPolicies: {
+        path: "/administration/access-policies",
+        getHref: () => "/administration/access-policies",
+      },
+      compliance: {
+        path: "/administration/compliance",
+        getHref: () => "/administration/compliance",
+      },
+      leadIngestion: {
+        path: "/administration/lead-ingestion",
+        getHref: () => "/administration/lead-ingestion",
+      },
+      duplicateReview: {
+        path: "/administration/duplicate-review",
+        getHref: () => "/administration/duplicate-review",
       },
     },
   },
