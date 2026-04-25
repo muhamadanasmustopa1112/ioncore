@@ -12,18 +12,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useSchemaStore } from "../../store/schema";
-import { DUMMY_SCHEMA_VERSIONS, DUMMY_SCHEMAS } from "../../data/dummy-schemas";
+import { useSchemaVersions, useSchemaVersionDiff } from "../../api/schema-queries";
 
-type DiffLine = {
-  type: "added" | "changed";
-  text: string;
-};
-
-const PLACEHOLDER_DIFF: DiffLine[] = [
-  { type: "changed", text: 'billing_cycle.type: "monthly" → "quarterly"' },
-  { type: "changed", text: "recurring_payment.late_fee.value: 1 → 2" },
-  { type: "added", text: "otc.generate_faktur_pajak: true" },
-];
 
 export function HistoryPanel() {
   const {
@@ -35,13 +25,22 @@ export function HistoryPanel() {
 
   const [selectedVersionIds, setSelectedVersionIds] = useState<string[]>([]);
 
-  const schema = DUMMY_SCHEMAS.find((s) => s.id === selectedSchemaId);
+  const { data: versionsData, isLoading: versionsLoading } = useSchemaVersions(
+    historyPanelOpen ? selectedSchemaId : null
+  );
+  const versions = versionsData ?? [];
 
-  const versions = DUMMY_SCHEMA_VERSIONS.filter(
-    (v) =>
-      schema &&
-      v.name === schema.name &&
-      v.customer_type === schema.customer_type,
+  const diffV1 = selectedVersionIds[0]
+    ? versions.find((v) => v.id === selectedVersionIds[0])?.version
+    : undefined;
+  const diffV2 = selectedVersionIds[1]
+    ? versions.find((v) => v.id === selectedVersionIds[1])?.version
+    : undefined;
+
+  const { data: diffResult } = useSchemaVersionDiff(
+    diffV1 && diffV2 ? selectedSchemaId : null,
+    diffV1 ?? "",
+    diffV2 ?? ""
   );
 
   function handleVersionClick(versionId: string) {
@@ -52,7 +51,6 @@ export function HistoryPanel() {
       if (prev.length < 2) {
         return [...prev, versionId];
       }
-      // Replace oldest (first) with new selection
       return [prev[1], versionId];
     });
   }
@@ -71,11 +69,15 @@ export function HistoryPanel() {
   const showDiff = selectedVersions.length === 2;
 
   const statusBadgeClass = (status: string) => {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case "published":
         return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
       case "archived":
         return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
+      case "approved":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+      case "submitted":
+        return "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400";
       case "draft":
         return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-500";
       default:
@@ -90,7 +92,7 @@ export function HistoryPanel() {
           <div className="flex items-center gap-2">
             <RiHistoryLine className="h-5 w-5 text-muted-foreground" />
             <SheetTitle className="font-medium text-xl">
-              Version History — {schema?.name ?? "Schema"}
+              Version History
             </SheetTitle>
           </div>
           <p className="text-sm text-muted-foreground mt-1">
@@ -101,7 +103,10 @@ export function HistoryPanel() {
         <SheetBody className="flex-1 overflow-y-auto p-5 space-y-4">
           {/* Version list */}
           <div className="space-y-2">
-            {versions.length === 0 && (
+            {versionsLoading && (
+              <p className="text-sm text-muted-foreground">Loading versions...</p>
+            )}
+            {!versionsLoading && versions.length === 0 && (
               <p className="text-sm text-muted-foreground">
                 No version history found for this schema.
               </p>
@@ -122,7 +127,7 @@ export function HistoryPanel() {
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="font-mono font-bold text-sm shrink-0">
-                        v{ver.version}
+                        {ver.version}
                       </span>
                       <span
                         className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${statusBadgeClass(ver.status)}`}
@@ -152,23 +157,19 @@ export function HistoryPanel() {
               <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
                 <RiGitMergeLine className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-semibold">
-                  Diff: v{selectedVersions[0].version} → v{selectedVersions[1].version}
+                  Diff: {selectedVersions[0].version} → {selectedVersions[1].version}
                 </span>
               </div>
-              <div className="p-4 space-y-2 font-mono text-xs">
-                {PLACEHOLDER_DIFF.map((line, idx) => (
-                  <div
-                    key={idx}
-                    className={`px-3 py-1.5 rounded ${
-                      line.type === "added"
-                        ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                        : "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-                    }`}
-                  >
-                    {line.type === "added" ? "+ " : "~ "}
-                    {line.text}
-                  </div>
-                ))}
+              <div className="p-4 font-mono text-xs">
+                {diffResult?.data
+                  ? (
+                    <pre className="whitespace-pre-wrap break-all text-foreground/80">
+                      {JSON.stringify(diffResult.data, null, 2)}
+                    </pre>
+                  )
+                  : (
+                    <p className="text-muted-foreground text-xs">Loading diff...</p>
+                  )}
               </div>
             </div>
           )}

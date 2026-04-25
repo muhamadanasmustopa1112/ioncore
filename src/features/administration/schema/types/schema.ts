@@ -10,30 +10,27 @@ export type SchemaStatus =
   | "submitted"
   | "approved"
   | "published"
-  | "archived";
+  | "archived"
+  | "DRAFT"
+  | "SUBMITTED"
+  | "APPROVED"
+  | "PUBLISHED"
+  | "ARCHIVED";
 
-export type CustomerType =
-  | "residential"
-  | "business"
-  | "enterprise"
-  | "corporate";
+export type CustomerType = string;
 
 export type SchemaFormMode = "new" | "edit" | "details" | null;
 
+/** Shape returned by GET /v1/schemas/ list endpoint */
 export interface SchemaRecord {
   id: string;
-  schema_type: SchemaType;
+  schema_type: string;
   name: string;
   customer_type: CustomerType;
-  version: string;
-  status: SchemaStatus;
-  content: object;
-  change_reason?: string;
+  schema_mode_type?: string;
+  latest_version: string;
   created_by: string;
-  published_by?: string;
-  published_at?: string;
-  created_at: string;
-  updated_at: string;
+  updated_by: string;
 }
 
 export interface SchemaApproval {
@@ -55,15 +52,18 @@ export interface SchemaApprovalDecision {
   decided_at: string;
 }
 
+/** Shape returned by GET /v1/schemas/:id/versions */
 export interface SchemaVersion {
   id: string;
-  schema_type: SchemaType;
-  name: string;
-  customer_type: CustomerType;
+  schema_id: string;
   version: string;
   status: SchemaStatus;
   change_reason?: string;
-  published_by?: string;
-  published_at?: string;
+  content: object;
+  created_by: string;
+  updated_by: string;
   created_at: string;
+  updated_at: string;
+  published_at: string | null;
+  published_by: string;
 }

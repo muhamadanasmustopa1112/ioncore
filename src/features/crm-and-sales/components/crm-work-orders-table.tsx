@@ -1,3 +1,6 @@
+"use client";
+
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,18 +18,40 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-const workOrders = [
-  { id: "#WO-1052", customer: "Tech Dynamics", status: "In Progress", statusVariant: "info" as const, due: "Oct 28, 2023" },
-  { id: "#WO-1051", customer: "Visionary Apps", status: "Pending Review", statusVariant: "warning" as const, due: "Oct 26, 2023" },
-  { id: "#WO-1050", customer: "Core Logistics", status: "In Progress", statusVariant: "info" as const, due: "Oct 25, 2023" },
-];
+import { useWorkOrderList } from "@/features/operations/work-orders/api/work-order-queries";
+import type { WoStatus } from "@/features/operations/work-orders/types/work-order-api";
+import { paths } from "@/config/paths";
+
+const STATUS_VARIANT: Record<
+  WoStatus,
+  "secondary" | "warning" | "success"
+> = {
+  CREATED: "secondary",
+  IN_PROGRESS: "warning",
+  DONE: "success",
+};
+
+const STATUS_LABEL: Record<WoStatus, string> = {
+  CREATED: "Created",
+  IN_PROGRESS: "In Progress",
+  DONE: "Done",
+};
+
 export function CrmWorkOrdersTable() {
+  const { data, isLoading, isError } = useWorkOrderList({ per_page: 5 });
+
+  const workOrders = data?.workOrders ?? [];
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Ongoing Work Orders</CardTitle>
         <CardToolbar>
-          <Button variant="ghost" mode="link">View All</Button>
+          <Button variant="ghost" mode="link" asChild>
+            <Link href={paths.dashboard.operations.workOrders.root.getHref()}>
+              View All
+            </Link>
+          </Button>
         </CardToolbar>
       </CardHeader>
       <CardTable>
@@ -34,25 +59,56 @@ export function CrmWorkOrdersTable() {
           <TableHeader>
             <TableRow>
               <TableHead>ID</TableHead>
-              <TableHead>Customer</TableHead>
+              <TableHead>Title</TableHead>
+              <TableHead>Type</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Due Date</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {workOrders.map((row) => (
-              <TableRow key={row.id}>
-                <TableCell className="font-medium">{row.id}</TableCell>
-                <TableCell>{row.customer}</TableCell>
+            {isLoading && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
+                  Loading…
+                </TableCell>
+              </TableRow>
+            )}
+            {isError && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-6 text-center text-destructive">
+                  Failed to load work orders
+                </TableCell>
+              </TableRow>
+            )}
+            {!isLoading && !isError && workOrders.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
+                  No work orders found
+                </TableCell>
+              </TableRow>
+            )}
+            {workOrders.slice(0, 5).map((wo) => (
+              <TableRow key={wo.id}>
+                <TableCell className="font-mono text-xs text-muted-foreground">
+                  {wo.id.slice(0, 8)}…
+                </TableCell>
+                <TableCell className="font-medium truncate max-w-[180px]">
+                  {wo.title ?? "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground capitalize text-xs">
+                  {wo.type?.replace(/_/g, " ").toLowerCase() ?? "—"}
+                </TableCell>
                 <TableCell>
-                  <Badge variant={row.statusVariant} appearance="light" size="md">
-                    {row.status}
+                  <Badge variant={STATUS_VARIANT[wo.status]} appearance="light" size="md">
+                    {STATUS_LABEL[wo.status]}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{row.due}</TableCell>
                 <TableCell>
-                  <Button variant="ghost" mode="link" size="sm">Detail</Button>
+                  <Button variant="ghost" mode="link" size="sm" asChild>
+                    <Link href={paths.dashboard.operations.workOrders.root.getHref()}>
+                      Detail
+                    </Link>
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}

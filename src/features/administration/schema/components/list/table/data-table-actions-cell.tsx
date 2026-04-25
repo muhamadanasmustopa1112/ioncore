@@ -25,7 +25,6 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
     useSchemaStore();
 
   const schema = row.original;
-  const isDraft = schema.status === "draft";
 
   return (
     <DropdownMenu>
@@ -46,18 +45,16 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
           View Details
         </DropdownMenuItem>
 
-        {isDraft && (
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => {
-              setSelectedSchemaId(schema.id);
-              openSchemaSheet("edit");
-            }}
-          >
-            <RiEditLine />
-            Edit Draft
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => {
+            setSelectedSchemaId(schema.id);
+            openSchemaSheet("edit");
+          }}
+        >
+          <RiEditLine />
+          Edit
+        </DropdownMenuItem>
 
         <DropdownMenuItem
           className="cursor-pointer"
@@ -72,26 +69,13 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
 
         <DropdownMenuSeparator />
 
-        {isDraft && (
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => openApprovalPanel(schema.id)}
-          >
-            <RiSendPlaneLine />
-            Submit for Approval
-          </DropdownMenuItem>
-        )}
-
-        {schema.status === "approved" && (
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => {
-              openApprovalPanel(schema.id);
-            }}
-          >
-            <RiSendPlaneLine className="mr-2 size-4" /> Publish
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => openApprovalPanel(schema.id)}
+        >
+          <RiSendPlaneLine />
+          Submit / Publish
+        </DropdownMenuItem>
 
         <DropdownMenuItem
           className="cursor-pointer"

@@ -44,19 +44,12 @@ export function MigrationPanel() {
     }
   }
 
-  // From options: published or archived schemas of activeSchemaType
   const fromOptions = DUMMY_SCHEMAS.filter(
-    (s) =>
-      s.schema_type === activeSchemaType &&
-      (s.status === "published" || s.status === "archived"),
+    (s) => s.schema_type === activeSchemaType,
   );
 
-  // To options: only published schemas of activeSchemaType, excluding fromVersion
   const toOptions = DUMMY_SCHEMAS.filter(
-    (s) =>
-      s.schema_type === activeSchemaType &&
-      s.status === "published" &&
-      s.id !== fromVersionId,
+    (s) => s.schema_type === activeSchemaType && s.id !== fromVersionId,
   );
 
   const showPreview = Boolean(fromVersionId && toVersionId);
@@ -103,7 +96,7 @@ export function MigrationPanel() {
               <SelectContent>
                 {fromOptions.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.name} v{s.version} ({s.status})
+                    {s.name} {s.latest_version ?? ""}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -126,7 +119,7 @@ export function MigrationPanel() {
               <SelectContent>
                 {toOptions.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
-                    {s.name} v{s.version} ({s.status})
+                    {s.name} {s.latest_version ?? ""}
                   </SelectItem>
                 ))}
               </SelectContent>

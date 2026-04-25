@@ -87,11 +87,11 @@ function RuleCard({
             {rule.rule_name}
           </div>
           <Badge
-            variant={CUSTOMER_TYPE_VARIANTS[rule.customer_type]}
+            variant={CUSTOMER_TYPE_VARIANTS[rule.customer_type as keyof typeof CUSTOMER_TYPE_VARIANTS] ?? "info"}
             appearance="light"
             className="text-[10px] px-2 py-0"
           >
-            {CUSTOMER_TYPE_LABELS[rule.customer_type]}
+            {CUSTOMER_TYPE_LABELS[rule.customer_type as keyof typeof CUSTOMER_TYPE_LABELS] ?? rule.customer_type}
           </Badge>
         </div>
         <div className="flex items-center gap-2 shrink-0">

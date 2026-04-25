@@ -1,6 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useState } from "react";
+import { RiArrowRightUpLine, RiShoppingBag3Line, RiCheckboxCircleLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +27,9 @@ import {
   useUpdateLeadStatus,
 } from "../api/leads-queries";
 import type { LeadActivityType, LeadStatus } from "../types/leads-api";
+import { RerouteLeadSheet } from "./reroute-lead-sheet";
+import { ProductSelectorSheet } from "@/features/products/components/product-selector-sheet";
+import type { BroadbandPlan, Addon } from "@/features/products/types/products";
 
 const statuses: LeadStatus[] = [
   "new",
@@ -43,6 +47,10 @@ export function LeadDetail() {
   const id = params?.id ?? "";
   const { data: lead, isLoading } = useLead(id);
 
+  const [rerouteOpen, setRerouteOpen] = useState(false);
+  const [productSelectorOpen, setProductSelectorOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<BroadbandPlan | null>(null);
+  const [selectedAddons, setSelectedAddons] = useState<Addon[]>([]);
   const [statusDraft, setStatusDraft] = useState<LeadStatus>("new");
   const [statusNote, setStatusNote] = useState("");
   const [cable, setCable] = useState("");
@@ -66,10 +74,59 @@ export function LeadDetail() {
             {lead.lead_type} · {lead.customer_sub_type} · source {lead.source}
           </p>
         </div>
-        <Badge variant="primary" appearance="light" size="md">
-          {lead.status}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="primary" appearance="light" size="md">
+            {lead.status}
+          </Badge>
+          <Button variant="outline" size="sm" onClick={() => setProductSelectorOpen(true)} className="gap-1">
+            <RiShoppingBag3Line className="size-4" />
+            Select Plan
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setRerouteOpen(true)} className="gap-1">
+            <RiArrowRightUpLine className="size-4" />
+            Reroute
+          </Button>
+        </div>
       </div>
+
+      <RerouteLeadSheet lead={lead} open={rerouteOpen} onClose={() => setRerouteOpen(false)} />
+
+      <ProductSelectorSheet
+        open={productSelectorOpen}
+        onOpenChange={setProductSelectorOpen}
+        leadType={lead.lead_type}
+        branchId={lead.branch_id}
+        cableDistanceMeters={lead.cable_distance_meters}
+        isExcessCableAccepted={lead.is_excess_cable_accepted}
+        onConfirm={(plan, addons) => {
+          setSelectedPlan(plan);
+          setSelectedAddons(addons);
+        }}
+      />
+
+      {selectedPlan && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <RiCheckboxCircleLine className="size-4 text-primary" />
+              Selected Package
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between gap-4">
+            <div>
+              <p className="font-semibold">{selectedPlan.name}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {selectedPlan.speed_download_mbps}/{selectedPlan.speed_upload_mbps} Mbps ·{" "}
+                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(selectedPlan.price)}/mo
+                {selectedAddons.length > 0 && ` · ${selectedAddons.length} add-on${selectedAddons.length > 1 ? "s" : ""}`}
+              </p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setProductSelectorOpen(true)}>
+              Change
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>

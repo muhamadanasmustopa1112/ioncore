@@ -3,6 +3,10 @@ const nextConfig = {
   // Base path for production deployment behind nginx proxy
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || "",
 
+  experimental: {
+    optimizePackageImports: ["@/components/ui"],
+  },
+
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "s3.ionlabs.dev" },

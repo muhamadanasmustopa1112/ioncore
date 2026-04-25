@@ -33,11 +33,15 @@ interface AuditListProps {
 
 export function AuditList({ filters, onViewDetail }: AuditListProps) {
   const [search, setSearch] = useState(filters.search ?? "");
+  const [pagination, setPagination] = useState({
+    pageIndex: (filters.page ?? 1) - 1,
+    pageSize: filters.perPage ?? 20,
+  });
 
   const queryFilters = useMemo(
     () => ({
-      page: filters.page ?? 1,
-      per_page: filters.perPage ?? 20,
+      page: pagination.pageIndex + 1,
+      per_page: pagination.pageSize,
       from_date: filters.fromDate,
       to_date: filters.toDate,
       user_id: filters.userIds,
@@ -47,7 +51,7 @@ export function AuditList({ filters, onViewDetail }: AuditListProps) {
       search: search || undefined,
       sort: "-timestamp",
     }),
-    [filters, search],
+    [filters, search, pagination],
   );
 
   const { data, isLoading, isError, refetch } = useAuditLogList(queryFilters);
@@ -63,6 +67,8 @@ export function AuditList({ filters, onViewDetail }: AuditListProps) {
     getSortedRowModel: getSortedRowModel(),
     manualPagination: true,
     pageCount: data?.pagination.total_pages ?? 0,
+    state: { pagination },
+    onPaginationChange: setPagination,
   });
 
   return (

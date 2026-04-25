@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/select";
 import { commissionFormSchema, type CommissionFormValues } from "../../../types/commission-schema";
 import { useSchemaStore } from "../../../store/schema";
+import { useCreateSchema, useUpdateSchemaContent, useSchema, useSchemaVersions } from "../../../api/schema-queries";
 import { CommissionSplitsSection } from "./commission-splits-section";
 import { ReferralSection } from "./referral-section";
 
@@ -42,8 +44,10 @@ const DEFAULT_COMMISSION: CommissionFormValues = {
 };
 
 export function CommissionForm() {
-  const { form } = useSchemaStore();
+  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter } = useSchemaStore();
   const isDetailMode = form === "details";
+  const createSchema = useCreateSchema();
+  const updateSchema = useUpdateSchemaContent();
 
   const rhfForm = useForm<CommissionFormValues>({
     resolver: zodResolver(commissionFormSchema),
@@ -54,10 +58,139 @@ export function CommissionForm() {
     register,
     watch,
     setValue,
+    handleSubmit,
+    reset,
     formState: { errors },
   } = rhfForm;
 
   const commissionType = watch("commission_type");
+
+  const { data: schemaDetail } = useSchema((form === "edit" || form === "details") ? selectedSchemaId : null);
+  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details") ? selectedSchemaId : null);
+
+  function fromApiContent(c: Record<string, unknown>): Partial<CommissionFormValues> {
+    const rules = ((c.commission_rules as unknown[]) ?? [])[0] as Record<string, unknown> ?? {};
+    const ca = (rules.commission_assignment ?? {}) as Record<string, unknown>;
+    const sm = (ca.sales_manager ?? {}) as Record<string, unknown>;
+    const ib = (ca.infrastructure_branch ?? {}) as Record<string, unknown>;
+    const rc = (c.recurring_commission ?? {}) as Record<string, unknown>;
+    const rf = (c.referral_commission ?? {}) as Record<string, unknown>;
+    const rfCond = (rf.conditions ?? {}) as Record<string, unknown>;
+    return {
+      commission_type: rules.commission_type as CommissionFormValues["commission_type"],
+      commission_value: rules.commission_value as number,
+      calculation_base: rules.calculation_base as CommissionFormValues["calculation_base"],
+      payment_timing: rules.payment_timing as CommissionFormValues["payment_timing"],
+      assignment: {
+        sales_person: ca.sales_person as number,
+        sales_manager_enabled: sm.enabled as boolean,
+        sales_manager_percentage: sm.percentage as number,
+        sales_manager_level: sm.level as CommissionFormValues["assignment"]["sales_manager_level"],
+        sales_branch: ca.sales_branch as number,
+        infrastructure_branch_enabled: ib.enabled as boolean,
+        infrastructure_branch_percentage: ib.percentage as number,
+      },
+      recurring_enabled: rc.enabled as boolean,
+      recurring_type: rc.type as CommissionFormValues["recurring_type"],
+      recurring_value: rc.value as number,
+      referral_enabled: rf.enabled as boolean,
+      referral_reward_type: rf.reward_type as CommissionFormValues["referral_reward_type"],
+      referral_reward_value: rf.reward_value as number,
+      referral_trigger: rf.trigger as CommissionFormValues["referral_trigger"],
+      referral_min_plan_price: rfCond.min_plan_price as number,
+      referral_referrer_must_be_active: rfCond.referrer_must_be_active as boolean,
+      referral_disbursement: rf.disbursement as CommissionFormValues["referral_disbursement"],
+    };
+  }
+
+  useEffect(() => {
+    if ((form !== "edit" && form !== "details") || !schemaDetail) return;
+    const latestVer = schemaVersions?.find((v) => v.version === schemaDetail.latest_version) ?? schemaVersions?.[0];
+    const raw = (latestVer?.content ?? {}) as Record<string, unknown>;
+    const content = fromApiContent(raw);
+    reset({
+      ...DEFAULT_COMMISSION,
+      name: schemaDetail.name,
+      customer_type: schemaDetail.customer_type as CommissionFormValues["customer_type"],
+      ...content,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, schemaDetail, schemaVersions]);
+
+  function toApiContent(values: CommissionFormValues) {
+    const commissionAssignment = {
+      sales_person: values.assignment.sales_person,
+      sales_manager: {
+        enabled: values.assignment.sales_manager_enabled,
+        percentage: values.assignment.sales_manager_percentage,
+        level: values.assignment.sales_manager_level,
+      },
+      sales_branch: values.assignment.sales_branch,
+      infrastructure_branch: {
+        enabled: values.assignment.infrastructure_branch_enabled,
+        percentage: values.assignment.infrastructure_branch_percentage,
+        applies_when: "cross_branch_only",
+      },
+      company: "remainder",
+    };
+
+    return {
+      commission_rules: [
+        {
+          rule_id: 1,
+          rule_name: "Standard Sales Commission",
+          conditions: {
+            sales_channel: [],
+            service_plan_price_range: { min: 0, max: null },
+            contract_type: [],
+            contract_value: { min: 0 },
+          },
+          commission_type: values.commission_type,
+          commission_value: values.commission_value,
+          commission_tiers: [],
+          commission_assignment: commissionAssignment,
+          calculation_base: values.calculation_base,
+          payment_timing: values.payment_timing,
+        },
+      ],
+      recurring_commission: {
+        enabled: values.recurring_enabled,
+        type: values.recurring_type ?? "percentage",
+        value: values.recurring_value ?? 0,
+        commission_assignment: commissionAssignment,
+        calculation_base: values.recurring_enabled ? "recurring_invoice_amount" : "",
+        payment_timing: values.recurring_enabled ? "monthly" : "",
+      },
+      referral_commission: {
+        enabled: values.referral_enabled,
+        reward_type: values.referral_reward_type ?? "cash",
+        reward_value_type: "fixed",
+        reward_value: values.referral_reward_value ?? 0,
+        trigger: values.referral_trigger ?? "on_first_payment",
+        conditions: {
+          min_plan_price: values.referral_min_plan_price ?? 0,
+          referrer_must_be_active: values.referral_referrer_must_be_active ?? true,
+        },
+        disbursement: values.referral_disbursement ?? "bank_transfer",
+      },
+    };
+  }
+
+  function onSubmit(values: CommissionFormValues) {
+    const { name, customer_type } = values;
+    const content = toApiContent(values);
+    if (form === "new") {
+      createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
+    } else if (form === "edit" && selectedSchemaId) {
+      updateSchema.mutate({ id: selectedSchemaId, payload: { content } });
+    }
+  }
+
+  useEffect(() => {
+    setFormSubmitter(handleSubmit(onSubmit));
+    return () => setFormSubmitter(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, selectedSchemaId]);
 
   const commissionValueLabel =
     commissionType === "percentage"

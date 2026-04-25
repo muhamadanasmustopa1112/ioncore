@@ -39,7 +39,9 @@ import {
   Users,
   Users2,
   UserSearch,
+  GitMerge,
   Wallet,
+  Webhook,
   Wrench,
 } from "lucide-react";
 import { paths } from "@/config/paths";
@@ -267,6 +269,11 @@ export const DASHBOARD_MENU: MenuConfig = [
         path: paths.dashboard.operations.workOrders.root.getHref(),
         icon: Wrench,
       },
+      {
+        title: "Orders",
+        path: paths.dashboard.operations.orders.root.getHref(),
+        icon: Package,
+      },
     ],
   },
   {
@@ -425,6 +432,34 @@ export const DASHBOARD_MENU: MenuConfig = [
     heading: 'Administration',
     icon: ScrollText,
     permission: "audit.read",
+  },
+  {
+    title: "Access Policies",
+    path: paths.dashboard.administration.accessPolicies.getHref(),
+    heading: 'Administration',
+    icon: ShieldCheck,
+    permission: "admin.manage",
+  },
+  {
+    title: "Compliance",
+    path: paths.dashboard.administration.compliance.getHref(),
+    heading: 'Administration',
+    icon: ShieldAlert,
+    permission: "admin.manage",
+  },
+  {
+    title: "Lead Ingestion",
+    path: paths.dashboard.administration.leadIngestion.getHref(),
+    heading: 'Administration',
+    icon: Webhook,
+    permission: "master.manage",
+  },
+  {
+    title: "Duplicate Review",
+    path: paths.dashboard.administration.duplicateReview.getHref(),
+    heading: 'Administration',
+    icon: GitMerge,
+    permission: "master.manage",
   },
 ];
 // Export default untuk backward compatibility

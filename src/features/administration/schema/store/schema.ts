@@ -18,6 +18,7 @@ interface SchemaStore {
   historyPanelOpen: boolean;
   selectedSchemaId: string | null;
   view: SchemaView;
+  formSubmitter: (() => void) | null;
 
   setView: (view: SchemaView) => void;
   setActiveSchemaType: (type: SchemaType) => void;
@@ -31,6 +32,7 @@ interface SchemaStore {
   closeMigrationPanel: () => void;
   openHistoryPanel: (schemaId: string) => void;
   closeHistoryPanel: () => void;
+  setFormSubmitter: (fn: (() => void) | null) => void;
 }
 
 const useSchemaStore = create<SchemaStore>((set) => ({
@@ -42,6 +44,7 @@ const useSchemaStore = create<SchemaStore>((set) => ({
   historyPanelOpen: false,
   selectedSchemaId: null,
   view: "schemas",
+  formSubmitter: null,
 
   setView: (view) => set({ view }),
   setActiveSchemaType: (type) => set({ activeSchemaType: type }),
@@ -49,7 +52,7 @@ const useSchemaStore = create<SchemaStore>((set) => ({
   setForm: (form) => set({ form }),
   openSchemaSheet: (form) => set({ schemaSheetOpen: true, form }),
   closeSchemaSheet: () =>
-    set({ schemaSheetOpen: false, form: null, selectedSchemaId: null }),
+    set({ schemaSheetOpen: false, form: null, selectedSchemaId: null, formSubmitter: null }),
   openApprovalPanel: (schemaId) =>
     set({ approvalPanelOpen: true, selectedSchemaId: schemaId }),
   closeApprovalPanel: () => set({ approvalPanelOpen: false }),
@@ -58,6 +61,7 @@ const useSchemaStore = create<SchemaStore>((set) => ({
   openHistoryPanel: (schemaId) =>
     set({ historyPanelOpen: true, selectedSchemaId: schemaId }),
   closeHistoryPanel: () => set({ historyPanelOpen: false }),
+  setFormSubmitter: (fn) => set({ formSubmitter: fn }),
 }));
 
 export { useSchemaStore };

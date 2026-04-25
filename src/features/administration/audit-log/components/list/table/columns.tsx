@@ -78,41 +78,45 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
         <Badge
           variant={ACTION_VARIANTS[row.original.actionType] ?? "secondary"}
           appearance="light"
-          className="capitalize text-xs"
+          className="capitalize text-xs whitespace-nowrap"
         >
           {row.original.actionType}
         </Badge>
       ),
-      size: 100,
+      size: 120,
+      minSize: 110,
     },
     {
       id: "module",
       accessorFn: (row) => row.module,
       header: "Module",
       cell: ({ row }) => (
-        <span className="text-sm capitalize">{row.original.module.replace(/_/g, " ")}</span>
+        <span className="text-sm capitalize whitespace-nowrap">{row.original.module.replace(/_/g, " ")}</span>
       ),
-      size: 140,
+      size: 150,
+      minSize: 120,
     },
     {
       id: "recordType",
       accessorFn: (row) => row.recordType,
       header: "Record Type",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">{row.original.recordType}</span>
+        <span className="text-sm text-muted-foreground whitespace-nowrap">{row.original.recordType}</span>
       ),
-      size: 140,
+      size: 160,
+      minSize: 130,
     },
     {
       id: "record",
       accessorFn: (row) => row.recordIdentifier,
       header: "Record",
       cell: ({ row }) => (
-        <span className="text-sm font-medium truncate max-w-[180px] block">
+        <span className="text-sm font-medium truncate max-w-[220px] block">
           {row.original.recordIdentifier}
         </span>
       ),
-      size: 200,
+      size: 220,
+      minSize: 160,
     },
     {
       id: "status",

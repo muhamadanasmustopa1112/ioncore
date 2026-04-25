@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -20,6 +21,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { serviceFormSchema, type ServiceFormValues } from "../../../types/service-schema";
 import { useSchemaStore } from "../../../store/schema";
+import { useCreateSchema, useUpdateSchemaContent, useSchema, useSchemaVersions } from "../../../api/schema-queries";
 
 const DEFAULT_SERVICE: ServiceFormValues = {
   name: "",
@@ -35,13 +37,17 @@ const DEFAULT_SERVICE: ServiceFormValues = {
 };
 
 export function ServiceForm() {
-  const { form } = useSchemaStore();
+  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter } = useSchemaStore();
   const isDetailMode = form === "details";
+  const createSchema = useCreateSchema();
+  const updateSchema = useUpdateSchemaContent();
 
   const {
     register,
     watch,
     setValue,
+    handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<ServiceFormValues>({
     resolver: zodResolver(serviceFormSchema),
@@ -50,6 +56,74 @@ export function ServiceForm() {
 
   const bandwidthType = watch("bandwidth_type");
   const maintenanceAllowed = watch("maintenance_allowed");
+
+  const { data: schemaDetail } = useSchema((form === "edit" || form === "details") ? selectedSchemaId : null);
+  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details") ? selectedSchemaId : null);
+
+  function fromApiContent(c: Record<string, unknown>): Partial<ServiceFormValues> {
+    const sla = (c.sla ?? {}) as Record<string, unknown>;
+    const bp = (c.bandwidth_profile ?? {}) as Record<string, unknown>;
+    const mw = (c.maintenance_window ?? {}) as Record<string, unknown>;
+    return {
+      sla_uptime: sla.uptime_guarantee_percentage as number,
+      sla_response_hours: sla.response_time_hours as number,
+      sla_resolution_hours: sla.resolution_time_hours as number,
+      bandwidth_type: bp.type as ServiceFormValues["bandwidth_type"],
+      contention_ratio: bp.contention_ratio as ServiceFormValues["contention_ratio"],
+      support_tier: c.support_tier as ServiceFormValues["support_tier"],
+      maintenance_allowed: mw.allowed as boolean,
+      maintenance_schedule: mw.schedule as string,
+    };
+  }
+
+  useEffect(() => {
+    if ((form !== "edit" && form !== "details") || !schemaDetail) return;
+    const latestVer = schemaVersions?.find((v) => v.version === schemaDetail.latest_version) ?? schemaVersions?.[0];
+    const raw = (latestVer?.content ?? {}) as Record<string, unknown>;
+    const content = fromApiContent(raw);
+    reset({
+      ...DEFAULT_SERVICE,
+      name: schemaDetail.name,
+      customer_type: schemaDetail.customer_type as ServiceFormValues["customer_type"],
+      ...content,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, schemaDetail, schemaVersions]);
+
+  function toApiContent(values: ServiceFormValues) {
+    return {
+      sla: {
+        uptime_guarantee_percentage: values.sla_uptime,
+        response_time_hours: values.sla_response_hours,
+        resolution_time_hours: values.sla_resolution_hours,
+      },
+      bandwidth_profile: {
+        type: values.bandwidth_type,
+        contention_ratio: values.contention_ratio,
+      },
+      support_tier: values.support_tier,
+      maintenance_window: {
+        allowed: values.maintenance_allowed,
+        schedule: values.maintenance_schedule ?? "",
+      },
+    };
+  }
+
+  function onSubmit(values: ServiceFormValues) {
+    const { name, customer_type } = values;
+    const content = toApiContent(values);
+    if (form === "new") {
+      createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
+    } else if (form === "edit" && selectedSchemaId) {
+      updateSchema.mutate({ id: selectedSchemaId, payload: { content } });
+    }
+  }
+
+  useEffect(() => {
+    setFormSubmitter(handleSubmit(onSubmit));
+    return () => setFormSubmitter(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, selectedSchemaId]);
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
