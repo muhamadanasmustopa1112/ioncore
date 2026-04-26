@@ -65,8 +65,8 @@ export function CommissionForm() {
 
   const commissionType = watch("commission_type");
 
-  const { data: schemaDetail } = useSchema((form === "edit" || form === "details") ? selectedSchemaId : null);
-  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details") ? selectedSchemaId : null);
+  const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
+  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
 
   function fromApiContent(c: Record<string, unknown>): Partial<CommissionFormValues> {
     const rules = ((c.commission_rules as unknown[]) ?? [])[0] as Record<string, unknown> ?? {};
@@ -104,13 +104,13 @@ export function CommissionForm() {
   }
 
   useEffect(() => {
-    if ((form !== "edit" && form !== "details") || !schemaDetail) return;
+    if ((form !== "edit" && form !== "details" && form !== "clone") || !schemaDetail) return;
     const latestVer = schemaVersions?.find((v) => v.version === schemaDetail.latest_version) ?? schemaVersions?.[0];
     const raw = (latestVer?.content ?? {}) as Record<string, unknown>;
     const content = fromApiContent(raw);
     reset({
       ...DEFAULT_COMMISSION,
-      name: schemaDetail.name,
+      name: form === "clone" ? `Copy of ${schemaDetail.name}` : schemaDetail.name,
       customer_type: schemaDetail.customer_type as CommissionFormValues["customer_type"],
       ...content,
     });
@@ -179,7 +179,7 @@ export function CommissionForm() {
   function onSubmit(values: CommissionFormValues) {
     const { name, customer_type } = values;
     const content = toApiContent(values);
-    if (form === "new") {
+    if (form === "new" || form === "clone") {
       createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
     } else if (form === "edit" && selectedSchemaId) {
       updateSchema.mutate({ id: selectedSchemaId, payload: { content } });

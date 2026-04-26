@@ -57,8 +57,8 @@ export function ServiceForm() {
   const bandwidthType = watch("bandwidth_type");
   const maintenanceAllowed = watch("maintenance_allowed");
 
-  const { data: schemaDetail } = useSchema((form === "edit" || form === "details") ? selectedSchemaId : null);
-  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details") ? selectedSchemaId : null);
+  const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
+  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
 
   function fromApiContent(c: Record<string, unknown>): Partial<ServiceFormValues> {
     const sla = (c.sla ?? {}) as Record<string, unknown>;
@@ -77,13 +77,13 @@ export function ServiceForm() {
   }
 
   useEffect(() => {
-    if ((form !== "edit" && form !== "details") || !schemaDetail) return;
+    if ((form !== "edit" && form !== "details" && form !== "clone") || !schemaDetail) return;
     const latestVer = schemaVersions?.find((v) => v.version === schemaDetail.latest_version) ?? schemaVersions?.[0];
     const raw = (latestVer?.content ?? {}) as Record<string, unknown>;
     const content = fromApiContent(raw);
     reset({
       ...DEFAULT_SERVICE,
-      name: schemaDetail.name,
+      name: form === "clone" ? `Copy of ${schemaDetail.name}` : schemaDetail.name,
       customer_type: schemaDetail.customer_type as ServiceFormValues["customer_type"],
       ...content,
     });
@@ -112,7 +112,7 @@ export function ServiceForm() {
   function onSubmit(values: ServiceFormValues) {
     const { name, customer_type } = values;
     const content = toApiContent(values);
-    if (form === "new") {
+    if (form === "new" || form === "clone") {
       createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
     } else if (form === "edit" && selectedSchemaId) {
       updateSchema.mutate({ id: selectedSchemaId, payload: { content } });

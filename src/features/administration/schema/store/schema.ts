@@ -19,11 +19,12 @@ interface SchemaStore {
   selectedSchemaId: string | null;
   view: SchemaView;
   formSubmitter: (() => void) | null;
+  pendingApproval: boolean;
 
   setView: (view: SchemaView) => void;
   setActiveSchemaType: (type: SchemaType) => void;
   setSelectedSchemaId: (id: string | null) => void;
-  openSchemaSheet: (form: "new" | "edit" | "details") => void;
+  openSchemaSheet: (form: "new" | "edit" | "details" | "clone") => void;
   closeSchemaSheet: () => void;
   setForm: (form: SchemaFormMode) => void;
   openApprovalPanel: (schemaId: string) => void;
@@ -33,6 +34,7 @@ interface SchemaStore {
   openHistoryPanel: (schemaId: string) => void;
   closeHistoryPanel: () => void;
   setFormSubmitter: (fn: (() => void) | null) => void;
+  setPendingApproval: (v: boolean) => void;
 }
 
 const useSchemaStore = create<SchemaStore>((set) => ({
@@ -45,6 +47,7 @@ const useSchemaStore = create<SchemaStore>((set) => ({
   selectedSchemaId: null,
   view: "schemas",
   formSubmitter: null,
+  pendingApproval: false,
 
   setView: (view) => set({ view }),
   setActiveSchemaType: (type) => set({ activeSchemaType: type }),
@@ -52,7 +55,8 @@ const useSchemaStore = create<SchemaStore>((set) => ({
   setForm: (form) => set({ form }),
   openSchemaSheet: (form) => set({ schemaSheetOpen: true, form }),
   closeSchemaSheet: () =>
-    set({ schemaSheetOpen: false, form: null, selectedSchemaId: null, formSubmitter: null }),
+    set({ schemaSheetOpen: false, form: null, selectedSchemaId: null, formSubmitter: null, pendingApproval: false }),
+  setPendingApproval: (v) => set({ pendingApproval: v }),
   openApprovalPanel: (schemaId) =>
     set({ approvalPanelOpen: true, selectedSchemaId: schemaId }),
   closeApprovalPanel: () => set({ approvalPanelOpen: false }),

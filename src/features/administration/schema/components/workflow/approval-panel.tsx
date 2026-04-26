@@ -14,6 +14,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { Can } from "@/lib/permissions";
 import { useSchemaStore } from "../../store/schema";
 import {
   usePublishSchemaVersion,
@@ -41,12 +42,14 @@ export function ApprovalPanel() {
     return s === "DRAFT" || s === "APPROVED" || s === "REVIEW";
   }) ?? versions?.[0];
 
-  const { data: approval } = useVersionApproval(approvalPanelOpen ? latestDraftVersion?.id ?? null : null);
-  const { data: decisions = [] } = useApprovalDecisions(approvalPanelOpen ? approval?.id ?? null : null);
-
   const versionStatus = latestDraftVersion?.status?.toUpperCase();
   const isDraft = versionStatus === "DRAFT";
   const isInReview = versionStatus === "REVIEW";
+
+  const { data: approval } = useVersionApproval(
+    approvalPanelOpen && !isDraft ? latestDraftVersion?.id ?? null : null
+  );
+  const { data: decisions = [] } = useApprovalDecisions(approvalPanelOpen ? approval?.id ?? null : null);
 
   const approvedCount = decisions.filter((d) => d.decision === "APPROVED").length;
   const minRequired = approval?.min_approvals ?? 0;
@@ -179,29 +182,31 @@ export function ApprovalPanel() {
           )}
 
           {/* Publish */}
-          {approval?.status?.toUpperCase() === "APPROVED" && (
-            <div className="space-y-3 border-t border-border/50 pt-4">
-              <p className="text-sm font-semibold">Publish Schema</p>
-              <p className="text-xs text-muted-foreground">
-                All required approvals received. Enter a change reason and publish.
-              </p>
-              <Input
-                placeholder="Change reason (required, min 10 chars)"
-                value={changeReason}
-                onChange={(e) => setChangeReason(e.target.value)}
-              />
-              <Button
-                variant="primary"
-                className="w-full font-semibold"
-                disabled={changeReason.length < 10 || publishVersion.isPending || !latestDraftVersion}
-                onClick={() => {
-                  if (latestDraftVersion) publishVersion.mutate(latestDraftVersion.id);
-                }}
-              >
-                <RiCheckboxCircleLine className="mr-2 size-4" /> Publish Schema
-              </Button>
-            </div>
-          )}
+          <Can permission="master.manage">
+            {approval?.status?.toUpperCase() === "APPROVED" && (
+              <div className="space-y-3 border-t border-border/50 pt-4">
+                <p className="text-sm font-semibold">Publish Schema</p>
+                <p className="text-xs text-muted-foreground">
+                  All required approvals received. Enter a change reason and publish.
+                </p>
+                <Input
+                  placeholder="Change reason (required, min 10 chars)"
+                  value={changeReason}
+                  onChange={(e) => setChangeReason(e.target.value)}
+                />
+                <Button
+                  variant="primary"
+                  className="w-full font-semibold"
+                  disabled={changeReason.length < 10 || publishVersion.isPending || !latestDraftVersion}
+                  onClick={() => {
+                    if (latestDraftVersion) publishVersion.mutate(latestDraftVersion.id);
+                  }}
+                >
+                  <RiCheckboxCircleLine className="mr-2 size-4" /> Publish Schema
+                </Button>
+              </div>
+            )}
+          </Can>
         </SheetBody>
 
         <SheetFooter className="border-border border-t p-5 pb-4">

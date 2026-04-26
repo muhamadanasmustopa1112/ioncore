@@ -56,8 +56,8 @@ export function SuspensionForm() {
 
   const { register, watch, setValue, handleSubmit, reset, formState: { errors } } = rhfForm;
 
-  const { data: schemaDetail } = useSchema((form === "edit" || form === "details") ? selectedSchemaId : null);
-  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details") ? selectedSchemaId : null);
+  const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
+  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
 
   function fromApiContent(c: Record<string, unknown>): Partial<SuspensionFormValues> {
     const s = (c.suspension ?? {}) as Record<string, unknown>;
@@ -86,13 +86,13 @@ export function SuspensionForm() {
   }
 
   useEffect(() => {
-    if ((form !== "edit" && form !== "details") || !schemaDetail) return;
+    if ((form !== "edit" && form !== "details" && form !== "clone") || !schemaDetail) return;
     const latestVer = schemaVersions?.find((v) => v.version === schemaDetail.latest_version) ?? schemaVersions?.[0];
     const raw = (latestVer?.content ?? {}) as Record<string, unknown>;
     const content = fromApiContent(raw);
     reset({
       ...DEFAULT_SUSPENSION,
-      name: schemaDetail.name,
+      name: form === "clone" ? `Copy of ${schemaDetail.name}` : schemaDetail.name,
       customer_type: schemaDetail.customer_type as SuspensionFormValues["customer_type"],
       ...content,
     });
@@ -122,7 +122,7 @@ export function SuspensionForm() {
         enabled: values.termination_enabled,
         trigger_basis: values.termination_trigger_basis ?? "days_after_suspension",
         days: values.termination_days ?? 30,
-        waive_early_termination_penalty: false,
+        waive_early_termination_penalty: true,
         notify_customer_days_before: values.termination_notify_customer_days_before ?? 7,
         auto_create_wo: values.termination_auto_create_wo ?? true,
         requires_approval: values.termination_requires_approval ?? false,
@@ -134,7 +134,7 @@ export function SuspensionForm() {
   function onSubmit(values: SuspensionFormValues) {
     const { name, customer_type } = values;
     const content = toApiContent(values);
-    if (form === "new") {
+    if (form === "new" || form === "clone") {
       createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
     } else if (form === "edit" && selectedSchemaId) {
       updateSchema.mutate({ id: selectedSchemaId, payload: { content } });

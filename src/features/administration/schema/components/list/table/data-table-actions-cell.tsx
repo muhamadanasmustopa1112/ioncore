@@ -25,6 +25,17 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
     useSchemaStore();
 
   const schema = row.original;
+  const status = schema.schema_status?.toUpperCase();
+
+  const isDraft = status === "DRAFT";
+  const isReview = status === "REVIEW";
+  const isApproved = status === "APPROVED";
+  const isPublished = status === "PUBLISHED";
+  const isArchived = status === "ARCHIVED";
+
+  const canEdit = isDraft || isPublished;
+  const canSubmitOrPublish = isDraft || isReview || isApproved;
+  const canClone = !isArchived;
 
   return (
     <DropdownMenu>
@@ -45,37 +56,43 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
           View Details
         </DropdownMenuItem>
 
-        <DropdownMenuItem
-          className="cursor-pointer"
-          onClick={() => {
-            setSelectedSchemaId(schema.id);
-            openSchemaSheet("edit");
-          }}
-        >
-          <RiEditLine />
-          Edit
-        </DropdownMenuItem>
+        {canEdit && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => {
+              setSelectedSchemaId(schema.id);
+              openSchemaSheet("edit");
+            }}
+          >
+            <RiEditLine />
+            Edit
+          </DropdownMenuItem>
+        )}
 
-        <DropdownMenuItem
-          className="cursor-pointer"
-          onClick={() => {
-            setSelectedSchemaId(schema.id);
-            openSchemaSheet("new");
-          }}
-        >
-          <RiFileCopyLine />
-          Clone
-        </DropdownMenuItem>
+        {canClone && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => {
+              setSelectedSchemaId(schema.id);
+              openSchemaSheet("clone");
+            }}
+          >
+            <RiFileCopyLine />
+            Clone
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          className="cursor-pointer"
-          onClick={() => openApprovalPanel(schema.id)}
-        >
-          <RiSendPlaneLine />
-          Submit / Publish
-        </DropdownMenuItem>
+        {canSubmitOrPublish && (
+          <DropdownMenuItem
+            className="cursor-pointer"
+            onClick={() => openApprovalPanel(schema.id)}
+          >
+            <RiSendPlaneLine />
+            {isDraft ? "Submit for Review" : isReview ? "Review Status" : "Publish"}
+          </DropdownMenuItem>
+        )}
 
         <DropdownMenuItem
           className="cursor-pointer"

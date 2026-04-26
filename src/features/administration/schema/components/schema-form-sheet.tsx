@@ -26,11 +26,11 @@ export function SchemaFormSheet() {
     closeSchemaSheet,
     form,
     activeSchemaType,
-    selectedSchemaId,
-    openApprovalPanel,
     formSubmitter,
+    setPendingApproval,
   } = useSchemaStore();
   const isNewMode = form === "new";
+  const isCloneMode = form === "clone";
   const isDetailMode = form === "details";
   const label = SCHEMA_LABELS[activeSchemaType] ?? "Schema";
 
@@ -41,9 +41,11 @@ export function SchemaFormSheet() {
           <SheetTitle className="font-medium text-xl">
             {isNewMode
               ? `Create ${label}`
-              : form === "edit"
-                ? `Edit ${label} (Draft)`
-                : `${label} Details`}
+              : isCloneMode
+                ? `Clone ${label}`
+                : form === "edit"
+                  ? `Edit ${label} (Draft)`
+                  : `${label} Details`}
           </SheetTitle>
         </SheetHeader>
         <SheetBody className="flex-1 p-0 overflow-hidden">
@@ -67,21 +69,21 @@ export function SchemaFormSheet() {
                   <Button
                     variant="primary"
                     onClick={() => {
-                      closeSchemaSheet();
-                      if (selectedSchemaId) openApprovalPanel(selectedSchemaId);
+                      setPendingApproval(true);
+                      formSubmitter?.();
                     }}
                   >
                     Submit for Approval
                   </Button>
                 </>
               )}
-              {isNewMode && (
+              {(isNewMode || isCloneMode) && (
                 <Button
                   variant="primary"
                   className="font-semibold"
                   onClick={() => formSubmitter?.()}
                 >
-                  Create Schema
+                  {isCloneMode ? "Create Clone" : "Create Schema"}
                 </Button>
               )}
             </>
