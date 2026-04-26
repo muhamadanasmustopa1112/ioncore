@@ -118,15 +118,21 @@ export function useCreateSchema() {
 
 export function useUpdateSchemaContent() {
   const qc = useQueryClient();
-  const { closeSchemaSheet } = useSchemaStore();
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateSchemaContentPayload }) =>
       updateSchemaContent(id, payload),
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: schemaKeys.detail(id) });
       qc.invalidateQueries({ queryKey: schemaKeys.all });
-      closeSchemaSheet();
-      toast.success("Schema draft saved.");
+      const store = useSchemaStore.getState();
+      if (store.pendingApproval) {
+        store.closeSchemaSheet();
+        store.openApprovalPanel(id);
+        toast.success("Draft saved. Opening approval panel...");
+      } else {
+        store.closeSchemaSheet();
+        toast.success("Schema draft saved.");
+      }
     },
     onError: (err: Error) => {
       toast.error(err.message ?? "Failed to save schema.");
@@ -189,10 +195,15 @@ export function useVersionApproval(versionId: string | null) {
   return useQuery<SchemaApprovalRecord | null>({
     queryKey: ["schema-approval", versionId],
     queryFn: async () => {
-      const res = await getVersionApproval(versionId!);
-      return res.data ?? null;
+      try {
+        const res = await getVersionApproval(versionId!);
+        return res.data ?? null;
+      } catch {
+        return null;
+      }
     },
     enabled: !!versionId,
+    retry: false,
   });
 }
 
@@ -228,9 +239,10 @@ export function useAddApprovalDecision() {
   return useMutation({
     mutationFn: ({ versionId, payload }: { versionId: string; payload: AddDecisionPayload }) =>
       addApprovalDecision(versionId, payload),
-    onSuccess: (data) => {
+    onSuccess: (data, { versionId }) => {
       const approvalId = data.data?.schema_approval_id;
       if (approvalId) qc.invalidateQueries({ queryKey: ["schema-approval-decisions", approvalId] });
+      qc.invalidateQueries({ queryKey: ["schema-approval", versionId] });
       qc.invalidateQueries({ queryKey: schemaKeys.all });
       toast.success("Decision submitted.");
     },

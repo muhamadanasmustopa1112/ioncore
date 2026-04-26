@@ -183,6 +183,7 @@ export const BILLING_SCHEMAS: SchemaRecord[] = [
     latest_version: "v1.2",
     created_by: "user-001",
     updated_by: "user-002",
+      schema_status: "published",
   },
   {
     id: "schema-bil-002",
@@ -192,6 +193,7 @@ export const BILLING_SCHEMAS: SchemaRecord[] = [
     latest_version: "v1.0",
     created_by: "user-001",
     updated_by: "user-002",
+      schema_status: "published",
   },
   {
     id: "schema-bil-003",
@@ -201,5 +203,6 @@ export const BILLING_SCHEMAS: SchemaRecord[] = [
     latest_version: "v1.3",
     created_by: "user-001",
     updated_by: "user-001",
+      schema_status: "published",
   },
 ];

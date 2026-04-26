@@ -317,6 +317,26 @@ export const paths = {
         path: "/administration/duplicate-review",
         getHref: () => "/administration/duplicate-review",
       },
+      menuVisibility: {
+        path: "/administration/menu-visibility",
+        getHref: () => "/administration/menu-visibility",
+      },
+      approvalPolicy: {
+        path: "/administration/approval-policy",
+        getHref: () => "/administration/approval-policy",
+      },
+      accessException: {
+        path: "/administration/access-exception",
+        getHref: () => "/administration/access-exception",
+      },
+      sodRules: {
+        path: "/administration/sod-rules",
+        getHref: () => "/administration/sod-rules",
+      },
+      securityPolicy: {
+        path: "/administration/security-policy",
+        getHref: () => "/administration/security-policy",
+      },
     },
   },
   docs: {

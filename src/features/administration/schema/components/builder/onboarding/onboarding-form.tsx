@@ -64,8 +64,8 @@ export function OnboardingForm() {
 
   const { register, watch, setValue, handleSubmit, reset, formState: { errors } } = rhfForm;
 
-  const { data: schemaDetail } = useSchema((form === "edit" || form === "details") ? selectedSchemaId : null);
-  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details") ? selectedSchemaId : null);
+  const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
+  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
 
   function fromApiContent(c: Record<string, unknown>): Partial<OnboardingFormValues> {
     const timeline = (c.timeline ?? {}) as Record<string, unknown>;
@@ -78,13 +78,13 @@ export function OnboardingForm() {
   }
 
   useEffect(() => {
-    if ((form !== "edit" && form !== "details") || !schemaDetail) return;
+    if ((form !== "edit" && form !== "details" && form !== "clone") || !schemaDetail) return;
     const latestVer = schemaVersions?.find((v) => v.version === schemaDetail.latest_version) ?? schemaVersions?.[0];
     const raw = (latestVer?.content ?? {}) as Record<string, unknown>;
     const content = fromApiContent(raw);
     reset({
       ...DEFAULT_ONBOARDING,
-      name: schemaDetail.name,
+      name: form === "clone" ? `Copy of ${schemaDetail.name}` : schemaDetail.name,
       customer_type: schemaDetail.customer_type as OnboardingFormValues["customer_type"],
       ...content,
     });
@@ -129,7 +129,7 @@ export function OnboardingForm() {
   function onSubmit(values: OnboardingFormValues) {
     const { name, customer_type } = values;
     const content = toApiContent(values);
-    if (form === "new") {
+    if (form === "new" || form === "clone") {
       createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
     } else if (form === "edit" && selectedSchemaId) {
       updateSchema.mutate({ id: selectedSchemaId, payload: { content } });

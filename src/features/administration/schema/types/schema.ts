@@ -19,7 +19,7 @@ export type SchemaStatus =
 
 export type CustomerType = string;
 
-export type SchemaFormMode = "new" | "edit" | "details" | null;
+export type SchemaFormMode = "new" | "edit" | "details" | "clone" | null;
 
 /** Shape returned by GET /v1/schemas/ list endpoint */
 export interface SchemaRecord {
@@ -29,6 +29,7 @@ export interface SchemaRecord {
   customer_type: CustomerType;
   schema_mode_type?: string;
   latest_version: string;
+  schema_status: SchemaStatus;
   created_by: string;
   updated_by: string;
 }
