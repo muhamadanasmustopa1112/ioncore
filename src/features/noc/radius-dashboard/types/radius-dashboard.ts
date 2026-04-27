@@ -59,3 +59,27 @@ export interface RadiusServiceInfo {
   totalBandwidths: number;
   totalProfileGroups: number;
 }
+
+export interface NocSummary {
+  total_warnings: number;
+  open_warnings: number;
+  total_incidents: number;
+  open_incidents: number;
+  down_nodes: number;
+  high_utilization_ports: number;
+  flapping_subscribers: number;
+}
+
+export interface TopologyStats {
+  DEGRADED: number;
+  DOWN: number;
+  UNKNOWN: number;
+  UP: number;
+}
+
+export interface NocTopologyStatus {
+  pops: TopologyStats;
+  olts: TopologyStats;
+  odps: TopologyStats;
+  links: TopologyStats;
+}

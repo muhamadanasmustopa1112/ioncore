@@ -10,10 +10,30 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { RiArrowLeftLine } from "@remixicon/react";
 import { OdpPopList } from "../list/odp-pop-list";
+import { useState, useMemo } from "react";
+import { usePop } from "../../api/get-pop";
 
 export function PopDetailView() {
     const router = useRouter();
     const { selectedPop } = usePopStore();
+
+    const [filter, setFilter] = useState({
+        limit: 10,
+        page: 1,
+        search: "",
+        sort_by: "name",
+        sort_order: "asc" as "asc" | "desc",
+    });
+
+    const params = useMemo(() => ({
+        limit: filter.limit,
+        page: filter.page,
+        search: filter.search,
+        sort_by: filter.sort_by,
+        sort_order: filter.sort_order,
+    }), [filter]);
+
+    const { data: popData, isLoading } = usePop({ params });
 
     if (!selectedPop) {
         return (
@@ -49,7 +69,13 @@ export function PopDetailView() {
 
                 <div className="space-y-8">
                     <PopDetailKpi pop={selectedPop} />
-                    <OdpPopList type='odp' />
+                    <OdpPopList
+                        type='odp'
+                        data={popData as any}
+                        isLoading={isLoading}
+                        filter={filter}
+                        setFilter={setFilter}
+                    />
                     <PopDeviceInventoryTable popId={String(selectedPop.id)} />
                 </div>
             </div>

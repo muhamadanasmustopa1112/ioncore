@@ -58,7 +58,7 @@ export function OdpPopList({
     meta: {
       onPopSelect,
     },
-    pageCount: Math.ceil((popData?.recordsTotal || 0) / (filter.limit || 10)),
+    pageCount: Math.ceil((popData?.recordsTotal || 0) / (filter?.limit || 10)),
     getRowId: (row) => String(row.id),
     state: {
       rowSelection,
@@ -103,7 +103,7 @@ export function OdpPopList({
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-3.5 -translate-y-1/2" />
                   <Input
                     placeholder="Search POP..."
-                    value={filter.search || ""}
+                    value={filter?.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
                     }
