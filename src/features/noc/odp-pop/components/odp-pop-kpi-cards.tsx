@@ -8,17 +8,23 @@ import {
   RiDatabase2Line
 } from "@remixicon/react";
 import { Card, CardContent } from "@/components/ui/card";
-import { DUMMY_POP_DATA } from "../data/dummy-odp-pop";
+import { PopResponse } from "../types/pop";
 
-export function OdpPopKpiCards() {
+export function OdpPopKpiCards({ data: popData }: { data?: PopResponse }) {
   const stats = useMemo(() => {
-    const total = DUMMY_POP_DATA.length;
-    const validated = total; // Hardcode all as validated for now
-    const pending = 0;
-    const totalOdp = 0;
+    const total = popData?.recordsTotal || 0;
+    const pops = popData?.data || [];
+    
+    const active = pops.filter(p => p.status === "ACTIVE").length;
+    const warning = pops.filter(p => p.status === "WARNING").length;
+    const inactive = pops.filter(p => p.status === "INACTIVE").length;
+    
+    // For now, if we have limited data (e.g. limit 100), the counts might be partial
+    // But it's better than dummy data.
+    const totalOdp = pops.reduce((acc, p) => acc + (p.odpCount || 0), 0);
 
-    return { total, validated, pending, totalOdp };
-  }, []);
+    return { total, active, warning, totalOdp };
+  }, [popData]);
 
   const items = [
     {
@@ -30,20 +36,20 @@ export function OdpPopKpiCards() {
       description: "Active infrastructure points"
     },
     {
-      label: "Validated POPs",
-      value: stats.validated,
+      label: "Active POPs",
+      value: stats.active,
       icon: RiCheckboxCircleLine,
       color: "text-emerald-600",
       bgColor: "bg-emerald-500/10",
       description: "Verified and operational"
     },
     {
-      label: "Pending Validation",
-      value: stats.pending,
+      label: "Warning/Issues",
+      value: stats.warning,
       icon: RiTimeLine,
       color: "text-amber-600",
       bgColor: "bg-amber-500/10",
-      description: "Awaiting inspection"
+      description: "Awaiting inspection or issues"
     },
     {
       label: "Total ODP Nodes",

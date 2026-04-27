@@ -13,8 +13,8 @@ import { useTheme } from "next-themes";
 import { PopMarkers } from "./pop-markers";
 import { OdpMarkers } from "./odp-markers";
 import { TopologyPaths } from "./topology-paths";
-import { usePop } from "../../api/get-pop";
 import { useOdp } from "../../api/get-odp";
+import { PopResponse } from "../../types/pop";
 
 // --- Controllers ---
 
@@ -75,6 +75,8 @@ interface OdpPopMapProps {
   selectedOdpId?: string | null;
   onSelect?: (id: string | null) => void;
   showOdps?: boolean;
+  data?: PopResponse;
+  isLoading?: boolean;
 }
 
 export default function OdpPopMap({
@@ -82,7 +84,9 @@ export default function OdpPopMap({
   selectedPopId,
   selectedOdpId,
   onSelect,
-  showOdps = false,
+  showOdps = true,
+  data: popResponse,
+  isLoading
 }: OdpPopMapProps) {
   const [isMounted, setIsMounted] = useState(false);
   const { theme, resolvedTheme } = useTheme();
@@ -91,16 +95,6 @@ export default function OdpPopMap({
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  const { data: popResponse } = usePop({
-    params: {
-      limit: 10,
-      page: 1,
-      search: "",
-      sort_by: "name",
-      sort_order: "asc",
-    },
-  });
 
   const pops = useMemo(() => popResponse?.data || [], [popResponse]);
 
@@ -113,11 +107,11 @@ export default function OdpPopMap({
   const { data: odpResponse } = useOdp({
     params: {
       limit: 10,
+      olt_id: selectedPopId || undefined,
     },
   });
 
   const odps = useMemo(() => odpResponse?.data || [], [odpResponse]);
-
   const filteredOdps = useMemo(() => {
     if (!showOdps) return [];
     let result = odps;
@@ -193,8 +187,6 @@ export default function OdpPopMap({
               <TopologyPaths
                 pops={pops}
                 odps={filteredOdps}
-                selectedPopId={selectedPopId}
-                selectedArea={selectedArea}
               />
               <OdpMarkers
                 data={filteredOdps}
@@ -205,8 +197,6 @@ export default function OdpPopMap({
             </>
           )}
         </MapContainer>
-
-
 
         <Button
           variant="outline"
