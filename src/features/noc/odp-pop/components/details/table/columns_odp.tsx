@@ -18,9 +18,11 @@ export const columns: ColumnDef<OdpListItem>[] = [
       />
     ),
     cell: ({ row }) => (
-      <span className="font-medium text-foreground">
-        {row.original.name}
-      </span>
+      <div className="flex flex-col gap-1 cursor-pointer hover:opacity-70 transition-opacity">
+        <span className="font-medium underline underline-offset-4 decoration-primary/30 hover:decoration-primary">
+          {row.original.name}
+        </span>
+      </div>
     ),
     size: 200,
   },

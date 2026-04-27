@@ -16,10 +16,25 @@ import { RadiusAuthStatsChart } from "./components/auth-stats-chart";
 import { RadiusTopNasChart } from "./components/top-nas-chart";
 import { RadiusLiveLogTable } from "./components/live-log-table";
 import { RadiusServiceInfo } from "./components/service-info";
+import { NocSummaryCards } from "./components/noc-summary-cards";
+import { NocTopologyStatus } from "./components/noc-topology-status";
 import { useRadiusDashboardStore } from "./store/use-radius-dashboard-store";
+import { useQueryClient, useIsFetching } from "@tanstack/react-query";
+import { RADIUS_DASHBOARD_KEYS } from "./api/key";
 
 export function RadiusDashboard() {
-  const { refreshData, isLoading } = useRadiusDashboardStore();
+  const { refreshData, isLoading: isStoreLoading } = useRadiusDashboardStore();
+  const queryClient = useQueryClient();
+  const isFetchingQueries = useIsFetching({ queryKey: RADIUS_DASHBOARD_KEYS.all });
+
+  const isLoading = isStoreLoading || isFetchingQueries > 0;
+
+  const handleRefresh = async () => {
+    // Refresh store data (mock)
+    await refreshData();
+    // Invalidate real API queries
+    queryClient.invalidateQueries({ queryKey: RADIUS_DASHBOARD_KEYS.all });
+  };
 
   return (
     <div className="relative h-full w-full px-6 py-6 overflow-y-auto custom-scrollbar">
@@ -55,7 +70,7 @@ export function RadiusDashboard() {
           <Button
             variant="primary"
             className="h-12 px-8 font-bold shadow-lg shadow-primary/20 rounded-2xl"
-            onClick={refreshData}
+            onClick={handleRefresh}
           >
             <RiRefreshLine className={`size-5 ${isLoading ? 'animate-spin' : ''}`} />
             Sync Data
@@ -64,6 +79,12 @@ export function RadiusDashboard() {
       </Toolbar>
 
       <div className="space-y-6">
+        {/* NOC Summary Section */}
+        <NocSummaryCards />
+
+        {/* Topology Status Section */}
+        <NocTopologyStatus />
+
         {/* KPI Section */}
         <RadiusKpiCards />
 

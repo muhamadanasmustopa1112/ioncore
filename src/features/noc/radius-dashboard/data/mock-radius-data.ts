@@ -1,4 +1,4 @@
-import { RadiusKpi, RadiusSessionTrend, AuthStats, NasPerformance, RadiusLog, RadiusServiceInfo } from "../types/radius-dashboard";
+import { RadiusKpi, RadiusSessionTrend, AuthStats, NasPerformance, RadiusLog, RadiusServiceInfo, NocSummary, NocTopologyStatus } from "../types/radius-dashboard";
 import { subHours, format, subDays, startOfDay } from "date-fns";
 
 // Optimized mock data generator for Radius Dashboard
@@ -54,4 +54,41 @@ export const RADIUS_SERVICE_INFO: RadiusServiceInfo = {
   totalCustomers: 85240,
   totalBandwidths: 24,
   totalProfileGroups: 8
+};
+
+export const NOC_SUMMARY: NocSummary = {
+  total_warnings: 0,
+  open_warnings: 0,
+  total_incidents: 0,
+  open_incidents: 0,
+  down_nodes: 0,
+  high_utilization_ports: 0,
+  flapping_subscribers: 0
+};
+
+export const NOC_TOPOLOGY_STATUS: NocTopologyStatus = {
+  pops: {
+    DEGRADED: 0,
+    DOWN: 0,
+    UNKNOWN: 2,
+    UP: 0
+  },
+  olts: {
+    DEGRADED: 0,
+    DOWN: 0,
+    UNKNOWN: 8,
+    UP: 0
+  },
+  odps: {
+    DEGRADED: 0,
+    DOWN: 0,
+    UNKNOWN: 47,
+    UP: 0
+  },
+  links: {
+    DEGRADED: 0,
+    DOWN: 0,
+    UNKNOWN: 0,
+    UP: 0
+  }
 };

@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import { RadiusDashboardFilters, RadiusKpi, NasPerformance, RadiusLog, RadiusServiceInfo } from "../types/radius-dashboard";
-import { RADIUS_KPI, NAS_PERFORMANCE, RADIUS_LOGS, RADIUS_SERVICE_INFO } from "../data/mock-radius-data";
+import { RadiusDashboardFilters, RadiusKpi, NasPerformance, RadiusLog, RadiusServiceInfo, NocSummary, NocTopologyStatus } from "../types/radius-dashboard";
+import { RADIUS_KPI, NAS_PERFORMANCE, RADIUS_LOGS, RADIUS_SERVICE_INFO, NOC_SUMMARY, NOC_TOPOLOGY_STATUS } from "../data/mock-radius-data";
 
 interface RadiusDashboardState {
   // Data
@@ -8,6 +8,8 @@ interface RadiusDashboardState {
   nasPerformance: NasPerformance[];
   logs: RadiusLog[];
   serviceInfo: RadiusServiceInfo;
+  nocSummary: NocSummary;
+  nocTopologyStatus: NocTopologyStatus;
   
   // UI State
   filters: RadiusDashboardFilters;
@@ -23,6 +25,8 @@ export const useRadiusDashboardStore = create<RadiusDashboardState>((set) => ({
   nasPerformance: NAS_PERFORMANCE,
   logs: RADIUS_LOGS,
   serviceInfo: RADIUS_SERVICE_INFO,
+  nocSummary: NOC_SUMMARY,
+  nocTopologyStatus: NOC_TOPOLOGY_STATUS,
   
   isLoading: false,
   filters: {
