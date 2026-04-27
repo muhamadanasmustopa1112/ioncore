@@ -10,6 +10,23 @@ const OdpPopMapClient = dynamic(
   }
 );
 
-export function OdpPopMapWrapper({ selectedPopId }: { selectedPopId: string | null }) {
-  return <OdpPopMapClient selectedPopId={selectedPopId} />;
+export function OdpPopMapWrapper({
+  selectedPopId,
+  showOdps = true,
+  data,
+  isLoading
+}: {
+  selectedPopId: string | null;
+  showOdps?: boolean;
+  data?: any;
+  isLoading?: boolean;
+}) {
+  return (
+    <OdpPopMapClient 
+      selectedPopId={selectedPopId} 
+      showOdps={showOdps} 
+      data={data}
+      isLoading={isLoading}
+    />
+  );
 }

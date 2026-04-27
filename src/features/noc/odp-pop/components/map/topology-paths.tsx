@@ -7,8 +7,6 @@ import { OdpData } from "../../types/odp";
 
 
 interface TopologyPathsProps {
-  selectedArea?: string | null;
-  selectedPopId: string | null;
   pops: PopData[];
   odps: OdpData[];
 }
@@ -17,17 +15,12 @@ interface TopologyPathsProps {
  * Renders topology paths (connection lines) between POPs and their child ODPs.
  * This visualizes the physical/logical connection between infrastructure points.
  */
-export function TopologyPaths({ selectedArea, selectedPopId, pops, odps }: TopologyPathsProps) {
+export function TopologyPaths({ pops, odps }: TopologyPathsProps) {
   const paths = useMemo(() => {
     const result: { id: string; positions: [number, number][] }[] = [];
 
-    // Filter ODPs based on current view
-    let odpsToProcess = odps;
-    if (selectedPopId) {
-      odpsToProcess = odps.filter(o => String(o.olt_id) === String(selectedPopId));
-    } else if (selectedArea) {
-      odpsToProcess = odps.filter(o => o.area === selectedArea);
-    }
+    // ODPs are already filtered by the parent (OdpPopMap)
+    const odpsToProcess = odps;
 
     // Build paths by finding the parent POP location for each ODP
     odpsToProcess.forEach(odp => {
@@ -44,7 +37,7 @@ export function TopologyPaths({ selectedArea, selectedPopId, pops, odps }: Topol
     });
 
     return result;
-  }, [selectedArea, selectedPopId, pops, odps]);
+  }, [pops, odps]);
 
 
   return (
@@ -54,10 +47,10 @@ export function TopologyPaths({ selectedArea, selectedPopId, pops, odps }: Topol
           key={path.id}
           positions={path.positions}
           pathOptions={{
-            color: "#a78bfa",     // Brighter violet (violet-400) for better visibility on dark maps
-            weight: 3,            // Increased thickness
-            opacity: 0.7,         // Higher opacity
-            dashArray: "10, 12",  // More pronounced dash pattern
+            color: "#a78bfa",
+            weight: 3,
+            opacity: 0.7,
+            dashArray: "10, 12",
             lineCap: "round",
             interactive: false
           }}

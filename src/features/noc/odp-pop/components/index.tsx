@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { RiAddLine, RiInformationLine } from "@remixicon/react";
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,11 +18,30 @@ import { OdpPopList } from "./list/odp-pop-list";
 import { OdpPopMapWrapper } from "./map/odp-pop-map-wrapper";
 import { usePopStore } from "../store/pop";
 import { PopFormSheet } from "./form/pop-form-sheet";
+import { usePop } from "../api/get-pop";
 
 export function OdpPopManagePage() {
     const { openPopFormSheet } = usePopStore();
 
     const [selectedPopId, setSelectedPopId] = useState<string | null>(null);
+
+    const [filter, setFilter] = useQueryStates({
+        limit: parseAsInteger.withDefault(100),
+        page: parseAsInteger.withDefault(1),
+        search: parseAsString,
+        sort_by: parseAsString.withDefault("name"),
+        sort_order: parseAsString.withDefault("asc"),
+    });
+
+    const params = useMemo(() => ({
+        limit: filter.limit,
+        page: filter.page,
+        search: filter.search || "",
+        sort_by: filter.sort_by,
+        sort_order: filter.sort_order,
+    }), [filter]);
+
+    const { data: popData, isLoading } = usePop({ params });
 
     return (
         <div className="relative h-full w-full flex flex-col overflow-hidden px-6 py-3">
@@ -61,18 +81,28 @@ export function OdpPopManagePage() {
             </Toolbar>
 
             <div className="mt-4 flex-none">
-                <OdpPopKpiCards />
+                <OdpPopKpiCards data={popData} />
             </div>
 
             <div className="flex-1 flex flex-col gap-6 mt-4 min-h-0 overflow-hidden">
                 {/* Top Section: Interactive Map */}
                 <div className="h-[500px] flex-none shadow-sm rounded-xl overflow-hidden border border-border/50">
-                    <OdpPopMapWrapper selectedPopId={selectedPopId} />
+                    <OdpPopMapWrapper 
+                        selectedPopId={selectedPopId} 
+                        data={popData}
+                        isLoading={isLoading}
+                    />
                 </div>
 
                 {/* Bottom Section: Data Table */}
                 <div className="flex-1 overflow-y-auto min-h-0">
-                    <OdpPopList onPopSelect={setSelectedPopId} />
+                    <OdpPopList 
+                        onPopSelect={setSelectedPopId} 
+                        data={popData}
+                        isLoading={isLoading}
+                        filter={filter}
+                        setFilter={setFilter}
+                    />
                 </div>
             </div>
 

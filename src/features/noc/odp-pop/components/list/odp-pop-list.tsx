@@ -10,7 +10,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Filter, Search, X } from "lucide-react";
-import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,33 +30,23 @@ import {
 } from "@/components/ui/collapsible";
 import { getPopColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
-import { usePop } from "../../api/get-pop";
+import { PopResponse } from "../../types/pop";
 
 export function OdpPopList({
   onPopSelect,
-  type = 'pop'
+  type = 'pop',
+  data: popData,
+  isLoading,
+  filter,
+  setFilter
 }: {
   onPopSelect?: (id: string) => void;
   type?: 'pop' | 'odp';
+  data?: PopResponse;
+  isLoading?: boolean;
+  filter: any;
+  setFilter: (state: any) => void;
 }) {
-  const [filter, setFilter] = useQueryStates({
-    limit: parseAsInteger.withDefault(10),
-    page: parseAsInteger.withDefault(1),
-    search: parseAsString,
-    sort_by: parseAsString.withDefault("name"),
-    sort_order: parseAsString.withDefault("asc"),
-  });
-
-  const params = useMemo(() => ({
-    limit: filter.limit,
-    page: filter.page,
-    search: filter.search || "",
-    sort_by: filter.sort_by,
-    sort_order: filter.sort_order,
-  }), [filter]);
-
-  const { data: popData, isLoading } = usePop({ params });
-
   const data = useMemo(() => popData?.data || [], [popData]);
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
