@@ -115,8 +115,8 @@ export const paths = {
           path: "/noc/odp-pop/manage",
           getHref: () => "/noc/odp-pop/manage",
           detail: {
-            path: "/noc/odp-pop/manage/detail",
-            getHref: () => `/noc/odp-pop/manage/detail`,
+            path: "/noc/odp-pop/manage/detail/:id",
+            getHref: (id: string) => `/noc/odp-pop/manage/detail/${id}`,
           },
         },
         map: {

@@ -1,106 +1,58 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
-import { Progress } from "@/components/ui/progress";
-import { PopOltDetail } from "@/features/noc/odp-pop/data/dummy-olt-details";
-import { paths } from "@/config/paths";
+import { OltData } from "@/features/noc/odp-pop/types/olt";
+import { OltActionsCell } from "./olt-actions-cell";
 
-export const columns: ColumnDef<PopOltDetail>[] = [
+export const columns: ColumnDef<OltData>[] = [
+  {
+    id: "code",
+    accessorKey: "code",
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        title="OLT CODE"
+        column={column}
+        className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
+      />
+    ),
+    cell: ({ row }) => (
+      <span className="text-primary font-black">{row.original.code}</span>
+    ),
+    size: 200,
+  },
   {
     id: "name",
     accessorKey: "name",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="OLT NAME"
-        column={column}
-        className="text-[10px] text-muted-foreground font-black tracking-widest"
-      />
-    ),
-    cell: ({ row }) => (
-      <div className="flex flex-col gap-0.5">
-        <span className="text-foreground leading-none">
-          {row.original.name}
-        </span>
-        <span className="text-[10px] text-muted-foreground/60 tracking-tighter">
-          {row.original.model}
-        </span>
-      </div>
-    ),
-    size: 220,
-  },
-  {
-    id: "capacity",
-    header: ({ column }) => (
-      <DataGridColumnHeader
-        title="PORT CAPACITY"
+        title="NAME"
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
     ),
-    cell: ({ row }) => {
-      const used = row.original.portsUsed;
-      const total = row.original.totalPorts;
-      const percentage = (used / total) * 100;
-
-      return (
-        <div className="flex flex-col gap-1.5 min-w-[120px]">
-          <div className="flex items-center justify-between text-[10px] uppercase tracking-tighter">
-            <span className="text-foreground">
-              {used} / {total} <span className="text-muted-foreground/50 ml-0.5">Ports</span>
-            </span>
-            <span
-              className={
-                percentage > 90
-                  ? "text-destructive"
-                  : percentage > 70
-                    ? "text-orange-500"
-                    : "text-primary"
-              }
-            >
-              {Math.round(percentage)}%
-            </span>
-          </div>
-          <Progress
-            value={percentage}
-            className="h-1.5"
-            indicatorClassName={
-              percentage > 90
-                ? "bg-destructive"
-                : percentage > 70
-                  ? "bg-orange-500"
-                  : "bg-primary"
-            }
-          />
-        </div>
-      );
-    },
-    size: 160,
+    cell: ({ row }) => (
+      <span className="text-foreground font-medium">{row.original.name}</span>
+    ),
+    size: 200,
   },
   {
-    id: "odpCount",
-    accessorKey: "odpCount",
+    id: "area",
+    accessorKey: "area",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="ODP CONNECTED"
+        title="AREA"
         column={column}
-        className="text-[10px] text-muted-foreground font-black tracking-widest uppercase text-center"
+        className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
     ),
     cell: ({ row }) => (
-      <div className="flex justify-center">
-        <Badge
-          variant="secondary"
-          className="text-[11px] px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 shadow-none rounded-md"
-        >
-          {row.original.odpCount} <span className="ml-1">ODPs</span>
-        </Badge>
-      </div>
+      <span className="text-muted-foreground">
+        {row.original.area}
+      </span>
     ),
-    size: 140,
+    size: 150,
   },
   {
     id: "status",
@@ -114,31 +66,31 @@ export const columns: ColumnDef<PopOltDetail>[] = [
     ),
     cell: ({ row }) => (
       <Badge
-        variant={row.original.status === "active" ? "success" : "warning"}
+        variant={row.original.status === "ACTIVE" ? "success" : "warning"}
         appearance="light"
         className="uppercase text-[10px] tracking-tighter"
       >
-        {row.original.status === "active" ? "Online" : "Warning"}
+        {row.original.status || "UNKNOWN"}
       </Badge>
     ),
     size: 100,
   },
   {
-    id: "ipAddress",
-    accessorKey: "ipAddress",
+    id: "address",
+    accessorKey: "address",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="IP ADDRESS"
+        title="ADDRESS"
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
     ),
     cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.original.ipAddress}
-      </span>
+      <p className="text-muted-foreground truncate max-w-[300px]">
+        {row.original.address}
+      </p>
     ),
-    size: 120,
+    size: 300,
   },
   {
     id: "actions",
@@ -149,19 +101,7 @@ export const columns: ColumnDef<PopOltDetail>[] = [
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase text-center"
       />
     ),
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <Link href={paths.dashboard.networkAndOrchestration.odpPop.oltDetail.getHref(row.original.id)}>
-          <Button
-            variant="primary"
-            size="sm"
-            className="h-8 px-4 font-black uppercase text-[10px] shadow-sm"
-          >
-            Manage
-          </Button>
-        </Link>
-      </div>
-    ),
+    cell: ({ row }) => <OltActionsCell row={row} />,
     size: 100,
   },
 ];

@@ -19,7 +19,7 @@ import {
   CardFooter,
   CardToolbar,
 } from "@/components/ui/card";
-import { DataGrid, DataGridContainer } from "@/components/ui/data-grid";
+import { DataGrid } from "@/components/ui/data-grid";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid-column-visibility";
@@ -29,14 +29,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { DUMMY_OLT_DETAILS } from "@/features/noc/odp-pop/data/dummy-olt-details";
-import { RiListCheck } from "@remixicon/react";
+import { RiRouterLine } from "@remixicon/react";
 import { columns } from "../table/columns_olt";
-import { AddOltDialog } from "../../form/olt-dialog";
+import { useOlt } from "@/features/noc/odp-pop/api/get-olt";
 
-export function PopOltInventoryTable({ popId }: { popId: string }) {
-  const data = useMemo(() => DUMMY_OLT_DETAILS[popId] || [], [popId]);
-
+export function PopOltTable({ popId }: { popId: string }) {
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -51,20 +48,32 @@ export function PopOltInventoryTable({ popId }: { popId: string }) {
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
 
+  const { data: oltResponse, isLoading } = useOlt({
+    params: {
+      pop_id: popId,
+      limit: filter.limit || 10,
+      page: filter.page || 1,
+      search: filter.search || "",
+    }
+  });
+
+  const data = useMemo(() => oltResponse?.data || [], [oltResponse]);
+
   const table = useReactTable({
     data,
     columns,
-    pageCount: Math.ceil(data.length / (filter.limit || 10)),
+    pageCount: Math.ceil((oltResponse?.recordsTotal || 0) / (filter.limit || 10)),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
   });
 
   return (
     <DataGrid
       table={table}
-      recordCount={data.length}
+      recordCount={oltResponse?.recordsTotal || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -76,16 +85,15 @@ export function PopOltInventoryTable({ popId }: { popId: string }) {
       tableClassNames={{
         base: "w-auto min-w-full",
       }}
-      isLoading={false}
+      isLoading={isLoading}
     >
-      <Card className="border-none shadow-sm rounded-2xl overflow-hidden mt-8">
+      <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
         <CardHeader className="flex-col items-stretch pt-6 pb-2 px-6">
           <div className="flex items-center justify-between mb-4">
             <CardHeading className="flex items-center gap-3 text-lg font-black tracking-tight text-foreground uppercase">
-              <RiListCheck className="size-5 text-primary" />
-              List OLT
+              <RiRouterLine className="size-5 text-primary" />
+              OLT Infrastructure List
             </CardHeading>
-            <AddOltDialog />
           </div>
 
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
@@ -134,7 +142,7 @@ export function PopOltInventoryTable({ popId }: { popId: string }) {
 
             <CollapsibleContent className="border-t border-border/50 mt-4 pt-4">
               <div className="text-xs text-muted-foreground italic">
-                Advanced filters coming soon...
+                Advanced filters for OLT coming soon...
               </div>
             </CollapsibleContent>
           </Collapsible>

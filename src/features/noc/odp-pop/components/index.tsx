@@ -89,6 +89,7 @@ export function OdpPopManagePage() {
                 <div className="h-[500px] flex-none shadow-sm rounded-xl overflow-hidden border border-border/50">
                     <OdpPopMapWrapper 
                         selectedPopId={selectedPopId} 
+                        onSelect={setSelectedPopId}
                         data={popData}
                         isLoading={isLoading}
                     />

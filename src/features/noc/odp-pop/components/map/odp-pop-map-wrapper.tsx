@@ -14,12 +14,14 @@ export function OdpPopMapWrapper({
   selectedPopId,
   showOdps = true,
   data,
-  isLoading
+  isLoading,
+  onSelect
 }: {
   selectedPopId: string | null;
   showOdps?: boolean;
   data?: any;
   isLoading?: boolean;
+  onSelect?: (id: string | null) => void;
 }) {
   return (
     <OdpPopMapClient 
@@ -27,6 +29,7 @@ export function OdpPopMapWrapper({
       showOdps={showOdps} 
       data={data}
       isLoading={isLoading}
+      onSelect={onSelect}
     />
   );
 }

@@ -8,7 +8,7 @@ import { POP_KEYS } from "./key";
 import { PopParams, PopResponse } from "../types/pop";
 
 export const getPop = (params: PopParams): Promise<PopResponse> => {
-    return api.get(`${services.networking}/odp-pop/pops`, { params });
+    return api.get(`${services.networking}/monitoring/topology/pops`, { params });
 };
 
 export const getPopQueryOptions = (params: PopParams) => {

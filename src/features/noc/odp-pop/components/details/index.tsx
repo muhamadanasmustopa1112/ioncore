@@ -5,35 +5,46 @@ import { paths } from "@/config/paths";
 import { PopDetailHeader } from "./components/pop-detail-header";
 import { PopDetailKpi } from "./components/pop-detail-kpi";
 import { PopDeviceInventoryTable } from "./list/pop-device-inventory-table";
+import { PopOltTable } from "./list/pop-olt-table";
 import { usePopStore } from "../../store/pop";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { RiArrowLeftLine } from "@remixicon/react";
-import { OdpPopList } from "../list/odp-pop-list";
-import { useState, useMemo } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { RiArrowLeftLine, RiLoader2Line } from "@remixicon/react";
 import { usePop } from "../../api/get-pop";
+import { useEffect } from "react";
 
 export function PopDetailView() {
     const router = useRouter();
-    const { selectedPop } = usePopStore();
+    const params = useParams();
+    const popId = params?.id as string;
+    
+    const { selectedPop, setSelectedPop } = usePopStore();
 
-    const [filter, setFilter] = useState({
-        limit: 10,
-        page: 1,
-        search: "",
-        sort_by: "name",
-        sort_order: "asc" as "asc" | "desc",
+    // Fetch data POP jika belum ada di store tapi ada di URL
+    const { data: popResponse, isLoading: isFetchingPop } = usePop({
+        params: {
+            id: popId || undefined
+        },
+        queryConfig: {
+            enabled: !!popId && !selectedPop
+        }
     });
 
-    const params = useMemo(() => ({
-        limit: filter.limit,
-        page: filter.page,
-        search: filter.search,
-        sort_by: filter.sort_by,
-        sort_order: filter.sort_order,
-    }), [filter]);
+    // Update store jika data berhasil di-fetch
+    useEffect(() => {
+        if (popResponse?.data?.[0] && !selectedPop) {
+            setSelectedPop(popResponse.data[0]);
+        }
+    }, [popResponse, selectedPop, setSelectedPop]);
 
-    const { data: popData, isLoading } = usePop({ params });
+    if (isFetchingPop) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+                <RiLoader2Line className="w-8 h-8 animate-spin text-primary" />
+                <p className="text-muted-foreground font-medium">Loading POP data...</p>
+            </div>
+        );
+    }
 
     if (!selectedPop) {
         return (
@@ -64,18 +75,14 @@ export function PopDetailView() {
                 className="mb-0"
             />
 
-            <div className="flex flex-col gap-8 max-w-7xl">
+            <div className="flex flex-col gap-8 max-w-7xl pb-10">
                 <PopDetailHeader pop={selectedPop} />
 
-                <div className="space-y-8">
+                <div className="space-y-10">
                     <PopDetailKpi pop={selectedPop} />
-                    <OdpPopList
-                        type='odp'
-                        data={popData as any}
-                        isLoading={isLoading}
-                        filter={filter}
-                        setFilter={setFilter}
-                    />
+                    
+                    <PopOltTable popId={String(selectedPop.id)} />
+                    
                     <PopDeviceInventoryTable popId={String(selectedPop.id)} />
                 </div>
             </div>
