@@ -47,6 +47,8 @@ export interface OdpData {
   gps_lng: number;
   status: string;
   address: string;
+  ports_used?: number;
+  total_ports?: number;
   heartbeat_at?: string;
   created_at?: string;
   updated_at?: string;
@@ -66,6 +68,7 @@ export type OdpParams = {
   sort_by?: string;
   sort_order?: string;
   olt_id?: string;
+  pop_id?: string;
 };
 
 export interface MetaData {

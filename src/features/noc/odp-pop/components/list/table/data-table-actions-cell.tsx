@@ -26,7 +26,7 @@ export function ActionsCell({ row }: { row: Row<PopData> }) {
 
   const handleDetailClick = () => {
     setSelectedPop(row.original);
-    router.push(`${paths.dashboard.networkAndOrchestration.odpPop.manage.detail.getHref()}`);
+    router.push(`${paths.dashboard.networkAndOrchestration.odpPop.manage.detail.getHref(String(row.original.id))}`);
   };
 
   return (

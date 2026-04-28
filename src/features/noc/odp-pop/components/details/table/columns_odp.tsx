@@ -4,9 +4,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { Progress } from "@/components/ui/progress";
-import { OdpListItem } from "@/features/noc/odp-pop/data/dummy-odp-list";
+import { OdpData } from "@/features/noc/odp-pop/types/odp";
 
-export const columns: ColumnDef<OdpListItem>[] = [
+export const columns: ColumnDef<OdpData>[] = [
   {
     id: "name",
     accessorKey: "name",
@@ -27,8 +27,8 @@ export const columns: ColumnDef<OdpListItem>[] = [
     size: 200,
   },
   {
-    id: "latitude",
-    accessorKey: "latitude",
+    id: "gps_lat",
+    accessorKey: "gps_lat",
     header: ({ column }) => (
       <DataGridColumnHeader
         title="LATITUDE"
@@ -38,14 +38,14 @@ export const columns: ColumnDef<OdpListItem>[] = [
     ),
     cell: ({ row }) => (
       <span className="text-muted-foreground font-mono text-xs">
-        {row.original.latitude.toFixed(4)}
+        {Number(row.original.gps_lat || 0).toFixed(4)}
       </span>
     ),
     size: 110,
   },
   {
-    id: "longitude",
-    accessorKey: "longitude",
+    id: "gps_lng",
+    accessorKey: "gps_lng",
     header: ({ column }) => (
       <DataGridColumnHeader
         title="LONGITUDE"
@@ -55,14 +55,14 @@ export const columns: ColumnDef<OdpListItem>[] = [
     ),
     cell: ({ row }) => (
       <span className="text-muted-foreground font-mono text-xs">
-        {row.original.longitude.toFixed(4)}
+        {Number(row.original.gps_lng || 0).toFixed(4)}
       </span>
     ),
     size: 110,
   },
   {
-    id: "ponPort",
-    accessorKey: "ponPort",
+    id: "olt_port",
+    accessorKey: "olt_port",
     header: ({ column }) => (
       <DataGridColumnHeader
         title="PON PORT"
@@ -75,7 +75,7 @@ export const columns: ColumnDef<OdpListItem>[] = [
         variant="secondary"
         className="text-[11px] px-2.5 py-0.5 bg-primary/10 text-primary border-primary/20 shadow-none rounded-md uppercase font-mono tracking-tight"
       >
-        {row.original.ponPort}
+        {row.original.olt_port || "N/A"}
       </Badge>
     ),
     size: 110,
@@ -90,8 +90,8 @@ export const columns: ColumnDef<OdpListItem>[] = [
       />
     ),
     cell: ({ row }) => {
-      const used = row.original.portsUsed;
-      const total = row.original.totalPorts;
+      const used = row.original.ports_used || 0;
+      const total = row.original.total_ports || 8;
       const percentage = (used / total) * 100;
 
       return (
@@ -104,10 +104,10 @@ export const columns: ColumnDef<OdpListItem>[] = [
             <span
               className={
                 percentage > 90
-                  ? "text-destructive"
-                  : percentage > 70
-                    ? "text-orange-500"
-                    : "text-primary"
+                   ? "text-destructive"
+                   : percentage > 70
+                     ? "text-orange-500"
+                     : "text-primary"
               }
             >
               {Math.round(percentage)}%

@@ -12,24 +12,12 @@ interface OdpMarkersProps {
   onSelect?: (id: string) => void;
 }
 
-export function OdpMarkers({ data, selectedPopId, markerRefs, onSelect }: OdpMarkersProps) {
-  // Get ODPs based on drill-down level
-  const currentOdps = useMemo(() => {
-    // 1. If a specific POP is selected, show ODPs for that POP only
-    if (selectedPopId) {
-      return data.filter(odp => String(odp.olt_id) === String(selectedPopId));
-    }
-
-    // 2. Otherwise return the data as provided (already filtered by area in parent if applicable)
-    return data;
-  }, [selectedPopId, data]);
-
-
-  if (currentOdps.length === 0) return null;
+export function OdpMarkers({ data, markerRefs, onSelect }: OdpMarkersProps) {
+  if (data.length === 0) return null;
 
   return (
     <>
-      {currentOdps.map((odp) => (
+      {data.map((odp) => (
         <Marker
           key={`odp-${odp.id}`}
           position={[odp.gps_lat, odp.gps_lng]}

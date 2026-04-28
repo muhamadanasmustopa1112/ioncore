@@ -56,6 +56,7 @@ export interface PopResponse {
 }
 
 export type PopParams = {
+  id?: string;
   page?: number;
   limit?: number;
   search?: string;

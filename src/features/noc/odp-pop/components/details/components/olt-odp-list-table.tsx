@@ -30,13 +30,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { RiRouterLine } from "@remixicon/react";
-import { DUMMY_ODP_LIST } from "@/features/noc/odp-pop/data/dummy-odp-list";
 import { columns } from "../table/columns_odp";
 import { AddOdpDialog } from "../../form/add-odp-dialog";
+import { useOdp } from "@/features/noc/odp-pop/api/get-odp";
 
 export function OltOdpListTable({ oltId }: { oltId: string }) {
-  const data = useMemo(() => DUMMY_ODP_LIST[oltId] || [], [oltId]);
-
   const [filter, setFilter] = useQueryStates(
     {
       limit: parseAsInteger.withDefault(10),
@@ -52,22 +50,33 @@ export function OltOdpListTable({ oltId }: { oltId: string }) {
     }
   );
 
+  const { data: odpResponse, isLoading } = useOdp({
+    params: {
+      olt_id: oltId,
+      limit: filter.limit || 10,
+      page: filter.page || 1,
+      search: filter.search || "",
+    }
+  });
+
+  const data = useMemo(() => odpResponse?.data || [], [odpResponse]);
   const [openFilter, setOpenFilter] = useState<boolean>(false);
 
   const table = useReactTable({
     data,
     columns,
-    pageCount: Math.ceil(data.length / (filter.limit || 10)),
+    pageCount: Math.ceil((odpResponse?.recordsTotal || 0) / (filter.limit || 10)),
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
   });
 
   return (
     <DataGrid
       table={table}
-      recordCount={data.length}
+      recordCount={odpResponse?.recordsTotal || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -79,7 +88,7 @@ export function OltOdpListTable({ oltId }: { oltId: string }) {
       tableClassNames={{
         base: "w-auto min-w-full",
       }}
-      isLoading={false}
+      isLoading={isLoading}
     >
       <Card className="border-none shadow-sm rounded-2xl overflow-hidden mt-8">
         <CardHeader className="flex-col items-stretch pt-6 pb-2 px-6">

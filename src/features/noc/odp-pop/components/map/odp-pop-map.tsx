@@ -14,6 +14,7 @@ import { PopMarkers } from "./pop-markers";
 import { OdpMarkers } from "./odp-markers";
 import { TopologyPaths } from "./topology-paths";
 import { useOdp } from "../../api/get-odp";
+import { useOlt } from "../../api/get-olt";
 import { PopResponse } from "../../types/pop";
 
 // --- Controllers ---
@@ -106,22 +107,52 @@ export default function OdpPopMap({
 
   const { data: odpResponse } = useOdp({
     params: {
-      limit: 10,
-      olt_id: selectedPopId || undefined,
+      limit: 100, // Ambil data ODP yang cukup banyak untuk difilter di client
+    },
+    queryConfig: {
+      enabled: !!selectedPopId, // Tetap hanya fetch saat POP dipilih agar hemat resource
     },
   });
 
+  const { data: oltResponse } = useOlt({
+    params: {
+      limit: 50,
+      pop_id: selectedPopId || undefined, // Fetch OLT yang sesuai dengan POP terpilih
+    },
+  });
+
+  useEffect(() => {
+    console.log("DEBUG NOC MAP:", {
+      selectedPopId,
+      hasOdpData: !!odpResponse?.data?.length,
+      odpCount: odpResponse?.data?.length || 0,
+      hasOltData: !!oltResponse?.data?.length,
+      oltCount: oltResponse?.data?.length || 0,
+    });
+  }, [selectedPopId, odpResponse, oltResponse]);
+
   const odps = useMemo(() => odpResponse?.data || [], [odpResponse]);
+  const olts = useMemo(() => oltResponse?.data || [], [oltResponse]);
+
+  // Cari daftar ID OLT yang ada di bawah POP yang sedang dipilih
+  const selectedPopOltIds = useMemo(() => {
+    if (!selectedPopId) return [];
+    return olts
+      .filter(olt => String(olt.pop_id) === String(selectedPopId) || String(olt.parent_id) === String(selectedPopId))
+      .map(olt => String(olt.id));
+  }, [olts, selectedPopId]);
+
   const filteredOdps = useMemo(() => {
-    if (!showOdps) return [];
-    let result = odps;
-    if (selectedPopId) {
-      result = result.filter(odp => String(odp.olt_id) === String(selectedPopId));
-    } else if (selectedArea) {
-      result = result.filter(odp => odp.area === selectedArea);
-    }
-    return result;
-  }, [odps, showOdps, selectedPopId, selectedArea]);
+    if (!showOdps || !selectedPopId || !olts.length) return [];
+    
+    // 1. Ambil semua ID OLT yang 'induknya' adalah POP terpilih
+    const validOltIds = olts
+      .filter(olt => String(olt.pop_id) === String(selectedPopId) || String(olt.parent_id) === String(selectedPopId))
+      .map(olt => String(olt.id));
+
+    // 2. Filter ODP yang olt_id-nya ada di dalam daftar OLT valid tadi
+    return odps.filter(odp => validOltIds.includes(String(odp.olt_id)));
+  }, [odps, olts, showOdps, selectedPopId]);
 
   // Default center
 
@@ -186,6 +217,7 @@ export default function OdpPopMap({
             <>
               <TopologyPaths
                 pops={pops}
+                olts={olts}
                 odps={filteredOdps}
               />
               <OdpMarkers
