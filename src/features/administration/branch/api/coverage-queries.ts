@@ -19,19 +19,29 @@ export const coverageKeys = {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string");
+}
+
+function normalizeCoverageJson(raw: CoverageDto["coverage_json"] | null | undefined) {
+  return {
+    service_area: toStringArray(raw?.service_area),
+    warehouse_coverage: toStringArray(raw?.warehouse_coverage),
+    network_scope: typeof raw?.network_scope === "string" ? raw.network_scope : "",
+    dispatch_radius_km:
+      typeof raw?.dispatch_radius_km === "number" ? raw.dispatch_radius_km : 0,
+  };
+}
+
 function mapToCoverageData(dto: CoverageDto): CoverageData {
   return {
     id: dto.id,
     branchId: dto.branch_id,
-    name: dto.name,
-    description: dto.description,
+    name: typeof dto.name === "string" ? dto.name : "",
+    description: typeof dto.description === "string" ? dto.description : "",
     isActive: dto.is_active,
-    coverageJson: dto.coverage_json ?? {
-      service_area: [],
-      warehouse_coverage: [],
-      network_scope: "",
-      dispatch_radius_km: 0,
-    },
+    coverageJson: normalizeCoverageJson(dto.coverage_json),
     createdAt: dto.created_at,
     updatedAt: dto.updated_at,
   };
@@ -57,6 +67,7 @@ export function useCoverageList(branchId: string) {
       }
     },
     enabled: !!branchId,
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });

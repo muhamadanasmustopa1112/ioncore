@@ -64,6 +64,7 @@ export function useNodeTypeList() {
       const res = await listNodeTypes();
       return (res.data?.node_types ?? []).map(mapNodeType);
     },
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });
@@ -76,6 +77,7 @@ export function useMaintenanceConfigList() {
       const res = await listMaintenanceConfig();
       return (res.data?.configs ?? []).map(mapMaintenanceConfig);
     },
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });
@@ -88,6 +90,7 @@ export function useSeedDeploymentList() {
       const res = await listSeedDeployments();
       return (res.data?.deployments ?? []).map(mapSeedDeployment);
     },
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });

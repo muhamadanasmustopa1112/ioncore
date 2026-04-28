@@ -75,6 +75,7 @@ export function useTemplateList() {
       const res = await listTemplates({ per_page: 100 });
       return (res.data?.templates ?? []).map(mapTemplate);
     },
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });

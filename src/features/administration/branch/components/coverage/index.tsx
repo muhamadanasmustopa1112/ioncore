@@ -2,6 +2,7 @@
 
 import { RiAddLine, RiMapPin2Line } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -9,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import {
   Toolbar,
   ToolbarActions,
@@ -118,7 +118,6 @@ export function BranchCoveragePage() {
         )}
       </div>
 
-      {/* List — only shown when branch is selected */}
       {selectedBranchId ? (
         <div className="flex-1 overflow-auto mt-2">
           <CoverageList branchId={selectedBranchId} />

@@ -16,7 +16,7 @@ function DataGridColumnVisibility<TData>({
   trigger: ReactNode;
 }) {
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[150px]">
         <DropdownMenuLabel className="font-medium">
