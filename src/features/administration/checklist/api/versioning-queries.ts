@@ -49,6 +49,7 @@ export function useVersionList(templateId: string) {
       return (res.data?.versions ?? []).map(mapVersion);
     },
     enabled: !!templateId,
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });

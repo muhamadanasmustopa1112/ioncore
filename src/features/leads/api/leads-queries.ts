@@ -34,6 +34,7 @@ export function useSalesList(params: SalesListParams = {}) {
   return useQuery({
     queryKey: salesKeys.list(params),
     queryFn: async () => (await listSales({ ...params, per_page: 100 })).data?.saleses ?? [],
+    placeholderData: [],
   });
 }
 

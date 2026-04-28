@@ -56,6 +56,7 @@ export function useOverrideList(params?: { status?: string }) {
       const res = await listOverrides(params);
       return (res.data?.overrides ?? []).map(mapOverride);
     },
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });

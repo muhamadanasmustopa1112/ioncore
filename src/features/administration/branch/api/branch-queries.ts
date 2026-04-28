@@ -103,6 +103,7 @@ export function useBranchList(params: { page?: number; per_page?: number } = {})
       const res = await getBranchList(params);
       return (res.data?.branches ?? []).map(mapBranchFlatToData);
     },
+    placeholderData: [],
   });
 }
 
@@ -113,6 +114,7 @@ export function useBranchTree() {
       const res = await getBranchTree({ per_page: 100 });
       return flattenBranchTree(res.data?.branches ?? []);
     },
+    placeholderData: [],
   });
 }
 
@@ -123,6 +125,7 @@ export function useRegionalList() {
       const res = await listRegional({ per_page: 100 });
       return res.data?.branches ?? [];
     },
+    placeholderData: [],
   });
 }
 
@@ -134,6 +137,7 @@ export function useAreaList(regionalId: string) {
       return res.data?.branches ?? [];
     },
     enabled: !!regionalId,
+    placeholderData: [],
   });
 }
 

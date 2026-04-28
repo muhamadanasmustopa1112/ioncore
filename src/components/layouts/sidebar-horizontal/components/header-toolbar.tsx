@@ -53,8 +53,11 @@ export function HeaderToolbar() {
   const { theme, setTheme } = useTheme();
 
   const { user, rawUser, setProfile, logout: clearAuth } = useAuthStore();
+  const hasSessionToken = Boolean(
+    getCookie(auth.token) || getCookie(auth.refresh_token),
+  );
 
-  const { data: meResponse } = useMyProfile(!user);
+  const { data: meResponse } = useMyProfile(!user && hasSessionToken);
 
   useEffect(() => {
     if (meResponse?.data && !rawUser) {

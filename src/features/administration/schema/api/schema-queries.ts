@@ -67,6 +67,7 @@ export function useSchemaVersions(id: string | null) {
       return res.data.schema_versions ?? [];
     },
     enabled: !!id,
+    placeholderData: [],
   });
 }
 
@@ -77,6 +78,7 @@ export function useSchemaTypes() {
       const res = await getSchemaTypes();
       return res.data ?? [];
     },
+    placeholderData: [],
     staleTime: Infinity,
   });
 }
@@ -215,6 +217,7 @@ export function useApprovalDecisions(approvalId: string | null) {
       return res.data?.decisions ?? [];
     },
     enabled: !!approvalId,
+    placeholderData: [],
   });
 }
 

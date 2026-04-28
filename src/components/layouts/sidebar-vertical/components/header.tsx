@@ -37,7 +37,7 @@ export function Header() {
                 <SheetHeader className="p-0 space-y-0">
                   <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 </SheetHeader>
-                <SheetBody className="bg-sidebar-main text-sidebar-main-foreground flex flex-col grow p-0 [--sidebar-space-x:calc(var(--spacing)*2.5)]">
+                <SheetBody className="bg-sidebar-main text-sidebar-main-foreground flex flex-col grow overflow-hidden min-h-0 p-0 [--sidebar-space-x:calc(var(--spacing)*2.5)]">
                   <SidebarContent />
                 </SheetBody>
               </SheetContent>

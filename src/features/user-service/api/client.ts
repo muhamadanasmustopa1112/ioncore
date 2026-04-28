@@ -54,6 +54,7 @@ function requestInterceptor(config: InternalAxiosRequestConfig) {
 userServiceApi.interceptors.request.use(requestInterceptor);
 
 let refreshPromise: Promise<string> | null = null;
+let isRedirectingToSignin = false;
 
 async function doRefresh(): Promise<string> {
   const refreshToken = getCookie(auth.refresh_token);
@@ -88,12 +89,15 @@ async function doRefresh(): Promise<string> {
 }
 
 function redirectToSignin() {
+  if (isRedirectingToSignin) return;
+  isRedirectingToSignin = true;
+
   clearAllCookies();
   if (
     typeof window !== "undefined" &&
     !window.location.pathname.includes("/signin")
   ) {
-    window.location.href = paths.auth.signin.getHref(window.location.pathname);
+    window.location.replace(paths.auth.signin.getHref(window.location.pathname));
   }
 }
 

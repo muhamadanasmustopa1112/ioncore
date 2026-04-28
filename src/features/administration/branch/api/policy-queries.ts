@@ -61,6 +61,7 @@ export function usePolicyList(branchId: string) {
       }
     },
     enabled: !!branchId,
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });

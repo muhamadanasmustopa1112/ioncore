@@ -156,6 +156,8 @@ export const useMyProfile = (enabled = true) =>
     queryKey: userServiceKeys.me(),
     queryFn: () => getMyProfile(),
     enabled,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 
 export const useUpdateMyProfile = () => {

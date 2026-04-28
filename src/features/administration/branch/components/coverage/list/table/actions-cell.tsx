@@ -27,7 +27,7 @@ export function ActionsCell({ row }: { row: Row<CoverageData> }) {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
         <Button className="size-7" mode="icon" variant="ghost">
           <EllipsisVertical />

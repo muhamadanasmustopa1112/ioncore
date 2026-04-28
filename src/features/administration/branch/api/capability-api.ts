@@ -1,4 +1,5 @@
-import { api } from "@/lib/api-client";
+import { services } from "@/config/constants";
+import { userServiceApi } from "@/features/user-service/api/client";
 import {
   ApiResponse,
   CapabilityDto,
@@ -6,7 +7,7 @@ import {
   CapabilityPayload,
 } from "../types/capability-api";
 
-const BASE = "/branch";
+const BASE = `${services.branch}/branch`;
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;
@@ -14,7 +15,7 @@ function cast<T>(p: unknown): Promise<T> {
 
 export function listCapabilities(branchId: string) {
   return cast<ApiResponse<CapabilityListResponse>>(
-    api.get(`${BASE}/${branchId}/capability`, {
+    userServiceApi.get(`${BASE}/${branchId}/capability`, {
       params: { page: 1, per_page: 100 },
     })
   );
@@ -22,7 +23,7 @@ export function listCapabilities(branchId: string) {
 
 export function createCapability(branchId: string, payload: CapabilityPayload) {
   return cast<ApiResponse<CapabilityDto>>(
-    api.post(`${BASE}/${branchId}/capability`, payload)
+    userServiceApi.post(`${BASE}/${branchId}/capability`, payload)
   );
 }
 
@@ -32,12 +33,12 @@ export function updateCapability(
   payload: CapabilityPayload
 ) {
   return cast<ApiResponse<CapabilityDto>>(
-    api.put(`${BASE}/${branchId}/capability/${capabilityId}`, payload)
+    userServiceApi.put(`${BASE}/${branchId}/capability/${capabilityId}`, payload)
   );
 }
 
 export function deleteCapability(branchId: string, capabilityId: string) {
   return cast<ApiResponse<null>>(
-    api.delete(`${BASE}/${branchId}/capability/${capabilityId}`)
+    userServiceApi.delete(`${BASE}/${branchId}/capability/${capabilityId}`)
   );
 }

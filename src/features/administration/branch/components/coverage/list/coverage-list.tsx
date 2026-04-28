@@ -6,7 +6,6 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
 import { AlertCircle, RefreshCw, Search, Settings2, X } from "lucide-react";
@@ -36,7 +35,6 @@ export function CoverageList({ branchId }: CoverageListProps) {
   const { data: coverages = [], isLoading, isError, refetch } = useCoverageList(branchId);
 
   const [search, setSearch] = useState("");
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const filteredData = useMemo(() => {
     if (!search) return coverages;
@@ -54,9 +52,6 @@ export function CoverageList({ branchId }: CoverageListProps) {
     columns,
     data: filteredData,
     getRowId: (row) => row.id,
-    state: { rowSelection },
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

@@ -1,4 +1,5 @@
-import { api } from "@/lib/api-client";
+import { services } from "@/config/constants";
+import { userServiceApi } from "@/features/user-service/api/client";
 import {
   ApiResponse,
   CoverageDto,
@@ -6,7 +7,7 @@ import {
   CoveragePayload,
 } from "../types/coverage-api";
 
-const BASE = "/branch";
+const BASE = `${services.branch}/branch`;
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;
@@ -14,13 +15,13 @@ function cast<T>(p: unknown): Promise<T> {
 
 export function listCoverages(branchId: string) {
   return cast<ApiResponse<CoverageListResponse>>(
-    api.get(`${BASE}/${branchId}/coverage`)
+    userServiceApi.get(`${BASE}/${branchId}/coverage`)
   );
 }
 
 export function createCoverage(branchId: string, payload: CoveragePayload) {
   return cast<ApiResponse<CoverageDto>>(
-    api.post(`${BASE}/${branchId}/coverage`, payload)
+    userServiceApi.post(`${BASE}/${branchId}/coverage`, payload)
   );
 }
 
@@ -30,12 +31,12 @@ export function updateCoverage(
   payload: CoveragePayload
 ) {
   return cast<ApiResponse<CoverageDto>>(
-    api.put(`${BASE}/${branchId}/coverage/${coverageId}`, payload)
+    userServiceApi.put(`${BASE}/${branchId}/coverage/${coverageId}`, payload)
   );
 }
 
 export function deleteCoverage(branchId: string, coverageId: string) {
   return cast<ApiResponse<null>>(
-    api.delete(`${BASE}/${branchId}/coverage/${coverageId}`)
+    userServiceApi.delete(`${BASE}/${branchId}/coverage/${coverageId}`)
   );
 }

@@ -64,6 +64,7 @@ export function useCapabilityList(branchId: string) {
       }
     },
     enabled: !!branchId,
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });

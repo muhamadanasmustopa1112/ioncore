@@ -58,6 +58,7 @@ export function useBindingList() {
       const res = await listBindings();
       return (res.data?.bindings ?? []).map(mapBinding);
     },
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });
@@ -70,6 +71,7 @@ export function useServiceChangePolicies() {
       const res = await listServiceChangePolicies();
       return (res.data?.policies ?? []).map(mapPolicy);
     },
+    placeholderData: [],
     retry: false,
     meta: { suppressGlobalError: true },
   });

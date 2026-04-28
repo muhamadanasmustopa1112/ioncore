@@ -1,4 +1,5 @@
-import { api } from "@/lib/api-client";
+import { services } from "@/config/constants";
+import { userServiceApi } from "@/features/user-service/api/client";
 import {
   ApiResponse,
   PolicyDto,
@@ -6,7 +7,7 @@ import {
   PolicyPayload,
 } from "../types/policy-api";
 
-const BASE = "/branch";
+const BASE = `${services.branch}/branch`;
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;
@@ -14,13 +15,13 @@ function cast<T>(p: unknown): Promise<T> {
 
 export function listPolicies(branchId: string) {
   return cast<ApiResponse<PolicyListResponse>>(
-    api.get(`${BASE}/${branchId}/policy`)
+    userServiceApi.get(`${BASE}/${branchId}/policy`)
   );
 }
 
 export function createPolicy(branchId: string, payload: PolicyPayload) {
   return cast<ApiResponse<PolicyDto>>(
-    api.post(`${BASE}/${branchId}/policy`, payload)
+    userServiceApi.post(`${BASE}/${branchId}/policy`, payload)
   );
 }
 
@@ -30,12 +31,12 @@ export function updatePolicy(
   payload: PolicyPayload
 ) {
   return cast<ApiResponse<PolicyDto>>(
-    api.put(`${BASE}/${branchId}/policy/${policyId}`, payload)
+    userServiceApi.put(`${BASE}/${branchId}/policy/${policyId}`, payload)
   );
 }
 
 export function deletePolicy(branchId: string, policyId: string) {
   return cast<ApiResponse<null>>(
-    api.delete(`${BASE}/${branchId}/policy/${policyId}`)
+    userServiceApi.delete(`${BASE}/${branchId}/policy/${policyId}`)
   );
 }
