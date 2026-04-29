@@ -49,6 +49,8 @@ export interface OdpData {
   address: string;
   ports_used?: number;
   total_ports?: number;
+  total_port?: number;
+  occupied_port?: number;
   heartbeat_at?: string;
   created_at?: string;
   updated_at?: string;
@@ -59,6 +61,17 @@ export interface OdpResponse {
   metadata: MetaData;
   recordsFiltered: number;
   recordsTotal: number;
+}
+
+/**
+ * Filter configuration for ODP list/table
+ */
+export interface OdpFilter {
+  limit: number;
+  page: number;
+  search: string | null;
+  sort_by?: string;
+  sort_order?: "asc" | "desc";
 }
 
 export type OdpParams = {

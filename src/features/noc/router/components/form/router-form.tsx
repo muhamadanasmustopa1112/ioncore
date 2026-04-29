@@ -56,7 +56,6 @@ export const RouterForm = forwardRef<RouterFormRef, RouterFormProps>(
         const { closeRouterFormSheet, selectedRouter } = useRouterStore();
         const isVerticalSidebar = process.env.NEXT_PUBLIC_SIDEBAR === "vertical";
 
-
         const data = selectedRouter;
         const form = useForm<RouterFormData>({
             resolver: zodResolver(routerSchema),

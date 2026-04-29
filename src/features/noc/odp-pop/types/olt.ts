@@ -23,6 +23,8 @@ export interface OltData {
   ipAddress?: string;
   ip_address?: string;
   model?: string;
+  total_port?: number;
+  occupied_port?: number;
 }
 
 export interface MetaData {
@@ -40,6 +42,15 @@ export interface OltResponse {
   metadata: MetaData;
   recordsFiltered: number;
   recordsTotal: number;
+}
+
+/**
+ * Filter configuration for OLT list/table
+ */
+export interface OltFilter {
+  limit: number;
+  page: number;
+  search: string | null;
 }
 
 export type OltParams = {

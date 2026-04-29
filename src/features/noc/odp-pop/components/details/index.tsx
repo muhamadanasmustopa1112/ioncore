@@ -11,14 +11,36 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useParams } from "next/navigation";
 import { RiArrowLeftLine, RiLoader2Line } from "@remixicon/react";
 import { usePop } from "../../api/get-pop";
-import { useEffect } from "react";
+import { useOlt } from "../../api/get-olt";
+import { useEffect, useState, useMemo } from "react";
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 
 export function PopDetailView() {
     const router = useRouter();
     const params = useParams();
     const popId = params?.id as string;
-    
+
     const { selectedPop, setSelectedPop } = usePopStore();
+
+    // Menggunakan useQueryStates agar filter tersimpan di URL
+    const [oltFilter, setOltFilter] = useQueryStates({
+        limit: parseAsInteger.withDefault(10),
+        page: parseAsInteger.withDefault(1),
+        search: parseAsString,
+    });
+
+    // Fetch data OLT
+    const { data: oltData, isLoading: isLoadingOlt } = useOlt({
+        params: {
+            pop_id: popId,
+            limit: oltFilter.limit,
+            page: oltFilter.page,
+            search: oltFilter.search || "",
+        },
+        queryConfig: {
+            enabled: !!popId
+        }
+    });
 
     // Fetch data POP jika belum ada di store tapi ada di URL
     const { data: popResponse, isLoading: isFetchingPop } = usePop({
@@ -80,9 +102,14 @@ export function PopDetailView() {
 
                 <div className="space-y-10">
                     <PopDetailKpi pop={selectedPop} />
-                    
-                    <PopOltTable popId={String(selectedPop.id)} />
-                    
+
+                    <PopOltTable
+                        data={oltData as any}
+                        isLoading={isLoadingOlt}
+                        filter={oltFilter}
+                        setFilter={setOltFilter}
+                    />
+
                     <PopDeviceInventoryTable popId={String(selectedPop.id)} />
                 </div>
             </div>

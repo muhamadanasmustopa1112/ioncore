@@ -40,7 +40,7 @@ function MapFocusController({ selectedPopId, selectedOdpId, markerRefs, pops }: 
 
       const pop = pops.find(p => String(p.id) === String(selectedPopId));
       if (pop) {
-        map.flyTo([pop.gps_lat, pop.gps_lng], 16, { animate: true, duration: 1.5 });
+        map.flyTo([Number(pop.gps_lat), Number(pop.gps_lng)], 16, { animate: true, duration: 1.5 });
 
         // Auto-open POP popup
         const marker = markerRefs.current[selectedPopId];
@@ -158,7 +158,7 @@ export default function OdpPopMap({
 
   const defaultCenter = useMemo<[number, number]>(() => (
     filteredPops.length > 0
-      ? [filteredPops[0].gps_lat, filteredPops[0].gps_lng]
+      ? [Number(filteredPops[0].gps_lat), Number(filteredPops[0].gps_lng)]
       : [-6.2088, 106.8456]
   ), [filteredPops]);
 
@@ -234,7 +234,7 @@ export default function OdpPopMap({
           variant="outline"
           size="sm"
           mode="icon"
-          className="absolute bottom-6 right-6 z-[400] bg-background/90 backdrop-blur-xl shadow-2xl border-none hover:bg-background size-10 rounded-xl transition-transform hover:scale-110 active:scale-95"
+          className="absolute bottom-6 right-6 z-10 bg-background/90 backdrop-blur-xl shadow-2xl border-none hover:bg-background size-10 rounded-xl transition-transform hover:scale-110 active:scale-95"
           onClick={() => onSelect?.(null)}
         >
           <Maximize2 className="size-5 text-primary" />

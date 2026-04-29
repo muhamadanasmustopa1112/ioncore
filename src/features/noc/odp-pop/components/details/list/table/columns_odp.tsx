@@ -90,8 +90,8 @@ export const columns: ColumnDef<OdpData>[] = [
       />
     ),
     cell: ({ row }) => {
-      const used = row.original.ports_used || 0;
-      const total = row.original.total_ports || 8;
+      const used = row.original.occupied_port ?? row.original.ports_used ?? 0;
+      const total = row.original.total_port ?? row.original.total_ports ?? 8;
       const percentage = (used / total) * 100;
 
       return (

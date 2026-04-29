@@ -58,7 +58,7 @@ export function OdpPopList({
     meta: {
       onPopSelect,
     },
-    pageCount: Math.ceil((popData?.recordsTotal || 0) / (filter?.limit || 10)),
+    pageCount: popData?.metadata?.total_page || 0,
     getRowId: (row) => String(row.id),
     state: {
       rowSelection,
@@ -74,7 +74,7 @@ export function OdpPopList({
   return (
     <DataGrid
       table={table}
-      recordCount={popData?.recordsTotal || 0}
+      recordCount={popData?.metadata?.total_data || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,

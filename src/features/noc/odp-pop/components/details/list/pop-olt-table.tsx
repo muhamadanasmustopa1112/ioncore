@@ -8,8 +8,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Filter, Search, X, Settings2 } from "lucide-react";
-import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
+import { Filter, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,12 +16,10 @@ import {
   CardHeader,
   CardHeading,
   CardFooter,
-  CardToolbar,
 } from "@/components/ui/card";
 import { DataGrid } from "@/components/ui/data-grid";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
-import { DataGridColumnVisibility } from "@/components/ui/data-grid-column-visibility";
 import { Input } from "@/components/ui/input";
 import {
   Collapsible,
@@ -30,39 +27,33 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { RiRouterLine } from "@remixicon/react";
-import { columns } from "../table/columns_olt";
-import { useOlt } from "@/features/noc/odp-pop/api/get-olt";
+import { DataTableToolbar } from "../../list/table/data-table-toolbar";
+import { columns } from "./table/columns_olt";
 
-export function PopOltTable({ popId }: { popId: string }) {
-  const [filter, setFilter] = useQueryStates({
-    limit: parseAsInteger.withDefault(10),
-    page: parseAsInteger.withDefault(1),
-    search: parseAsString,
-  }, {
-    urlKeys: {
-      limit: 'olt_limit',
-      page: 'olt_page',
-      search: 'olt_search',
-    }
-  });
+import { OltResponse, OltFilter } from "@/features/noc/odp-pop/types/olt";
+import { AddOltDialog } from "../../form/olt-dialog";
+
+interface PopOltTableProps {
+  data?: OltResponse;
+  isLoading?: boolean;
+  filter: OltFilter;
+  setFilter: (values: Partial<OltFilter> | ((old: OltFilter) => OltFilter)) => void;
+}
+
+export function PopOltTable({
+  data: oltResponse,
+  isLoading,
+  filter,
+  setFilter
+}: PopOltTableProps) {
+  const data = useMemo(() => oltResponse?.data || [], [oltResponse]);
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
-
-  const { data: oltResponse, isLoading } = useOlt({
-    params: {
-      pop_id: popId,
-      limit: filter.limit || 10,
-      page: filter.page || 1,
-      search: filter.search || "",
-    }
-  });
-
-  const data = useMemo(() => oltResponse?.data || [], [oltResponse]);
 
   const table = useReactTable({
     data,
     columns,
-    pageCount: Math.ceil((oltResponse?.recordsTotal || 0) / (filter.limit || 10)),
+    pageCount: oltResponse?.metadata?.total_page || 0,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -73,7 +64,7 @@ export function PopOltTable({ popId }: { popId: string }) {
   return (
     <DataGrid
       table={table}
-      recordCount={oltResponse?.recordsTotal || 0}
+      recordCount={oltResponse?.metadata?.total_data || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -94,6 +85,7 @@ export function PopOltTable({ popId }: { popId: string }) {
               <RiRouterLine className="size-5 text-primary" />
               OLT Infrastructure List
             </CardHeading>
+            <AddOltDialog />
           </div>
 
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
@@ -127,17 +119,7 @@ export function PopOltTable({ popId }: { popId: string }) {
                 </div>
               </div>
 
-              <CardToolbar>
-                <DataGridColumnVisibility
-                  table={table}
-                  trigger={
-                    <Button variant="outline" size="sm" className="h-8">
-                      <Settings2 className="size-3" />
-                      View
-                    </Button>
-                  }
-                />
-              </CardToolbar>
+              <DataTableToolbar />
             </div>
 
             <CollapsibleContent className="border-t border-border/50 mt-4 pt-4">

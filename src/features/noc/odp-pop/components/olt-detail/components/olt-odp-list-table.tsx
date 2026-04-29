@@ -9,7 +9,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Filter, Search, X, Settings2 } from "lucide-react";
-import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,7 +18,7 @@ import {
   CardFooter,
   CardToolbar,
 } from "@/components/ui/card";
-import { DataGrid, DataGridContainer } from "@/components/ui/data-grid";
+import { DataGrid } from "@/components/ui/data-grid";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid-column-visibility";
@@ -30,34 +29,25 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { RiRouterLine } from "@remixicon/react";
-import { columns } from "../table/columns_odp";
+import { columns } from "../../details/list/table/columns_odp";
 import { AddOdpDialog } from "../../form/add-odp-dialog";
-import { useOdp } from "@/features/noc/odp-pop/api/get-odp";
+import { OdpResponse, OdpFilter } from "../../../types/odp";
 
-export function OltOdpListTable({ oltId }: { oltId: string }) {
-  const [filter, setFilter] = useQueryStates(
-    {
-      limit: parseAsInteger.withDefault(10),
-      page: parseAsInteger.withDefault(1),
-      search: parseAsString,
-    },
-    {
-      urlKeys: {
-        limit: "odp_limit",
-        page: "odp_page",
-        search: "odp_search",
-      },
-    }
-  );
+interface OltOdpListTableProps {
+  data?: OdpResponse;
+  isLoading?: boolean;
+  filter: OdpFilter;
+  setFilter: (
+    values: Partial<OdpFilter> | ((old: OdpFilter) => OdpFilter)
+  ) => void;
+}
 
-  const { data: odpResponse, isLoading } = useOdp({
-    params: {
-      olt_id: oltId,
-      limit: filter.limit || 10,
-      page: filter.page || 1,
-      search: filter.search || "",
-    }
-  });
+export function OltOdpListTable({
+  data: odpResponse,
+  isLoading,
+  filter,
+  setFilter
+}: OltOdpListTableProps) {
 
   const data = useMemo(() => odpResponse?.data || [], [odpResponse]);
   const [openFilter, setOpenFilter] = useState<boolean>(false);
@@ -65,7 +55,7 @@ export function OltOdpListTable({ oltId }: { oltId: string }) {
   const table = useReactTable({
     data,
     columns,
-    pageCount: Math.ceil((odpResponse?.recordsTotal || 0) / (filter.limit || 10)),
+    pageCount: odpResponse?.metadata?.total_page || 0,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -76,7 +66,7 @@ export function OltOdpListTable({ oltId }: { oltId: string }) {
   return (
     <DataGrid
       table={table}
-      recordCount={odpResponse?.recordsTotal || 0}
+      recordCount={odpResponse?.metadata?.total_data || 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,

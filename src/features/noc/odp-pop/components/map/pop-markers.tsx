@@ -17,7 +17,7 @@ export function PopMarkers({ data, markerRefs, onSelect }: PopMarkersProps) {
       {data.map((pop) => (
         <Marker
           key={`pop-${pop.id}`}
-          position={[pop.gps_lat, pop.gps_lng]}
+          position={[Number(pop.gps_lat), Number(pop.gps_lng)]}
           icon={createStatusIcon("active")}
           eventHandlers={{
             click: () => onSelect?.(String(pop.id)),

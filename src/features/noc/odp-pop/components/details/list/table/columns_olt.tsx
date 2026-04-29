@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
+import { Progress } from "@/components/ui/progress";
 import { OltData } from "@/features/noc/odp-pop/types/olt";
 import { OltActionsCell } from "./olt-actions-cell";
 
@@ -38,21 +39,53 @@ export const columns: ColumnDef<OltData>[] = [
     size: 200,
   },
   {
-    id: "area",
-    accessorKey: "area",
+    id: "ports",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="AREA"
+        title="PORT CAPACITY"
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
     ),
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">
-        {row.original.area}
-      </span>
-    ),
-    size: 150,
+    cell: ({ row }) => {
+      const used = row.original.occupied_port ?? 0;
+      const total = row.original.total_port ?? 16;
+      const percentage = (used / total) * 100;
+
+      return (
+        <div className="flex flex-col gap-1.5 min-w-[120px]">
+          <div className="flex items-center justify-between text-[10px] uppercase tracking-tighter">
+            <span className="text-foreground font-bold">
+              {used} / {total}
+              <span className="text-muted-foreground/50 ml-1">Ports</span>
+            </span>
+            <span
+              className={
+                percentage > 90
+                  ? "text-destructive"
+                  : percentage > 70
+                    ? "text-orange-500"
+                    : "text-primary font-bold"
+              }
+            >
+              {Math.round(percentage)}%
+            </span>
+          </div>
+          <Progress
+            value={percentage}
+            className="h-1.5"
+            indicatorClassName={
+              percentage > 90
+                ? "bg-destructive"
+                : percentage > 70
+                  ? "bg-orange-500"
+                  : "bg-primary"
+            }
+          />
+        </div>
+      );
+    },
+    size: 160,
   },
   {
     id: "status",
@@ -74,23 +107,6 @@ export const columns: ColumnDef<OltData>[] = [
       </Badge>
     ),
     size: 100,
-  },
-  {
-    id: "address",
-    accessorKey: "address",
-    header: ({ column }) => (
-      <DataGridColumnHeader
-        title="ADDRESS"
-        column={column}
-        className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
-      />
-    ),
-    cell: ({ row }) => (
-      <p className="text-muted-foreground truncate max-w-[300px]">
-        {row.original.address}
-      </p>
-    ),
-    size: 300,
   },
   {
     id: "actions",

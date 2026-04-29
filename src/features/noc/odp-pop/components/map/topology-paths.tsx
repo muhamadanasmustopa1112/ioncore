@@ -49,20 +49,14 @@ export function TopologyPaths({ pops, olts, odps }: TopologyPathsProps) {
               id: `path-olt-${olt.id}-to-pop-${pop.id}`,
               positions: [
                 [olt.gps_lat, olt.gps_lng],
-                [pop.gps_lat, pop.gps_lng]
+                [Number(pop.gps_lat), Number(pop.gps_lng)]
               ]
             });
             processedOlts.add(olt.id);
-          } else {
-            console.warn(`DEBUG Topology: OLT ${olt.id} has no matching POP (pop_id: ${olt.pop_id})`);
           }
         }
-      } else {
-        console.warn(`DEBUG Topology: ODP ${odp.id} has no matching OLT (olt_id: ${odp.olt_id})`);
       }
     });
-
-    console.log(`DEBUG Topology: Created ${result.length} path segments from ${odpsToProcess.length} ODPs`);
 
     return result;
   }, [pops, olts, odps]);

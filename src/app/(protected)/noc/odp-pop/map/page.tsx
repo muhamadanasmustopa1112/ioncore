@@ -4,6 +4,7 @@ import { Suspense, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { ScreenLoader } from "@/components/common/screen-loader";
 import { HierarchicalFilter } from "@/features/noc/odp-pop/components/map/hierarchical-filter";
+import { usePop } from "@/features/noc/odp-pop/api/get-pop";
 
 // Dynamically import the map component with SSR disabled
 const OdpPopMap = dynamic(
@@ -27,6 +28,14 @@ export default function Page() {
         area: null,
         popId: null,
         odpId: null,
+    });
+
+    const { data: popData, isLoading } = usePop({
+        params: {
+            limit: 100,
+            page: 1,
+            search: "",
+        }
     });
 
     const handleFilterChange = useCallback((newFilters: {
@@ -55,6 +64,8 @@ export default function Page() {
             {/* Map Section */}
             <div className="h-[800px] flex-none">
                 <OdpPopMap
+                    data={popData}
+                    isLoading={isLoading}
                     selectedArea={filters.area}
                     selectedPopId={filters.popId}
                     selectedOdpId={filters.odpId}
