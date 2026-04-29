@@ -3,10 +3,12 @@
 import { RiSignalTowerLine, RiHashtag, RiGlobalLine } from "@remixicon/react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { PopOltDetail } from "../../../data/dummy-olt-details";
+import { OltData } from "../../../types/olt";
 
-export function OltDetailKpi({ olt }: { olt: PopOltDetail }) {
-  const capacityPercentage = (olt.portsUsed / olt.totalPorts) * 100;
+export function OltDetailKpi({ olt }: { olt: OltData }) {
+  const portsUsed = olt.portsUsed || 0;
+  const totalPorts = olt.totalPorts || 16;
+  const capacityPercentage = (portsUsed / totalPorts) * 100;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -22,10 +24,10 @@ export function OltDetailKpi({ olt }: { olt: PopOltDetail }) {
         <div className="space-y-3">
           <div className="flex items-end justify-between">
             <h3 className="text-3xl font-black text-foreground">
-              {olt.portsUsed} <span className="text-lg text-muted-foreground ml-1">/ {olt.totalPorts}</span>
+              {portsUsed} <span className="text-lg text-muted-foreground ml-1">/ {totalPorts}</span>
             </h3>
             <span className={`text-sm font-black ${capacityPercentage > 90 ? 'text-destructive' :
-                capacityPercentage > 70 ? 'text-orange-500' : 'text-primary'
+              capacityPercentage > 70 ? 'text-orange-500' : 'text-primary'
               }`}>
               {Math.round(capacityPercentage)}%
             </span>
@@ -51,7 +53,7 @@ export function OltDetailKpi({ olt }: { olt: PopOltDetail }) {
           </span>
         </div>
         <h3 className="text-3xl font-black text-foreground">
-          {olt.odpCount} <span className="text-lg text-muted-foreground ml-1 uppercase">Units</span>
+          {olt.odpCount || 0} <span className="text-lg text-muted-foreground ml-1 uppercase">Units</span>
         </h3>
       </Card>
 
@@ -65,7 +67,7 @@ export function OltDetailKpi({ olt }: { olt: PopOltDetail }) {
           </span>
         </div>
         <h3 className="text-3xl font-black text-foreground font-mono">
-          {olt.ipAddress}
+          {olt.ipAddress || '0.0.0.0'}
         </h3>
       </Card>
     </div>

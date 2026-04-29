@@ -1,21 +1,23 @@
 import { z } from "zod";
 
 export const popSchema = z.object({
+  branch_id: z.string().min(1, "Branch is required"),
+  code: z.string().min(1, "Code is required"),
+  gps_lat: z.string().min(1, "Latitude is required"),
+  gps_lng: z.string().min(1, "Longitude is required"),
   name: z.string().min(1, "POP Name is required"),
-  area: z.string().min(1, "Area is required"),
-  latitude: z.string(),
-  longitude: z.string(),
-  status: z.enum(["active", "warning", "down"]),
+  status: z.enum(["UP", "DOWN", "DEGRADED", "UNKNOWN"]),
 });
 
 export type PopFormValues = z.infer<typeof popSchema>;
 
 export const DEFAULT_POP_VALUES: Partial<PopFormValues> = {
+  branch_id: "",
+  code: "",
+  gps_lat: "",
+  gps_lng: "",
   name: "",
-  area: "",
-  latitude: "",
-  longitude: "",
-  status: "active",
+  status: "UP",
 };
 
 export interface PopData {
@@ -26,15 +28,20 @@ export interface PopData {
   description?: string;
   port?: number;
   area: string;
-  gps_lat: number;
-  gps_lng: number;
+  gps_lat: string;
+  gps_lng: string;
   address?: string;
   oltCount?: number;
   odpCount?: number;
   heartbeat_at?: string;
   created_at?: string;
   updated_at?: string;
-  status?: "ACTIVE" | "INACTIVE" | "WARNING" | "UNKNOWN";
+  status?: "UP" | "DOWN" | "DEGRADED" | "UNKNOWN";
+  branch?: {
+    id: string;
+    name: string;
+  };
+  parent_id?: string;
   isValidated?: boolean;
 }
 

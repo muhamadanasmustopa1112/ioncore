@@ -2,9 +2,9 @@
 
 import { RiRouterLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
-import { PopOltDetail } from "../../../data/dummy-olt-details";
+import { OltData } from "../../../types/olt";
 
-export function OltDetailHeader({ olt }: { olt: PopOltDetail }) {
+export function OltDetailHeader({ olt }: { olt: OltData }) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card p-8 rounded-3xl shadow-sm border border-border/40">
       <div className="flex items-start gap-5">
@@ -25,7 +25,7 @@ export function OltDetailHeader({ olt }: { olt: PopOltDetail }) {
             </Badge>
           </div>
           <p className="text-muted-foreground font-bold tracking-tight uppercase text-sm">
-            {olt.model} • {olt.ipAddress}
+            {olt.model || 'N/A'} • {olt.ipAddress || '0.0.0.0'}
           </p>
         </div>
       </div>

@@ -10,13 +10,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RiFocus2Line } from "@remixicon/react";
 import { useTheme } from "next-themes";
-import { useOdp } from "../../api/get-odp";
 import { useMemo } from "react";
+import { OdpResponse, OdpData } from "../../types/odp";
 
 // Controller to handle programmatic map changes
 function MapFocusController({ selectedOdpName, points, markerRefs }: {
   selectedOdpName: string | null,
-  points: any[],
+  points: OdpData[],
   markerRefs: MutableRefObject<Record<string, L.Marker>>
 }) {
   const map = useMap();
@@ -46,7 +46,7 @@ function MapFocusController({ selectedOdpName, points, markerRefs }: {
 }
 
 // Update map bounds to fit all markers initially
-function MapBoundsController({ points }: { points: any[] }) {
+function MapBoundsController({ points }: { points: OdpData[] }) {
   const map = useMap();
 
   useEffect(() => {
@@ -74,20 +74,13 @@ const odpIcon = L.divIcon({
   popupAnchor: [0, -15],
 });
 
-export default function OltOdpMap({ oltId }: { oltId: string }) {
+export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isLoading?: boolean }) {
   const [isMounted, setIsMounted] = useState(false);
   const { resolvedTheme } = useTheme();
   const [selectedOdpName, setSelectedOdpName] = useState<string | null>(null);
   const markerRefs = useRef<Record<string, L.Marker>>({});
 
-  const { data: odpResponse, isLoading } = useOdp({
-    params: {
-      limit: 10,
-      olt_id: oltId,
-    }
-  });
-
-  const points = useMemo(() => odpResponse?.data || [], [odpResponse]);
+  const points = useMemo(() => data?.data || [], [data]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -129,7 +122,7 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
 
       <CardContent className="p-0 flex-1 relative min-h-[600px] overflow-hidden">
         {/* Floating List Overlay */}
-        <div className="absolute top-6 left-6 z-[400] w-64 max-h-[calc(100%-48px)] flex flex-col gap-3">
+        <div className="absolute top-6 left-6 z-10 w-64 max-h-[calc(100%-48px)] flex flex-col gap-3">
           <div className="bg-background/80 backdrop-blur-xl border border-border/40 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
             <div className="p-4 border-b border-border/10 bg-card/40 flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-widest text-foreground/70">
@@ -228,7 +221,7 @@ export default function OltOdpMap({ oltId }: { oltId: string }) {
           variant="outline"
           size="sm"
           mode="icon"
-          className="absolute bottom-6 right-6 z-[400] bg-background/90 backdrop-blur-xl shadow-2xl border-none hover:bg-background size-10 rounded-xl transition-transform hover:scale-110 active:scale-95"
+          className="absolute bottom-6 right-6 z-10 bg-background/90 backdrop-blur-xl shadow-2xl border-none hover:bg-background size-10 rounded-xl transition-transform hover:scale-110 active:scale-95"
           onClick={() => setSelectedOdpName(null)}
         >
           <Maximize2 className="size-5 text-primary" />

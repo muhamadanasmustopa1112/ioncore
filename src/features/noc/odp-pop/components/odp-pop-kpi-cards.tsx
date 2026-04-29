@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { 
-  RiMapPinLine, 
-  RiCheckboxCircleLine, 
+import {
+  RiMapPinLine,
+  RiCheckboxCircleLine,
   RiTimeLine,
   RiDatabase2Line
 } from "@remixicon/react";
@@ -14,11 +14,11 @@ export function OdpPopKpiCards({ data: popData }: { data?: PopResponse }) {
   const stats = useMemo(() => {
     const total = popData?.recordsTotal || 0;
     const pops = popData?.data || [];
-    
-    const active = pops.filter(p => p.status === "ACTIVE").length;
-    const warning = pops.filter(p => p.status === "WARNING").length;
-    const inactive = pops.filter(p => p.status === "INACTIVE").length;
-    
+
+    const active = pops.filter(p => p.status === "UP").length;
+    const warning = pops.filter(p => p.status === "DOWN").length;
+    const inactive = pops.filter(p => p.status === "DEGRADED").length;
+
     // For now, if we have limited data (e.g. limit 100), the counts might be partial
     // But it's better than dummy data.
     const totalOdp = pops.reduce((acc, p) => acc + (p.odpCount || 0), 0);

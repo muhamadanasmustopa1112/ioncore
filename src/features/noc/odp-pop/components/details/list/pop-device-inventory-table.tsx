@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/collapsible";
 import { DUMMY_DEVICE_DETAILS } from "@/features/noc/odp-pop/data/dummy-pop-details";
 import { RiServerLine } from "@remixicon/react";
-import { columns } from "../table/columns_device_inventory";
+import { columns } from "./table/columns_device_inventory";
 
 export function PopDeviceInventoryTable({ popId }: { popId: string }) {
   const data = useMemo(() => DUMMY_DEVICE_DETAILS[popId] || [], [popId]);

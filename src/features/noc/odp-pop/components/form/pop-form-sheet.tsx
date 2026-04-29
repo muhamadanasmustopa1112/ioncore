@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -8,17 +9,18 @@ import {
     SheetTitle,
 } from "@/components/ui/sheet";
 import { usePopStore } from "../../store/pop";
-import { PopForm } from "./pop-form";
+import { PopForm, PopFormRef } from "./pop-form";
 
 export function PopFormSheet() {
-    const { popSheetOpen, closePopFormSheet, form } = usePopStore();
+    const { popSheetOpen, closePopFormSheet, form: formMode, selectedPop } = usePopStore();
+    const formRef = useRef<PopFormRef>(null);
 
-    const isNewMode = form === "new";
-    const isEditMode = form === "edit";
-    const isDetailMode = form === "details";
+    const isNewMode = formMode === "new";
+    const isEditMode = formMode === "edit";
+    const isDetailMode = formMode === "details";
 
     const handleSave = () => {
-        closePopFormSheet();
+        formRef.current?.submit();
     };
 
     return (
@@ -33,7 +35,12 @@ export function PopFormSheet() {
 
                 {/* Body */}
                 <SheetBody className="flex-1 p-0 overflow-hidden">
-                    <PopForm />
+                    <PopForm
+                        ref={formRef}
+                        mode={formMode || "new"}
+                        popId={selectedPop?.id ? String(selectedPop.id) : undefined}
+                        readOnly={isDetailMode}
+                    />
                 </SheetBody>
 
                 {/* Footer */}
@@ -45,14 +52,16 @@ export function PopFormSheet() {
                     <Button variant="outline" onClick={closePopFormSheet} className="mr-3">
                         Cancel
                     </Button>
-                    <Button
-                        variant="primary"
-                        onClick={handleSave}
-                        className="font-semibold"
-                        disabled={isDetailMode}
-                    >
-                        {isNewMode ? "Create POP" : "Save Changes"}
-                    </Button>
+                    {!isDetailMode && (
+                        <Button
+                            variant="primary"
+                            onClick={handleSave}
+                            className="font-semibold"
+                            disabled={formRef.current?.isPending}
+                        >
+                            {isNewMode ? "Create POP" : "Save Changes"}
+                        </Button>
+                    )}
                 </SheetFooter>
             </SheetContent>
         </Sheet>
