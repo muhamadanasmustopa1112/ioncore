@@ -15,7 +15,7 @@ import type {
   RerouteLeadPayload,
 } from "../types/leads-api";
 
-const BASE = `${services.sales}/v1`;
+const BASE = `${services.sales}`;
 const SALES = `${BASE}/sales/leads`;
 const ADMIN = `${BASE}/admin/leads`;
 

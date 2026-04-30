@@ -1,4 +1,5 @@
-import { api } from "@/lib/api-client";
+import { userServiceApi } from "@/features/user-service/api/client";
+import { services } from "@/config/constants";
 import type {
   OrderDto,
   OrderListResponse,
@@ -7,7 +8,7 @@ import type {
   UpdateOrderStatusPayload,
 } from "../types/orders";
 
-const BASE = "/order/api/v1/orders";
+const BASE = `${services.order}/orders`;
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;
@@ -22,20 +23,20 @@ interface ApiResponse<T> {
 
 export function listOrders(filters?: OrderFilters) {
   return cast<ApiResponse<OrderListResponse>>(
-    api.get(BASE, { params: filters }),
+    userServiceApi.get(BASE, { params: filters }),
   );
 }
 
 export function getOrder(id: string) {
-  return cast<ApiResponse<OrderDto>>(api.get(`${BASE}/${id}`));
+  return cast<ApiResponse<OrderDto>>(userServiceApi.get(`${BASE}/${id}`));
 }
 
 export function createOrder(payload: CreateOrderPayload) {
-  return cast<ApiResponse<OrderDto>>(api.post(BASE, payload));
+  return cast<ApiResponse<OrderDto>>(userServiceApi.post(BASE, payload));
 }
 
 export function updateOrderStatus(id: string, payload: UpdateOrderStatusPayload) {
   return cast<ApiResponse<OrderDto>>(
-    api.patch(`${BASE}/${id}/status`, payload),
+    userServiceApi.patch(`${BASE}/${id}/status`, payload),
   );
 }
