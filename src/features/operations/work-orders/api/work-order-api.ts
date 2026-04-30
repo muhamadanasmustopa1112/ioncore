@@ -1,4 +1,4 @@
-import { api } from "@/lib/api-client";
+import { userServiceApi } from "@/features/user-service/api/client";
 import type {
   WorkOrderDto,
   WorkOrderListResponse,
@@ -11,8 +11,9 @@ import type {
   UpdateChecklistItemPayload,
   ChecklistDto,
 } from "../types/work-order-api";
+import { services } from "@/config/constants";
 
-const BASE = "/order/api/v1/work-orders";
+const BASE = `${services.order}/work-orders`;
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;
@@ -26,33 +27,33 @@ interface ApiResponse<T> {
 }
 
 export function listWorkOrders(filters?: WorkOrderFilters) {
-  return cast<ApiResponse<WorkOrderListResponse>>(api.get(BASE, { params: filters }));
+  return cast<ApiResponse<WorkOrderListResponse>>(userServiceApi.get(BASE, { params: filters }));
 }
 
 export function getWorkOrder(id: string) {
-  return cast<ApiResponse<WorkOrderDto>>(api.get(`${BASE}/${id}`));
+  return cast<ApiResponse<WorkOrderDto>>(userServiceApi.get(`${BASE}/${id}`));
 }
 
 export function createWorkOrder(payload: CreateWorkOrderPayload) {
-  return cast<ApiResponse<WorkOrderDto>>(api.post(BASE, payload));
+  return cast<ApiResponse<WorkOrderDto>>(userServiceApi.post(BASE, payload));
 }
 
 export function updateWorkOrder(id: string, payload: UpdateWorkOrderPayload) {
-  return cast<ApiResponse<WorkOrderDto>>(api.put(`${BASE}/${id}`, payload));
+  return cast<ApiResponse<WorkOrderDto>>(userServiceApi.put(`${BASE}/${id}`, payload));
 }
 
 export function assignTechnician(id: string, payload: AssignTechnicianPayload) {
-  return cast<ApiResponse<WorkOrderDto>>(api.patch(`${BASE}/${id}/assign`, payload));
+  return cast<ApiResponse<WorkOrderDto>>(userServiceApi.patch(`${BASE}/${id}/assign`, payload));
 }
 
 export function updateWorkOrderStatus(id: string, payload: UpdateStatusPayload) {
-  return cast<ApiResponse<WorkOrderDto>>(api.patch(`${BASE}/${id}/status`, payload));
+  return cast<ApiResponse<WorkOrderDto>>(userServiceApi.patch(`${BASE}/${id}/status`, payload));
 }
 
 export function createChecklist(workOrderId: string, payload: CreateChecklistPayload) {
-  return cast<ApiResponse<ChecklistDto>>(api.post(`${BASE}/${workOrderId}/checklists`, payload));
+  return cast<ApiResponse<ChecklistDto>>(userServiceApi.post(`${BASE}/${workOrderId}/checklists`, payload));
 }
 
 export function updateChecklistItem(workOrderId: string, itemId: string, payload: UpdateChecklistItemPayload) {
-  return cast<ApiResponse<null>>(api.patch(`${BASE}/${workOrderId}/checklists/items/${itemId}`, payload));
+  return cast<ApiResponse<null>>(userServiceApi.patch(`${BASE}/${workOrderId}/checklists/items/${itemId}`, payload));
 }

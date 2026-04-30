@@ -16,11 +16,11 @@ const PROXY_PATH_ALIASES: Array<[string, string]> = [
   ["/ion-user-service/api/v1", "/user"],
   ["/ion-branch-service/api/v1", "/branch"],
   ["/ion-networking-service/api/v1", "/networking"],
-  ["/ion-order-service", "/order"],
-  ["/ion-rule-scheme-service", "/rule-scheme"],
-  ["/ion-product-service", "/product"],
-  ["/ion-sales-service", "/sales"],
-  ["/ion-customer-service", "/customer"],
+  ["/ion-order-service/api/v1", "/order"],
+  ["/ion-rule-scheme-service/api/v1", "/rule-scheme"],
+  ["/ion-product-service/api/v1", "/product"],
+  ["/ion-sales-service/api/v1", "/sales"],
+  ["/ion-customer-service/api/v1", "/customer"],
   ["/ion-technical-service/api/v1", "/technical"],
 ];
 

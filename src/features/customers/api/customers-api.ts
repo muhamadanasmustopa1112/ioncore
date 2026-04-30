@@ -12,7 +12,7 @@ import type {
   UpdateCustomerAttributePayload,
 } from "../types/customers-api";
 
-const BASE = `${services.customer}/v1/customers`;
+const BASE = `${services.customer}/customers`;
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;
