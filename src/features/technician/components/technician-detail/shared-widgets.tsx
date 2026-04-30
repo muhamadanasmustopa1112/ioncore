@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { User, Clock, Check } from "lucide-react";
+import { User, Clock, Check, History } from "lucide-react";
 import { paths } from "@/config/paths";
 import { Badge } from "@/components/ui/badge";
 import type { AssignedTechnician, WorkOrderState, WorkOrderType } from "../../types/technician-api";
 import { STATE_LABEL } from "./shared";
+import { TechnicianHistoryModal } from "./modals/technician-history";
 import { format } from "date-fns";
 
 function fmtDate(s: string | undefined | null) {
@@ -21,24 +23,43 @@ function humanize(s: string | undefined | null) {
 // ── TechnicianCard ─────────────────────────────────────────────────────────
 
 export function TechnicianCard({ t }: { t: AssignedTechnician }) {
+  const [showHistory, setShowHistory] = useState(false);
   const isLead = t?.role === "lead" || t?.level === "senior";
   return (
-    <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
-      <div className={`size-10 sm:size-12 rounded-full flex items-center justify-center shrink-0 ${isLead ? "bg-primary/10" : "bg-slate-200 dark:bg-slate-700"}`}>
-        <User className={`size-5 sm:size-6 ${isLead ? "text-primary" : "text-slate-500"}`} />
+    <>
+      <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
+        <div className={`size-10 sm:size-12 rounded-full flex items-center justify-center shrink-0 ${isLead ? "bg-primary/10" : "bg-slate-200 dark:bg-slate-700"}`}>
+          <User className={`size-5 sm:size-6 ${isLead ? "text-primary" : "text-slate-500"}`} />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className={`text-[10px] font-bold uppercase tracking-tight ${isLead ? "text-primary" : "text-slate-400"}`}>
+            {t?.level ?? "—"} · {t?.role ?? "—"}
+          </p>
+          <p className="text-sm font-bold truncate">{t?.technician_name || "—"}</p>
+          <p className="text-[10px] text-slate-500">
+            {t?.accepted ? "✓ Accepted" : "Pending acceptance"}
+            {t?.cross_area ? " · Cross-area" : ""}
+            {typeof t?.active_workload === "number" ? ` · ${t.active_workload} active` : ""}
+          </p>
+        </div>
+        {t?.technician_id && (
+          <button
+            onClick={() => setShowHistory(true)}
+            className="shrink-0 text-slate-400 hover:text-primary transition-colors"
+            title="View WO history"
+          >
+            <History className="size-4" />
+          </button>
+        )}
       </div>
-      <div className="min-w-0 flex-1">
-        <p className={`text-[10px] font-bold uppercase tracking-tight ${isLead ? "text-primary" : "text-slate-400"}`}>
-          {t?.level ?? "—"} · {t?.role ?? "—"}
-        </p>
-        <p className="text-sm font-bold truncate">{t?.technician_name || "—"}</p>
-        <p className="text-[10px] text-slate-500">
-          {t?.accepted ? "✓ Accepted" : "Pending acceptance"}
-          {t?.cross_area ? " · Cross-area" : ""}
-          {typeof t?.active_workload === "number" ? ` · ${t.active_workload} active` : ""}
-        </p>
-      </div>
-    </div>
+      {showHistory && t?.technician_id && (
+        <TechnicianHistoryModal
+          technicianId={t.technician_id}
+          technicianName={t.technician_name || t.technician_id}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
+    </>
   );
 }
 
