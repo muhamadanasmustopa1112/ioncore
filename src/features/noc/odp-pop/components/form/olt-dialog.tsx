@@ -1,9 +1,7 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useRef } from "react";
 import { Plus } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,43 +12,25 @@ import {
   DialogBody,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
 import { useOltStore } from "../../store/olt";
-import { DEFAULT_OLT_VALUES, OltFormValues, oltSchema } from "../../types/olt";
-import { AddOltForm } from "./olt-form";
+import { OltForm, OltFormRef } from "./olt-form";
 
 export function AddOltDialog() {
-  const { isAddOltDialogOpen, setAddOltDialogOpen } = useOltStore();
+  const { oltSheetOpen, setOltFormSheetOpen, openOltFormSheet, closeOltFormSheet } = useOltStore();
+  const formRef = useRef<OltFormRef>(null);
 
-  const form = useForm<OltFormValues>({
-    resolver: zodResolver(oltSchema),
-    defaultValues: DEFAULT_OLT_VALUES,
-  });
-
-  const { isSubmitting } = form.formState;
-
-  async function onSubmit(data: OltFormValues) {
-    // TODO: Integrate with actual API
-    console.log("Submitting new OLT:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("OLT created successfully");
-    setAddOltDialogOpen(false);
-    form.reset(DEFAULT_OLT_VALUES);
-  }
-
-  function handleOpenChange(open: boolean) {
-    setAddOltDialogOpen(open);
-    if (!open) form.reset(DEFAULT_OLT_VALUES);
-  }
+  const handleSave = () => {
+    formRef.current?.submit();
+  };
 
   return (
-    <Dialog open={isAddOltDialogOpen} onOpenChange={handleOpenChange}>
-      <Button size="sm" className="h-8" onClick={() => setAddOltDialogOpen(true)}>
+    <Dialog open={oltSheetOpen} onOpenChange={setOltFormSheetOpen}>
+      <Button size="sm" className="h-8" onClick={() => openOltFormSheet("new")}>
         <Plus className="size-4" />
         Add New OLT
       </Button>
 
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Add New OLT</DialogTitle>
           <DialogDescription>
@@ -58,26 +38,29 @@ export function AddOltDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <DialogBody className="space-y-4">
-              <AddOltForm />
-            </DialogBody>
+        <DialogBody className="p-0">
+          <OltForm 
+            ref={formRef} 
+            mode="new" 
+            onSuccess={closeOltFormSheet} 
+          />
+        </DialogBody>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setAddOltDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save OLT"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={closeOltFormSheet}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSave} 
+            disabled={formRef.current?.isPending}
+          >
+            {formRef.current?.isPending ? "Saving..." : "Save OLT"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

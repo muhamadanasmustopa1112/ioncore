@@ -1,9 +1,7 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useRef } from "react";
 import { Plus } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,69 +12,55 @@ import {
   DialogBody,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
 import { useOdpStore } from "../../store/odp";
-import { DEFAULT_ODP_VALUES, OdpFormValues, odpSchema } from "../../types/odp";
-import { AddOdpForm } from "./odp-form";
+import { OdpForm, OdpFormRef } from "./odp-form";
 
 export function AddOdpDialog() {
-  const { isAddOdpDialogOpen, setAddOdpDialogOpen } = useOdpStore();
+  const { odpSheetOpen, setOdpFormSheetOpen, openOdpFormSheet, closeOdpFormSheet } = useOdpStore();
+  const formRef = useRef<OdpFormRef>(null);
 
-  const form = useForm<OdpFormValues>({
-    resolver: zodResolver(odpSchema),
-    defaultValues: DEFAULT_ODP_VALUES as OdpFormValues,
-  });
-
-  const { isSubmitting } = form.formState;
-
-  async function onSubmit(data: OdpFormValues) {
-    console.log("Submitting new ODP:", data);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("ODP created successfully");
-    setAddOdpDialogOpen(false);
-    form.reset(DEFAULT_ODP_VALUES as OdpFormValues);
-  }
-
-  function handleOpenChange(open: boolean) {
-    setAddOdpDialogOpen(open);
-    if (!open) form.reset(DEFAULT_ODP_VALUES as OdpFormValues);
-  }
+  const handleSave = () => {
+    formRef.current?.submit();
+  };
 
   return (
-    <Dialog open={isAddOdpDialogOpen} onOpenChange={handleOpenChange}>
-      <Button size="sm" className="h-8" onClick={() => setAddOdpDialogOpen(true)}>
+    <Dialog open={odpSheetOpen} onOpenChange={setOdpFormSheetOpen}>
+      <Button size="sm" className="h-8" onClick={() => openOdpFormSheet("new")}>
         <Plus className="size-4" />
         Add ODP
       </Button>
 
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Add New ODP</DialogTitle>
           <DialogDescription>
-            Fill in the details below to register a new ODP on this OLT.
+            Fill in the details below to add a new ODP device to this infrastructure.
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <DialogBody className="space-y-4">
-              <AddOdpForm />
-            </DialogBody>
+        <DialogBody className="p-0">
+          <OdpForm 
+            ref={formRef} 
+            mode="new" 
+            onSuccess={closeOdpFormSheet} 
+          />
+        </DialogBody>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setAddOdpDialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save ODP"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+        <DialogFooter>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={closeOdpFormSheet}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSave} 
+            disabled={formRef.current?.isPending}
+          >
+            {formRef.current?.isPending ? "Saving..." : "Save ODP"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

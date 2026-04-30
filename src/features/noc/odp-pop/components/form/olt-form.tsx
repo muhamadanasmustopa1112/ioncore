@@ -1,8 +1,26 @@
 "use client";
 
+import { useImperativeHandle, forwardRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams } from "next/navigation";
+import {
+  RiCpuLine,
+  RiInformationLine,
+  RiNodeTree,
+  RiHashtag,
+  RiStackLine,
+} from "@remixicon/react";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -10,204 +28,199 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { SearchableSelect } from "@/components/ui/searchable-select";
-import { DEFAULT_OLT_VALUES, OltFormValues, oltSchema } from "../../types/olt";
-import { zodResolver } from "@hookform/resolvers/zod";
 
-const WAREHOUSE_OLTS = [
-  { value: "OLT-JKT-RAISECOM-01", label: "OLT-JKT-RAISECOM-01", model: "Raisecom ISCOM5508" },
-  { value: "OLT-JKT-ZTE-02", label: "OLT-JKT-ZTE-02", model: "ZTE ZXA10 C320" },
-  { value: "OLT-BDG-HUAWEI-01", label: "OLT-BDG-HUAWEI-01", model: "Huawei EA5800-X17" },
-  { value: "OLT-MDN-ZTE-01", label: "OLT-MDN-ZTE-01", model: "ZTE ZXA10 C300" },
-  { value: "OLT-SUB-RAISECOM-03", label: "OLT-SUB-RAISECOM-03", model: "Raisecom ISCOM5508" },
-];
+import { DEFAULT_OLT_VALUES, OltData, oltSchema, type OltFormValues } from "../../types/olt";
+import { useOltStore } from "../../store/olt";
+import { useCreateOlt } from "../../api/create-olt";
+import { useUpdateOlt } from "../../api/update-olt";
 
-export function AddOltForm() {
-  const form = useForm<OltFormValues>({
-    resolver: zodResolver(oltSchema),
-    defaultValues: DEFAULT_OLT_VALUES as OltFormValues,
-  });
-  const expansionValue = form.watch("expansion");
+type OltFormProps = {
+  mode: "new" | "edit" | "details";
+  onSuccess?: () => void;
+  oltId?: string;
+  readOnly?: boolean;
+};
 
-  return (
-    <div className="space-y-4">
-      {/* OLT Name */}
-      <FormField
-        control={form.control}
-        name="name"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-xs text-muted-foreground">
-              OLT Name (Warehouse)
-            </FormLabel>
-            <FormControl>
-              <SearchableSelect
-                options={WAREHOUSE_OLTS}
-                value={field.value}
-                onSelect={(value, option) => {
-                  form.setValue("name", value);
-                  form.setValue("model", option.model);
-                }}
-                placeholder="Select OLT from warehouse..."
-                searchPlaceholder="Search OLT name..."
-                emptyText="No OLT found in warehouse."
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+export type OltFormRef = {
+  submit: () => void;
+  isPending: boolean;
+};
 
-      {/* Model & Status */}
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="model"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs text-muted-foreground">Model</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select model" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Raisecom ISCOM5508">Raisecom ISCOM5508</SelectItem>
-                  <SelectItem value="ZTE ZXA10 C320">ZTE ZXA10 C320</SelectItem>
-                  <SelectItem value="ZTE ZXA10 C300">ZTE ZXA10 C300</SelectItem>
-                  <SelectItem value="Huawei EA5800-X17">Huawei EA5800-X17</SelectItem>
-                  <SelectItem value="Huawei MA5608T">Huawei MA5608T</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+export const OltForm = forwardRef<OltFormRef, OltFormProps>(
+  ({ onSuccess, oltId, readOnly = false, mode }, ref) => {
+    const params = useParams();
+    const { closeOltFormSheet, selectedOlt } = useOltStore();
 
-        <FormField
-          control={form.control}
-          name="status"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs text-muted-foreground">Status</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="warning">Warning</SelectItem>
-                  <SelectItem value="down">Down</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+    // Get IDs from URL if available
+    const urlPopId = params?.id as string;
+    // Note: If we are in OLT detail, params.id might be parent_id. 
+    // But for now, in POP Detail page, params.id is the pop_id.
 
-      {/* IP Address & Total Ports */}
-      <div className="grid grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="ipAddress"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs text-muted-foreground">IP Address</FormLabel>
-              <FormControl>
-                <Input placeholder="10.1.5.44" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    const data = selectedOlt;
 
-        <FormField
-          control={form.control}
-          name="totalPorts"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-xs text-muted-foreground">Total Ports</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="16"
-                  {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+    const mapOltToFormValues = (olt: OltData): OltFormValues => ({
+      code: olt.code ?? "",
+      name: olt.name,
+      parent_id: olt.parent_id ?? null,
+      pop_id: olt.pop_id ?? urlPopId ?? "",
+      status: olt.status ?? "UP",
+      total_port: olt.total_port ?? 16,
+    });
 
-      {/* Expansion */}
-      <FormField
-        control={form.control}
-        name="expansion"
-        render={({ field }) => (
-          <FormItem className="space-y-3">
-            <FormLabel className="text-xs text-muted-foreground">Expansion</FormLabel>
-            <FormControl>
-              <RadioGroup
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  if (value === "no") {
-                    form.setValue("expansionPorts", undefined);
-                  }
-                }}
-                value={field.value}
-                className="flex gap-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="yes" id="expansion-yes" />
-                  <Label htmlFor="expansion-yes" className="font-medium cursor-pointer">Yes</Label>
+    const form = useForm<OltFormValues>({
+      resolver: zodResolver(oltSchema),
+      values: (data && mode !== "new") ? mapOltToFormValues(data) : {
+        ...DEFAULT_OLT_VALUES,
+        pop_id: urlPopId || "",
+      } as OltFormValues,
+    });
+
+    const { mutate: createOlt, isPending: isCreating } = useCreateOlt({
+      mutationConfig: {
+        onSuccess: () => {
+          form.reset();
+          closeOltFormSheet();
+          onSuccess?.();
+        },
+      },
+    });
+
+    const { mutate: updateOlt, isPending: isUpdating } = useUpdateOlt({
+      mutationConfig: {
+        onSuccess: () => {
+          form.reset();
+          closeOltFormSheet();
+          onSuccess?.();
+        },
+      },
+    });
+
+    const isPending = isCreating || isUpdating;
+
+    useImperativeHandle(ref, () => ({
+      submit: () => form.handleSubmit(onSubmit)(),
+      isPending,
+    }));
+
+    const onSubmit = (formData: OltFormValues) => {
+      const payload = {
+        ...formData,
+        parent_id: formData.parent_id === "none" ? null : formData.parent_id,
+      };
+
+      if (mode === "edit" && oltId) {
+        updateOlt({ id: oltId, data: payload });
+      } else {
+        createOlt(payload);
+      }
+    };
+
+    return (
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full flex-col overflow-hidden">
+          <ScrollArea className="flex-1 px-6 py-6">
+            <div className="space-y-8 pb-6">
+              {/* General Information Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                  <RiCpuLine className="size-4 text-blue-500" />
+                  <h3 className="text-sm font-semibold">General Information</h3>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no" id="expansion-no" />
-                  <Label htmlFor="expansion-no" className="font-medium cursor-pointer">No</Label>
-                </div>
-              </RadioGroup>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
 
-      {/* Expansion Ports — only shown when expansion is "yes" */}
-      {expansionValue === "yes" && (
-        <FormField
-          control={form.control}
-          name="expansionPorts"
-          render={({ field }) => (
-            <FormItem className="animate-in fade-in-0 slide-in-from-top-2 duration-200">
-              <FormLabel className="text-xs text-muted-foreground">Expansion Ports</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="8"
-                  {...field}
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
-    </div>
-  );
-}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                  <FormField
+                    control={form.control}
+                    name="code"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                          <RiHashtag className="size-3" />
+                          Code
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="OLT-JKT-001" {...field} disabled={readOnly || isPending} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium text-muted-foreground">OLT Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="JAKARTA PUSAT MAIN OLT" {...field} disabled={readOnly || isPending} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="total_port"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                          <RiStackLine className="size-3" />
+                          Total Ports
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="16"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) => field.onChange(e.target.value === "" ? 0 : Number(e.target.value))}
+                            disabled={readOnly || isPending}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                          <RiInformationLine className="size-3" />
+                          Status
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={readOnly || isPending}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="UP">Up</SelectItem>
+                            <SelectItem value="DOWN">Down</SelectItem>
+                            <SelectItem value="DEGRADED">Degraded</SelectItem>
+                            <SelectItem value="UNKNOWN">Unknown</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+            </div>
+          </ScrollArea>
+        </form>
+      </Form>
+    );
+  }
+);
+
+OltForm.displayName = "OltForm";

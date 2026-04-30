@@ -6,7 +6,6 @@ import { PopData } from "../../types/pop";
 import { OdpData } from "../../types/odp";
 import { OltData } from "../../types/olt";
 
-
 interface TopologyPathsProps {
   pops: PopData[];
   olts: OltData[];
@@ -15,52 +14,35 @@ interface TopologyPathsProps {
 
 /**
  * Renders topology paths (connection lines) between POPs and their child ODPs.
- * This visualizes the physical/logical connection between infrastructure points.
+ * Direct path from ODP to its parent POP through OLT relation.
  */
 export function TopologyPaths({ pops, olts, odps }: TopologyPathsProps) {
   const paths = useMemo(() => {
     const result: { id: string; positions: [number, number][] }[] = [];
 
-    // ODPs are already filtered by the parent (OdpPopMap)
-    const odpsToProcess = odps;
-
-    // Build paths by finding the bridge OLT then its parent POP location for each ODP
-    const processedOlts = new Set<string>();
-
-    odpsToProcess.forEach(odp => {
-      // 1. Find the OLT that this ODP belongs to
+    odps.forEach(odp => {
+      // 1. Cari OLT-nya
       const olt = olts.find(o => String(o.id) === String(odp.olt_id));
-
+      
       if (olt) {
-        // Path A: ODP to OLT
-        result.push({
-          id: `path-odp-${odp.id}-to-olt-${olt.id}`,
-          positions: [
-            [odp.gps_lat, odp.gps_lng],
-            [olt.gps_lat, olt.gps_lng]
-          ]
-        });
-
-        // Path B: OLT to POP (only draw once per OLT)
-        if (!processedOlts.has(olt.id)) {
-          const pop = pops.find(p => String(p.id) === String(olt.pop_id) || String(p.id) === String(olt.parent_id));
-          if (pop) {
-            result.push({
-              id: `path-olt-${olt.id}-to-pop-${pop.id}`,
-              positions: [
-                [olt.gps_lat, olt.gps_lng],
-                [Number(pop.gps_lat), Number(pop.gps_lng)]
-              ]
-            });
-            processedOlts.add(olt.id);
-          }
+        // 2. Cari POP-nya berdasarkan relasi di OLT
+        const pop = pops.find(p => String(p.id) === String(olt.pop_id) || String(p.id) === String(olt.parent_id));
+        
+        // 3. Tarik garis langsung ODP -> POP jika koordinat keduanya ada
+        if (pop && odp.gps_lat && odp.gps_lng && pop.gps_lat && pop.gps_lng) {
+          result.push({
+            id: `path-odp-${odp.id}-to-pop-${pop.id}`,
+            positions: [
+              [Number(odp.gps_lat), Number(odp.gps_lng)],
+              [Number(pop.gps_lat), Number(pop.gps_lng)]
+            ]
+          });
         }
       }
     });
 
     return result;
   }, [pops, olts, odps]);
-
 
   return (
     <>
@@ -70,8 +52,8 @@ export function TopologyPaths({ pops, olts, odps }: TopologyPathsProps) {
           positions={path.positions}
           pathOptions={{
             color: "#a78bfa",
-            weight: 5,
-            opacity: 0.8,
+            weight: 4,
+            opacity: 0.7,
             dashArray: "10, 12",
             lineCap: "round",
             interactive: false

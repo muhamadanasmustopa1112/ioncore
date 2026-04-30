@@ -1,35 +1,32 @@
 import { z } from "zod";
 
 export const odpSchema = z.object({
-  name: z.string().min(1, "ODP name is required"),
-  ponPort: z.string().min(1, "PON port is required"),
-  latitude: z
-    .number({ error: "Latitude is required" })
-    .min(-90, "Invalid latitude")
-    .max(90, "Invalid latitude"),
-  longitude: z
-    .number({ error: "Longitude is required" })
-    .min(-180, "Invalid longitude")
-    .max(180, "Invalid longitude"),
-  totalPorts: z
-    .number({ error: "Total ports is required" })
-    .min(1, "Minimum 1 port"),
-  portsUsed: z
-    .number({ error: "Ports used is required" })
-    .min(0, "Cannot be negative"),
-  status: z.enum(["active", "warning", "down"]),
+  code: z.string().min(1, "Code is required"),
+  gps_lat: z.string().optional().nullable(),
+  gps_lng: z.string().optional().nullable(),
+  name: z.string().min(1, "Name is required"),
+  olt_id: z.string().min(1, "OLT ID is required"),
+  parent_id: z.string().optional().nullable(),
+  status: z.string().min(1, "Status is required"),
+  total_port: z.number().min(1, "Total port must be at least 1"),
 });
 
 export type OdpFormValues = z.infer<typeof odpSchema>;
 
-export const DEFAULT_ODP_VALUES: Partial<OdpFormValues> = {
+export type OdpPayload = Omit<OdpFormValues, "gps_lat" | "gps_lng"> & {
+  gps_lat: number;
+  gps_lng: number;
+};
+
+export const DEFAULT_ODP_VALUES: OdpFormValues = {
+  code: "",
+  gps_lat: "0",
+  gps_lng: "0",
   name: "",
-  ponPort: "",
-  latitude: undefined,
-  longitude: undefined,
-  totalPorts: undefined,
-  portsUsed: 0,
-  status: "active",
+  olt_id: "",
+  parent_id: null,
+  status: "UP",
+  total_port: 16,
 };
 
 export interface OdpData {
