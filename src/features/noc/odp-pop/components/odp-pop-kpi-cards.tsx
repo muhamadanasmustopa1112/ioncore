@@ -19,8 +19,6 @@ export function OdpPopKpiCards({ data: popData }: { data?: PopResponse }) {
     const warning = pops.filter(p => p.status === "DOWN").length;
     const inactive = pops.filter(p => p.status === "DEGRADED").length;
 
-    // For now, if we have limited data (e.g. limit 100), the counts might be partial
-    // But it's better than dummy data.
     const totalOdp = pops.reduce((acc, p) => acc + (p.odpCount || 0), 0);
 
     return { total, active, warning, totalOdp };

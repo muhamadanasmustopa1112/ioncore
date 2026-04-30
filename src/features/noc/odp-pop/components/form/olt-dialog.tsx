@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,9 +14,13 @@ import {
 import { useOltStore } from "../../store/olt";
 import { OltForm, OltFormRef } from "./olt-form";
 
-export function AddOltDialog() {
-  const { oltSheetOpen, setOltFormSheetOpen, openOltFormSheet, closeOltFormSheet } = useOltStore();
+export function OltDialog() {
+  const { oltSheetOpen, setOltFormSheetOpen, closeOltFormSheet, form: formMode, selectedOlt } = useOltStore();
   const formRef = useRef<OltFormRef>(null);
+
+  const isNewMode = formMode === "new";
+  const isEditMode = formMode === "edit";
+  const isDetailMode = formMode === "details";
 
   const handleSave = () => {
     formRef.current?.submit();
@@ -25,24 +28,27 @@ export function AddOltDialog() {
 
   return (
     <Dialog open={oltSheetOpen} onOpenChange={setOltFormSheetOpen}>
-      <Button size="sm" className="h-8" onClick={() => openOltFormSheet("new")}>
-        <Plus className="size-4" />
-        Add New OLT
-      </Button>
-
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New OLT</DialogTitle>
+          <DialogTitle>
+            {isNewMode ? "Add New OLT" : isEditMode ? "Edit OLT" : "OLT Details"}
+          </DialogTitle>
           <DialogDescription>
-            Fill in the details below to add a new OLT device to this POP.
+            {isNewMode 
+              ? "Fill in the details below to add a new OLT device to this POP." 
+              : isEditMode 
+                ? `Update details for OLT ${selectedOlt?.name}` 
+                : `Viewing details for OLT ${selectedOlt?.name}`}
           </DialogDescription>
         </DialogHeader>
 
         <DialogBody className="p-0">
           <OltForm 
             ref={formRef} 
-            mode="new" 
+            mode={formMode || "new"} 
+            oltId={selectedOlt?.id ? String(selectedOlt.id) : undefined}
             onSuccess={closeOltFormSheet} 
+            readOnly={isDetailMode}
           />
         </DialogBody>
 
@@ -52,16 +58,19 @@ export function AddOltDialog() {
             variant="outline"
             onClick={closeOltFormSheet}
           >
-            Cancel
+            {isDetailMode ? "Close" : "Cancel"}
           </Button>
-          <Button 
-            onClick={handleSave} 
-            disabled={formRef.current?.isPending}
-          >
-            {formRef.current?.isPending ? "Saving..." : "Save OLT"}
-          </Button>
+          {!isDetailMode && (
+            <Button 
+              onClick={handleSave} 
+              disabled={formRef.current?.isPending}
+            >
+              {formRef.current?.isPending ? "Saving..." : isNewMode ? "Save OLT" : "Save Changes"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

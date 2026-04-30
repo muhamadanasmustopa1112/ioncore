@@ -6,6 +6,8 @@ import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { Progress } from "@/components/ui/progress";
 import { OdpData } from "@/features/noc/odp-pop/types/odp";
 
+import { OdpActionsCell } from "./odp-actions-cell";
+
 export const columns: ColumnDef<OdpData>[] = [
   {
     id: "name",
@@ -14,12 +16,12 @@ export const columns: ColumnDef<OdpData>[] = [
       <DataGridColumnHeader
         title="ODP NAME"
         column={column}
-        className="text-[10px] text-muted-foreground font-black tracking-widest"
+        className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
     ),
     cell: ({ row }) => (
-      <div className="flex flex-col gap-1 cursor-pointer hover:opacity-70 transition-opacity">
-        <span className="font-medium underline underline-offset-4 decoration-primary/30 hover:decoration-primary">
+      <div className="flex flex-col gap-1">
+        <span className="font-medium text-foreground">
           {row.original.name}
         </span>
       </div>
@@ -104,10 +106,10 @@ export const columns: ColumnDef<OdpData>[] = [
             <span
               className={
                 percentage > 90
-                   ? "text-destructive"
-                   : percentage > 70
-                     ? "text-orange-500"
-                     : "text-primary"
+                  ? "text-destructive"
+                  : percentage > 70
+                    ? "text-orange-500"
+                    : "text-primary"
               }
             >
               {Math.round(percentage)}%
@@ -129,4 +131,38 @@ export const columns: ColumnDef<OdpData>[] = [
     },
     size: 160,
   },
+  {
+    id: "status",
+    accessorKey: "status",
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        title="STATUS"
+        column={column}
+        className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
+      />
+    ),
+    cell: ({ row }) => (
+      <Badge
+        variant={row.original.status === "UP" ? "success" : row.original.status === "DOWN" ? "destructive" : "warning"}
+        appearance="light"
+        className="text-[11px] px-2.5 py-0.5 shadow-none rounded-md uppercase font-mono tracking-tight"
+      >
+        {row.original.status || "N/A"}
+      </Badge>
+    ),
+    size: 110,
+  },
+  {
+    id: "actions",
+    header: ({ column }) => (
+      <DataGridColumnHeader
+        title="ACTIONS"
+        column={column}
+        className="text-[10px] text-muted-foreground font-black tracking-widest uppercase text-center"
+      />
+    ),
+    cell: ({ row }) => <OdpActionsCell row={row} />,
+    size: 100,
+  },
 ];
+

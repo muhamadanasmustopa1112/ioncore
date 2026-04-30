@@ -24,17 +24,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { paths } from "@/config/paths";
-import { OltData } from "@/features/noc/odp-pop/types/olt";
-import { useOltStore } from "@/features/noc/odp-pop/store/olt";
-import { useDeleteOlt } from "@/features/noc/odp-pop/api/delete-olt";
+import { OdpData } from "@/features/noc/odp-pop/types/odp";
+import { useOdpStore } from "@/features/noc/odp-pop/store/odp";
+import { useDeleteOdp } from "@/features/noc/odp-pop/api/delete-odp";
 
-
-export function OltActionsCell({ row }: { row: Row<OltData> }) {
+export function OdpActionsCell({ row }: { row: Row<OdpData> }) {
   const router = useRouter();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const { openOltFormSheet, setSelectedOlt } = useOltStore();
+  const { openOdpFormSheet, setSelectedOdp } = useOdpStore();
 
-  const { mutate: deleteOlt, isPending: isDeleting } = useDeleteOlt({
+  const { mutate: deleteOdp, isPending: isDeleting } = useDeleteOdp({
     mutationConfig: {
       onSuccess: () => {
         setShowDeleteDialog(false);
@@ -43,12 +42,13 @@ export function OltActionsCell({ row }: { row: Row<OltData> }) {
   });
 
   const handleEditClick = () => {
-    setSelectedOlt(row.original);
-    openOltFormSheet("edit");
+    setSelectedOdp(row.original);
+    openOdpFormSheet("edit");
   };
 
   const handleDetailClick = () => {
-    router.push(paths.dashboard.networkAndOrchestration.odpPop.oltDetail.getHref(String(row.original.id)));
+    setSelectedOdp(row.original);
+    openOdpFormSheet("details");
   };
 
   const handleDeleteClick = () => {
@@ -57,7 +57,7 @@ export function OltActionsCell({ row }: { row: Row<OltData> }) {
 
   const handleConfirmDelete = () => {
     if (row.original.id) {
-      deleteOlt({ id: String(row.original.id) });
+      deleteOdp({ id: String(row.original.id) });
     }
   };
 
@@ -94,7 +94,7 @@ export function OltActionsCell({ row }: { row: Row<OltData> }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the OLT "{row.original.name}". This action cannot be undone.
+              This will permanently delete the ODP "{row.original.name}". This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -112,5 +112,3 @@ export function OltActionsCell({ row }: { row: Row<OltData> }) {
     </div>
   );
 }
-
-

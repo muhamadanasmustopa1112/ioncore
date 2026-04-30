@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,9 +14,13 @@ import {
 import { useOdpStore } from "../../store/odp";
 import { OdpForm, OdpFormRef } from "./odp-form";
 
-export function AddOdpDialog() {
-  const { odpSheetOpen, setOdpFormSheetOpen, openOdpFormSheet, closeOdpFormSheet } = useOdpStore();
+export function OdpDialog() {
+  const { odpSheetOpen, setOdpFormSheetOpen, closeOdpFormSheet, form: formMode, selectedOdp } = useOdpStore();
   const formRef = useRef<OdpFormRef>(null);
+
+  const isNewMode = formMode === "new";
+  const isEditMode = formMode === "edit";
+  const isDetailMode = formMode === "details";
 
   const handleSave = () => {
     formRef.current?.submit();
@@ -25,24 +28,27 @@ export function AddOdpDialog() {
 
   return (
     <Dialog open={odpSheetOpen} onOpenChange={setOdpFormSheetOpen}>
-      <Button size="sm" className="h-8" onClick={() => openOdpFormSheet("new")}>
-        <Plus className="size-4" />
-        Add ODP
-      </Button>
-
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Add New ODP</DialogTitle>
+          <DialogTitle>
+            {isNewMode ? "Add New ODP" : isEditMode ? "Edit ODP" : "ODP Details"}
+          </DialogTitle>
           <DialogDescription>
-            Fill in the details below to add a new ODP device to this infrastructure.
+            {isNewMode 
+              ? "Fill in the details below to add a new ODP device to this infrastructure." 
+              : isEditMode 
+                ? `Update details for ODP ${selectedOdp?.name}` 
+                : `Viewing details for ODP ${selectedOdp?.name}`}
           </DialogDescription>
         </DialogHeader>
 
         <DialogBody className="p-0">
           <OdpForm 
             ref={formRef} 
-            mode="new" 
+            mode={formMode || "new"} 
+            odpId={selectedOdp?.id ? String(selectedOdp.id) : undefined}
             onSuccess={closeOdpFormSheet} 
+            readOnly={isDetailMode}
           />
         </DialogBody>
 
@@ -52,16 +58,19 @@ export function AddOdpDialog() {
             variant="outline"
             onClick={closeOdpFormSheet}
           >
-            Cancel
+            {isDetailMode ? "Close" : "Cancel"}
           </Button>
-          <Button 
-            onClick={handleSave} 
-            disabled={formRef.current?.isPending}
-          >
-            {formRef.current?.isPending ? "Saving..." : "Save ODP"}
-          </Button>
+          {!isDetailMode && (
+            <Button 
+              onClick={handleSave} 
+              disabled={formRef.current?.isPending}
+            >
+              {formRef.current?.isPending ? "Saving..." : isNewMode ? "Save ODP" : "Save Changes"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
+

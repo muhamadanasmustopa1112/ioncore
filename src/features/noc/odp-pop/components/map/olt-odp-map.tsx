@@ -14,16 +14,16 @@ import { useMemo } from "react";
 import { OdpResponse, OdpData } from "../../types/odp";
 
 // Controller to handle programmatic map changes
-function MapFocusController({ selectedOdpName, points, markerRefs }: {
-  selectedOdpName: string | null,
+function MapFocusController({ selectedOdpId, points, markerRefs }: {
+  selectedOdpId: string | null,
   points: OdpData[],
   markerRefs: MutableRefObject<Record<string, L.Marker>>
 }) {
   const map = useMap();
 
   useEffect(() => {
-    if (selectedOdpName) {
-      const odp = points.find(p => p.name === selectedOdpName);
+    if (selectedOdpId) {
+      const odp = points.find(p => String(p.id) === selectedOdpId);
       if (odp) {
         // Pan and Zoom
         map.flyTo([odp.gps_lat, odp.gps_lng], 18, {
@@ -32,7 +32,7 @@ function MapFocusController({ selectedOdpName, points, markerRefs }: {
         });
 
         // Open Popup
-        const marker = markerRefs.current[selectedOdpName];
+        const marker = markerRefs.current[selectedOdpId];
         if (marker) {
           setTimeout(() => {
             marker.openPopup();
@@ -40,7 +40,7 @@ function MapFocusController({ selectedOdpName, points, markerRefs }: {
         }
       }
     }
-  }, [selectedOdpName, points, map, markerRefs]);
+  }, [selectedOdpId, points, map, markerRefs]);
 
   return null;
 }
@@ -77,7 +77,7 @@ const odpIcon = L.divIcon({
 export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isLoading?: boolean }) {
   const [isMounted, setIsMounted] = useState(false);
   const { resolvedTheme } = useTheme();
-  const [selectedOdpName, setSelectedOdpName] = useState<string | null>(null);
+  const [selectedOdpId, setSelectedOdpId] = useState<string | null>(null);
   const markerRefs = useRef<Record<string, L.Marker>>({});
 
   const points = useMemo(() => data?.data || [], [data]);
@@ -138,16 +138,16 @@ export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isL
                 {points.length > 0 ? (
                   points.map((odp) => (
                     <button
-                      key={odp.name}
-                      onClick={() => setSelectedOdpName(odp.name)}
-                      className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 text-left group ${selectedOdpName === odp.name
+                      key={odp.id}
+                      onClick={() => setSelectedOdpId(String(odp.id))}
+                      className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 text-left group ${selectedOdpId === String(odp.id)
                         ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]'
                         : 'hover:bg-primary/5 text-foreground/80'
                         }`}
                     >
-                      <div className={`p-1.5 rounded-lg transition-colors ${selectedOdpName === odp.name ? 'bg-primary-foreground/20' : 'bg-muted group-hover:bg-primary/10'
+                      <div className={`p-1.5 rounded-lg transition-colors ${selectedOdpId === String(odp.id) ? 'bg-primary-foreground/20' : 'bg-muted group-hover:bg-primary/10'
                         }`}>
-                        <Search className={`size-3 ${selectedOdpName === odp.name ? 'text-white' : 'text-primary'}`} />
+                        <Search className={`size-3 ${selectedOdpId === String(odp.id) ? 'text-white' : 'text-primary'}`} />
                       </div>
                       <span className="text-[10px] font-black truncate uppercase tracking-tight">
                         {odp.name}
@@ -177,19 +177,19 @@ export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isL
           <MapBoundsController points={points} />
 
           <MapFocusController
-            selectedOdpName={selectedOdpName}
+            selectedOdpId={selectedOdpId}
             points={points}
             markerRefs={markerRefs}
           />
 
           {points.map((odp) => (
             <Marker
-              key={odp.name}
+              key={odp.id}
               position={[odp.gps_lat, odp.gps_lng]}
               icon={odpIcon}
               ref={(ref) => {
                 if (ref) {
-                  markerRefs.current[odp.name] = ref;
+                  markerRefs.current[String(odp.id)] = ref;
                 }
               }}
             >
@@ -222,7 +222,7 @@ export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isL
           size="sm"
           mode="icon"
           className="absolute bottom-6 right-6 z-10 bg-background/90 backdrop-blur-xl shadow-2xl border-none hover:bg-background size-10 rounded-xl transition-transform hover:scale-110 active:scale-95"
-          onClick={() => setSelectedOdpName(null)}
+          onClick={() => setSelectedOdpId(null)}
         >
           <Maximize2 className="size-5 text-primary" />
         </Button>
@@ -230,3 +230,4 @@ export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isL
     </Card>
   );
 }
+

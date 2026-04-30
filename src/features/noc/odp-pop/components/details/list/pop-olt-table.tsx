@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Filter, Search, X } from "lucide-react";
+import { Filter, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,7 +31,8 @@ import { DataTableToolbar } from "../../list/table/data-table-toolbar";
 import { columns } from "./table/columns_olt";
 
 import { OltResponse, OltFilter } from "@/features/noc/odp-pop/types/olt";
-import { AddOltDialog } from "../../form/olt-dialog";
+import { OltDialog } from "../../form/olt-dialog";
+import { useOltStore } from "../../../store/olt";
 
 interface PopOltTableProps {
   data?: OltResponse;
@@ -46,6 +47,7 @@ export function PopOltTable({
   filter,
   setFilter
 }: PopOltTableProps) {
+  const { openOltFormSheet } = useOltStore();
   const data = useMemo(() => oltResponse?.data || [], [oltResponse]);
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
@@ -85,7 +87,13 @@ export function PopOltTable({
               <RiRouterLine className="size-5 text-primary" />
               OLT Infrastructure List
             </CardHeading>
-            <AddOltDialog />
+            <div className="flex items-center gap-2">
+              <Button size="sm" className="h-8" onClick={() => openOltFormSheet("new")}>
+                <Plus className="size-4" />
+                Add New OLT
+              </Button>
+              <OltDialog />
+            </div>
           </div>
 
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>

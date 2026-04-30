@@ -8,7 +8,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Filter, Search, X, Settings2 } from "lucide-react";
+import { Filter, Plus, Search, X, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,7 +30,8 @@ import {
 } from "@/components/ui/collapsible";
 import { RiRouterLine } from "@remixicon/react";
 import { columns } from "../../details/list/table/columns_odp";
-import { AddOdpDialog } from "../../form/add-odp-dialog";
+import { OdpDialog } from "../../form/add-odp-dialog";
+import { useOdpStore } from "../../../store/odp";
 import { OdpResponse, OdpFilter } from "../../../types/odp";
 
 interface OltOdpListTableProps {
@@ -48,7 +49,7 @@ export function OltOdpListTable({
   filter,
   setFilter
 }: OltOdpListTableProps) {
-
+  const { openOdpFormSheet } = useOdpStore();
   const data = useMemo(() => odpResponse?.data || [], [odpResponse]);
   const [openFilter, setOpenFilter] = useState<boolean>(false);
 
@@ -87,7 +88,13 @@ export function OltOdpListTable({
               <RiRouterLine className="size-5 text-primary" />
               List ODP
             </CardHeading>
-            <AddOdpDialog />
+            <div className="flex items-center gap-2">
+              <Button size="sm" className="h-8" onClick={() => openOdpFormSheet("new")}>
+                <Plus className="size-4" />
+                Add ODP
+              </Button>
+              <OdpDialog />
+            </div>
 
           </div>
 
