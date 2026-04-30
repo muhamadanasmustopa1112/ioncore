@@ -243,6 +243,23 @@ export const DASHBOARD_MENU: MenuConfig = [
     path: paths.dashboard.technician.root.getHref(),
     heading: 'Infrastructure',
     icon: UserCog,
+    children: [
+      {
+        title: "Work Orders",
+        path: paths.dashboard.technician.root.getHref(),
+        icon: ClipboardList,
+      },
+      {
+        title: "Team Pairing",
+        path: paths.dashboard.technician.teamPairing.getHref(),
+        icon: UserCheck2,
+      },
+      {
+        title: "NOC Queue",
+        path: paths.dashboard.technician.nocQueue.getHref(),
+        icon: ShieldCheck,
+      },
+    ],
   },
   {
     title: "Warehouse & Asset",

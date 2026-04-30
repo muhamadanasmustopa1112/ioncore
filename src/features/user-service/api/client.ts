@@ -21,6 +21,7 @@ const PROXY_PATH_ALIASES: Array<[string, string]> = [
   ["/ion-product-service", "/product"],
   ["/ion-sales-service", "/sales"],
   ["/ion-customer-service", "/customer"],
+  ["/ion-technical-service/api/v1", "/technical"],
 ];
 
 function toProxyAlias(url: string): string {

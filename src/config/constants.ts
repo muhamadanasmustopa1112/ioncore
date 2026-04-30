@@ -43,13 +43,14 @@ export const services = {
   iam: "/iam-access",
   networking: "/ion-networking-service/api/v1",
   user: "/ion-user-service/api/v1",
-  userOrigin: "/ion-user-service",
-  branch: "/ion-branch-service",
-  ruleScheme: "/ion-rule-scheme-service",
-  product: "/ion-product-service",
-  sales: "/ion-sales-service",
-  order: "/ion-order-service",
-  customer: "/ion-customer-service",
+  userOrigin: "/ion-user-service/api/v1",
+  branch: "/ion-branch-service/api/v1",
+  ruleScheme: "/ion-rule-scheme-service/api/v1",
+  product: "/ion-product-service/api/v1",
+  sales: "/ion-sales-service/api/v1",
+  order: "/ion-order-service/api/v1",
+  customer: "/ion-customer-service/api/v1",
+  technical: "/ion-technical-service/api/v1",
 };
 
 // devices

@@ -41,6 +41,7 @@ const nextConfig = {
       "ion-product-service": "product",
       "ion-sales-service": "sales",
       "ion-customer-service": "customer",
+      "ion-technical-service/api/v1": "technical",
     };
 
     const useProxyMode =

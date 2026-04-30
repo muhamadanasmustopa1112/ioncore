@@ -139,6 +139,14 @@ export const paths = {
         path: "/technician/:id",
         getHref: (id: string) => `/technician/${id}`,
       },
+      teamPairing: {
+        path: "/technician/team-pairing",
+        getHref: () => "/technician/team-pairing",
+      },
+      nocQueue: {
+        path: "/technician/noc-queue",
+        getHref: () => "/technician/noc-queue",
+      },
     },
     operations: {
       root: {
