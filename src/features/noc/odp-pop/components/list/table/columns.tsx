@@ -7,78 +7,14 @@ import { ActionsCell } from "./data-table-actions-cell";
 import { ActionsCellOdp } from "./data-table-actions-odp";
 import { Badge, BadgeDot } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { PopData } from "../../../types/pop";
 
-// Cache sederhana di luar komponen agar tidak fetch ulang koordinat yang sama
-const addressCache: Record<string, string> = {};
-
-const AddressCell = ({ lat, lng, fallback }: { lat: any, lng: any, fallback?: string }) => {
-  const [address, setAddress] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [shouldFetch, setShouldFetch] = useState(false);
-
-  // Gunakan IntersectionObserver agar hanya fetch yang terlihat di layar saja
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShouldFetch(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!shouldFetch || !lat || !lng) return;
-
-    const cacheKey = `${lat},${lng}`;
-    if (addressCache[cacheKey]) {
-      setAddress(addressCache[cacheKey]);
-      return;
-    }
-
-    const fetchAddress = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18`,
-          { headers: { "User-Agent": "ION-App" } }
-        );
-        const data = await res.json();
-        const result = data.display_name || "";
-        addressCache[cacheKey] = result;
-        setAddress(result);
-      } catch (e) {
-        console.error("Geocoding error:", e);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAddress();
-  }, [shouldFetch, lat, lng]);
-
-  return (
-    <div ref={containerRef} className="min-h-[20px]">
-      {loading ? (
-        <div className="animate-pulse h-3 w-32 bg-muted rounded" />
-      ) : (
-        <div
-          className="text-foreground/80  truncate max-w-[200px]"
-          title={address || fallback}
-        >
-          {address || fallback || "-"}
-        </div>
-      )}
-    </div>
-  );
-};
 
 export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[] => [
   {
@@ -132,11 +68,18 @@ export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[]
       <DataGridColumnHeader title="Address" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
-      <AddressCell
-        lat={row.original.gps_lat}
-        lng={row.original.gps_lng}
-        fallback={row.original.address}
-      />
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="text-foreground/80 truncate max-w-[200px] cursor-help">
+              {row.original.address || "-"}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[300px] break-words">
+            {row.original.address}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     ),
     enableSorting: true,
     size: 200,
@@ -175,7 +118,7 @@ export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[]
     cell: ({ getValue }) => {
       const status = (getValue() as string || "UNKNOWN").toUpperCase();
       let variant: any = "secondary";
-      
+
       if (status === "UP") variant = "success";
       if (status === "DOWN") variant = "destructive";
       if (status === "DEGRADED") variant = "warning";
