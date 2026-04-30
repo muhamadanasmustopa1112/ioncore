@@ -5,8 +5,9 @@ import { Loader2, FileText, CheckCircle2, ClipboardCheck, AlertTriangle, PenTool
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useUpdateWorkOrder } from "../../../api/technician-queries";
+import { useUpdateWorkOrder, useCustomerHistory, useSiteHistory } from "../../../api/technician-queries";
 import type { WorkOrderDetailResponse } from "../../../types/technician-api";
+import { WOHistoryModal } from "../modals/wo-history";
 import {
   SectionCard,
   Field,
@@ -22,7 +23,12 @@ import { HistoryList } from "../shared-widgets";
 
 export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
   const [notes, setNotes] = useState(wo.description ?? "");
+  const [showCustomerHistory, setShowCustomerHistory] = useState(false);
+  const [showSiteHistory, setShowSiteHistory] = useState(false);
   const updateMutation = useUpdateWorkOrder(wo.id);
+
+  const customerHistory = useCustomerHistory(showCustomerHistory ? wo.customer_id : "");
+  const siteHistory = useSiteHistory(showSiteHistory ? wo.site_id : "");
 
   const proofItems = useMemo(() => wo.proof_of_work ?? [], [wo.proof_of_work]);
 
@@ -239,17 +245,65 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
       )}
 
       {/* Previous Customer Jobs */}
-      {wo.previous_customer_jobs && wo.previous_customer_jobs.length > 0 && (
-        <SectionCard icon={History} title="Previous Customer Jobs">
-          <HistoryList items={wo.previous_customer_jobs} />
+      {wo.customer_id && (
+        <SectionCard
+          icon={History}
+          title="Customer WO History"
+          rightSlot={
+            <Button variant="outline" size="sm" onClick={() => setShowCustomerHistory(true)} className="text-[10px] h-6 px-2">
+              View Full History
+            </Button>
+          }
+        >
+          {wo.previous_customer_jobs && wo.previous_customer_jobs.length > 0
+            ? <HistoryList items={wo.previous_customer_jobs} />
+            : <Empty />}
         </SectionCard>
       )}
 
       {/* Previous Site Jobs */}
-      {wo.previous_site_jobs && wo.previous_site_jobs.length > 0 && (
-        <SectionCard icon={History} title="Previous Site Jobs">
-          <HistoryList items={wo.previous_site_jobs} />
+      {wo.site_id && (
+        <SectionCard
+          icon={History}
+          title="Site WO History"
+          rightSlot={
+            <Button variant="outline" size="sm" onClick={() => setShowSiteHistory(true)} className="text-[10px] h-6 px-2">
+              View Full History
+            </Button>
+          }
+        >
+          {wo.previous_site_jobs && wo.previous_site_jobs.length > 0
+            ? <HistoryList items={wo.previous_site_jobs} />
+            : <Empty />}
         </SectionCard>
+      )}
+
+      {/* Customer History Modal */}
+      {showCustomerHistory && (
+        <WOHistoryModal
+          title="Customer WO History"
+          subtitle={wo.customer_name}
+          items={customerHistory.data?.items ?? []}
+          total={customerHistory.data?.total}
+          isLoading={customerHistory.isLoading}
+          isError={customerHistory.isError}
+          onRetry={() => customerHistory.refetch()}
+          onClose={() => setShowCustomerHistory(false)}
+        />
+      )}
+
+      {/* Site History Modal */}
+      {showSiteHistory && (
+        <WOHistoryModal
+          title="Site WO History"
+          subtitle={wo.site_name}
+          items={siteHistory.data?.items ?? []}
+          total={siteHistory.data?.total}
+          isLoading={siteHistory.isLoading}
+          isError={siteHistory.isError}
+          onRetry={() => siteHistory.refetch()}
+          onClose={() => setShowSiteHistory(false)}
+        />
       )}
     </>
   );

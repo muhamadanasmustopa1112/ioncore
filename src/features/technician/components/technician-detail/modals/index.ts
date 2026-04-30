@@ -4,3 +4,5 @@ export { RescheduleModal } from "./reschedule";
 export { CrossAreaModal } from "./cross-area";
 export { AutoAssignModal } from "./auto-assign";
 export { CancelModal } from "./cancel";
+export { TechnicianHistoryModal } from "./technician-history";
+export { WOHistoryModal } from "./wo-history";
