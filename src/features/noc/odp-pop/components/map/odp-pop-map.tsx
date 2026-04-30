@@ -121,15 +121,6 @@ export default function OdpPopMap({
     },
   });
 
-  useEffect(() => {
-    console.log("DEBUG NOC MAP:", {
-      selectedPopId,
-      hasOdpData: !!odpResponse?.data?.length,
-      odpCount: odpResponse?.data?.length || 0,
-      hasOltData: !!oltResponse?.data?.length,
-      oltCount: oltResponse?.data?.length || 0,
-    });
-  }, [selectedPopId, odpResponse, oltResponse]);
 
   const odps = useMemo(() => odpResponse?.data || [], [odpResponse]);
   const olts = useMemo(() => oltResponse?.data || [], [oltResponse]);

@@ -15,7 +15,7 @@ export interface OltData {
   heartbeat_at: string;
   created_at: string;
   updated_at: string;
-  
+
   // UI Compatibility Fields
   portsUsed?: number;
   totalPorts?: number;
@@ -65,23 +65,21 @@ export type OltParams = {
 };
 
 export const oltSchema = z.object({
+  code: z.string().min(1, "Code is required"),
   name: z.string().min(1, "Name is required"),
-  model: z.string().min(1, "Model is required"),
-  status: z.union([z.literal("active"), z.literal("warning"), z.literal("down")]),
-  ipAddress: z.string().min(1, "IP Address is required"),
-  totalPorts: z.number().min(1, "Total ports must be at least 1"),
-  expansion: z.union([z.literal("yes"), z.literal("no")]),
-  expansionPorts: z.number().optional(),
+  parent_id: z.string().optional().nullable(),
+  pop_id: z.string().min(1, "POP is required"),
+  status: z.string().min(1, "Status is required"),
+  total_port: z.number().min(1, "Total ports must be at least 1"),
 });
 
 export type OltFormValues = z.infer<typeof oltSchema>;
 
 export const DEFAULT_OLT_VALUES: OltFormValues = {
+  code: "",
   name: "",
-  model: "",
-  status: "active",
-  ipAddress: "",
-  totalPorts: 16,
-  expansion: "no",
-  expansionPorts: undefined,
+  parent_id: null,
+  pop_id: "",
+  status: "UP",
+  total_port: 16,
 };
