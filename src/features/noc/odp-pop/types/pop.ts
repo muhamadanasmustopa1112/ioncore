@@ -7,6 +7,7 @@ export const popSchema = z.object({
   gps_lng: z.string().min(1, "Longitude is required"),
   name: z.string().min(1, "POP Name is required"),
   status: z.enum(["UP", "DOWN", "DEGRADED", "UNKNOWN"]),
+  address: z.string().optional(),
 });
 
 export type PopFormValues = z.infer<typeof popSchema>;
@@ -18,6 +19,7 @@ export const DEFAULT_POP_VALUES: Partial<PopFormValues> = {
   gps_lng: "",
   name: "",
   status: "UP",
+  address: "",
 };
 
 export interface PopData {

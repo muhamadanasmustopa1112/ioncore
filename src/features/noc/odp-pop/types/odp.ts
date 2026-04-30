@@ -8,6 +8,7 @@ export const odpSchema = z.object({
   olt_id: z.string().min(1, "OLT ID is required"),
   parent_id: z.string().optional().nullable(),
   status: z.string().min(1, "Status is required"),
+  address: z.string().min(1, "Status is required"),
   total_port: z.number().min(1, "Total port must be at least 1"),
 });
 
@@ -26,6 +27,7 @@ export const DEFAULT_ODP_VALUES: OdpFormValues = {
   olt_id: "",
   parent_id: null,
   status: "UP",
+  address: "",
   total_port: 16,
 };
 
