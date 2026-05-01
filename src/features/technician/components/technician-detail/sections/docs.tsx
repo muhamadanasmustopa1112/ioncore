@@ -257,7 +257,7 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
         >
           {wo.previous_customer_jobs && wo.previous_customer_jobs.length > 0
             ? <HistoryList items={wo.previous_customer_jobs} />
-            : <Empty />}
+            : <Empty><>No previous jobs for this customer.</></Empty>}
         </SectionCard>
       )}
 
@@ -274,7 +274,7 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
         >
           {wo.previous_site_jobs && wo.previous_site_jobs.length > 0
             ? <HistoryList items={wo.previous_site_jobs} />
-            : <Empty />}
+            : <Empty><>No previous jobs for this site.</></Empty>}
         </SectionCard>
       )}
 
