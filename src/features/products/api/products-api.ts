@@ -26,13 +26,13 @@ function cast<T>(p: unknown): Promise<T> {
 
 export function listActiveBroadbandPlans(params: BroadbandPlanListParams = {}) {
   return cast<ProductEnvelope<BroadbandPlanListData>>(
-    userServiceApi.get(`${BASE}/v1/products/broadband-plans`, { params })
+    userServiceApi.get(`${BASE}/products/broadband-plans`, { params })
   );
 }
 
 export function getActiveBroadbandPlan(id: string) {
   return cast<ProductEnvelope<BroadbandPlan>>(
-    userServiceApi.get(`${BASE}/v1/products/broadband-plans/${id}`)
+    userServiceApi.get(`${BASE}/products/broadband-plans/${id}`)
   );
 }
 
@@ -40,13 +40,13 @@ export function getActiveBroadbandPlan(id: string) {
 
 export function listActiveEnterpriseServices(params: EnterpriseServiceListParams = {}) {
   return cast<ProductEnvelope<EnterpriseServiceListData>>(
-    userServiceApi.get(`${BASE}/v1/products/enterprise-services`, { params })
+    userServiceApi.get(`${BASE}/products/enterprise-services`, { params })
   );
 }
 
 export function getActiveEnterpriseService(id: string) {
   return cast<ProductEnvelope<EnterpriseService>>(
-    userServiceApi.get(`${BASE}/v1/products/enterprise-services/${id}`)
+    userServiceApi.get(`${BASE}/products/enterprise-services/${id}`)
   );
 }
 
@@ -54,13 +54,13 @@ export function getActiveEnterpriseService(id: string) {
 
 export function listActiveAddons(params: AddonListParams = {}) {
   return cast<ProductEnvelope<AddonListData>>(
-    userServiceApi.get(`${BASE}/v1/products/addons`, { params })
+    userServiceApi.get(`${BASE}/products/addons`, { params })
   );
 }
 
 export function getActiveAddon(id: string) {
   return cast<ProductEnvelope<Addon>>(
-    userServiceApi.get(`${BASE}/v1/products/addons/${id}`)
+    userServiceApi.get(`${BASE}/products/addons/${id}`)
   );
 }
 
@@ -68,43 +68,43 @@ export function getActiveAddon(id: string) {
 
 export function adminListBroadbandPlans(params: BroadbandPlanListParams = {}) {
   return cast<ProductEnvelope<BroadbandPlanListData>>(
-    userServiceApi.get(`${BASE}/v1/admin/broadband-plans`, { params })
+    userServiceApi.get(`${BASE}/admin/broadband-plans`, { params })
   );
 }
 
 export function adminGetBroadbandPlan(id: string) {
   return cast<ProductEnvelope<BroadbandPlan>>(
-    userServiceApi.get(`${BASE}/v1/admin/broadband-plans/${id}`)
+    userServiceApi.get(`${BASE}/admin/broadband-plans/${id}`)
   );
 }
 
 export function adminCreateBroadbandPlan(payload: CreateBroadbandPlanPayload) {
   return cast<ProductEnvelope<BroadbandPlan>>(
-    userServiceApi.post(`${BASE}/v1/admin/broadband-plans`, payload)
+    userServiceApi.post(`${BASE}/admin/broadband-plans`, payload)
   );
 }
 
 export function adminUpdateBroadbandPlan(id: string, payload: CreateBroadbandPlanPayload) {
   return cast<ProductEnvelope<BroadbandPlan>>(
-    userServiceApi.put(`${BASE}/v1/admin/broadband-plans/${id}`, payload)
+    userServiceApi.put(`${BASE}/admin/broadband-plans/${id}`, payload)
   );
 }
 
 export function adminDeleteBroadbandPlan(id: string) {
   return cast<ProductEnvelope<null>>(
-    userServiceApi.delete(`${BASE}/v1/admin/broadband-plans/${id}`)
+    userServiceApi.delete(`${BASE}/admin/broadband-plans/${id}`)
   );
 }
 
 export function adminAddBranchToBroadbandPlan(planId: string, branchId: string) {
   return cast<ProductEnvelope<null>>(
-    userServiceApi.post(`${BASE}/v1/admin/broadband-plans/${planId}/branches`, { branch_id: branchId })
+    userServiceApi.post(`${BASE}/admin/broadband-plans/${planId}/branches`, { branch_id: branchId })
   );
 }
 
 export function adminRemoveBranchFromBroadbandPlan(planId: string, branchId: string) {
   return cast<ProductEnvelope<null>>(
-    userServiceApi.delete(`${BASE}/v1/admin/broadband-plans/${planId}/branches/${branchId}`)
+    userServiceApi.delete(`${BASE}/admin/broadband-plans/${planId}/branches/${branchId}`)
   );
 }
 
@@ -112,43 +112,43 @@ export function adminRemoveBranchFromBroadbandPlan(planId: string, branchId: str
 
 export function adminListEnterpriseServices(params: EnterpriseServiceListParams = {}) {
   return cast<ProductEnvelope<EnterpriseServiceListData>>(
-    userServiceApi.get(`${BASE}/v1/admin/enterprise-services`, { params })
+    userServiceApi.get(`${BASE}/admin/enterprise-services`, { params })
   );
 }
 
 export function adminGetEnterpriseService(id: string) {
   return cast<ProductEnvelope<EnterpriseService>>(
-    userServiceApi.get(`${BASE}/v1/admin/enterprise-services/${id}`)
+    userServiceApi.get(`${BASE}/admin/enterprise-services/${id}`)
   );
 }
 
 export function adminCreateEnterpriseService(payload: CreateEnterpriseServicePayload) {
   return cast<ProductEnvelope<EnterpriseService>>(
-    userServiceApi.post(`${BASE}/v1/admin/enterprise-services`, payload)
+    userServiceApi.post(`${BASE}/admin/enterprise-services`, payload)
   );
 }
 
 export function adminUpdateEnterpriseService(id: string, payload: CreateEnterpriseServicePayload) {
   return cast<ProductEnvelope<EnterpriseService>>(
-    userServiceApi.put(`${BASE}/v1/admin/enterprise-services/${id}`, payload)
+    userServiceApi.put(`${BASE}/admin/enterprise-services/${id}`, payload)
   );
 }
 
 export function adminDeleteEnterpriseService(id: string) {
   return cast<ProductEnvelope<null>>(
-    userServiceApi.delete(`${BASE}/v1/admin/enterprise-services/${id}`)
+    userServiceApi.delete(`${BASE}/admin/enterprise-services/${id}`)
   );
 }
 
 export function adminAddBranchToEnterpriseService(serviceId: string, branchId: string) {
   return cast<ProductEnvelope<null>>(
-    userServiceApi.post(`${BASE}/v1/admin/enterprise-services/${serviceId}/branches`, { branch_id: branchId })
+    userServiceApi.post(`${BASE}/admin/enterprise-services/${serviceId}/branches`, { branch_id: branchId })
   );
 }
 
 export function adminRemoveBranchFromEnterpriseService(serviceId: string, branchId: string) {
   return cast<ProductEnvelope<null>>(
-    userServiceApi.delete(`${BASE}/v1/admin/enterprise-services/${serviceId}/branches/${branchId}`)
+    userServiceApi.delete(`${BASE}/admin/enterprise-services/${serviceId}/branches/${branchId}`)
   );
 }
 
@@ -156,30 +156,30 @@ export function adminRemoveBranchFromEnterpriseService(serviceId: string, branch
 
 export function adminListAddons(params: AddonListParams = {}) {
   return cast<ProductEnvelope<AddonListData>>(
-    userServiceApi.get(`${BASE}/v1/admin/addons`, { params })
+    userServiceApi.get(`${BASE}/admin/addons`, { params })
   );
 }
 
 export function adminGetAddon(id: string) {
   return cast<ProductEnvelope<Addon>>(
-    userServiceApi.get(`${BASE}/v1/admin/addons/${id}`)
+    userServiceApi.get(`${BASE}/admin/addons/${id}`)
   );
 }
 
 export function adminCreateAddon(payload: CreateAddonPayload) {
   return cast<ProductEnvelope<Addon>>(
-    userServiceApi.post(`${BASE}/v1/admin/addons`, payload)
+    userServiceApi.post(`${BASE}/admin/addons`, payload)
   );
 }
 
 export function adminUpdateAddon(id: string, payload: CreateAddonPayload) {
   return cast<ProductEnvelope<Addon>>(
-    userServiceApi.put(`${BASE}/v1/admin/addons/${id}`, payload)
+    userServiceApi.put(`${BASE}/admin/addons/${id}`, payload)
   );
 }
 
 export function adminDeleteAddon(id: string) {
   return cast<ProductEnvelope<null>>(
-    userServiceApi.delete(`${BASE}/v1/admin/addons/${id}`)
+    userServiceApi.delete(`${BASE}/admin/addons/${id}`)
   );
 }

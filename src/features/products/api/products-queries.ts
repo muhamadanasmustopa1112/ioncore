@@ -131,6 +131,8 @@ export function useAdminBroadbandPlans(params: BroadbandPlanListParams = {}) {
       const res = await adminListBroadbandPlans(params);
       return res.data;
     },
+    placeholderData: { broadband_plans: [], metadata: { page: 1, per_page: 10, total: 0 } },
+    retry: false,
   });
 }
 
@@ -218,6 +220,8 @@ export function useAdminEnterpriseServices(params: EnterpriseServiceListParams =
       const res = await adminListEnterpriseServices(params);
       return res.data;
     },
+    placeholderData: { enterprise_services: [], metadata: { page: 1, per_page: 10, total: 0 } },
+    retry: false,
   });
 }
 
@@ -294,6 +298,8 @@ export function useAdminAddons(params: AddonListParams = {}) {
       const res = await adminListAddons(params);
       return res.data;
     },
+    placeholderData: { addons: [], metadata: { page: 1, per_page: 10, total: 0 } },
+    retry: false,
   });
 }
 

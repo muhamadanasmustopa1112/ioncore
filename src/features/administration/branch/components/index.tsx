@@ -14,11 +14,11 @@ import { paths } from "@/config/paths";
 import { BranchList } from "./list/branch-list";
 import { useBranchStore } from "../store/branch";
 import { BranchFormSheet } from "./form/branch-form-sheet";
-import { DUMMY_BRANCHES } from "../data/dummy-branch";
-import { useRegionalList } from "../api/branch-queries";
+import { useRegionalList, useBranchList } from "../api/branch-queries";
 
 export function BranchListPage() {
-  const { openBranchFormSheet } = useBranchStore();
+  const openBranchFormSheet = useBranchStore((s) => s.openBranchFormSheet);
+  const { data: branches = [] } = useBranchList();
   // Warm the regional list cache so it's ready when the form sheet opens
   useRegionalList();
 
@@ -41,7 +41,7 @@ export function BranchListPage() {
           <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
             <Badge variant="info" appearance="light" className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs">
               <RiBuilding2Line className="size-3.5" />
-              {DUMMY_BRANCHES.length} Branches
+              {branches.length} Branches
             </Badge>
             <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
             <span className="text-muted-foreground font-normal text-xs sm:text-sm">

@@ -61,6 +61,14 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
   };
 
   const activeBranches = branches.filter((b) => b.active);
+
+  // Filter sales reps by type matching lead_type (SIT-C05)
+  const compatibleReps = salesReps.filter((rep) => {
+    if (!lead) return true;
+    if (rep.type === "both") return true;
+    return rep.type === lead.lead_type;
+  });
+
   const canSubmit = !!branchId && !!salesId && !reroute.isPending;
 
   return (
@@ -133,7 +141,7 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {salesReps.map((rep) => (
+                    {compatibleReps.map((rep) => (
                       <SelectItem key={rep.id} value={rep.id}>
                         <span>{rep.name}</span>
                         <span className="ml-2 text-xs text-muted-foreground capitalize">
@@ -143,6 +151,11 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
                     ))}
                   </SelectContent>
                 </Select>
+                {branchId && !salesLoading && compatibleReps.length === 0 && salesReps.length > 0 && (
+                  <p className="text-xs text-amber-600">
+                    No {lead?.lead_type} reps in this branch. Only reps with matching type are shown.
+                  </p>
+                )}
                 {branchId && !salesLoading && salesReps.length === 0 && (
                   <p className="text-xs text-amber-600">
                     No sales reps assigned to this branch.

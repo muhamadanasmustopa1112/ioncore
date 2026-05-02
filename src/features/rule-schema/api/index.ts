@@ -107,26 +107,54 @@ export const evaluateSchema = (versionId: string, payload: EvaluateSchemaRequest
     payload,
   );
 
+// ── Safe empty placeholders ─────────────────────────────
+
+const EMPTY_META = { page: 1, size: 10, total: 0 };
+
+const EMPTY_SCHEMA_TYPES: RuleSchemaEnvelope<SchemaType[]> = {
+  data: [], error: "", message: "", metadata: null,
+};
+const EMPTY_SCHEMAS: RuleSchemaEnvelope<SchemaListData> = {
+  data: { schemas: [], metadata: EMPTY_META }, error: "", message: "", metadata: null,
+};
+const EMPTY_SCHEMA_VERSIONS: RuleSchemaEnvelope<SchemaVersionListData> = {
+  data: { schema_versions: [], metadata: EMPTY_META }, error: "", message: "", metadata: null,
+};
+const EMPTY_DIFF: RuleSchemaEnvelope<SchemaDiffData> = {
+  data: { schema_versions: [] }, error: "", message: "", metadata: null,
+};
+
 // ── Hooks ───────────────────────────────────────────────
 
 export const useSchemaTypes = () =>
   useQuery({
     queryKey: ruleSchemaKeys.types(),
-    queryFn: () => getSchemaTypes(),
+    queryFn: async () => {
+      try { return await getSchemaTypes(); } catch { return EMPTY_SCHEMA_TYPES; }
+    },
     staleTime: Infinity,
+    placeholderData: EMPTY_SCHEMA_TYPES,
+    retry: false,
   });
 
 export const useSchemas = (params?: ListSchemasParams) =>
   useQuery({
     queryKey: ruleSchemaKeys.schemas(params),
-    queryFn: () => listSchemas(params),
+    queryFn: async () => {
+      try { return await listSchemas(params); } catch { return EMPTY_SCHEMAS; }
+    },
+    placeholderData: EMPTY_SCHEMAS,
+    retry: false,
   });
 
 export const useSchema = (id: string) =>
   useQuery({
     queryKey: ruleSchemaKeys.schema(id),
-    queryFn: () => getSchema(id),
+    queryFn: async () => {
+      try { return await getSchema(id); } catch { return null; }
+    },
     enabled: !!id,
+    retry: false,
   });
 
 export const useCreateSchema = () => {
@@ -151,15 +179,22 @@ export const useUpdateSchemaContent = (id: string) => {
 export const useSchemaVersions = (schemaId: string, params?: ListSchemaVersionsParams) =>
   useQuery({
     queryKey: ruleSchemaKeys.versions(schemaId, params),
-    queryFn: () => listSchemaVersions(schemaId, params),
+    queryFn: async () => {
+      try { return await listSchemaVersions(schemaId, params); } catch { return EMPTY_SCHEMA_VERSIONS; }
+    },
     enabled: !!schemaId,
+    placeholderData: EMPTY_SCHEMA_VERSIONS,
+    retry: false,
   });
 
 export const useSchemaVersion = (versionId: string) =>
   useQuery({
     queryKey: ruleSchemaKeys.version(versionId),
-    queryFn: () => getSchemaVersion(versionId),
+    queryFn: async () => {
+      try { return await getSchemaVersion(versionId); } catch { return null; }
+    },
     enabled: !!versionId,
+    retry: false,
   });
 
 export const useCreateSchemaVersion = (schemaId: string) => {
@@ -210,8 +245,12 @@ export const useCloneSchemaVersion = (schemaId: string) => {
 export const useDiffSchemaVersions = (schemaId: string, params?: DiffVersionsParams) =>
   useQuery({
     queryKey: [...ruleSchemaKeys.versions(schemaId), "diff", params] as const,
-    queryFn: () => diffSchemaVersions(schemaId, params!),
+    queryFn: async () => {
+      try { return await diffSchemaVersions(schemaId, params!); } catch { return EMPTY_DIFF; }
+    },
     enabled: !!schemaId && !!params?.version && !!params?.target_version,
+    placeholderData: EMPTY_DIFF,
+    retry: false,
   });
 
 export const useRollbackSchemaVersion = (schemaId: string) => {

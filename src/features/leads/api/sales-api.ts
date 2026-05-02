@@ -8,7 +8,7 @@ import type {
   UpdateSalesPayload,
 } from "../types/leads-api";
 
-const BASE = `${services.sales}/v1/internal/saleses`;
+const BASE = `${services.sales}/saleses`;
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;

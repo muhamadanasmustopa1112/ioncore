@@ -67,7 +67,8 @@ export type EnterpriseCategory =
   | "infrastructure";
 
 export type EnterpriseDeliveryType = "ion_direct" | "vendor_supplied" | "hybrid";
-export type EnterprisePricingType = "fixed" | "negotiated" | "usage_based";
+export type EnterprisePricingType = "fixed" | "negotiated" | "vendor_quoted";
+export type EnterpriseUnit = "monthly" | "one_time" | "per_unit" | "per_m2" | "per_rack";
 
 export interface EnterpriseSlaTemplate {
   uptime_percentage: number;
@@ -80,6 +81,7 @@ export interface EnterpriseService {
   name: string;
   category: EnterpriseCategory;
   delivery_type: EnterpriseDeliveryType;
+  unit: EnterpriseUnit;
   base_price: number;
   pricing_type: EnterprisePricingType;
   sla_template: EnterpriseSlaTemplate;
@@ -110,6 +112,7 @@ export interface CreateEnterpriseServicePayload {
   name: string;
   category: EnterpriseCategory;
   delivery_type: EnterpriseDeliveryType;
+  unit: EnterpriseUnit;
   base_price: number;
   pricing_type: EnterprisePricingType;
   sla_template: EnterpriseSlaTemplate;
@@ -129,6 +132,7 @@ export interface Addon {
   price: number;
   one_time_charge: number;
   profile_change_id: string;
+  compatible_plans?: string[];
   is_wo_required: boolean;
   is_active: boolean;
   created_at: string;
@@ -154,6 +158,7 @@ export interface CreateAddonPayload {
   price: number;
   one_time_charge: number;
   profile_change_id?: string;
+  compatible_plans?: string[];
   is_wo_required: boolean;
   is_active: boolean;
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { RiArrowRightUpLine, RiShoppingBag3Line, RiCheckboxCircleLine } from "@remixicon/react";
+import { RiArrowRightUpLine, RiShoppingBag3Line, RiCheckboxCircleLine, RiUserAddLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +28,7 @@ import {
 } from "../api/leads-queries";
 import type { LeadActivityType, LeadStatus } from "../types/leads-api";
 import { RerouteLeadSheet } from "./reroute-lead-sheet";
+import { ConvertLeadSheet } from "./convert-lead-sheet";
 import { ProductSelectorSheet } from "@/features/products/components/product-selector-sheet";
 import type { BroadbandPlan, Addon } from "@/features/products/types/products";
 
@@ -48,6 +49,7 @@ export function LeadDetail() {
   const { data: lead, isLoading } = useLead(id);
 
   const [rerouteOpen, setRerouteOpen] = useState(false);
+  const [convertOpen, setConvertOpen] = useState(false);
   const [productSelectorOpen, setProductSelectorOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<BroadbandPlan | null>(null);
   const [selectedAddons, setSelectedAddons] = useState<Addon[]>([]);
@@ -86,10 +88,24 @@ export function LeadDetail() {
             <RiArrowRightUpLine className="size-4" />
             Reroute
           </Button>
+          {lead.status !== "converted" && (
+            <Button size="sm" onClick={() => setConvertOpen(true)} className="gap-1">
+              <RiUserAddLine className="size-4" />
+              Convert
+            </Button>
+          )}
         </div>
       </div>
 
       <RerouteLeadSheet lead={lead} open={rerouteOpen} onClose={() => setRerouteOpen(false)} />
+
+      <ConvertLeadSheet
+        lead={lead}
+        selectedPlan={selectedPlan}
+        selectedAddons={selectedAddons}
+        open={convertOpen}
+        onClose={() => setConvertOpen(false)}
+      />
 
       <ProductSelectorSheet
         open={productSelectorOpen}

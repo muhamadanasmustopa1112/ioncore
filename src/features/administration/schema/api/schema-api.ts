@@ -2,9 +2,9 @@ import { services } from "@/config/constants";
 import { userServiceApi } from "@/features/user-service/api/client";
 import { SchemaRecord, SchemaVersion } from "../types";
 
-const BASE = `${services.ruleScheme}/v1/schemas`;
-const VERSIONS_BASE = `${services.ruleScheme}/v1/schema-versions`;
-const APPROVALS_BASE = `${services.ruleScheme}/v1/schema-version-approvals`;
+const BASE = `${services.ruleScheme}/schemas`;
+const VERSIONS_BASE = `${services.ruleScheme}/schema-versions`;
+const APPROVALS_BASE = `${services.ruleScheme}/schema-version-approvals`;
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;
