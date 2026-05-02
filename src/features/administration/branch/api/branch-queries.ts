@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { BranchData, BranchLevel, BranchType } from "../types";
-import { BranchFlatDto, BranchPayload, BranchTreeNode, AreaTreeDto, SubAreaTreeDto } from "../types/branch-api";
+import { BranchDetailDto, BranchFlatDto, BranchPayload, BranchTreeNode, AreaTreeDto, SubAreaTreeDto } from "../types/branch-api";
 import {
   getBranchList,
   getBranchTree,
+  getBranchById,
   listRegional,
   listArea,
   createRegional,
@@ -96,6 +97,28 @@ export function flattenBranchTree(nodes: BranchTreeNode[]): BranchData[] {
   return result;
 }
 
+// ─── Helpers: map BranchDetailDto → BranchData ───────────────────────────────
+
+function mapBranchDetailToData(dto: BranchDetailDto): BranchData {
+  const level = dto.level.toLowerCase() as BranchLevel;
+  return {
+    id: dto.id,
+    name: dto.name,
+    code: dto.code,
+    level,
+    parentId: dto.branch_area?.id ?? dto.branch_regional?.id ?? null,
+    parentName: dto.branch_area?.branch_name ?? dto.branch_regional?.branch_name,
+    branchType: dto.type as BranchType | undefined,
+    address: dto.address,
+    geographic_polygon: dto.geographic_polygon ?? undefined,
+    active: dto.is_active,
+    createdAt: dto.created_at,
+    updatedAt: dto.updated_at,
+    _regionalId: dto.branch_regional?.id,
+    _areaId: dto.branch_area?.id,
+  };
+}
+
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 export function useBranchList(params: { page?: number; per_page?: number } = {}) {
@@ -140,6 +163,20 @@ export function useAreaList(regionalId: string) {
     },
     enabled: !!regionalId,
     placeholderData: [],
+  });
+}
+
+export function useBranchDetail(branch: BranchData | null) {
+  return useQuery({
+    queryKey: [...branchKeys.all, "detail", branch?.id] as const,
+    queryFn: async (): Promise<BranchData | null> => {
+      if (!branch) return null;
+      const res = await getBranchById(branch.id);
+      if (!res.data) return null;
+      return mapBranchDetailToData(res.data);
+    },
+    enabled: !!branch,
+    retry: false,
   });
 }
 

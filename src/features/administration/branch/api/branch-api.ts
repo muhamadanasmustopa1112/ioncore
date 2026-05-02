@@ -2,6 +2,7 @@ import { services } from "@/config/constants";
 import { userServiceApi } from "@/features/user-service/api/client";
 import {
   ApiResponse,
+  BranchDetailDto,
   BranchListResponse,
   BranchListParams,
   BranchPayload,
@@ -16,6 +17,14 @@ const BASE = `${services.branch}/branch`;
 
 function cast<T>(p: unknown): Promise<T> {
   return p as Promise<T>;
+}
+
+// ─── Detail ───────────────────────────────────────────────────────────────────
+
+export function getBranchById(id: string) {
+  return cast<ApiResponse<BranchDetailDto>>(
+    userServiceApi.get(`${BASE}/${id}`)
+  );
 }
 
 // ─── List ─────────────────────────────────────────────────────────────────────

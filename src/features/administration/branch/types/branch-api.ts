@@ -113,6 +113,25 @@ export interface BranchTreeResponse {
   metadata: PaginationMeta;
 }
 
+// ─── Branch Detail (GET /branch/:id) ─────────────────────────────────────────
+
+export interface BranchDetailDto {
+  id: string;
+  name: string;
+  code: string;
+  level: string;
+  type?: string;
+  is_active: boolean;
+  address?: string;
+  geographic_polygon?: string | null;
+  branch_regional?: { id: string; branch_name: string } | null;
+  branch_area?: { id: string; branch_name: string } | null;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
 // ─── Query Params ─────────────────────────────────────────────────────────────
 
 export interface BranchListParams {

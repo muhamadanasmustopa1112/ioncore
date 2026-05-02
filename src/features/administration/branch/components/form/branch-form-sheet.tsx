@@ -10,7 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useBranchStore } from "../../store/branch";
-import { useCreateBranch, useUpdateBranch } from "../../api/branch-queries";
+import { useCreateBranch, useUpdateBranch, useBranchDetail } from "../../api/branch-queries";
 import { BranchForm } from "./branch-form";
 import { BranchLevel } from "../../types";
 
@@ -24,6 +24,10 @@ export function BranchFormSheet() {
   const isEditMode = form === "edit";
   const isDetailMode = form === "details";
 
+  const { data: detailBranch } = useBranchDetail(
+    isEditMode || isDetailMode ? selectedBranch : null
+  );
+
   const createBranch = useCreateBranch();
   const updateBranch = useUpdateBranch();
 
@@ -33,6 +37,7 @@ export function BranchFormSheet() {
     name: string;
     code: string;
     is_active: boolean;
+    type: string;
     level: BranchLevel;
     regionalId?: string;
     areaId?: string;
@@ -43,6 +48,7 @@ export function BranchFormSheet() {
       name: formData.name,
       code: formData.code,
       is_active: formData.is_active,
+      type: formData.type,
       address: formData.address,
       geographic_polygon: formData.geographic_polygon,
     };
@@ -99,7 +105,7 @@ export function BranchFormSheet() {
 
         {/* Body */}
         <SheetBody className="flex-1 p-0 overflow-hidden">
-          <BranchForm onSubmit={handleFormSubmit} />
+          <BranchForm onSubmit={handleFormSubmit} branchData={detailBranch ?? null} />
         </SheetBody>
 
         {/* Footer */}

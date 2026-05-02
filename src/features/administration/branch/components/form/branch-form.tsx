@@ -19,7 +19,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useBranchStore } from "../../store/branch";
 import { useAreaList, useRegionalList } from "../../api/branch-queries";
-import { BranchLevel } from "../../types";
+import { BranchData, BranchLevel } from "../../types";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -27,6 +27,7 @@ const branchSchema = z
   .object({
     name: z.string().min(1, "Branch name is required"),
     code: z.string().min(1, "Branch code is required"),
+    type: z.enum(["office", "noc", "warehouse"]),
     level: z.enum(["regional", "area", "sub_area"]),
     active: z.boolean(),
     regionalId: z.string().optional(),
@@ -51,10 +52,12 @@ type BranchFormValues = z.infer<typeof branchSchema>;
 // ─── Props ────────────────────────────────────────────────────────────────────
 
 interface BranchFormProps {
+  branchData?: BranchData | null;
   onSubmit?: (payload: {
     name: string;
     code: string;
     is_active: boolean;
+    type: string;
     level: BranchLevel;
     regionalId?: string;
     areaId?: string;
@@ -65,9 +68,10 @@ interface BranchFormProps {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function BranchForm({ onSubmit }: BranchFormProps) {
+export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const formMode = useBranchStore((s) => s.form);
-  const selectedBranch = useBranchStore((s) => s.selectedBranch);
+  const storedBranch = useBranchStore((s) => s.selectedBranch);
+  const selectedBranch = branchData ?? storedBranch;
   const isEditMode = formMode === "edit";
   const isDetailMode = formMode === "details";
 
@@ -77,6 +81,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
     () => ({
       name: "",
       code: "",
+      type: "office" as const,
       level: "regional" as const,
       active: true,
       regionalId: "",
@@ -115,6 +120,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
       reset({
         name: selectedBranch.name,
         code: selectedBranch.code,
+        type: (selectedBranch.branchType as "office" | "noc" | "warehouse" | undefined) ?? "office",
         level: selectedBranch.level,
         active: selectedBranch.active,
         regionalId: selectedBranch._regionalId ?? "",
@@ -124,7 +130,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
       });
     }
     if (!selectedBranch && !isEditMode && !isDetailMode) {
-      reset({ name: "", code: "", level: "regional", active: true, regionalId: "", areaId: "", address: "", geographic_polygon: "" });
+      reset({ name: "", code: "", type: "office", level: "regional", active: true, regionalId: "", areaId: "", address: "", geographic_polygon: "" });
     }
   }, [selectedBranch, isEditMode, isDetailMode, reset]);
 
@@ -140,6 +146,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
       name: values.name,
       code: values.code,
       is_active: values.active,
+      type: values.type,
       level: values.level,
       regionalId: isRegional ? undefined : values.regionalId,
       areaId: isSubArea ? values.areaId : undefined,
@@ -175,7 +182,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
               <h3 className="text-sm font-semibold">General Information</h3>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-1">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
                   Branch Name <span className="text-red-500">*</span>
@@ -189,7 +196,8 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                   <p className="text-xs text-destructive">{errors.name.message}</p>
                 )}
               </div>
-
+            </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
                   Branch Code <span className="text-red-500">*</span>
@@ -202,6 +210,30 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                 />
                 {errors.code && (
                   <p className="text-xs text-destructive">{errors.code.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Branch Type <span className="text-red-500">*</span>
+                </Label>
+                {isDetailMode ? (
+                  <Input value={watch("type").charAt(0).toUpperCase() + watch("type").slice(1)} disabled />
+                ) : (
+                  <Controller
+                    name="type"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="office">Office</SelectItem>
+                          <SelectItem value="noc">NOC</SelectItem>
+                          <SelectItem value="warehouse">Warehouse</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 )}
               </div>
             </div>
