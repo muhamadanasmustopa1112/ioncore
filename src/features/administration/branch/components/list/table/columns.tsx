@@ -2,8 +2,15 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
-import { BranchData, BranchLevel } from "../../../types";
+import { BranchData, BranchLevel, BranchType } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
+
+const typeConfig: Record<BranchType, { label: string; className: string }> = {
+  office:    { label: "Office",    className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400" },
+  noc:       { label: "NOC",       className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
+  warehouse: { label: "Warehouse", className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400" },
+  hybrid:    { label: "Hybrid",    className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300" },
+};
 
 const levelConfig: Record<BranchLevel, { label: string; className: string }> = {
   regional: { label: "Regional", className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
@@ -46,6 +53,23 @@ export const columns: ColumnDef<BranchData>[] = [
     ),
     cell: ({ row }) => {
       const config = levelConfig[row.original.level];
+      return <span className={config.className}>{config.label}</span>;
+    },
+    enableSorting: true,
+    size: 110,
+  },
+  {
+    id: "branchType",
+    accessorFn: (row) => row.branchType,
+    header: ({ column }) => (
+      <DataGridColumnHeader title="Type" column={column} className="text-foreground font-semibold" />
+    ),
+    cell: ({ row }) => {
+      const type = row.original.branchType;
+      if (!type || !(type in typeConfig)) {
+        return <span className="text-muted-foreground/40">—</span>;
+      }
+      const config = typeConfig[type as BranchType];
       return <span className={config.className}>{config.label}</span>;
     },
     enableSorting: true,

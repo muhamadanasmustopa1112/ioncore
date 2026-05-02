@@ -3,13 +3,7 @@
 import { RiAddLine, RiMapPin2Line } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { BranchCombobox } from "../branch-combobox";
 import {
   Toolbar,
   ToolbarActions,
@@ -23,11 +17,6 @@ import { useCoverageStore } from "../../store/coverage";
 import { CoverageList } from "./list/coverage-list";
 import { CoverageFormSheet } from "./form/coverage-form-sheet";
 
-const levelLabel: Record<string, string> = {
-  regional: "Regional",
-  area: "Area",
-  sub_area: "Sub Area",
-};
 
 export function BranchCoveragePage() {
   const { data: branches = [] } = useBranchTree();
@@ -91,26 +80,11 @@ export function BranchCoveragePage() {
         <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
           Select Branch:
         </span>
-        <Select
-          value={selectedBranchId || "none"}
-          onValueChange={(v) => setSelectedBranchId(v === "none" ? "" : v)}
-        >
-          <SelectTrigger className="w-full sm:w-72">
-            <SelectValue placeholder="Choose a branch to manage..." />
-          </SelectTrigger>
-          <SelectContent>
-            {branches.map((b) => (
-              <SelectItem key={b.id} value={b.id}>
-                <span className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-16 shrink-0">
-                    {levelLabel[b.level]}
-                  </span>
-                  {b.name}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <BranchCombobox
+          branches={branches}
+          value={selectedBranchId || ""}
+          onValueChange={setSelectedBranchId}
+        />
         {selectedBranch && (
           <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded">
             {selectedBranch.code}

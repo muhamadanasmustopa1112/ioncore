@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
-import { MapContainer, TileLayer, Polygon, Marker, Polyline, useMapEvents } from "react-leaflet";
+import { useMemo, useState, useCallback, useEffect } from "react";
+import { MapContainer, TileLayer, Polygon, Marker, Polyline, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
@@ -65,6 +65,15 @@ function DrawHandler({ onAdd }: { onAdd: (pt: LngLat) => void }) {
   return null;
 }
 
+function MapResizeController() {
+  const map = useMap();
+  useEffect(() => {
+    const timer = setTimeout(() => map.invalidateSize(), 100);
+    return () => clearTimeout(timer);
+  }, [map]);
+  return null;
+}
+
 // ─── Static preview map ───────────────────────────────────────────────────────
 
 function StaticMap({ rings }: { rings: LngLat[][] }) {
@@ -118,9 +127,10 @@ function DrawTool({ initial, onSave, onCancel }: { initial: LngLat[]; onSave: (g
           <CheckCheck className="size-3" /> Save
         </Button>
       </div>
-      <div className="flex-1 rounded-md overflow-hidden border border-border" style={{ minHeight: 240 }}>
-        <MapContainer center={center} zoom={13} style={{ height: "100%", width: "100%", cursor: "crosshair" }} scrollWheelZoom attributionControl={false}>
+      <div className="rounded-md overflow-hidden border border-border h-[240px] md:h-[300px]">
+        <MapContainer center={center} zoom={13} className="h-full w-full cursor-crosshair" scrollWheelZoom attributionControl={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <MapResizeController />
           <DrawHandler onAdd={add} />
           {positions.length >= 3 && (
             <Polygon positions={positions} pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.12, weight: 2, dashArray: "4 4" }} />

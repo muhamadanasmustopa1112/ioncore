@@ -19,7 +19,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useBranchStore } from "../../store/branch";
 import { useAreaList, useRegionalList } from "../../api/branch-queries";
-import { BranchData, BranchLevel } from "../../types";
+import { BranchData, BranchLevel, GeographicPolygon } from "../../types";
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -34,8 +34,15 @@ const branchSchema = z
     areaId: z.string().optional(),
     address: z.string().optional(),
     geographic_polygon: z.string().optional().refine((val) => {
-      if (!val || val.trim() === "") return true;
-      try { JSON.parse(val); return true; } catch { return false; }
+      if (!val) return true;
+      const trimmed = val.trim();
+      if (!trimmed || trimmed === "undefined") return true;
+      try {
+        const parsed = JSON.parse(trimmed);
+        return !!parsed && typeof parsed === "object";
+      } catch {
+        return false;
+      }
     }, "Must be valid JSON (GeoJSON coordinate array)"),
   })
   .superRefine((data, ctx) => {
@@ -48,6 +55,32 @@ const branchSchema = z
   });
 
 type BranchFormValues = z.infer<typeof branchSchema>;
+
+const parseGeographicPolygon = (value?: string) => {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "undefined") return undefined;
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (parsed && typeof parsed === "object") return parsed as GeographicPolygon;
+    return undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const toPolygonInputValue = (value?: GeographicPolygon | string | null) => {
+  if (!value) return "";
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed === "undefined" ? "" : value;
+  }
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return "";
+  }
+};
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -62,7 +95,7 @@ interface BranchFormProps {
     regionalId?: string;
     areaId?: string;
     address?: string;
-    geographic_polygon?: string;
+    geographic_polygon?: GeographicPolygon;
   }) => void;
 }
 
@@ -126,7 +159,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
         regionalId: selectedBranch._regionalId ?? "",
         areaId: selectedBranch._areaId ?? "",
         address: selectedBranch.address ?? "",
-        geographic_polygon: selectedBranch.geographic_polygon ?? "",
+        geographic_polygon: toPolygonInputValue(selectedBranch.geographic_polygon),
       });
     }
     if (!selectedBranch && !isEditMode && !isDetailMode) {
@@ -151,7 +184,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
       regionalId: isRegional ? undefined : values.regionalId,
       areaId: isSubArea ? values.areaId : undefined,
       address: values.address?.trim() || undefined,
-      geographic_polygon: values.geographic_polygon?.trim() || undefined,
+      geographic_polygon: parseGeographicPolygon(values.geographic_polygon),
     });
   };
 

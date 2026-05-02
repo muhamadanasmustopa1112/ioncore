@@ -12,7 +12,7 @@ import {
 import { useBranchStore } from "../../store/branch";
 import { useCreateBranch, useUpdateBranch, useBranchDetail } from "../../api/branch-queries";
 import { BranchForm } from "./branch-form";
-import { BranchLevel } from "../../types";
+import { BranchLevel, GeographicPolygon } from "../../types";
 
 export function BranchFormSheet() {
   const branchSheetOpen = useBranchStore((s) => s.branchSheetOpen);
@@ -42,7 +42,7 @@ export function BranchFormSheet() {
     regionalId?: string;
     areaId?: string;
     address?: string;
-    geographic_polygon?: string;
+    geographic_polygon?: GeographicPolygon;
   }) => {
     const branchPayload = {
       name: formData.name,

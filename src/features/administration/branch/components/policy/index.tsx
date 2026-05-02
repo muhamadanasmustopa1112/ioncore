@@ -2,14 +2,8 @@
 
 import { RiAddLine, RiShieldLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { BranchCombobox } from "../branch-combobox";
 import {
   Toolbar,
   ToolbarActions,
@@ -23,11 +17,6 @@ import { usePolicyStore } from "../../store/policy";
 import { PolicyList } from "./list/policy-list";
 import { PolicyFormSheet } from "./form/policy-form-sheet";
 
-const levelLabel: Record<string, string> = {
-  regional: "Regional",
-  area: "Area",
-  sub_area: "Sub Area",
-};
 
 export function BranchPolicyPage() {
   const { data: branches = [] } = useBranchTree();
@@ -91,26 +80,11 @@ export function BranchPolicyPage() {
         <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
           Select Branch:
         </span>
-        <Select
-          value={selectedBranchId || "none"}
-          onValueChange={(v) => setSelectedBranchId(v === "none" ? "" : v)}
-        >
-          <SelectTrigger className="w-full sm:w-72">
-            <SelectValue placeholder="Choose a branch to manage..." />
-          </SelectTrigger>
-          <SelectContent>
-            {branches.map((b) => (
-              <SelectItem key={b.id} value={b.id}>
-                <span className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground w-16 shrink-0">
-                    {levelLabel[b.level]}
-                  </span>
-                  {b.name}
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <BranchCombobox
+          branches={branches}
+          value={selectedBranchId || ""}
+          onValueChange={setSelectedBranchId}
+        />
         {selectedBranch && (
           <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded">
             {selectedBranch.code}

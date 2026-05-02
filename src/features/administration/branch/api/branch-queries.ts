@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { BranchData, BranchLevel, BranchType } from "../types";
+import { BranchData, BranchLevel, BranchType, GeographicPolygon } from "../types";
 import { BranchDetailDto, BranchFlatDto, BranchPayload, BranchTreeNode, AreaTreeDto, SubAreaTreeDto } from "../types/branch-api";
 import {
   getBranchList,
@@ -30,6 +30,23 @@ export const branchKeys = {
 
 // ─── Helpers: map flat API item → BranchData ─────────────────────────────────
 
+function normalizeGeographicPolygon(value: unknown): GeographicPolygon | undefined {
+  if (!value) return undefined;
+  if (typeof value !== "string") {
+    if (typeof value === "object") return value as GeographicPolygon;
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === "undefined") return undefined;
+  try {
+    const parsed = JSON.parse(trimmed);
+    if (parsed && typeof parsed === "object") return parsed as GeographicPolygon;
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function mapBranchFlatToData(dto: BranchFlatDto): BranchData {
   return {
     id: dto.id,
@@ -40,7 +57,7 @@ function mapBranchFlatToData(dto: BranchFlatDto): BranchData {
     parentName: dto.parent_branch_name ?? undefined,
     branchType: dto.branch_type.toLowerCase() as BranchType,
     address: dto.address,
-    geographic_polygon: dto.geographic_polygon,
+    geographic_polygon: normalizeGeographicPolygon(dto.geographic_polygon),
     active: dto.is_active,
     createdAt: "",
     updatedAt: "",
@@ -110,7 +127,7 @@ function mapBranchDetailToData(dto: BranchDetailDto): BranchData {
     parentName: dto.branch_area?.branch_name ?? dto.branch_regional?.branch_name,
     branchType: dto.type as BranchType | undefined,
     address: dto.address,
-    geographic_polygon: dto.geographic_polygon ?? undefined,
+    geographic_polygon: normalizeGeographicPolygon(dto.geographic_polygon),
     active: dto.is_active,
     createdAt: dto.created_at,
     updatedAt: dto.updated_at,

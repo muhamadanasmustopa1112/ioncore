@@ -1,6 +1,7 @@
 export type BranchLevel = "regional" | "area" | "sub_area";
 export type BranchType = "office" | "noc" | "warehouse" | "hybrid";
 export type BranchFormMode = "new" | "edit" | "details" | null;
+export type GeographicPolygon = Record<string, unknown> | unknown[];
 
 export interface BranchData {
   id: string;
@@ -11,7 +12,7 @@ export interface BranchData {
   parentName?: string;
   branchType?: BranchType;
   address?: string;
-  geographic_polygon?: string;
+  geographic_polygon?: GeographicPolygon;
   active: boolean;
   createdAt: string;
   updatedAt: string;

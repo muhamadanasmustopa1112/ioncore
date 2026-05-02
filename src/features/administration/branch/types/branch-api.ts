@@ -1,3 +1,5 @@
+import type { GeographicPolygon } from "./branch";
+
 // ─── API Request Payloads ─────────────────────────────────────────────────────
 
 export interface BranchPayload {
@@ -8,7 +10,7 @@ export interface BranchPayload {
   level?: string;
   branch_parent_id?: string | null;
   address?: string;
-  geographic_polygon?: string;
+  geographic_polygon?: GeographicPolygon;
 }
 
 // ─── API Response Envelope ────────────────────────────────────────────────────
@@ -44,7 +46,7 @@ export interface BranchDto {
   branch_parent_id?: string;
   is_active: boolean;
   address?: string;
-  geographic_polygon?: string;
+  geographic_polygon?: GeographicPolygon | string;
   created_at: string;
   updated_at: string;
   created_by?: string;
@@ -68,7 +70,7 @@ export interface BranchFlatDto {
   is_active: boolean;
   parent_branch_name: string | null;
   address?: string;
-  geographic_polygon?: string;
+  geographic_polygon?: GeographicPolygon | string;
 }
 
 export interface BranchFlatListResponse {
@@ -123,7 +125,7 @@ export interface BranchDetailDto {
   type?: string;
   is_active: boolean;
   address?: string;
-  geographic_polygon?: string | null;
+  geographic_polygon?: GeographicPolygon | string | null;
   branch_regional?: { id: string; branch_name: string } | null;
   branch_area?: { id: string; branch_name: string } | null;
   created_at: string;
