@@ -7,6 +7,8 @@ export interface BranchPayload {
   type?: string;
   level?: string;
   branch_parent_id?: string | null;
+  address?: string;
+  geographic_polygon?: string;
 }
 
 // ─── API Response Envelope ────────────────────────────────────────────────────
@@ -41,6 +43,8 @@ export interface BranchDto {
   type?: string;
   branch_parent_id?: string;
   is_active: boolean;
+  address?: string;
+  geographic_polygon?: string;
   created_at: string;
   updated_at: string;
   created_by?: string;
@@ -63,6 +67,8 @@ export interface BranchFlatDto {
   branch_type: string;
   is_active: boolean;
   parent_branch_name: string | null;
+  address?: string;
+  geographic_polygon?: string;
 }
 
 export interface BranchFlatListResponse {

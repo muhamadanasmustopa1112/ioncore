@@ -2,20 +2,13 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
-import { BranchData, BranchLevel, BranchType } from "../../../types";
+import { BranchData, BranchLevel } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
 
 const levelConfig: Record<BranchLevel, { label: string; className: string }> = {
   regional: { label: "Regional", className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
   area: { label: "Area", className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
   sub_area: { label: "Sub Area", className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300" },
-};
-
-const typeConfig: Record<BranchType, { label: string; className: string }> = {
-  office: { label: "Office", className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" },
-  noc: { label: "NOC", className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
-  warehouse: { label: "Warehouse", className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
-  hybrid: { label: "Hybrid", className: "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400" },
 };
 
 export const columns: ColumnDef<BranchData>[] = [
@@ -56,7 +49,7 @@ export const columns: ColumnDef<BranchData>[] = [
       return <span className={config.className}>{config.label}</span>;
     },
     enableSorting: true,
-    size: 120,
+    size: 110,
   },
   {
     id: "parentName",
@@ -73,19 +66,23 @@ export const columns: ColumnDef<BranchData>[] = [
     size: 200,
   },
   {
-    id: "branchType",
-    accessorFn: (row) => row.branchType,
+    id: "geographic_polygon",
+    accessorFn: (row) => row.geographic_polygon,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Type" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Polygon" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => {
-      const type = row.original.branchType;
-      if (!type) return <span className="text-muted-foreground/40">—</span>;
-      const config = typeConfig[type];
-      return <span className={config.className}>{config.label}</span>;
-    },
-    enableSorting: true,
-    size: 120,
+    cell: ({ row }) =>
+      row.original.geographic_polygon ? (
+        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400">
+          Defined
+        </span>
+      ) : (
+        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-muted text-muted-foreground">
+          None
+        </span>
+      ),
+    enableSorting: false,
+    size: 90,
   },
   {
     id: "active",

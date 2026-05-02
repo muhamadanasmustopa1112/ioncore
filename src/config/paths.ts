@@ -275,6 +275,12 @@ export const paths = {
           getHref: () => "/administration/schema",
         },
       },
+      products: {
+        root: {
+          path: "/administration/products",
+          getHref: () => "/administration/products",
+        },
+      },
       checklist: {
         root: {
           path: "/administration/checklist",

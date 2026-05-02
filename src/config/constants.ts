@@ -45,7 +45,7 @@ export const services = {
   user: "/ion-user-service/api/v1",
   userOrigin: "/ion-user-service/api/v1",
   branch: "/ion-branch-service/api/v1",
-  ruleScheme: "/ion-rule-scheme-service/api/v1",
+  ruleScheme: "/ion-rule-scheme-service/v1",
   product: "/ion-product-service/api/v1",
   sales: "/ion-sales-service/api/v1",
   order: "/ion-order-service/api/v1",

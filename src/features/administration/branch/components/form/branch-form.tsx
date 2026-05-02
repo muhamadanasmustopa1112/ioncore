@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { RiInformationLine, RiMapPin2Line } from "@remixicon/react";
+import { RiInformationLine, RiMapPinLine } from "@remixicon/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { PolygonPreview } from "./polygon-preview";
 import {
   Select,
   SelectContent,
@@ -31,6 +32,10 @@ const branchSchema = z
     regionalId: z.string().optional(),
     areaId: z.string().optional(),
     address: z.string().optional(),
+    geographic_polygon: z.string().optional().refine((val) => {
+      if (!val || val.trim() === "") return true;
+      try { JSON.parse(val); return true; } catch { return false; }
+    }, "Must be valid JSON (GeoJSON coordinate array)"),
   })
   .superRefine((data, ctx) => {
     if ((data.level === "area" || data.level === "sub_area") && !data.regionalId) {
@@ -53,13 +58,16 @@ interface BranchFormProps {
     level: BranchLevel;
     regionalId?: string;
     areaId?: string;
+    address?: string;
+    geographic_polygon?: string;
   }) => void;
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function BranchForm({ onSubmit }: BranchFormProps) {
-  const { form: formMode, selectedBranch } = useBranchStore();
+  const formMode = useBranchStore((s) => s.form);
+  const selectedBranch = useBranchStore((s) => s.selectedBranch);
   const isEditMode = formMode === "edit";
   const isDetailMode = formMode === "details";
 
@@ -74,6 +82,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
       regionalId: "",
       areaId: "",
       address: "",
+      geographic_polygon: "",
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -101,7 +110,6 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
   const isArea = level === "area";
   const isSubArea = level === "sub_area";
 
-  // Populate form when editing or viewing
   useEffect(() => {
     if (selectedBranch && (isEditMode || isDetailMode)) {
       reset({
@@ -112,22 +120,14 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
         regionalId: selectedBranch._regionalId ?? "",
         areaId: selectedBranch._areaId ?? "",
         address: selectedBranch.address ?? "",
+        geographic_polygon: selectedBranch.geographic_polygon ?? "",
       });
     }
     if (!selectedBranch && !isEditMode && !isDetailMode) {
-      reset({
-        name: "",
-        code: "",
-        level: "regional",
-        active: true,
-        regionalId: "",
-        areaId: "",
-        address: "",
-      });
+      reset({ name: "", code: "", level: "regional", active: true, regionalId: "", areaId: "", address: "", geographic_polygon: "" });
     }
   }, [selectedBranch, isEditMode, isDetailMode, reset]);
 
-  // Reset parent IDs when level changes in create mode
   useEffect(() => {
     if (!isEditMode && !isDetailMode) {
       setValue("regionalId", "");
@@ -143,17 +143,22 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
       level: values.level,
       regionalId: isRegional ? undefined : values.regionalId,
       areaId: isSubArea ? values.areaId : undefined,
+      address: values.address?.trim() || undefined,
+      geographic_polygon: values.geographic_polygon?.trim() || undefined,
     });
   };
 
-  // Expose submit via window so SheetFooter button can trigger it
+  const submitRef = useRef<(() => void) | undefined>(undefined);
+  submitRef.current = handleSubmit(onFormSubmit);
+
   useEffect(() => {
-    (window as unknown as Record<string, unknown>).__branchFormSubmit =
-      handleSubmit(onFormSubmit);
+    (window as unknown as Record<string, unknown>).__branchFormSubmit = () =>
+      submitRef.current?.();
     return () => {
       delete (window as unknown as Record<string, unknown>).__branchFormSubmit;
     };
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const levelDisplayName = (l: BranchLevel) =>
     l === "sub_area" ? "Sub Area" : l.charAt(0).toUpperCase() + l.slice(1);
@@ -162,6 +167,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
+
           {/* General Information */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
@@ -170,7 +176,6 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Branch Name */}
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
                   Branch Name <span className="text-red-500">*</span>
@@ -185,19 +190,15 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                 )}
               </div>
 
-              {/* Branch Code */}
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
                   Branch Code <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   placeholder="e.g. JKT-PST"
-                  {...register("code", {
-                    onChange: (e) =>
-                      setValue("code", e.target.value.toUpperCase()),
-                  })}
+                  {...register("code")}
                   disabled={isDetailMode}
-                  className="font-mono uppercase"
+                  className="font-mono"
                 />
                 {errors.code && (
                   <p className="text-xs text-destructive">{errors.code.message}</p>
@@ -206,7 +207,6 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {/* Branch Level */}
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
                   Branch Level <span className="text-red-500">*</span>
@@ -220,9 +220,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                     render={({ field }) => (
                       <Select
                         value={field.value}
-                        onValueChange={(val) =>
-                          field.onChange(val as BranchLevel)
-                        }
+                        onValueChange={(val) => field.onChange(val as BranchLevel)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select Level" />
@@ -238,16 +236,10 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                 )}
               </div>
 
-              {/* Status */}
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Status
-                </Label>
+                <Label className="text-xs font-medium text-muted-foreground">Status</Label>
                 {isDetailMode ? (
-                  <Input
-                    value={watch("active") ? "Active" : "Inactive"}
-                    disabled
-                  />
+                  <Input value={watch("active") ? "Active" : "Inactive"} disabled />
                 ) : (
                   <Controller
                     name="active"
@@ -257,9 +249,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                         value={field.value ? "true" : "false"}
                         onValueChange={(val) => field.onChange(val === "true")}
                       >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="true">Active</SelectItem>
                           <SelectItem value="false">Inactive</SelectItem>
@@ -279,10 +269,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                 </Label>
                 {isDetailMode ? (
                   <Input
-                    value={
-                      regionals.find((r) => r.id === regionalId)?.name ??
-                      regionalId
-                    }
+                    value={regionals.find((r) => r.id === regionalId)?.name ?? regionalId}
                     disabled
                   />
                 ) : (
@@ -302,9 +289,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                         </SelectTrigger>
                         <SelectContent>
                           {regionals.map((r) => (
-                            <SelectItem key={r.id} value={r.id}>
-                              {r.name}
-                            </SelectItem>
+                            <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -312,9 +297,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                   />
                 )}
                 {errors.regionalId && (
-                  <p className="text-xs text-destructive">
-                    {errors.regionalId.message}
-                  </p>
+                  <p className="text-xs text-destructive">{errors.regionalId.message}</p>
                 )}
               </div>
             )}
@@ -327,10 +310,7 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                 </Label>
                 {isDetailMode ? (
                   <Input
-                    value={
-                      areas.find((a) => a.id === watch("areaId"))?.name ??
-                      watch("areaId")
-                    }
+                    value={areas.find((a) => a.id === watch("areaId"))?.name ?? watch("areaId")}
                     disabled
                   />
                 ) : (
@@ -340,25 +320,17 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                     render={({ field }) => (
                       <Select
                         value={field.value || "none"}
-                        onValueChange={(v) =>
-                          field.onChange(v === "none" ? "" : v)
-                        }
+                        onValueChange={(v) => field.onChange(v === "none" ? "" : v)}
                         disabled={!regionalId}
                       >
                         <SelectTrigger>
                           <SelectValue
-                            placeholder={
-                              !regionalId
-                                ? "Select Regional first"
-                                : "Select Area Branch"
-                            }
+                            placeholder={!regionalId ? "Select Regional first" : "Select Area Branch"}
                           />
                         </SelectTrigger>
                         <SelectContent>
                           {areas.map((a) => (
-                            <SelectItem key={a.id} value={a.id}>
-                              {a.name}
-                            </SelectItem>
+                            <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -366,32 +338,43 @@ export function BranchForm({ onSubmit }: BranchFormProps) {
                   />
                 )}
                 {errors.areaId && (
-                  <p className="text-xs text-destructive">
-                    {errors.areaId.message}
-                  </p>
+                  <p className="text-xs text-destructive">{errors.areaId.message}</p>
                 )}
               </div>
             )}
           </div>
 
-          {/* Location */}
+          {/* Location & Geographic Boundary */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 pb-1 border-b border-border/50">
-              <RiMapPin2Line className="size-4 text-emerald-500" />
-              <h3 className="text-sm font-semibold">Location</h3>
+              <RiMapPinLine className="size-4 text-emerald-500" />
+              <h3 className="text-sm font-semibold">Location & Geographic Boundary</h3>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Address
-              </Label>
+              <Label className="text-xs font-medium text-muted-foreground">Address</Label>
               <Textarea
                 placeholder="Enter branch address..."
-                className="min-h-[80px] resize-none"
+                className="min-h-[72px] resize-none"
                 {...register("address")}
                 disabled={isDetailMode}
               />
             </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-muted-foreground">
+                Coverage Polygon
+                <span className="ml-1.5 text-muted-foreground/60 font-normal">(GeoJSON Polygon — for address-to-area resolution)</span>
+              </Label>
+              <PolygonPreview
+                value={watch("geographic_polygon") ?? ""}
+                onChange={isDetailMode ? undefined : (v) => setValue("geographic_polygon", v)}
+                readOnly={isDetailMode}
+              />
+              {errors.geographic_polygon && (
+                <p className="text-xs text-destructive">{errors.geographic_polygon.message}</p>
+              )}
+            </div>
           </div>
+
         </div>
       </ScrollArea>
     </div>

@@ -38,6 +38,8 @@ function mapBranchFlatToData(dto: BranchFlatDto): BranchData {
     parentId: null,
     parentName: dto.parent_branch_name ?? undefined,
     branchType: dto.branch_type.toLowerCase() as BranchType,
+    address: dto.address,
+    geographic_polygon: dto.geographic_polygon,
     active: dto.is_active,
     createdAt: "",
     updatedAt: "",

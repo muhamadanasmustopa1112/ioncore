@@ -11,6 +11,7 @@ export interface BranchData {
   parentName?: string;
   branchType?: BranchType;
   address?: string;
+  geographic_polygon?: string;
   active: boolean;
   createdAt: string;
   updatedAt: string;
