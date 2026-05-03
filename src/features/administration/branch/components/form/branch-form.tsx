@@ -425,15 +425,15 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">
-                Coverage Polygon
-                <span className="ml-1.5 text-muted-foreground/60 font-normal">(GeoJSON Polygon — for address-to-area resolution)</span>
-              </Label>
               <PolygonPreview
                 value={watch("geographic_polygon") ?? ""}
                 onChange={isDetailMode ? undefined : (v) => setValue("geographic_polygon", v)}
                 readOnly={isDetailMode}
               />
+              <Label className="text-xs font-medium text-muted-foreground">
+                Coverage Polygon
+                <span className="ml-1.5 text-muted-foreground/60 font-normal">(GeoJSON Polygon — for address-to-area resolution)</span>
+              </Label>
               {errors.geographic_polygon && (
                 <p className="text-xs text-destructive">{errors.geographic_polygon.message}</p>
               )}
