@@ -63,11 +63,10 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
             {proofItems.map((item) => (
               <div
                 key={item.item_id}
-                className={`flex items-center gap-3 p-3 rounded-lg border ${
-                  item.completed
+                className={`flex items-center gap-3 p-3 rounded-lg border ${item.completed
                     ? "bg-emerald-50/50 border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-900/30"
                     : "bg-slate-50 border-slate-200 dark:bg-slate-900 dark:border-slate-800"
-                }`}
+                  }`}
               >
                 <div className={`size-5 rounded flex items-center justify-center shrink-0 ${item.completed ? "bg-emerald-500" : "border-2 border-slate-300 dark:border-slate-600"}`}>
                   {item.completed && <span className="text-white text-[10px] font-bold">✓</span>}
