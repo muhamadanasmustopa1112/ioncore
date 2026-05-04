@@ -112,7 +112,10 @@ export interface WorkOrderDashboardItem {
   type: WorkOrderType;
   state: WorkOrderState;
   priority: WorkOrderPriority;
+  customer_id?: string;
   customer_name: string;
+  customer_phone?: string;
+  customer_email?: string;
   site_name: string;
   area_id: string;
   sub_area_id: string;
