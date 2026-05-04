@@ -41,7 +41,7 @@ export const ProfileGroupForm = forwardRef<ProfileGroupFormRef, ProfileGroupForm
         const isEditMode = mode === "edit";
 
         const { data: routerResponse, isLoading: isLoadingRouters } = useRouters({
-            params: { length: 100, start: 1 }
+            params: { length: 100, start: 0 }
         });
         const routers = routerResponse?.data || [];
 

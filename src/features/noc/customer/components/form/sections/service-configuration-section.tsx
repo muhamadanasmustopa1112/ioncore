@@ -12,10 +12,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { useCustomerStore } from "../../../store/customer";
 import { Input } from "@/components/ui/input";
+import { useRouters } from "@/features/noc/router/api/get-routers";
+import { RouterItem } from "@/features/noc/router/types";
+import { usePPPProfiles } from "@/features/noc/service-plan/ppp-profile/api/get-ppp-profiles";
+import { PPPProfileItem } from "@/features/noc/service-plan/ppp-profile/types/ppp-profile";
+import { useBandwidths } from "@/features/noc/service-plan/bandwidth/api/get-bandwidths";
+import { BandwidthItem } from "@/features/noc/service-plan/bandwidth/types/bandwidth";
 
 export function ServiceConfigurationSection() {
     const { formData, updateFormData, form } = useCustomerStore();
     const isDetailMode = form === "details";
+
+    const { data: routerResponse, isLoading: isLoadingRouters } = useRouters({
+        params: { length: 100, start: 0 }
+    });
+    const routers = routerResponse?.data || [];
+
+    const { data: profileResponse, isLoading: isLoadingProfiles } = usePPPProfiles({
+        params: { limit: 100, page: 1 }
+    });
+    const profiles = profileResponse?.data || [];
+
+    const { data: bandwidthResponse, isLoading: isLoadingBandwidths } = useBandwidths({
+        params: { limit: 100, page: 1 }
+    });
+    const bandwidths = bandwidthResponse?.data || [];
 
     const handleChange = (field: string, value: any) => {
         updateFormData({ [field]: value });
@@ -41,15 +62,17 @@ export function ServiceConfigurationSection() {
                         <Select
                             value={formData.server_name || ""}
                             onValueChange={(v) => handleChange("server_name", v)}
-                            disabled={isDetailMode}
+                            disabled={isDetailMode || isLoadingRouters}
                         >
                             <SelectTrigger id="server_name">
-                                <SelectValue placeholder="Select Server" />
+                                <SelectValue placeholder={isLoadingRouters ? "Loading..." : "Select Server"} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="pppoe-jakarta">pppoe-jakarta</SelectItem>
-                                <SelectItem value="OPVN CLOUD SERVER">OPVN CLOUD SERVER</SelectItem>
-                                <SelectItem value="LOCAL SERVER 01">LOCAL SERVER 01</SelectItem>
+                                {routers.map((router: RouterItem) => (
+                                    <SelectItem key={router.id} value={router.shortname}>
+                                        {router.shortname}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
@@ -130,27 +153,42 @@ export function ServiceConfigurationSection() {
 
                     <div className="space-y-2">
                         <Label htmlFor="plan_name" className="text-xs font-medium text-muted-foreground">Plan Name</Label>
-                        <Select value={formData.plan_name || ""} onValueChange={(v) => handleChange("plan_name", v)} disabled={isDetailMode}>
+                        <Select
+                            value={formData.plan_name || ""}
+                            onValueChange={(v) => handleChange("plan_name", v)}
+                            disabled={isDetailMode || isLoadingProfiles}
+                        >
                             <SelectTrigger id="plan_name">
-                                <SelectValue placeholder="Select Plan" />
+                                <SelectValue placeholder={isLoadingProfiles ? "Loading..." : "Select Plan"} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="DEFAULT PPP">DEFAULT PPP</SelectItem>
-                                <SelectItem value="Home 10Mbps">Home 10Mbps</SelectItem>
-                                <SelectItem value="Home 25Mbps">Home 25Mbps</SelectItem>
+                                {profiles.map((profile: PPPProfileItem) => (
+                                    <SelectItem key={profile.id} value={profile.name}>
+                                        {profile.name}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="bandwidth" className="text-xs font-medium text-muted-foreground">Bandwidth Code</Label>
-                        <Input
-                            id="bandwidth"
-                            placeholder="bandwidth_code"
+                        <Select
                             value={formData.bandwidth || ""}
-                            onChange={(e) => handleChange("bandwidth", e.target.value)}
-                            disabled={isDetailMode}
-                        />
+                            onValueChange={(v) => handleChange("bandwidth", v)}
+                            disabled={isDetailMode || isLoadingBandwidths}
+                        >
+                            <SelectTrigger id="bandwidth">
+                                <SelectValue placeholder={isLoadingBandwidths ? "Loading..." : "Select Bandwidth"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {bandwidths.map((bw: BandwidthItem) => (
+                                    <SelectItem key={bw.id} value={bw.code}>
+                                        {bw.name} ({bw.rate_limit})
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
             </div>

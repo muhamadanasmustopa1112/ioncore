@@ -2,12 +2,15 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { SearchableSelect } from "@/components/ui/searchable-select";
+import { useBranchList } from "@/features/administration/branch/api/branch-queries";
 import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
 import { DUMMY_OLT_DETAILS } from "../../data/dummy-olt-details";
 import { DUMMY_ODP_LIST } from "../../data/dummy-odp-list";
 import { MapPin, Building2, Radio } from "lucide-react";
+import { PopResponse } from "../../types/pop";
 
 interface HierarchicalFilterProps {
+  popData?: PopResponse;
   onFilterChange: (filters: {
     area: string | null;
     popId: string | null;
@@ -15,24 +18,34 @@ interface HierarchicalFilterProps {
   }) => void;
 }
 
-export function HierarchicalFilter({ onFilterChange }: HierarchicalFilterProps) {
+export function HierarchicalFilter({ onFilterChange, popData }: HierarchicalFilterProps) {
   const [selectedArea, setSelectedArea] = useState<string | null>(null);
   const [selectedPopId, setSelectedPopId] = useState<string | null>(null);
   const [selectedOdpId, setSelectedOdpId] = useState<string | null>(null);
 
-  // 1. Get Unique Areas
+  const { data: branches = [] } = useBranchList();
+
+  const pops = useMemo(() => popData?.data || DUMMY_POP_DATA, [popData]);
+
+  // 1. Get Unique Areas (now from branches)
   const areaOptions = useMemo(() => {
-    const areas = Array.from(new Set(DUMMY_POP_DATA.map((p) => p.area)));
+    if (branches.length > 0) {
+      return branches
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((branch) => ({ value: branch.name, label: branch.name }));
+    }
+    // Fallback to dummy if no branches yet
+    const areas = Array.from(new Set(pops.map((p) => p.area)));
     return areas.sort().map((area) => ({ value: area, label: area }));
-  }, []);
+  }, [branches, pops]);
 
   // 2. Get POPs based on Area
   const popOptions = useMemo(() => {
     const filtered = selectedArea
-      ? DUMMY_POP_DATA.filter((p) => p.area === selectedArea)
-      : DUMMY_POP_DATA;
+      ? pops.filter((p) => p.area === selectedArea)
+      : pops;
     return filtered.map((p) => ({ value: p.id, label: p.name }));
-  }, [selectedArea]);
+  }, [selectedArea, pops]);
 
   // 3. Get ODPs based on POP
   const odpOptions = useMemo(() => {
@@ -85,7 +98,7 @@ export function HierarchicalFilter({ onFilterChange }: HierarchicalFilterProps) 
           }}
           placeholder="Select POP..."
           triggerClassName="rounded-2xl border-2 border-border/40 h-12 bg-background/80"
-          disabled={!selectedArea && DUMMY_POP_DATA.length > 50}
+          disabled={!selectedArea && pops.length > 50}
         />
       </div>
 

@@ -167,14 +167,54 @@ export const RouterForm = forwardRef<RouterFormRef, RouterFormProps>(
                                                     />
                                                 </div>
 
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="type"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel>Router Type</FormLabel>
+                                                                <Select disabled={readOnly || isPending} onValueChange={field.onChange} value={field.value}>
+                                                                    <FormControl><SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger></FormControl>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="MikroTik">MikroTik</SelectItem>
+                                                                        <SelectItem value="Cisco">Cisco</SelectItem>
+                                                                        <SelectItem value="Juniper">Juniper</SelectItem>
+                                                                        <SelectItem value="other">Other</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                    <FormField
+                                                        control={form.control}
+                                                        name="time_zone"
+                                                        render={({ field }) => (
+                                                            <FormItem>
+                                                                <FormLabel className="flex items-center gap-1.5"><RiTimeLine className="size-3" />Time Zone</FormLabel>
+                                                                <Select disabled={readOnly || isPending} onValueChange={field.onChange} value={field.value}>
+                                                                    <FormControl><SelectTrigger><SelectValue placeholder="Select Time Zone" /></SelectTrigger></FormControl>
+                                                                    <SelectContent>
+                                                                        <SelectItem value="+07:00 Asia/Jakarta">+07:00 Asia/Jakarta</SelectItem>
+                                                                        <SelectItem value="+08:00 Asia/Singapore">+08:00 Asia/Singapore</SelectItem>
+                                                                        <SelectItem value="+00:00 UTC">+00:00 UTC</SelectItem>
+                                                                    </SelectContent>
+                                                                </Select>
+                                                                <FormMessage />
+                                                            </FormItem>
+                                                        )}
+                                                    />
+                                                </div>
+
                                                 <FormField
                                                     control={form.control}
-                                                    name="time_zone"
+                                                    name="server"
                                                     render={({ field }) => (
-                                                        <FormItem className="space-y-2">
-                                                            <FormLabel className="flex items-center gap-1.5"><RiTimeLine className="size-3" />Time Zone</FormLabel>
+                                                        <FormItem>
+                                                            <FormLabel>Server / Radius Server</FormLabel>
                                                             <Select disabled={readOnly || isPending} onValueChange={field.onChange} value={field.value}>
-                                                                <FormControl><SelectTrigger><SelectValue placeholder="Select Time Zone" /></SelectTrigger></FormControl>
+                                                                <FormControl><SelectTrigger><SelectValue placeholder="Select Server Time Zone" /></SelectTrigger></FormControl>
                                                                 <SelectContent>
                                                                     <SelectItem value="+07:00 Asia/Jakarta">+07:00 Asia/Jakarta</SelectItem>
                                                                     <SelectItem value="+08:00 Asia/Singapore">+08:00 Asia/Singapore</SelectItem>
@@ -221,6 +261,19 @@ export const RouterForm = forwardRef<RouterFormRef, RouterFormProps>(
                                                         )}
                                                     />
                                                 </div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="community"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel>SNMP Community</FormLabel>
+                                                            <FormControl>
+                                                                <Input placeholder="e.g. public" {...field} disabled={readOnly || isPending} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
                                             </div>
 
                                             {/* Additional Info */}
