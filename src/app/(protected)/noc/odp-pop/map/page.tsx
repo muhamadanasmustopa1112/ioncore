@@ -58,6 +58,7 @@ export default function Page() {
 
             {/* Filter Section */}
             <HierarchicalFilter
+                popData={popData}
                 onFilterChange={handleFilterChange}
             />
 

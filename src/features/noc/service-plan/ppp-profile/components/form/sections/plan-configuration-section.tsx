@@ -10,6 +10,15 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { useProfileGroups } from "@/features/noc/service-plan/profile-group/api/get-profile-groups";
+import { ProfileGroupItem } from "@/features/noc/service-plan/profile-group/types/profile-group";
 import { PPPProfileFormData } from "../../../api/post-ppp-profile";
 
 type SectionProps = {
@@ -19,6 +28,11 @@ type SectionProps = {
 
 export function PlanConfigurationSection({ isDetailMode, isPending }: SectionProps) {
     const { control } = useFormContext<PPPProfileFormData>();
+
+    const { data: profileGroupResponse, isLoading: isLoadingGroups } = useProfileGroups({
+        params: { limit: 100, page: 1 }
+    });
+    const profileGroups = profileGroupResponse?.data || [];
 
     return (
         <section className="space-y-4">
@@ -34,12 +48,21 @@ export function PlanConfigurationSection({ isDetailMode, isPending }: SectionPro
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel className="text-xs text-muted-foreground">Profile Group</FormLabel>
-                            <FormControl>
-                                <div className="relative">
-                                    <Input {...field} disabled={isDetailMode || isPending} className="h-10 pl-9" />
-                                    <RiGroupLine className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                                </div>
-                            </FormControl>
+                            <Select disabled={isDetailMode || isPending || isLoadingGroups} onValueChange={field.onChange} value={field.value}>
+                                <FormControl>
+                                    <SelectTrigger className="h-10 pl-9">
+                                        <RiGroupLine className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                                        <SelectValue placeholder={isLoadingGroups ? "Loading..." : "Select Group"} />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {profileGroups.map((group: ProfileGroupItem) => (
+                                        <SelectItem key={group.id} value={group.code}>
+                                            {group.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                             <FormMessage />
                         </FormItem>
                     )}
