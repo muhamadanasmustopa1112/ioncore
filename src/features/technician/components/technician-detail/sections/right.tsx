@@ -9,14 +9,34 @@ import { TimelineEntry } from "../shared-widgets";
 export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const images = useMemo(
-    () =>
-      (wo.proof_of_work ?? [])
-        .flatMap((p) => p?.evidence ?? [])
-        .map((e) => e?.url)
-        .filter((u): u is string => typeof u === "string" && u.length > 0),
-    [wo.proof_of_work]
-  );
+  const images = useMemo(() => {
+    const collected: string[] = [];
+    (wo.proof_of_work ?? []).forEach((p) => {
+      // 1. Collect from evidence array
+      (p.evidence ?? []).forEach((e) => {
+        if (e?.url) collected.push(e.url);
+      });
+
+      // 2. Collect from value if it's a photo and looks like a URL
+      if (
+        (p.field_type === "photo" || p.category === "photo") &&
+        p.value &&
+        (p.value.startsWith("http") || p.value.startsWith("/"))
+      ) {
+        collected.push(p.value);
+      }
+    });
+
+    // Also collect from other sections if needed (e.g. customer_sign_off, issue_report)
+    if (wo.customer_sign_off?.signature_url) {
+      collected.push(wo.customer_sign_off.signature_url);
+    }
+    (wo.issue_report?.evidence ?? []).forEach((e) => {
+      if (e?.url) collected.push(e.url);
+    });
+
+    return Array.from(new Set(collected)).filter(Boolean);
+  }, [wo]);
 
   return (
     <>
