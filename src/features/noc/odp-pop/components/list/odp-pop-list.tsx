@@ -61,6 +61,10 @@ export function OdpPopList({
     pageCount: popData?.metadata?.total_page || 0,
     getRowId: (row) => String(row.id),
     state: {
+      pagination: {
+        pageIndex: (filter.page ?? 1) - 1,
+        pageSize: filter.limit ?? 10,
+      },
       rowSelection,
     },
     enableRowSelection: true,

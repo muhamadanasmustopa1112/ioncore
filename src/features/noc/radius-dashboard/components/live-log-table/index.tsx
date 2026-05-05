@@ -53,8 +53,13 @@ export function RadiusLiveLogTable() {
     columns: radiusLogColumns,
     pageCount: Math.ceil(logs.length / (filter.limit || 10)),
     state: {
+      pagination: {
+        pageIndex: filter.page - 1,
+        pageSize: filter.limit,
+      },
       rowSelection,
     },
+    manualPagination: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),

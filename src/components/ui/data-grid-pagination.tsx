@@ -110,7 +110,13 @@ function DataGridPagination(props: DataGridPaginationProps) {
           mode="icon"
           className={btnBaseClasses}
           variant="ghost"
-          onClick={() => table.setPageIndex(currentGroupStart - 1)}
+          onClick={() => {
+            if (setFilter) {
+              setFilter((prevState: any) => ({ ...prevState, page: currentGroupStart }));
+            } else {
+              table.setPageIndex(currentGroupStart - 1);
+            }
+          }}
         >
           ...
         </Button>
@@ -128,7 +134,13 @@ function DataGridPagination(props: DataGridPaginationProps) {
           variant="ghost"
           size="sm"
           mode="icon"
-          onClick={() => table.setPageIndex(currentGroupEnd)}
+          onClick={() => {
+            if (setFilter) {
+              setFilter((prevState: any) => ({ ...prevState, page: currentGroupEnd + 1 }));
+            } else {
+              table.setPageIndex(currentGroupEnd);
+            }
+          }}
         >
           ...
         </Button>
@@ -157,9 +169,10 @@ function DataGridPagination(props: DataGridPaginationProps) {
               onValueChange={(value) => {
                 const newPageSize = Number(value);
                 if (setFilter) {
-                  setFilter((prevState: any) => ({ ...prevState, limit: newPageSize }));
+                  setFilter((prevState: any) => ({ ...prevState, limit: newPageSize, page: 1 }));
                 } else {
                   table.setPageSize(newPageSize);
+                  table.setPageIndex(0);
                 }
               }}
             >

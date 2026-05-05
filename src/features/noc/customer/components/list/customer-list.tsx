@@ -44,7 +44,7 @@ export function CustomerList() {
 
   const { data: pppData, isLoading } = usePPPCustomers({
     params: {
-      draw: filter.page, // Using page as draw counter
+      draw: filter.page,
       start: (filter.page - 1) * filter.limit,
       length: filter.limit,
       search: filter.search || undefined,
@@ -60,6 +60,10 @@ export function CustomerList() {
     pageCount: pppData?.metadata.total_page || 0,
     getRowId: (row) => row.id,
     state: {
+      pagination: {
+        pageIndex: filter.page - 1,
+        pageSize: filter.limit,
+      },
       rowSelection,
     },
     manualPagination: true,
@@ -114,7 +118,7 @@ export function CustomerList() {
                   )}
                 </div>
               </div>
-              
+
               <DataTableToolbar />
             </div>
 
