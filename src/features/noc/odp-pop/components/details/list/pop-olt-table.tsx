@@ -60,6 +60,12 @@ export function PopOltTable({
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    state: {
+      pagination: {
+        pageIndex: filter.page - 1,
+        pageSize: filter.limit,
+      },
+    },
     manualPagination: true,
   });
 
