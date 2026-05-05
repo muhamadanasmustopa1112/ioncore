@@ -1,4 +1,4 @@
-import { CustomerType, SchemaType } from "./schema";
+import { CustomerType } from "./schema";
 
 // ─── Assignment Rules ────────────────────────────────────────────────────────
 
@@ -16,33 +16,6 @@ export interface SchemaAssignmentRule {
   suspension_schema_id: string;
   suspension_schema_name: string;
   updated_by: string;
-  updated_at: string;
-}
-
-// ─── Per-Customer Schema Override ────────────────────────────────────────────
-
-export type OverrideStatus = "active" | "pending_review" | "expired";
-
-export interface OverriddenField {
-  field_path: string;
-  original_value: string;
-  override_value: string;
-}
-
-export interface CustomerSchemaOverride {
-  id: string;
-  customer_id: string;
-  customer_name: string;
-  customer_type: CustomerType;
-  schema_type: SchemaType;
-  base_schema_name: string;
-  overridden_fields: OverriddenField[];
-  reason: string;
-  status: OverrideStatus;
-  approved_by?: string;
-  expires_at?: string;
-  created_by: string;
-  created_at: string;
   updated_at: string;
 }
 

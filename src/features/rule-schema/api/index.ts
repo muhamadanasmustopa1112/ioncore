@@ -29,81 +29,81 @@ const base = services.ruleScheme;
 
 export const getSchemaTypes = () =>
   userServiceApi.get<unknown, RuleSchemaEnvelope<SchemaType[]>>(
-    `${base}/v1/schemas/types`,
+    `${base}/schemas/types`,
   );
 
 export const listSchemas = (params?: ListSchemasParams) =>
   userServiceApi.get<unknown, RuleSchemaEnvelope<SchemaListData>>(
-    `${base}/v1/schemas/`,
+    `${base}/schemas/`,
     { params },
   );
 
 export const getSchema = (id: string) =>
   userServiceApi.get<unknown, RuleSchemaEnvelope<Schema>>(
-    `${base}/v1/schemas/${id}`,
+    `${base}/schemas/${id}`,
   );
 
 export const createSchema = (payload: CreateSchemaRequest) =>
   userServiceApi.post<unknown, RuleSchemaEnvelope<Schema>>(
-    `${base}/v1/schemas`,
+    `${base}/schemas`,
     payload,
   );
 
 export const updateSchemaContent = (id: string, payload: UpdateSchemaContentRequest) =>
   userServiceApi.put<unknown, RuleSchemaEnvelope<SchemaVersion>>(
-    `${base}/v1/schemas/${id}/content`,
+    `${base}/schemas/${id}/content`,
     payload,
   );
 
 export const listSchemaVersions = (schemaId: string, params?: ListSchemaVersionsParams) =>
   userServiceApi.get<unknown, RuleSchemaEnvelope<SchemaVersionListData>>(
-    `${base}/v1/schemas/${schemaId}/versions`,
+    `${base}/schemas/${schemaId}/versions`,
     { params },
   );
 
 export const getSchemaVersion = (versionId: string) =>
   userServiceApi.get<unknown, RuleSchemaEnvelope<SchemaVersion>>(
-    `${base}/v1/schema-versions/${versionId}`,
+    `${base}/schema-versions/${versionId}`,
   );
 
 export const createSchemaVersion = (schemaId: string, payload: CreateSchemaVersionRequest) =>
   userServiceApi.post<unknown, RuleSchemaEnvelope<SchemaVersion>>(
-    `${base}/v1/schemas/${schemaId}/versions`,
+    `${base}/schemas/${schemaId}/versions`,
     payload,
   );
 
 export const updateSchemaVersion = (versionId: string, payload: UpdateSchemaVersionRequest) =>
   userServiceApi.put<unknown, RuleSchemaEnvelope<SchemaVersion>>(
-    `${base}/v1/schema-versions/${versionId}`,
+    `${base}/schema-versions/${versionId}`,
     payload,
   );
 
 export const publishSchemaVersion = (versionId: string) =>
   userServiceApi.put<unknown, RuleSchemaEnvelope<null>>(
-    `${base}/v1/schema-versions/${versionId}/publish`,
+    `${base}/schema-versions/${versionId}/publish`,
   );
 
 export const cloneSchemaVersion = (versionId: string, payload: CloneSchemaVersionRequest) =>
   userServiceApi.post<unknown, RuleSchemaEnvelope<SchemaVersion>>(
-    `${base}/v1/schema-versions/${versionId}/clone`,
+    `${base}/schema-versions/${versionId}/clone`,
     payload,
   );
 
 export const diffSchemaVersions = (schemaId: string, params: DiffVersionsParams) =>
   userServiceApi.get<unknown, RuleSchemaEnvelope<SchemaDiffData>>(
-    `${base}/v1/schemas/${schemaId}/versions/diff`,
+    `${base}/schemas/${schemaId}/versions/diff`,
     { params },
   );
 
 export const rollbackSchemaVersion = (schemaId: string, payload: RollbackVersionRequest) =>
   userServiceApi.put<unknown, RuleSchemaEnvelope<null>>(
-    `${base}/v1/schemas/${schemaId}/versions/rollback`,
+    `${base}/schemas/${schemaId}/versions/rollback`,
     payload,
   );
 
 export const evaluateSchema = (versionId: string, payload: EvaluateSchemaRequest) =>
   userServiceApi.post<unknown, RuleSchemaEnvelope<EvaluateResult>>(
-    `${base}/v1/schema-versions/${versionId}/evaluate`,
+    `${base}/schema-versions/${versionId}/evaluate`,
     payload,
   );
 
@@ -269,3 +269,5 @@ export const useEvaluateSchema = () =>
     mutationFn: ({ versionId, payload }: { versionId: string; payload: EvaluateSchemaRequest }) =>
       evaluateSchema(versionId, payload),
   });
+
+export * from "./customer-overrides-api";

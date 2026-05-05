@@ -15,4 +15,11 @@ export const ruleSchemaKeys = {
     [...ruleSchemaKeys.all, "schemas", schemaId, "versions", params] as const,
   version: (versionId: string) =>
     [...ruleSchemaKeys.all, "versions", versionId] as const,
+
+  customerOverrides: (params?: unknown) =>
+    [...ruleSchemaKeys.all, "customer-overrides", params] as const,
+  customerOverride: (id: string) =>
+    [...ruleSchemaKeys.all, "customer-overrides", id] as const,
+  customerOverrideDiff: (id: string) =>
+    [...ruleSchemaKeys.all, "customer-overrides", id, "content-diff"] as const,
 };

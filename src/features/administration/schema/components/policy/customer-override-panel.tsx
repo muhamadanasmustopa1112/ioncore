@@ -6,30 +6,62 @@ import {
   RiSearchLine,
   RiUserLine,
   RiArrowRightLine,
+  RiLoader4Line,
 } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DUMMY_CUSTOMER_OVERRIDES } from "../../data/dummy-policies";
-import { CustomerSchemaOverride, OverrideStatus } from "../../types/policy-types";
+import {
+  useCustomerOverrideDiff,
+  useCustomerOverrides,
+} from "@/features/rule-schema";
+import type {
+  CustomerOverrideSchema,
+  OverriddenField,
+  OverrideDiffStatus,
+} from "@/features/rule-schema";
+import { CustomerOverrideFormSheet } from "./customer-override-form-sheet";
 
-const STATUS_CONFIG: Record<OverrideStatus, { label: string; variant: "success" | "warning" | "destructive" }> = {
-  active: { label: "Active", variant: "success" },
-  pending_review: { label: "Pending Review", variant: "warning" },
-  expired: { label: "Expired", variant: "destructive" },
+const DIFF_BADGE: Record<
+  OverrideDiffStatus,
+  { variant: "info" | "success" | "destructive" | "warning"; label: string }
+> = {
+  Changed: { variant: "info", label: "Changed" },
+  Added: { variant: "success", label: "Added" },
+  Removed: { variant: "destructive", label: "Removed" },
 };
 
-const SCHEMA_TYPE_LABELS: Record<string, string> = {
-  billing: "Billing",
-  onboarding: "Onboarding",
-  service: "Service",
-  commission: "Commission",
-  suspension: "Suspension",
-};
+function DiffRow({ field }: { field: OverriddenField }) {
+  const cfg = DIFF_BADGE[field.status] ?? {
+    variant: "warning" as const,
+    label: String(field.status),
+  };
+  return (
+    <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 rounded-lg bg-muted/40 px-3 py-2">
+      <span className="text-xs font-mono text-muted-foreground truncate">
+        {field.path}
+      </span>
+      <span className="text-xs line-through text-muted-foreground">
+        {field.from ?? "—"}
+      </span>
+      <span className="text-xs font-medium text-foreground">
+        {field.to ?? "—"}
+      </span>
+      <Badge variant={cfg.variant} appearance="light" className="text-[11px] px-2">
+        {cfg.label}
+      </Badge>
+    </div>
+  );
+}
 
-function OverrideCard({ override }: { override: CustomerSchemaOverride }) {
+function OverrideCard({ override }: { override: CustomerOverrideSchema }) {
   const [expanded, setExpanded] = useState(false);
-  const status = STATUS_CONFIG[override.status];
+  const { data: diffEnv, isFetching: diffLoading } = useCustomerOverrideDiff(
+    override.id,
+    expanded,
+  );
+  const diff = diffEnv?.data;
+  const fieldCount = diff?.overridden_fields.length ?? 0;
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
@@ -41,29 +73,28 @@ function OverrideCard({ override }: { override: CustomerSchemaOverride }) {
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold text-sm">{override.customer_name}</span>
-              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                {override.customer_type}
-              </Badge>
-              <Badge
-                variant={status.variant}
-                appearance="light"
-                className="text-[10px] px-1.5 py-0"
-              >
-                {status.label}
-              </Badge>
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span>{SCHEMA_TYPE_LABELS[override.schema_type]} Schema</span>
+              <span>{override.schema_name}</span>
               <RiArrowRightLine className="size-3" />
-              <span className="font-medium text-foreground">{override.base_schema_name}</span>
+              <span className="font-medium text-foreground">
+                {override.baseline_schema_name}
+              </span>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{override.reason}</p>
+            <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
+              Created by {override.created_by}
+              {override.updated_by && override.updated_by !== override.created_by
+                ? ` · Updated by ${override.updated_by}`
+                : ""}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Badge variant="info" appearance="light" className="text-xs">
-            {override.overridden_fields.length} field{override.overridden_fields.length !== 1 ? "s" : ""}
-          </Badge>
+          {expanded && (
+            <Badge variant="info" appearance="light" className="text-xs">
+              {fieldCount} field{fieldCount !== 1 ? "s" : ""}
+            </Badge>
+          )}
           <Button
             variant="ghost"
             size="sm"
@@ -80,33 +111,33 @@ function OverrideCard({ override }: { override: CustomerSchemaOverride }) {
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
             Overridden Fields
           </p>
-          <div className="space-y-2">
-            {override.overridden_fields.map((field, idx) => (
-              <div
-                key={idx}
-                className="grid grid-cols-[1fr_auto_auto] items-center gap-3 rounded-lg bg-muted/40 px-3 py-2"
-              >
-                <span className="text-xs font-mono text-muted-foreground truncate">
-                  {field.field_path}
+          {diffLoading && !diff ? (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <RiLoader4Line className="size-4 animate-spin" />
+              Loading diff...
+            </div>
+          ) : !diff || diff.overridden_fields.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No differences.</p>
+          ) : (
+            <>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{diff.baseline_label}</span>
+                <span className="font-medium text-foreground">
+                  {diff.baseline_version_name}
                 </span>
-                <span className="text-xs line-through text-muted-foreground">
-                  {field.original_value}
+                <RiArrowRightLine className="size-3" />
+                <span>{diff.override_label}</span>
+                <span className="font-medium text-foreground">
+                  {diff.override_version_name}
                 </span>
-                <Badge variant="info" appearance="light" className="text-[11px] px-2">
-                  {field.override_value}
-                </Badge>
               </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
-            <span>Created by {override.created_by} · {new Date(override.created_at).toLocaleDateString()}</span>
-            {override.approved_by && (
-              <span>Approved by {override.approved_by}</span>
-            )}
-            {override.expires_at && (
-              <span>Expires {new Date(override.expires_at).toLocaleDateString()}</span>
-            )}
-          </div>
+              <div className="space-y-2">
+                {diff.overridden_fields.map((field, idx) => (
+                  <DiffRow key={`${field.path}-${idx}`} field={field} />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -115,14 +146,17 @@ function OverrideCard({ override }: { override: CustomerSchemaOverride }) {
 
 export function CustomerOverridePanel() {
   const [search, setSearch] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const { data, isLoading, isError } = useCustomerOverrides({ size: 50 });
+  const rows = data?.data.customer_override_schemas ?? [];
 
-  const filtered = DUMMY_CUSTOMER_OVERRIDES.filter((o) => {
+  const filtered = rows.filter((o) => {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
       o.customer_name.toLowerCase().includes(q) ||
-      o.customer_type.includes(q) ||
-      o.schema_type.includes(q)
+      o.schema_name.toLowerCase().includes(q) ||
+      o.baseline_schema_name.toLowerCase().includes(q)
     );
   });
 
@@ -143,13 +177,27 @@ export function CustomerOverridePanel() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <Button variant="primary" size="sm" className="h-9 px-4 font-medium w-full sm:w-auto">
+        <Button
+          variant="primary"
+          size="sm"
+          className="h-9 px-4 font-medium w-full sm:w-auto"
+          onClick={() => setCreateOpen(true)}
+        >
           <RiAddLine className="size-4 mr-1.5" />
           New Override
         </Button>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
+          <RiLoader4Line className="size-4 animate-spin" />
+          Loading overrides...
+        </div>
+      ) : isError ? (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <p className="text-sm text-destructive">Failed to load overrides.</p>
+        </div>
+      ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <p className="text-sm text-muted-foreground">No overrides found.</p>
         </div>
@@ -160,6 +208,8 @@ export function CustomerOverridePanel() {
           ))}
         </div>
       )}
+
+      <CustomerOverrideFormSheet open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   );
 }
