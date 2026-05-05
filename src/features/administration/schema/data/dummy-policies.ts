@@ -1,6 +1,5 @@
 import {
   SchemaAssignmentRule,
-  CustomerSchemaOverride,
   ServiceChangePolicy,
   UpgradeEligibilityRule,
   ChangeMatrixEntry,
@@ -72,66 +71,6 @@ export const DUMMY_ASSIGNMENT_RULES: SchemaAssignmentRule[] = [
     suspension_schema_name: "Corporate Suspension Policy",
     updated_by: "Super Admin",
     updated_at: "2026-03-20T10:30:00Z",
-  },
-];
-
-// ─── Per-Customer Schema Override ────────────────────────────────────────────
-
-export const DUMMY_CUSTOMER_OVERRIDES: CustomerSchemaOverride[] = [
-  {
-    id: "ov-001",
-    customer_id: "cust-1001",
-    customer_name: "PT Maju Bersama",
-    customer_type: "enterprise",
-    schema_type: "billing",
-    base_schema_name: "Enterprise Billing Postpaid",
-    overridden_fields: [
-      { field_path: "billing_cycle.type", original_value: "monthly", override_value: "annual" },
-      { field_path: "payment_terms", original_value: "net_30", override_value: "net_45" },
-      { field_path: "recurring_payment.late_fee.enabled", original_value: "true", override_value: "false" },
-    ],
-    reason: "Negotiated annual contract with custom payment terms per MOU",
-    status: "active",
-    approved_by: "Finance Director",
-    expires_at: "2027-03-15T00:00:00Z",
-    created_by: "Sales Manager",
-    created_at: "2026-03-15T09:00:00Z",
-    updated_at: "2026-03-15T09:00:00Z",
-  },
-  {
-    id: "ov-002",
-    customer_id: "cust-1002",
-    customer_name: "CV Teknologi Nusantara",
-    customer_type: "business",
-    schema_type: "service",
-    base_schema_name: "Business Service SLA Priority",
-    overridden_fields: [
-      { field_path: "sla.uptime_guarantee_percentage", original_value: "99.0", override_value: "99.5" },
-      { field_path: "sla.response_time_hours", original_value: "8", override_value: "4" },
-      { field_path: "support_tier", original_value: "standard", override_value: "priority" },
-    ],
-    reason: "Premium support tier requested via contract amendment",
-    status: "active",
-    approved_by: "Operations Director",
-    created_by: "Account Manager",
-    created_at: "2026-02-10T11:00:00Z",
-    updated_at: "2026-02-10T11:00:00Z",
-  },
-  {
-    id: "ov-003",
-    customer_id: "cust-2050",
-    customer_name: "Budi Santoso",
-    customer_type: "residential",
-    schema_type: "commission",
-    base_schema_name: "Residential Commission Standard",
-    overridden_fields: [
-      { field_path: "commission_rules[0].commission_value", original_value: "10", override_value: "15" },
-    ],
-    reason: "Special referral campaign — elevated commission rate for Q1 2026",
-    status: "pending_review",
-    created_by: "Sales Supervisor",
-    created_at: "2026-04-01T14:00:00Z",
-    updated_at: "2026-04-01T14:00:00Z",
   },
 ];
 
