@@ -159,7 +159,7 @@ export function CustomerForm() {
 
     if (!isCreateMode) {
         return (
-            <div className="flex h-full flex-col overflow-hidden">
+            <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-slate-950">
                 <Tabs defaultValue="customer-info" className="flex-1 flex flex-col overflow-hidden">
                     <div className="px-6 border-b border-border/50 flex items-center justify-between">
                         <TabsList variant="line" className="justify-start border-none">
@@ -196,7 +196,7 @@ export function CustomerForm() {
     }
 
     return (
-        <div className="flex h-full flex-col overflow-hidden bg-background">
+        <div className="flex h-full flex-col overflow-hidden bg-white dark:bg-slate-950">
             <div className="px-6 pt-4 pb-3 border-b border-border/50 space-y-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -251,7 +251,7 @@ export function CustomerForm() {
             </div>
 
             {/* Navigation Footer */}
-            <div className="p-4 px-6 border-t border-border/50 bg-muted/20 flex items-center justify-between">
+            <div className="p-4 px-6 border-t border-border/50 bg-white dark:bg-slate-950 flex items-center justify-between">
                 <Button
                     variant="ghost"
                     onClick={handleBack}

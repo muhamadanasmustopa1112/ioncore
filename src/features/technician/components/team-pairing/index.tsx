@@ -78,7 +78,9 @@ export function TeamPairingDashboard() {
       <div className="mb-6">
         <TeamPairingSummary
           summary={data.daily_summary}
-          alerts={data.alerts}
+          alerts={data.alerts?.filter(
+            (alert) => alert.created_at?.slice(0, 10) === date
+          )}
         />
       </div>
 
@@ -91,7 +93,11 @@ export function TeamPairingDashboard() {
             selectedDate={date}
             onAssign={(wo) => setPairingTarget(wo)}
           />
-          <CrossAreaPanel requests={data.cross_area_requests ?? []} />
+          <CrossAreaPanel
+            requests={data.cross_area_requests?.filter(
+              (req) => req.created_at?.slice(0, 10) === date
+            ) ?? []}
+          />
         </div>
 
         {/* Right: Availability Board */}
