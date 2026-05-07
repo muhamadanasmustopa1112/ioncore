@@ -138,7 +138,9 @@ function mapBranchDetailToData(dto: BranchDetailDto): BranchData {
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
-export function useBranchList(params: { page?: number; per_page?: number } = {}) {
+export function useBranchList(
+  params: { page?: number; per_page?: number; search?: string; branch_type?: string } = {}
+) {
   return useQuery({
     queryKey: [...branchKeys.list(), params] as const,
     queryFn: async () => {
@@ -146,6 +148,33 @@ export function useBranchList(params: { page?: number; per_page?: number } = {})
       return (res.data?.branches ?? []).map(mapBranchFlatToData);
     },
     placeholderData: [],
+  });
+}
+
+export interface UseBranchListPaginatedParams {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  branch_type?: string;
+}
+
+export interface UseBranchListPaginatedResult {
+  items: BranchData[];
+  total: number;
+}
+
+const EMPTY_BRANCH_PAGE: UseBranchListPaginatedResult = { items: [], total: 0 };
+
+export function useBranchListPaginated(params: UseBranchListPaginatedParams = {}) {
+  return useQuery<UseBranchListPaginatedResult>({
+    queryKey: [...branchKeys.list(), "paginated", params] as const,
+    queryFn: async () => {
+      const res = await getBranchList(params);
+      const items = (res.data?.branches ?? []).map(mapBranchFlatToData);
+      const total = res.data?.metadata?.total ?? items.length;
+      return { items, total };
+    },
+    placeholderData: EMPTY_BRANCH_PAGE,
   });
 }
 

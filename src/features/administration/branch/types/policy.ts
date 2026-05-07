@@ -13,6 +13,8 @@ export interface PolicyData {
     tax_default: number;
     notification_contacts: string[];
     approval_matrix: { level_1: string; level_2: string };
+    excess_cable_price: number;
+    cable_threshold_meter: number;
   };
   createdAt: string;
   updatedAt: string;

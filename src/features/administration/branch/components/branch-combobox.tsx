@@ -26,9 +26,18 @@ interface BranchComboboxProps {
   value: string;
   onValueChange: (id: string) => void;
   className?: string;
+  onSearchChange?: (search: string) => void;
+  isLoading?: boolean;
 }
 
-export function BranchCombobox({ branches, value, onValueChange, className }: BranchComboboxProps) {
+export function BranchCombobox({
+  branches,
+  value,
+  onValueChange,
+  className,
+  onSearchChange,
+  isLoading,
+}: BranchComboboxProps) {
   const [open, setOpen] = useState(false);
   const selected = branches.find((b) => b.id === value);
 
@@ -55,10 +64,15 @@ export function BranchCombobox({ branches, value, onValueChange, className }: Br
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 p-0" align="start">
-        <Command>
-          <CommandInput placeholder="Search branch..." />
+        <Command shouldFilter={!onSearchChange}>
+          <CommandInput
+            placeholder="Search branch..."
+            onValueChange={onSearchChange}
+          />
           <CommandList>
-            <CommandEmpty>No branch found.</CommandEmpty>
+            <CommandEmpty>
+              {isLoading ? "Loading..." : "No branch found."}
+            </CommandEmpty>
             <CommandGroup>
               {branches.map((b) => (
                 <CommandItem

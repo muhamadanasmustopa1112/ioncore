@@ -39,6 +39,8 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
   const [contacts, setContacts] = useState("");
   const [approvalL1, setApprovalL1] = useState("");
   const [approvalL2, setApprovalL2] = useState("");
+  const [excessCablePrice, setExcessCablePrice] = useState("35000");
+  const [cableThresholdMeter, setCableThresholdMeter] = useState("210");
 
   useEffect(() => {
     if (selectedPolicy && (form === "edit" || form === "details")) {
@@ -54,6 +56,8 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
       setContacts(p.policyJson.notification_contacts?.join(", ") ?? "");
       setApprovalL1(p.policyJson.approval_matrix?.level_1 ?? "");
       setApprovalL2(p.policyJson.approval_matrix?.level_2 ?? "");
+      setExcessCablePrice(p.policyJson.excess_cable_price?.toString() ?? "35000");
+      setCableThresholdMeter(p.policyJson.cable_threshold_meter?.toString() ?? "210");
     } else if (form === "new") {
       setName("");
       setDescription("");
@@ -66,6 +70,8 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
       setContacts("");
       setApprovalL1("");
       setApprovalL2("");
+      setExcessCablePrice("35000");
+      setCableThresholdMeter("210");
     }
   }, [selectedPolicy, form]);
 
@@ -85,9 +91,11 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
           .map((s) => s.trim())
           .filter(Boolean),
         approval_matrix: { level_1: approvalL1, level_2: approvalL2 },
+        excess_cable_price: Number(excessCablePrice) || 0,
+        cable_threshold_meter: Number(cableThresholdMeter) || 0,
       },
     });
-  }, [name, description, isActive, slaHours, workStart, workEnd, timezone, taxDefault, contacts, approvalL1, approvalL2, onSubmit]);
+  }, [name, description, isActive, slaHours, workStart, workEnd, timezone, taxDefault, contacts, approvalL1, approvalL2, excessCablePrice, cableThresholdMeter, onSubmit]);
 
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__policyFormSubmit =
@@ -231,6 +239,44 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
                 <span className="text-sm text-muted-foreground">
                   ({((Number(taxDefault) || 0) * 100).toFixed(0)}%)
                 </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Cable Configuration */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2 pb-1 border-b border-border/50">
+              <RiInformationLine className="size-4 text-emerald-500" />
+              <h3 className="text-sm font-semibold">Cable Configuration</h3>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Excess Cable Price
+                </Label>
+                <Input
+                  type="number"
+                  placeholder="35000"
+                  value={excessCablePrice}
+                  onChange={(e) => setExcessCablePrice(e.target.value)}
+                  disabled={isDetailMode}
+                  min={0}
+                  step={1000}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Cable Threshold (meter)
+                </Label>
+                <Input
+                  type="number"
+                  placeholder="210"
+                  value={cableThresholdMeter}
+                  onChange={(e) => setCableThresholdMeter(e.target.value)}
+                  disabled={isDetailMode}
+                  min={0}
+                />
               </div>
             </div>
           </div>

@@ -1,10 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   RowSelectionState,
   useReactTable,
@@ -36,13 +34,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useBranchList } from "../../api/branch-queries";
+import { useBranchListPaginated } from "../../api/branch-queries";
 import { columns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 
 export function BranchList() {
-  const { data: branches = [], isLoading } = useBranchList();
-
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -50,44 +46,59 @@ export function BranchList() {
     branch_type: parseAsString,
   });
 
+  const [searchInput, setSearchInput] = useState(filter.search ?? "");
+  const [debouncedSearch, setDebouncedSearch] = useState(filter.search ?? "");
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchInput), 400);
+    return () => clearTimeout(id);
+  }, [searchInput]);
+
+  useEffect(() => {
+    const next = debouncedSearch.trim() ? debouncedSearch.trim() : null;
+    if (next !== (filter.search ?? null)) {
+      setFilter({ ...filter, search: next, page: 1 });
+    }
+  }, [debouncedSearch]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const page = filter.page || 1;
+  const limit = filter.limit || 10;
+
+  const { data: result = { items: [], total: 0 }, isLoading } = useBranchListPaginated({
+    page,
+    per_page: limit,
+    search: filter.search ?? undefined,
+    branch_type:
+      filter.branch_type && filter.branch_type !== "all"
+        ? filter.branch_type
+        : undefined,
+  });
+
+  const branches = result.items;
+  const total = result.total;
+
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const filteredData = useMemo(() => {
-    let result = branches;
-    if (filter.search) {
-      const q = filter.search.toLowerCase();
-      result = result.filter(
-        (b) =>
-          b.name.toLowerCase().includes(q) ||
-          b.code.toLowerCase().includes(q)
-      );
-    }
-    if (filter.branch_type && filter.branch_type !== "all") {
-      result = result.filter((b) => b.branchType === filter.branch_type);
-    }
-    return result;
-  }, [branches, filter.search, filter.branch_type]);
-
   const table = useReactTable({
     columns,
-    data: filteredData,
-    pageCount: Math.ceil(filteredData.length / (filter.limit || 10)),
+    data: branches,
+    pageCount: Math.max(1, Math.ceil(total / limit)),
+    rowCount: total,
+    manualPagination: true,
+    manualFiltering: true,
     getRowId: (row) => row.id,
     state: {
       rowSelection,
       pagination: {
-        pageIndex: (filter.page || 1) - 1,
-        pageSize: filter.limit || 10,
+        pageIndex: page - 1,
+        pageSize: limit,
       },
     },
     onPaginationChange: (updater) => {
       const next =
         typeof updater === "function"
-          ? updater({
-              pageIndex: (filter.page || 1) - 1,
-              pageSize: filter.limit || 10,
-            })
+          ? updater({ pageIndex: page - 1, pageSize: limit })
           : updater;
       setFilter({
         ...filter,
@@ -98,15 +109,13 @@ export function BranchList() {
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
   return (
     <DataGrid
       table={table}
-      recordCount={filteredData.length}
+      recordCount={total}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -131,18 +140,16 @@ export function BranchList() {
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
                     placeholder="Search branch..."
-                    value={filter.search || ""}
-                    onChange={(e) =>
-                      setFilter({ ...filter, search: e.target.value })
-                    }
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
                     className="w-full ps-9"
                   />
-                  {filter.search && (
+                  {searchInput && (
                     <Button
                       mode="icon"
                       variant="ghost"
                       className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-                      onClick={() => setFilter({ ...filter, search: "" })}
+                      onClick={() => setSearchInput("")}
                     >
                       <X />
                     </Button>
@@ -156,7 +163,11 @@ export function BranchList() {
                     <Select
                       value={filter.branch_type || "all"}
                       onValueChange={(val) =>
-                        setFilter({ ...filter, branch_type: val === "all" ? null : val })
+                        setFilter({
+                          ...filter,
+                          branch_type: val === "all" ? null : val,
+                          page: 1,
+                        })
                       }
                     >
                       <SelectTrigger className="h-8 w-36 text-xs">

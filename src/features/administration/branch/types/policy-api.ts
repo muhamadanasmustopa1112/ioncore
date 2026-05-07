@@ -15,6 +15,8 @@ export interface PolicyJson {
     level_1: string;
     level_2: string;
   };
+  excess_cable_price: number;
+  cable_threshold_meter: number;
 }
 
 // ─── Policy Payload ───────────────────────────────────────────────────────────

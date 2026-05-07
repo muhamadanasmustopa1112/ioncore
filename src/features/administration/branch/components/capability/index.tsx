@@ -12,14 +12,14 @@ import {
 } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
-import { useBranchTree } from "../../api/branch-queries";
+import { useBranchSelect } from "../use-branch-select";
 import { useCapabilityStore } from "../../store/capability";
 import { CapabilityList } from "./list/capability-list";
 import { CapabilityFormSheet } from "./form/capability-form-sheet";
 
 
 export function BranchCapabilityPage() {
-  const { data: branches = [] } = useBranchTree();
+  const { branches, isLoading, onSearchChange } = useBranchSelect();
   const openSheet = useCapabilityStore((s) => s.openSheet);
   const selectedBranchId = useCapabilityStore((s) => s.selectedBranchId);
   const setSelectedBranchId = useCapabilityStore((s) => s.setSelectedBranchId);
@@ -84,6 +84,8 @@ export function BranchCapabilityPage() {
           branches={branches}
           value={selectedBranchId || ""}
           onValueChange={setSelectedBranchId}
+          onSearchChange={onSearchChange}
+          isLoading={isLoading}
         />
         {selectedBranch && (
           <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded">

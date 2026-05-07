@@ -12,14 +12,14 @@ import {
 } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
-import { useBranchTree } from "../../api/branch-queries";
+import { useBranchSelect } from "../use-branch-select";
 import { useCoverageStore } from "../../store/coverage";
 import { CoverageList } from "./list/coverage-list";
 import { CoverageFormSheet } from "./form/coverage-form-sheet";
 
 
 export function BranchCoveragePage() {
-  const { data: branches = [] } = useBranchTree();
+  const { branches, isLoading, onSearchChange } = useBranchSelect();
   const openSheet = useCoverageStore((s) => s.openSheet);
   const selectedBranchId = useCoverageStore((s) => s.selectedBranchId);
   const setSelectedBranchId = useCoverageStore((s) => s.setSelectedBranchId);
@@ -84,6 +84,8 @@ export function BranchCoveragePage() {
           branches={branches}
           value={selectedBranchId || ""}
           onValueChange={setSelectedBranchId}
+          onSearchChange={onSearchChange}
+          isLoading={isLoading}
         />
         {selectedBranch && (
           <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded">

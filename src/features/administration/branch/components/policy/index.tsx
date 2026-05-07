@@ -12,14 +12,14 @@ import {
 } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
-import { useBranchTree } from "../../api/branch-queries";
+import { useBranchSelect } from "../use-branch-select";
 import { usePolicyStore } from "../../store/policy";
 import { PolicyList } from "./list/policy-list";
 import { PolicyFormSheet } from "./form/policy-form-sheet";
 
 
 export function BranchPolicyPage() {
-  const { data: branches = [] } = useBranchTree();
+  const { branches, isLoading, onSearchChange } = useBranchSelect();
   const openSheet = usePolicyStore((s) => s.openSheet);
   const selectedBranchId = usePolicyStore((s) => s.selectedBranchId);
   const setSelectedBranchId = usePolicyStore((s) => s.setSelectedBranchId);
@@ -84,6 +84,8 @@ export function BranchPolicyPage() {
           branches={branches}
           value={selectedBranchId || ""}
           onValueChange={setSelectedBranchId}
+          onSearchChange={onSearchChange}
+          isLoading={isLoading}
         />
         {selectedBranch && (
           <span className="text-xs text-muted-foreground font-mono bg-muted px-2 py-0.5 rounded">

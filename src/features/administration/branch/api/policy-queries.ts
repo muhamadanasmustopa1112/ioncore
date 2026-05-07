@@ -26,6 +26,8 @@ const defaultPolicyJson = {
   tax_default: 0.11,
   notification_contacts: [],
   approval_matrix: { level_1: "", level_2: "" },
+  excess_cable_price: 35000,
+  cable_threshold_meter: 210,
 };
 
 function mapToPolicyData(dto: PolicyDto): PolicyData {
