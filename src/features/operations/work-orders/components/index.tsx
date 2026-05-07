@@ -177,6 +177,7 @@ function DetailSheet() {
   const [technicianId, setTechnicianId] = useState(wo?.technicianId ?? "");
   const [technicianName, setTechnicianName] = useState(wo?.technicianName ?? "");
   const [assignMode, setAssignMode] = useState(false);
+  const [isCrossArea, setIsCrossArea] = useState(wo?.cross_area ?? false);
 
   const [newStatus, setNewStatus] = useState<WoStatus | "">(wo?.status ?? "");
   const [statusNotes, setStatusNotes] = useState("");
@@ -221,7 +222,12 @@ function DetailSheet() {
     if (!wo || !technicianId.trim() || !technicianName.trim()) return;
     assignTech.mutate(
       { id: wo.id, payload: { technician_id: technicianId, technician_name: technicianName } },
-      { onSuccess: () => setAssignMode(false) }
+      {
+        onSuccess: () => {
+          wo.cross_area = isCrossArea;
+          setAssignMode(false);
+        }
+      }
     );
   };
 
@@ -325,11 +331,18 @@ function DetailSheet() {
                     </Button>
                   )}
                 </div>
-                {wo.technicianName ? (
-                  <p className="text-sm font-medium">{wo.technicianName}</p>
-                ) : (
-                  <p className="text-xs text-muted-foreground italic">No technician assigned</p>
-                )}
+                <div className="flex items-center gap-2">
+                  {wo.technicianName ? (
+                    <p className="text-sm font-medium">{wo.technicianName}</p>
+                  ) : (
+                    <p className="text-xs text-muted-foreground italic">No technician assigned</p>
+                  )}
+                  {wo.cross_area && (
+                    <Badge variant="warning" className="text-[9px] uppercase font-black px-1.5 py-0.5 tracking-widest bg-amber-500/10 text-amber-600 border border-amber-500/20 animate-pulse">
+                      Cross Area
+                    </Badge>
+                  )}
+                </div>
                 {assignMode && (
                   <div className="space-y-2 pt-1">
                     <Input
@@ -344,6 +357,18 @@ function DetailSheet() {
                       value={technicianName}
                       onChange={(e) => setTechnicianName(e.target.value)}
                     />
+                    <div className="flex items-center gap-2 py-1">
+                      <input
+                        type="checkbox"
+                        id="isCrossArea"
+                        checked={isCrossArea}
+                        onChange={(e) => setIsCrossArea(e.target.checked)}
+                        className="rounded border-border text-primary focus:ring-primary size-3.5"
+                      />
+                      <label htmlFor="isCrossArea" className="text-xs text-muted-foreground font-medium select-none cursor-pointer">
+                        Cross-Area Assignment (SIT §4.4 Overflow)
+                      </label>
+                    </div>
                     <div className="flex gap-2">
                       <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setAssignMode(false)}>Cancel</Button>
                       <Button
@@ -505,8 +530,8 @@ function DetailSheet() {
               {createWO.isPending || updateWO.isPending
                 ? "Saving..."
                 : isCreate
-                ? "Create Work Order"
-                : "Save Changes"}
+                  ? "Create Work Order"
+                  : "Save Changes"}
             </Button>
           )}
           {isDetail && wo && (
@@ -597,9 +622,16 @@ function WorkOrderList() {
         accessorKey: "technicianName",
         header: "Technician",
         cell: ({ row }) => (
-          <span className="text-sm">
-            {row.original.technicianName ?? <span className="text-muted-foreground text-xs">Unassigned</span>}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm">
+              {row.original.technicianName ?? <span className="text-muted-foreground text-xs">Unassigned</span>}
+            </span>
+            {row.original.cross_area && (
+              <Badge variant="warning" className="text-[9px] uppercase font-bold px-1.5 py-0 bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                Cross Area
+              </Badge>
+            )}
+          </div>
         ),
       },
       {

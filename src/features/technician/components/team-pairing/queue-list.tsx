@@ -31,12 +31,27 @@ function humanize(s: string | undefined | null) {
 
 export function QueueList({
   items,
+  selectedDate,
   onAssign,
 }: {
   items: WorkOrderDashboardItem[];
+  selectedDate?: string;
   onAssign: (wo: WorkOrderDashboardItem) => void;
 }) {
-  const unassigned = items.filter((wo) => wo.state === "unassigned" || wo.assigned_team.length === 0);
+  const unassigned = items.filter((wo) => {
+    const isUnassigned = wo.state === "unassigned" || wo.assigned_team.length === 0;
+    if (!isUnassigned) return false;
+
+    if (selectedDate) {
+      try {
+        const woDate = wo.requested_installation ? new Date(wo.requested_installation).toISOString().slice(0, 10) : "";
+        return woDate === selectedDate;
+      } catch {
+        return true;
+      }
+    }
+    return true;
+  });
 
   return (
     <Card>
@@ -53,7 +68,9 @@ export function QueueList({
         {unassigned.length === 0 ? (
           <p className="text-sm text-slate-400 italic p-4">All work orders assigned.</p>
         ) : (
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+          <div className={`divide-y divide-slate-100 dark:divide-slate-800 ${
+            unassigned.length >= 10 ? "max-h-[480px] overflow-y-auto pr-1.5 scrollbar-thin" : ""
+          }`}>
             {unassigned.map((wo) => (
               <div key={wo.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                 <div className="flex-1 min-w-0">

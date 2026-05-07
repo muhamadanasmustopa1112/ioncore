@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Sparkles, X, AlertTriangle, User } from "lucide-react";
+import { Loader2, Sparkles, X, AlertTriangle, User, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +9,7 @@ import {
   useAssignPairing,
   useUpdatePairing,
   usePairingRecommendation,
+  useTechnicianList,
 } from "../../../api/technician-queries";
 import type {
   AssignedTechnician,
@@ -18,9 +19,9 @@ import type {
 import { ModalShell, FieldLabel } from "./shell";
 
 const LEVEL_COLOR: Record<string, { bg: string; text: string; ring: string }> = {
-  senior: { bg: "bg-primary/10",                        text: "text-primary",                           ring: "ring-primary/30" },
-  junior: { bg: "bg-blue-100 dark:bg-blue-900/20",      text: "text-blue-600 dark:text-blue-400",       ring: "ring-blue-300/30" },
-  lead:   { bg: "bg-amber-100 dark:bg-amber-900/20",    text: "text-amber-600 dark:text-amber-400",     ring: "ring-amber-300/30" },
+  senior: { bg: "bg-primary/10", text: "text-primary", ring: "ring-primary/30" },
+  junior: { bg: "bg-blue-100 dark:bg-blue-900/20", text: "text-blue-600 dark:text-blue-400", ring: "ring-blue-300/30" },
+  lead: { bg: "bg-amber-100 dark:bg-amber-900/20", text: "text-amber-600 dark:text-amber-400", ring: "ring-amber-300/30" },
 };
 
 function ScoreBar({ score }: { score: number }) {
@@ -53,11 +54,10 @@ function CandidateCard({
   return (
     <button
       onClick={onToggle}
-      className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
-        selected
-          ? "border-primary bg-primary/5 dark:bg-primary/10"
-          : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary/40"
-      }`}
+      className={`w-full text-left p-3 rounded-lg border-2 transition-all ${selected
+        ? "border-primary bg-primary/5 dark:bg-primary/10"
+        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary/40"
+        }`}
     >
       <div className="flex items-start gap-3">
         <div className={`size-9 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ring-2 ${lc.bg} ${lc.text} ${lc.ring}`}>
@@ -69,8 +69,15 @@ function CandidateCard({
             <Badge variant={candidate.level === "senior" ? "primary" : "info"} appearance="light" size="sm" className="uppercase shrink-0">
               {candidate.level}
             </Badge>
-            {candidate.cross_area && (
-              <Badge variant="warning" appearance="light" size="sm" className="shrink-0">Cross-area</Badge>
+            {(candidate as any).availability_status && (
+              <Badge
+                variant={(candidate as any).availability_status === "available" ? "success" : "warning"}
+                appearance="light"
+                size="sm"
+                className="shrink-0 uppercase"
+              >
+                {(candidate as any).availability_status}
+              </Badge>
             )}
           </div>
           <ScoreBar score={candidate.match_score} />
@@ -84,9 +91,8 @@ function CandidateCard({
             <p className="text-[10px] text-slate-400 mt-1 italic line-clamp-1">{candidate.reasons.join(" · ")}</p>
           )}
         </div>
-        <div className={`size-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors ${
-          selected ? "bg-primary border-primary" : "border-slate-300 dark:border-slate-600"
-        }`}>
+        <div className={`size-5 rounded-full border-2 shrink-0 mt-0.5 flex items-center justify-center transition-colors ${selected ? "bg-primary border-primary" : "border-slate-300 dark:border-slate-600"
+          }`}>
           {selected && <span className="text-white text-[10px] font-bold">✓</span>}
         </div>
       </div>
@@ -111,11 +117,16 @@ export function PairingModal({
   const [override, setOverride] = useState(isReassign);
   const [note, setNote] = useState("");
   const [recommendation, setRecommendation] = useState<PairingRecommendationResponse | null>(null);
+  const [viewMode, setViewMode] = useState<"recommend" | "all">("recommend");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const assignMutation = useAssignPairing(workOrderId);
   const updateMutation = useUpdatePairing(workOrderId);
   const recommendMutation = usePairingRecommendation(workOrderId);
   const mutation = isReassign ? updateMutation : assignMutation;
+
+  // Load all technicians dynamically from the newly implemented POST /technicians/list endpoint
+  const { data: allTechnicians = [], isLoading: isTechListLoading } = useTechnicianList();
 
   function handleRecommend() {
     recommendMutation.mutate(
@@ -124,6 +135,7 @@ export function PairingModal({
         onSuccess: (res) => {
           const rec = res?.data ?? null;
           setRecommendation(rec);
+          setViewMode("recommend");
           const suggested = rec?.suggested_team ?? [];
           if (suggested.length > 0) setSelectedIds(suggested.map((t) => t.technician_id).filter(Boolean));
         },
@@ -144,14 +156,38 @@ export function PairingModal({
   }
 
   const candidates = recommendation?.candidates ?? [];
-  // Build name map from candidates + suggested_team + currentTeam so chips always show names
   const nameMap: Record<string, string> = {};
   currentTeam.forEach((t) => { if (t.technician_id) nameMap[t.technician_id] = t.technician_name; });
   (recommendation?.suggested_team ?? []).forEach((t) => { if (t.technician_id) nameMap[t.technician_id] = t.technician_name; });
   candidates.forEach((c) => { nameMap[c.technician_id] = c.technician_name; });
+  allTechnicians.forEach((t) => { nameMap[t.technician_id] = t.technician_name; });
 
   const seniorCandidates = candidates.filter((c) => c.level === "senior" || c.level === "lead");
   const juniorCandidates = candidates.filter((c) => c.level === "junior");
+
+  // Map the raw ListTechnicianItem to DispatchCandidate format for manual rendering
+  const mappedAllCandidates: DispatchCandidate[] = allTechnicians.map((t) => ({
+    technician_id: t.technician_id,
+    technician_name: t.technician_name,
+    level: t.level as any,
+    active_workload: t.active_workload,
+    skills: t.skills,
+    match_score: t.level === "senior" ? 85 : t.level === "lead" ? 90 : 65,
+    reasons: [`Area: ${t.area_id?.replace("area-", "").toUpperCase() || "UNKNOWN"}`],
+    cross_area: t.cross_area_enabled ?? false,
+    area_id: t.area_id,
+    sub_area_id: t.sub_area_id,
+    availability_status: t.availability_status,
+  }));
+
+  const filteredAllCandidates = mappedAllCandidates.filter((c) => {
+    const q = searchTerm.toLowerCase();
+    return (
+      c.technician_name.toLowerCase().includes(q) ||
+      c.level.toLowerCase().includes(q) ||
+      (c.area_id ?? "").toLowerCase().includes(q)
+    );
+  });
 
   return (
     <ModalShell
@@ -207,50 +243,194 @@ export function PairingModal({
               </div>
             )}
 
-            {/* Recommend CTA */}
-            {!recommendation ? (
-              <Button variant="primary" size="sm" onClick={handleRecommend} disabled={recommendMutation.isPending} className="w-full gap-2">
-                {recommendMutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-                Get Recommendation
-              </Button>
-            ) : (
-              <div className="space-y-4">
-                {recommendation.priority_reason && (
-                  <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg">
-                    <AlertTriangle className="size-4 text-amber-500 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">Priority · {recommendation.priority}</p>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">{recommendation.priority_reason}</p>
-                    </div>
-                  </div>
-                )}
-
-                {seniorCandidates.length > 0 && (
-                  <div>
-                    <FieldLabel>Senior / Lead</FieldLabel>
-                    <div className="space-y-2">
-                      {seniorCandidates.map((c) => (
-                        <CandidateCard key={c.technician_id} candidate={c} selected={selectedIds.includes(c.technician_id)} onToggle={() => toggleCandidate(c.technician_id)} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {juniorCandidates.length > 0 && (
-                  <div>
-                    <FieldLabel>Junior</FieldLabel>
-                    <div className="space-y-2">
-                      {juniorCandidates.map((c) => (
-                        <CandidateCard key={c.technician_id} candidate={c} selected={selectedIds.includes(c.technician_id)} onToggle={() => toggleCandidate(c.technician_id)} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <button onClick={handleRecommend} disabled={recommendMutation.isPending} className="text-[11px] text-slate-400 hover:text-primary transition-colors flex items-center gap-1">
-                  {recommendMutation.isPending ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
-                  Refresh
+            {/* View switcher & recommendations CTA */}
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-2">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("recommend")}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${viewMode === "recommend"
+                    ? "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+                    : "text-slate-400 hover:text-slate-600"
+                    }`}
+                >
+                  Recommended
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("all")}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${viewMode === "all"
+                    ? "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
+                    : "text-slate-400 hover:text-slate-600"
+                    }`}
+                >
+                  All Technicians ({allTechnicians.length})
+                </button>
+              </div>
+
+              {viewMode === "recommend" && !recommendation && (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handleRecommend}
+                  disabled={recommendMutation.isPending}
+                  className="gap-1 px-3"
+                >
+                  {recommendMutation.isPending ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
+                  Get Recommendation
+                </Button>
+              )}
+            </div>
+
+            {/* AI Recommended view */}
+            {viewMode === "recommend" && (
+              <>
+                {!recommendation ? (
+                  <div className="p-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-center">
+                    <Sparkles className="size-6 text-primary/40 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500">Click &quot;Get Recommendation&quot; to fetch optimal candidates using the matching algorithm.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recommendation.priority_reason && (
+                      <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg">
+                        <AlertTriangle className="size-4 text-amber-500 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">Priority · {recommendation.priority}</p>
+                          <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">{recommendation.priority_reason}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {seniorCandidates.length > 0 && (
+                      <div>
+                        <FieldLabel>Senior / Lead</FieldLabel>
+                        <div className="space-y-2">
+                          {seniorCandidates.map((c) => (
+                            <CandidateCard key={c.technician_id} candidate={c} selected={selectedIds.includes(c.technician_id)} onToggle={() => toggleCandidate(c.technician_id)} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {juniorCandidates.length > 0 && (
+                      <div>
+                        <FieldLabel>Junior</FieldLabel>
+                        <div className="space-y-2">
+                          {juniorCandidates.map((c) => (
+                            <CandidateCard key={c.technician_id} candidate={c} selected={selectedIds.includes(c.technician_id)} onToggle={() => toggleCandidate(c.technician_id)} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <button onClick={handleRecommend} disabled={recommendMutation.isPending} className="text-[11px] text-slate-400 hover:text-primary transition-colors flex items-center gap-1">
+                      {recommendMutation.isPending ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
+                      Refresh Recommendation
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* All Technicians manual select view */}
+            {viewMode === "all" && (
+              <div className="space-y-4">
+                {isTechListLoading ? (
+                  <div className="flex flex-col items-center justify-center py-8 gap-2">
+                    <Loader2 className="size-6 animate-spin text-primary" />
+                    <p className="text-xs text-slate-400">Loading technician directory...</p>
+                  </div>
+                ) : allTechnicians.length === 0 ? (
+                  <div className="p-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-center text-xs text-slate-400">
+                    No technicians found in the directory.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Search Input */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Search technician by name, level, or area..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs py-2.5 px-3 pl-9 text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                      />
+                      <Search className="size-4 text-slate-400 absolute left-3 top-3" />
+                      {searchTerm && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchTerm("")}
+                          className="absolute right-3 top-3 text-slate-400 hover:text-foreground text-xs font-semibold"
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Compact Filtered List */}
+                    <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-[250px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 scrollbar-thin">
+                      {filteredAllCandidates.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-slate-400 italic">
+                          No matching technicians found.
+                        </div>
+                      ) : (
+                        filteredAllCandidates.map((c) => {
+                          const isSelected = selectedIds.includes(c.technician_id);
+                          const lc = LEVEL_COLOR[c.level] ?? LEVEL_COLOR.junior;
+                          const initials = c.technician_name
+                            .split(" ")
+                            .slice(0, 2)
+                            .map((w) => w[0])
+                            .join("")
+                            .toUpperCase();
+
+                          return (
+                            <button
+                              key={c.technician_id}
+                              type="button"
+                              onClick={() => toggleCandidate(c.technician_id)}
+                              className={`w-full flex items-center justify-between p-2.5 text-left text-xs transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40 ${
+                                isSelected ? "bg-primary/5 dark:bg-primary/10" : ""
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className={`size-7 rounded-full flex items-center justify-center shrink-0 text-[10px] font-black ring-1 ${lc.bg} ${lc.text} ${lc.ring}`}>
+                                  {initials}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{c.technician_name}</span>
+                                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${lc.bg} ${lc.text}`}>
+                                      {c.level}
+                                    </span>
+                                    {(c as any).availability_status && (
+                                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                                        (c as any).availability_status === "available"
+                                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400"
+                                          : "bg-amber-100 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400"
+                                      }`}>
+                                        {(c as any).availability_status.replace(/_/g, " ")}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[10px] text-slate-400 mt-0.5 font-medium">
+                                    Area: <span className="uppercase text-slate-500 font-bold">{c.area_id?.replace("area-", "") || "UNKNOWN"}</span> · {c.active_workload} active WO
+                                  </div>
+                                </div>
+                              </div>
+                              <div className={`size-4 rounded-md border shrink-0 flex items-center justify-center transition-colors ${
+                                isSelected ? "bg-primary border-primary text-white" : "border-slate-300 dark:border-slate-600"
+                              }`}>
+                                {isSelected && <span className="text-[9px] font-black">✓</span>}
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </>

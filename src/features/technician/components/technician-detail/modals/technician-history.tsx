@@ -135,8 +135,8 @@ export function TechnicianHistoryModal({
             <p className="text-sm text-slate-400 italic text-center py-8">No work orders found.</p>
           ) : (
             <ol className="space-y-2">
-              {data.items.map((item) => (
-                <HistoryRow key={item.work_order_id} item={item} />
+              {data.items.map((item, index) => (
+                <HistoryRow key={`${item.work_order_id || "history"}-${index}`} item={item} />
               ))}
             </ol>
           )}

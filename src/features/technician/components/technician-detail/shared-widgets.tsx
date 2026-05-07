@@ -96,8 +96,8 @@ export function HistoryList({
 }) {
   return (
     <ol className="space-y-2">
-      {items.map((h) => (
-        <li key={h.work_order_id} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
+      {items.map((h, i) => (
+        <li key={`${h.work_order_id}-${i}`} className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
           <Link
             href={paths.dashboard.technician.detail.getHref(h.work_order_id)}
             className="text-xs font-bold text-primary hover:underline shrink-0"

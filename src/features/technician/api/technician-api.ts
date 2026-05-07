@@ -40,6 +40,7 @@ import type {
   DeviceReceiptPayload,
   WarehouseDispatchPayload,
   WarehouseDispatch,
+  RequestTemporaryRadiusPayload,
   // Cross-area
   CreateCrossAreaPayload,
   ReviewCrossAreaPayload,
@@ -50,9 +51,10 @@ import type {
   TechnicianPerformanceResponse,
   TechnicianWorkOrderHistoryResponse,
   WorkOrderHistoryResponse,
-  // Common
   ResponseEnvelope,
   WorkOrderDetailResponse,
+  ListTechniciansParams,
+  ListTechniciansResponse,
 } from "../types/technician-api";
 
 const BASE = services.technical;
@@ -317,6 +319,23 @@ export function getSiteWorkOrderHistory(siteId: string) {
   );
 }
 
+export function requestTemporaryRadius(id: string, payload: RequestTemporaryRadiusPayload) {
+  return cast<WorkOrderDetailEnvelope>(
+    userServiceApi.post(`${BASE}/work-orders/${id}/radius-provisionings/temporary`, payload)
+  );
+}
+
+export function listTechnicians(payload: ListTechniciansParams = {}) {
+  const body: Record<string, string> = {};
+  if (payload.branch_id) body.branch_id = payload.branch_id;
+  if (payload.team_leader_id) body.team_leader_id = payload.team_leader_id;
+
+  return cast<ResponseEnvelope<ListTechniciansResponse>>(
+    userServiceApi.post(`${BASE}/technicians/list`, body)
+  );
+}
+
 // ── Re-export for callers needing the underlying detail type ───────────────
 
 export type { WorkOrderDetailResponse };
+
