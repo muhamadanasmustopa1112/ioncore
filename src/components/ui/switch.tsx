@@ -21,9 +21,10 @@ const useSwitchContext = () => {
 // Define classes for variants
 const switchVariants = cva(
   `
-    relative peer inline-flex shrink-0 cursor-pointer items-center rounded-full transition-colors 
-    focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background 
-    disabled:cursor-not-allowed disabled:opacity-50 data-[state=unchecked]:bg-input
+    relative peer inline-flex shrink-0 cursor-pointer items-center rounded-full transition-colors border border-border
+    focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background
+    disabled:cursor-not-allowed disabled:opacity-50
+    data-[state=unchecked]:bg-muted-foreground/25 data-[state=unchecked]:hover:bg-muted-foreground/35
     aria-invalid:border aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10 dark:aria-invalid:border-destructive dark:aria-invalid:ring-destructive/20
     [[data-invalid=true]_&]:border [[data-invalid=true]_&]:border-destructive/60 [[data-invalid=true]_&]:ring-destructive/10  dark:[[data-invalid=true]_&]:border-destructive dark:[[data-invalid=true]_&]:ring-destructive/20
   `,
@@ -40,8 +41,8 @@ const switchVariants = cva(
         xl: "h-9 w-16",
       },
       permanent: {
-        true: "bg-input",
-        false: "data-[state=checked]:bg-primary",
+        true: "bg-muted-foreground/25",
+        false: "data-[state=checked]:bg-primary data-[state=checked]:border-primary",
       },
     },
     defaultVariants: {

@@ -160,22 +160,22 @@ export function useBranchTree() {
   });
 }
 
-export function useRegionalList() {
+export function useRegionalList(type?: string) {
   return useQuery({
-    queryKey: branchKeys.regional(),
+    queryKey: [...branchKeys.regional(), { type }] as const,
     queryFn: async () => {
-      const res = await listRegional({ per_page: 100 });
+      const res = await listRegional({ per_page: 100, type });
       return res.data?.branches ?? [];
     },
     placeholderData: [],
   });
 }
 
-export function useAreaList(regionalId: string) {
+export function useAreaList(regionalId: string, type?: string) {
   return useQuery({
-    queryKey: [...branchKeys.all, "area", regionalId] as const,
+    queryKey: [...branchKeys.all, "area", regionalId, { type }] as const,
     queryFn: async () => {
-      const res = await listArea(regionalId, { per_page: 100 });
+      const res = await listArea(regionalId, { per_page: 100, type });
       return res.data?.branches ?? [];
     },
     enabled: !!regionalId,

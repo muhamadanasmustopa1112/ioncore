@@ -290,7 +290,7 @@ export function ServiceForm() {
               <div className="flex items-center justify-between md:col-span-2">
                 <Label className="text-xs font-medium text-muted-foreground">Maintenance Allowed</Label>
                 <Switch
-                  size="sm"
+                  size="lg"
                   checked={maintenanceAllowed}
                   onCheckedChange={(v) => setValue("maintenance_allowed", v)}
                   disabled={isDetailMode}

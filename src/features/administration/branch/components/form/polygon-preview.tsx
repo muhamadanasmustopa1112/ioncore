@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState, useCallback, useEffect } from "react";
-import { MapContainer, TileLayer, Polygon, Marker, Polyline, useMapEvents, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Polygon, Polyline, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Undo2, Trash2, CheckCheck, Map } from "lucide-react";
+import { Undo2, Trash2, CheckCheck, MapPin, Pencil, Search, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -15,28 +16,26 @@ type LatLng = [number, number]; // [lat, lng] Leaflet order
 
 // ─── Parse GeoJSON — supports Polygon + MultiPolygon ─────────────────────────
 
-function parseRings(value: string): { rings: LngLat[][]; error: string | null } {
-  if (!value?.trim()) return { rings: [], error: null };
+function parseGeo(value: string): { rings: LngLat[][]; point: LngLat | null; error: string | null } {
+  if (!value?.trim()) return { rings: [], point: null, error: null };
   try {
     const parsed = JSON.parse(value);
+    if (parsed?.type === "Point" && Array.isArray(parsed.coordinates) && parsed.coordinates.length === 2) {
+      return { rings: [], point: parsed.coordinates as LngLat, error: null };
+    }
     if (parsed?.type === "Polygon" && Array.isArray(parsed.coordinates)) {
-      // exterior ring only
       const ring = parsed.coordinates[0] as LngLat[];
-      if (!ring || ring.length < 3) return { rings: [], error: "Polygon must have at least 3 points" };
-      return { rings: [ring], error: null };
+      if (!ring || ring.length < 3) return { rings: [], point: null, error: "Polygon must have at least 3 points" };
+      return { rings: [ring], point: null, error: null };
     }
     if (parsed?.type === "MultiPolygon" && Array.isArray(parsed.coordinates)) {
       const rings: LngLat[][] = parsed.coordinates.map((poly: LngLat[][]) => poly[0]);
-      if (rings.some((r) => r.length < 3)) return { rings: [], error: "Each polygon ring must have at least 3 points" };
-      return { rings, error: null };
+      if (rings.some((r) => r.length < 3)) return { rings: [], point: null, error: "Each polygon ring must have at least 3 points" };
+      return { rings, point: null, error: null };
     }
-    // Raw array [[lng, lat], ...]
-    if (Array.isArray(parsed) && parsed.length >= 3) {
-      return { rings: [parsed as LngLat[]], error: null };
-    }
-    return { rings: [], error: "Unsupported format — use GeoJSON Polygon or MultiPolygon" };
+    return { rings: [], point: null, error: "Unsupported format — use GeoJSON Point, Polygon or MultiPolygon" };
   } catch {
-    return { rings: [], error: "Invalid JSON" };
+    return { rings: [], point: null, error: "Invalid JSON" };
   }
 }
 
@@ -44,7 +43,11 @@ function toLeaflet(ring: LngLat[]): LatLng[] {
   return ring.map(([lng, lat]) => [lat, lng]);
 }
 
-function toGeoJSON(points: LngLat[]): string {
+function pointToGeoJSON(pt: LngLat): string {
+  return JSON.stringify({ type: "Point", coordinates: pt }, null, 2);
+}
+
+function polygonToGeoJSON(points: LngLat[]): string {
   const ring = [...points, points[0]];
   return JSON.stringify({ type: "Polygon", coordinates: [ring] }, null, 2);
 }
@@ -65,6 +68,86 @@ function DrawHandler({ onAdd }: { onAdd: (pt: LngLat) => void }) {
   return null;
 }
 
+// ─── Geocoder search (Nominatim) ──────────────────────────────────────────────
+
+interface GeocodeResult {
+  display_name: string;
+  lat: string;
+  lon: string;
+}
+
+function MapSearch() {
+  const map = useMap();
+  const [q, setQ] = useState("");
+  const [results, setResults] = useState<GeocodeResult[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const search = useCallback(async () => {
+    if (!q.trim()) return;
+    setLoading(true);
+    setOpen(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=0`,
+        { headers: { "Accept-Language": "en" } },
+      );
+      const data: GeocodeResult[] = await res.json();
+      setResults(data);
+    } catch {
+      setResults([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [q]);
+
+  const pick = (r: GeocodeResult) => {
+    map.flyTo([parseFloat(r.lat), parseFloat(r.lon)], 16, { duration: 0.6 });
+    setOpen(false);
+    setQ(r.display_name);
+  };
+
+  return (
+    <div className="absolute top-2 left-2 right-2 z-[400]">
+      <div className="flex gap-1.5">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); search(); } }}
+            onFocus={() => results.length > 0 && setOpen(true)}
+            placeholder="Search place or address..."
+            className="h-8 pl-8 text-xs bg-background shadow-md"
+          />
+        </div>
+        <Button size="sm" variant="primary" className="h-8 px-2.5 text-xs gap-1" onClick={search} disabled={loading || !q.trim()}>
+          {loading ? <Loader2 className="size-3 animate-spin" /> : <Search className="size-3" />}
+        </Button>
+      </div>
+      {open && results.length > 0 && (
+        <div className="mt-1 rounded-md border border-border bg-background shadow-lg max-h-48 overflow-y-auto">
+          {results.map((r, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => pick(r)}
+              className="w-full text-left px-3 py-1.5 text-xs hover:bg-accent border-b border-border last:border-0 truncate"
+            >
+              {r.display_name}
+            </button>
+          ))}
+        </div>
+      )}
+      {open && !loading && results.length === 0 && q.trim() && (
+        <div className="mt-1 rounded-md border border-border bg-background shadow-lg px-3 py-2 text-xs text-muted-foreground">
+          No results.
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MapResizeController() {
   const map = useMap();
   useEffect(() => {
@@ -76,14 +159,19 @@ function MapResizeController() {
 
 // ─── Static preview map ───────────────────────────────────────────────────────
 
-function StaticMap({ rings }: { rings: LngLat[][] }) {
-  const allPositions = rings.flatMap(toLeaflet);
-  const bounds = L.latLngBounds(allPositions);
+function StaticMap({ rings, point }: { rings: LngLat[][]; point: LngLat | null }) {
+  const ringPositions = rings.flatMap(toLeaflet);
+  const pointPos: LatLng | null = point ? [point[1], point[0]] : null;
+  const allPositions = pointPos ? [...ringPositions, pointPos] : ringPositions;
+  const bounds = allPositions.length > 1 ? L.latLngBounds(allPositions) : undefined;
+  const center: LatLng | undefined = !bounds && pointPos ? pointPos : undefined;
 
   return (
     <MapContainer
       key={allPositions.map((p) => p.join()).join("|")}
       bounds={bounds}
+      center={center}
+      zoom={center ? 15 : undefined}
       boundsOptions={{ padding: [24, 24] }}
       style={{ height: "100%", width: "100%" }}
       scrollWheelZoom={false}
@@ -97,13 +185,48 @@ function StaticMap({ rings }: { rings: LngLat[][] }) {
           pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.15, weight: 2 }}
         />
       ))}
+      {pointPos && <Marker position={pointPos} icon={dotIcon} />}
     </MapContainer>
   );
 }
 
 // ─── Draw tool ────────────────────────────────────────────────────────────────
 
-function DrawTool({ initial, onSave, onCancel }: { initial: LngLat[]; onSave: (geojson: string) => void; onCancel: () => void }) {
+function PointPicker({ initial, onSave, onCancel }: { initial: LngLat | null; onSave: (geojson: string) => void; onCancel: () => void }) {
+  const [point, setPoint] = useState<LngLat | null>(initial);
+  const set = useCallback((pt: LngLat) => setPoint(pt), []);
+
+  const pos: LatLng | null = point ? [point[1], point[0]] : null;
+  const center: LatLng = initial ? [initial[1], initial[0]] : [-6.2, 106.816];
+
+  return (
+    <div className="flex flex-col gap-2 h-full">
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-xs text-muted-foreground flex-1">
+          {point ? `Point: ${point[1].toFixed(5)}, ${point[0].toFixed(5)}` : "Click map to drop a pin"}
+        </span>
+        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive" onClick={() => setPoint(null)} disabled={!point}>
+          <Trash2 className="size-3" /> Clear
+        </Button>
+        <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={onCancel}>Cancel</Button>
+        <Button size="sm" variant="primary" className="h-7 px-2 text-xs gap-1" onClick={() => point && onSave(pointToGeoJSON(point))} disabled={!point}>
+          <CheckCheck className="size-3" /> Save
+        </Button>
+      </div>
+      <div className="rounded-md overflow-hidden border border-border h-[240px] md:h-[300px]">
+        <MapContainer center={center} zoom={13} className="h-full w-full cursor-crosshair" scrollWheelZoom attributionControl={false}>
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          <MapResizeController />
+          <MapSearch />
+          <DrawHandler onAdd={set} />
+          {pos && <Marker position={pos} icon={dotIcon} />}
+        </MapContainer>
+      </div>
+    </div>
+  );
+}
+
+function PolygonPicker({ initial, onSave, onCancel }: { initial: LngLat[]; onSave: (geojson: string) => void; onCancel: () => void }) {
   const [points, setPoints] = useState<LngLat[]>(initial);
   const add = useCallback((pt: LngLat) => setPoints((p) => [...p, pt]), []);
 
@@ -123,7 +246,7 @@ function DrawTool({ initial, onSave, onCancel }: { initial: LngLat[]; onSave: (g
           <Trash2 className="size-3" /> Clear
         </Button>
         <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={onCancel}>Cancel</Button>
-        <Button size="sm" variant="primary" className="h-7 px-2 text-xs gap-1" onClick={() => onSave(toGeoJSON(points))} disabled={points.length < 3}>
+        <Button size="sm" variant="primary" className="h-7 px-2 text-xs gap-1" onClick={() => onSave(polygonToGeoJSON(points))} disabled={points.length < 3}>
           <CheckCheck className="size-3" /> Save
         </Button>
       </div>
@@ -131,6 +254,7 @@ function DrawTool({ initial, onSave, onCancel }: { initial: LngLat[]; onSave: (g
         <MapContainer center={center} zoom={13} className="h-full w-full cursor-crosshair" scrollWheelZoom attributionControl={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapResizeController />
+          <MapSearch />
           <DrawHandler onAdd={add} />
           {positions.length >= 3 && (
             <Polygon positions={positions} pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.12, weight: 2, dashArray: "4 4" }} />
@@ -153,27 +277,35 @@ interface PolygonPreviewProps {
   readOnly?: boolean;
 }
 
+type PickMode = "point" | "polygon" | null;
+
 export function PolygonPreview({ value, onChange, readOnly }: PolygonPreviewProps) {
-  const [drawing, setDrawing] = useState(false);
+  const [pickMode, setPickMode] = useState<PickMode>(null);
 
-  const { rings, error } = useMemo(() => parseRings(value), [value]);
-  const hasValidPolygon = rings.length > 0;
+  const { rings, point, error } = useMemo(() => parseGeo(value), [value]);
+  const hasGeo = rings.length > 0 || point !== null;
 
-  const handleDrawSave = useCallback((geojson: string) => {
+  const handleSave = useCallback((geojson: string) => {
     onChange?.(geojson);
-    setDrawing(false);
+    setPickMode(null);
   }, [onChange]);
 
-  // ── Draw mode ──
-  if (drawing && onChange) {
+  // ── Pick mode ──
+  if (pickMode === "point" && onChange) {
+    return (
+      <div className="mt-2 space-y-2" style={{ minHeight: 320 }}>
+        <PointPicker initial={point} onSave={handleSave} onCancel={() => setPickMode(null)} />
+      </div>
+    );
+  }
+  if (pickMode === "polygon" && onChange) {
     const firstRing = rings[0] ?? [];
-    // strip closing duplicate point before passing to draw tool
     const initial = firstRing.length > 0 && firstRing[0] === firstRing[firstRing.length - 1]
       ? firstRing.slice(0, -1)
       : firstRing;
     return (
       <div className="mt-2 space-y-2" style={{ minHeight: 320 }}>
-        <DrawTool initial={initial} onSave={handleDrawSave} onCancel={() => setDrawing(false)} />
+        <PolygonPicker initial={initial} onSave={handleSave} onCancel={() => setPickMode(null)} />
       </div>
     );
   }
@@ -181,41 +313,32 @@ export function PolygonPreview({ value, onChange, readOnly }: PolygonPreviewProp
   // ── Normal mode ──
   return (
     <div className="mt-1 space-y-2">
-      {/* Textarea for manual input / paste */}
-      {!readOnly && onChange && (
-        <Textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={`Paste GeoJSON here, e.g.:\n{\n  "type": "MultiPolygon",\n  "coordinates": [[[[106.82,-6.21],[106.84,-6.21],[106.84,-6.23],[106.82,-6.21]]]]\n}`}
-          className="font-mono text-xs min-h-[100px] resize-y"
-          spellCheck={false}
-        />
-      )}
-
-      {/* Validation feedback */}
       {value?.trim() && error && (
         <p className="text-xs text-destructive">{error}</p>
       )}
 
-      {/* Map preview */}
-      {hasValidPolygon && (
+      {hasGeo && (
         <div className="rounded-md overflow-hidden border border-border" style={{ height: 220 }}>
-          <StaticMap rings={rings} />
+          <StaticMap rings={rings} point={point} />
         </div>
       )}
 
-      {/* Draw button */}
       {!readOnly && onChange && (
-        <Button size="sm" variant="outline" className="h-7 px-3 text-xs gap-1.5" onClick={() => setDrawing(true)}>
-          <Map className="size-3.5" />
-          {hasValidPolygon ? "Edit on Map" : "Draw on Map"}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" className="h-7 px-3 text-xs gap-1.5" onClick={() => setPickMode("point")}>
+            <MapPin className="size-3.5" />
+            {point ? "Edit Pin" : "Drop Pin"}
+          </Button>
+          <Button size="sm" variant="outline" className="h-7 px-3 text-xs gap-1.5" onClick={() => setPickMode("polygon")}>
+            <Pencil className="size-3.5" />
+            {rings.length > 0 ? "Edit Polygon" : "Draw Polygon"}
+          </Button>
+        </div>
       )}
 
-      {/* Read-only empty state */}
-      {readOnly && !hasValidPolygon && (
+      {readOnly && !hasGeo && (
         <div className="rounded-md border border-dashed border-border flex items-center justify-center text-xs text-muted-foreground" style={{ height: 60 }}>
-          No polygon defined
+          No location defined
         </div>
       )}
 

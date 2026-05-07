@@ -130,7 +130,7 @@ export function DocumentsSection({ form, disabled }: DocumentsSectionProps) {
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-medium text-muted-foreground">Required</Label>
                 <Switch
-                  size="sm"
+                  size="lg"
                   checked={watch(`required_documents.${index}.required`)}
                   onCheckedChange={(v) => setValue(`required_documents.${index}.required`, v)}
                   disabled={disabled}

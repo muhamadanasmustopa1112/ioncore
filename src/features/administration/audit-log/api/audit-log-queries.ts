@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { listActivityLogs } from "@/features/user-service/api/audit";
+import { getPageCount, getTotal, getPerPage } from "@/lib/pagination";
 import type { ActivityLog } from "@/features/user-service/types";
 import type { AuditLog } from "../types/audit-log";
 import type { AuditLogFilters } from "../types/audit-log-api";
@@ -45,13 +46,16 @@ export function useAuditLogList(filters: Partial<AuditLogFilters> = {}) {
         user_id: filters.user_id?.[0],
       });
       const items = Array.isArray(res.data) ? res.data : [];
+      const perPage = getPerPage(res.metadata, filters.per_page ?? 20);
+      const total = getTotal(res.metadata);
+      const totalPages = getPageCount(res.metadata, perPage);
       return {
         logs: items.map(mapActivityLog),
         pagination: {
-          page: res.metadata?.page ?? 1,
-          per_page: res.metadata?.per_page ?? 20,
-          total: res.metadata?.total ?? 0,
-          total_pages: Math.ceil((res.metadata?.total ?? 0) / (res.metadata?.per_page ?? 20)) || 1,
+          page: res.metadata?.page ?? filters.page ?? 1,
+          per_page: perPage,
+          total,
+          total_pages: totalPages || 1,
         },
       };
     },

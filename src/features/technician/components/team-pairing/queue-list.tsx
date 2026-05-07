@@ -49,7 +49,7 @@ export function QueueList({
           </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 max-h-[480px] overflow-y-auto">
         {unassigned.length === 0 ? (
           <p className="text-sm text-slate-400 italic p-4">All work orders assigned.</p>
         ) : (

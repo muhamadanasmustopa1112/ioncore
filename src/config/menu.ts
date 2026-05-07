@@ -430,13 +430,13 @@ export const DASHBOARD_MENU: MenuConfig = [
     icon: FileText,
     permission: "master.manage",
   },
-  // {
-  //   title: "Products",
-  //   path: paths.dashboard.administration.products.root.getHref(),
-  //   heading: 'Administration',
-  //   icon: Package,
-  //   permission: "master.manage",
-  // },
+  {
+    title: "Products",
+    path: paths.dashboard.administration.products.root.getHref(),
+    heading: 'Administration',
+    icon: Package,
+    permission: "master.manage",
+  },
   // {
   //   title: "Checklist",
   //   path: paths.dashboard.administration.checklist.root.getHref(),

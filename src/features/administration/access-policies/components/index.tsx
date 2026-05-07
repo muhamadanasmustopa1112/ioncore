@@ -1,17 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import {
+  ColumnDef,
+  getCoreRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import { Plus, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardFooter,
   CardHeader,
   CardHeading,
   CardTable,
   CardToolbar,
 } from "@/components/ui/card";
+import { DataGrid, DataGridContainer } from "@/components/ui/data-grid";
+import { DataGridPagination } from "@/components/ui/data-grid-pagination";
+import { DataGridTable } from "@/components/ui/data-grid-table";
+import { getPageCount } from "@/lib/pagination";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -26,14 +37,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Toolbar, ToolbarHeading, ToolbarTitle } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
@@ -41,20 +44,102 @@ import { paths } from "@/config/paths";
 import { useAccessPolicies, useCreateAccessPolicy } from "@/features/user-service/api/access-policies";
 import { useRoles } from "@/features/user-service/api/roles";
 import { usePermissions } from "@/features/user-service/api/permissions";
-import type { CreateAccessPolicyRequest } from "@/features/user-service/types";
+import type { AccessPolicy, CreateAccessPolicyRequest } from "@/features/user-service/types";
+
+const columns: ColumnDef<AccessPolicy>[] = [
+  {
+    id: "role",
+    header: "Role",
+    accessorFn: (r) => r.role?.name ?? "—",
+    cell: ({ row }) => <span className="font-medium">{row.original.role?.name ?? "—"}</span>,
+  },
+  {
+    id: "permission",
+    header: "Permission",
+    accessorFn: (r) => r.permission?.name ?? "—",
+  },
+  {
+    id: "resource",
+    header: "Resource",
+    accessorFn: (r) => r.permission?.resource ?? "—",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground text-xs">{row.original.permission?.resource ?? "—"}</span>
+    ),
+  },
+  {
+    id: "action",
+    header: "Action",
+    accessorFn: (r) => r.permission?.action ?? "—",
+    cell: ({ row }) => (
+      <span className="text-muted-foreground text-xs">{row.original.permission?.action ?? "—"}</span>
+    ),
+  },
+  {
+    id: "effect",
+    header: "Effect",
+    accessorFn: (r) => r.effect,
+    cell: ({ row }) => (
+      <Badge
+        variant={row.original.effect === "allow" ? "success" : "destructive"}
+        appearance="light"
+        size="sm"
+        className="capitalize"
+      >
+        {row.original.effect}
+      </Badge>
+    ),
+  },
+  {
+    id: "created",
+    header: "Created",
+    accessorFn: (r) => r.created_at ?? "",
+    cell: ({ row }) => (
+      <span className="text-xs text-muted-foreground">
+        {row.original.created_at ? new Date(row.original.created_at).toLocaleDateString() : "—"}
+      </span>
+    ),
+  },
+];
 
 export function AccessPoliciesPage() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<Partial<CreateAccessPolicyRequest>>({ effect: "allow" });
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
 
-  const { data: policiesResp, isLoading } = useAccessPolicies({ per_page: 100 });
+  const { data: policiesResp, isLoading } = useAccessPolicies({
+    page: pagination.page,
+    per_page: pagination.limit,
+  });
   const { data: rolesResp } = useRoles({ per_page: 100 });
   const { data: permsResp } = usePermissions({ per_page: 100 });
   const { mutateAsync: createPolicy, isPending } = useCreateAccessPolicy();
 
-  const policies = Array.isArray(policiesResp?.data) ? policiesResp.data : [];
+  const policies = useMemo<AccessPolicy[]>(
+    () => (Array.isArray(policiesResp?.data) ? policiesResp.data : []),
+    [policiesResp],
+  );
   const roles = Array.isArray(rolesResp?.data) ? rolesResp.data : [];
   const permissions = Array.isArray(permsResp?.data) ? permsResp.data : [];
+  const total = policiesResp?.metadata?.total ?? policies.length;
+
+  const table = useReactTable({
+    columns,
+    data: policies,
+    manualPagination: true,
+    pageCount: getPageCount(policiesResp?.metadata, pagination.limit) || 1,
+    getRowId: (row) => row.id ?? `${row.role?.id}-${row.permission?.id}`,
+    state: {
+      pagination: { pageIndex: pagination.page - 1, pageSize: pagination.limit },
+    },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === "function"
+        ? updater({ pageIndex: pagination.page - 1, pageSize: pagination.limit })
+        : updater;
+      setPagination({ page: next.pageIndex + 1, limit: next.pageSize });
+    },
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
   const handleCreate = async () => {
     if (!form.role_id || !form.permission_id || !form.effect) {
@@ -94,69 +179,34 @@ export function AccessPoliciesPage() {
         </Button>
       </Toolbar>
 
-      <Card className="mt-5">
-        <CardHeader>
-          <CardHeading>
-            <Shield className="size-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{policies.length} policies</span>
-          </CardHeading>
-          <CardToolbar />
-        </CardHeader>
-        <CardTable>
-          <ScrollArea>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Permission</TableHead>
-                  <TableHead>Resource</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Effect</TableHead>
-                  <TableHead>Created</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      Loading…
-                    </TableCell>
-                  </TableRow>
-                )}
-                {!isLoading && policies.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
-                      No policies defined yet
-                    </TableCell>
-                  </TableRow>
-                )}
-                {policies.map((p) => (
-                  <TableRow key={p.id ?? `${p.role?.id}-${p.permission?.id}`}>
-                    <TableCell className="font-medium">{p.role?.name ?? "—"}</TableCell>
-                    <TableCell>{p.permission?.name ?? "—"}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{p.permission?.resource ?? "—"}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{p.permission?.action ?? "—"}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={p.effect === "allow" ? "success" : "destructive"}
-                        appearance="light"
-                        size="sm"
-                        className="capitalize"
-                      >
-                        {p.effect}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs text-muted-foreground">
-                      {p.created_at ? new Date(p.created_at).toLocaleDateString() : "—"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </CardTable>
-      </Card>
+      <DataGrid
+        table={table}
+        recordCount={total}
+        tableLayout={{ cellBorder: true }}
+        isLoading={isLoading}
+        emptyMessage="No policies defined yet"
+      >
+        <Card className="mt-5">
+          <CardHeader>
+            <CardHeading>
+              <Shield className="size-4 text-muted-foreground" />
+              <span className="text-sm font-medium">{total} policies</span>
+            </CardHeading>
+            <CardToolbar />
+          </CardHeader>
+          <CardTable>
+            <ScrollArea>
+              <DataGridContainer className="w-full">
+                <DataGridTable />
+              </DataGridContainer>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </CardTable>
+          <CardFooter>
+            <DataGridPagination setFilter={setPagination} filter={pagination} />
+          </CardFooter>
+        </Card>
+      </DataGrid>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent className="sm:max-w-md">

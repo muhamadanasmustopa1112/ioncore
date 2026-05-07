@@ -36,11 +36,11 @@ import { ChangeMatrixPanel } from "./policy/change-matrix-panel";
 
 const VIEWS: { value: SchemaView; label: string; icon: React.ReactNode }[] = [
   { value: "schemas", label: "Schema Library", icon: <RiFileTextLine className="size-3.5" /> },
-  { value: "assignment-rules", label: "Assignment Rules", icon: <RiGroupLine className="size-3.5" /> },
+  // { value: "assignment-rules", label: "Assignment Rules", icon: <RiGroupLine className="size-3.5" /> },
   { value: "customer-overrides", label: "Customer Overrides", icon: <RiUserSettingsLine className="size-3.5" /> },
-  { value: "change-policies", label: "Change Policies", icon: <RiRefreshLine className="size-3.5" /> },
-  { value: "upgrade-rules", label: "Upgrade Eligibility", icon: <RiArrowUpLine className="size-3.5" /> },
-  { value: "change-matrix", label: "Change Matrix", icon: <RiGridLine className="size-3.5" /> },
+  // { value: "change-policies", label: "Change Policies", icon: <RiRefreshLine className="size-3.5" /> },
+  // { value: "upgrade-rules", label: "Upgrade Eligibility", icon: <RiArrowUpLine className="size-3.5" /> },
+  // { value: "change-matrix", label: "Change Matrix", icon: <RiGridLine className="size-3.5" /> },
 ];
 
 const VIEW_TITLES: Record<SchemaView, string> = {

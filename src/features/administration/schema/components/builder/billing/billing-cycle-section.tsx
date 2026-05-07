@@ -100,7 +100,7 @@ export function BillingCycleSection({ form, disabled }: BillingCycleSectionProps
         <div className="flex items-center justify-between md:col-span-2">
           <Label className="text-xs font-medium text-muted-foreground">Allow Partial Payments</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={watch("billing_cycle.allow_partial_payments")}
             onCheckedChange={(v) => setValue("billing_cycle.allow_partial_payments", v)}
             disabled={disabled}

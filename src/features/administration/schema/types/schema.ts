@@ -9,11 +9,13 @@ export type SchemaStatus =
   | "draft"
   | "submitted"
   | "approved"
+  | "rejected"
   | "published"
   | "archived"
   | "DRAFT"
   | "SUBMITTED"
   | "APPROVED"
+  | "REJECTED"
   | "PUBLISHED"
   | "ARCHIVED";
 

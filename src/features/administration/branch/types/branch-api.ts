@@ -139,4 +139,5 @@ export interface BranchDetailDto {
 export interface BranchListParams {
   page?: number;
   per_page?: number;
+  type?: string;
 }

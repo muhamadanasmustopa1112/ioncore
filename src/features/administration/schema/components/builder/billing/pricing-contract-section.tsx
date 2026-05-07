@@ -67,7 +67,7 @@ export function PricingContractSection({ form, disabled }: PricingContractSectio
           <div className="flex items-center justify-between md:col-span-2">
             <Label className="text-xs font-medium text-muted-foreground">Tax Included</Label>
             <Switch
-              size="sm"
+              size="lg"
               checked={watch("tax_included")}
               onCheckedChange={(v) => setValue("tax_included", v)}
               disabled={disabled}
@@ -98,7 +98,7 @@ export function PricingContractSection({ form, disabled }: PricingContractSectio
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium text-muted-foreground">Early Termination Enabled</Label>
             <Switch
-              size="sm"
+              size="lg"
               checked={earlyTerminationEnabled}
               onCheckedChange={(v) => setValue("early_termination_enabled", v)}
               disabled={disabled}

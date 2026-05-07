@@ -102,7 +102,7 @@ export function StepsSection({ form, disabled }: StepsSectionProps) {
               <div className="flex items-center justify-between pt-4">
                 <Label className="text-xs font-medium text-muted-foreground">Required</Label>
                 <Switch
-                  size="sm"
+                  size="lg"
                   checked={watch(`steps.${index}.required`)}
                   onCheckedChange={(v) => setValue(`steps.${index}.required`, v)}
                   disabled={disabled}
@@ -111,7 +111,7 @@ export function StepsSection({ form, disabled }: StepsSectionProps) {
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-medium text-muted-foreground">Automated</Label>
                 <Switch
-                  size="sm"
+                  size="lg"
                   checked={watch(`steps.${index}.automated`)}
                   onCheckedChange={(v) => setValue(`steps.${index}.automated`, v)}
                   disabled={disabled}

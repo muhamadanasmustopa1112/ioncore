@@ -52,7 +52,7 @@ export function SuspensionRulesSection({ form, disabled }: SuspensionRulesSectio
         <div className="flex items-center justify-between md:col-span-2">
           <Label className="text-xs font-medium text-muted-foreground">Automatic Suspension</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={suspensionAutomatic}
             onCheckedChange={(v) => setValue("suspension_automatic", v)}
             disabled={disabled}
@@ -81,7 +81,7 @@ export function SuspensionRulesSection({ form, disabled }: SuspensionRulesSectio
         <div className="flex items-center justify-between">
           <Label className="text-xs font-medium text-muted-foreground">Requires Manual Approval</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={watch("suspension_requires_manual_approval")}
             onCheckedChange={(v) => setValue("suspension_requires_manual_approval", v)}
             disabled={disabled}
@@ -90,7 +90,7 @@ export function SuspensionRulesSection({ form, disabled }: SuspensionRulesSectio
         <div className="flex items-center justify-between">
           <Label className="text-xs font-medium text-muted-foreground">Requires Executive Approval</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={watch("suspension_requires_executive_approval")}
             onCheckedChange={(v) => setValue("suspension_requires_executive_approval", v)}
             disabled={disabled}
@@ -131,7 +131,7 @@ export function SuspensionRulesSection({ form, disabled }: SuspensionRulesSectio
         <div className="flex items-center justify-between md:col-span-2">
           <Label className="text-xs font-medium text-muted-foreground">Notification Enabled</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={watch("suspension_notification")}
             onCheckedChange={(v) => setValue("suspension_notification", v)}
             disabled={disabled}
