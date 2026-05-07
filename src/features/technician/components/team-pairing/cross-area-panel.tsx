@@ -88,7 +88,7 @@ export function CrossAreaPanel({ requests }: { requests: CrossAreaRequest[] }) {
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className={`p-0 ${requests.length > 5 ? "max-h-[380px] overflow-y-auto scrollbar-thin" : ""}`}>
         {requests.length === 0 ? (
           <p className="text-sm text-slate-400 italic p-4">No cross-area requests.</p>
         ) : (
