@@ -39,7 +39,7 @@ export function OdpMarkers({ data, markerRefs, onSelect }: OdpMarkersProps) {
             }}
           >
             <Popup className="odp-popup">
-              <div className="w-[240px] p-1">
+              <div className="w-[140px] p-1">
                 <div className="flex items-center gap-2 mb-2 border-b pb-2">
                   <Radio className="size-3 text-violet-500" />
                   <h4 className="font-black text-xs m-0 text-foreground uppercase tracking-tight">{odp.name}</h4>

@@ -28,7 +28,7 @@ export function PopMarkers({ data, markerRefs, onSelect }: PopMarkersProps) {
 
         >
           <Popup className="odp-popup">
-            <div className="w-[280px] p-1">
+            <div className="w-[170px] p-1">
               <div className="flex justify-between items-start mb-2 border-b pb-2">
                 <div>
                   <h4 className="font-black text-xs m-0 text-foreground uppercase tracking-tight">{pop.name}</h4>

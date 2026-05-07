@@ -334,6 +334,8 @@ export interface WorkOrderDetailResponse {
   state: WorkOrderState;
   priority: WorkOrderPriority;
   description: string;
+  inventory_reservation_status?: "reserved" | "pending";
+  temporary_provisioning_status?: "TEMPORARY_PENDING" | "TEMPORARY_ACTIVE" | "TEMPORARY" | "TEMPORARY_FAILURE" | "FAILED" | "EXPIRED" | null;
   customer_id: string;
   customer_name: string;
   customer_email: string;
@@ -884,3 +886,40 @@ export interface LoginPayload {
 export interface RefreshTokenPayload {
   refresh_token: string;
 }
+
+export interface RequestTemporaryRadiusPayload {
+  actor_id: string;
+  actor_role: string;
+  note: string;
+}
+
+export interface ListTechniciansParams {
+  branch_id?: string;
+  team_leader_id?: string;
+}
+
+export interface ListTechnicianItem {
+  active_workload: number;
+  area_id: string;
+  availability_status: string;
+  branch_id: string;
+  cross_area_enabled: boolean;
+  employee_id: string;
+  level: string;
+  skills: string[];
+  sub_area_id: string;
+  team_leader_area_id: string;
+  team_leader_id: string;
+  team_leader_name: string;
+  team_leader_role: string;
+  team_leader_sub_area_id: string;
+  technician_id: string;
+  technician_name: string;
+  user_email: string;
+  user_id: string;
+}
+
+export interface ListTechniciansResponse {
+  items: ListTechnicianItem[];
+}
+

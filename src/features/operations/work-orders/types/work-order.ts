@@ -48,6 +48,7 @@ export interface WorkOrder {
   updatedAt: string;
   updatedBy: string;
   checklists: Checklist[];
+  cross_area?: boolean;
 }
 
 export const WO_TYPE_LABELS: Record<WoType, string> = {

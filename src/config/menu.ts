@@ -263,7 +263,7 @@ export const DASHBOARD_MENU: MenuConfig = [
   },
   // {
   //   title: "Warehouse & Asset",
-  //   path: "#",
+  //   path: paths.dashboard.warehouse.root.getHref(),
   //   heading: 'Infrastructure',
   //   icon: BookMinus,
   // },

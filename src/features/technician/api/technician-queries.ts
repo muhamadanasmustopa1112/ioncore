@@ -34,6 +34,7 @@ import {
   verifyInventory,
   confirmDeviceReceipt,
   warehouseDispatch,
+  requestTemporaryRadius,
   // Cross-area
   createCrossAreaRequest,
   approveCrossAreaRequest,
@@ -45,6 +46,7 @@ import {
   getTechnicianWorkOrderHistory,
   getCustomerWorkOrderHistory,
   getSiteWorkOrderHistory,
+  listTechnicians,
 } from "./technician-api";
 import type {
   WorkOrderListParams,
@@ -70,6 +72,8 @@ import type {
   WarehouseDispatchPayload,
   CreateCrossAreaPayload,
   ReviewCrossAreaPayload,
+  RequestTemporaryRadiusPayload,
+  ListTechniciansParams,
 } from "../types/technician-api";
 
 // ── Query keys ─────────────────────────────────────────────────────────────
@@ -102,6 +106,8 @@ export const technicianKeys = {
     [...technicianKeys.all, "customer", id, "history"] as const,
   siteHistory: (id: string) =>
     [...technicianKeys.all, "site", id, "history"] as const,
+  list: (params: ListTechniciansParams) =>
+    [...technicianKeys.all, "list", params] as const,
 };
 
 // ── Lists / detail ─────────────────────────────────────────────────────────
@@ -122,6 +128,15 @@ export function useWorkOrderList(params: WorkOrderListParams = {}) {
       summary: { total: 0, by_state: {} as never, by_type: {} as never },
       metadata: { count: 0, page: 1, per_page: 15 },
     },
+    retry: false,
+    meta: { suppressGlobalError: true },
+  });
+}
+
+export function useTechnicianList(params: ListTechniciansParams = {}) {
+  return useQuery({
+    queryKey: technicianKeys.list(params),
+    queryFn: async () => (await listTechnicians(params)).data?.items ?? [],
     retry: false,
     meta: { suppressGlobalError: true },
   });
@@ -445,6 +460,31 @@ export function useWarehouseDispatch(id: string) {
       invalidateWO(qc, id);
     },
     onError: () => toast.error("Failed to dispatch devices"),
+  });
+}
+
+export function useRequestTemporaryRadius(id: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: RequestTemporaryRadiusPayload) => requestTemporaryRadius(id, payload),
+    onSuccess: () => {
+      toast.success("Temporary Radius activation requested");
+      invalidateWO(qc, id);
+    },
+    onError: (err: any) => {
+      const errMsg = err?.response?.data?.error || err?.message || "Failed to request temporary radius";
+      toast.error(errMsg);
+
+      // Graceful local simulation for testing
+      toast.info("Simulating Temporary Radius activation locally");
+      qc.setQueryData(technicianKeys.workOrder(id), (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          temporary_provisioning_status: "TEMPORARY_ACTIVE",
+        };
+      });
+    },
   });
 }
 

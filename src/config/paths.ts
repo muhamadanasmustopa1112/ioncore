@@ -148,6 +148,12 @@ export const paths = {
         getHref: () => "/technician/noc-queue",
       },
     },
+    warehouse: {
+      root: {
+        path: "/warehouse",
+        getHref: () => "/warehouse",
+      },
+    },
     operations: {
       root: {
         path: "/operations",

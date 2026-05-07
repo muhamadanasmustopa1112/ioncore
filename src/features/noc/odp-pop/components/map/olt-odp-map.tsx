@@ -120,9 +120,9 @@ export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isL
         </div>
       </CardHeader>
 
-      <CardContent className="p-0 flex-1 relative min-h-[600px] overflow-hidden">
+      <CardContent className="p-0 flex-1 relative min-h-[400px] overflow-hidden">
         {/* Floating List Overlay */}
-        <div className="absolute top-6 left-6 z-10 w-64 max-h-[calc(100%-48px)] flex flex-col gap-3">
+        <div className="absolute top-6 left-6 z-10 w-52 max-h-[calc(100%-48px)] flex flex-col gap-3">
           <div className="bg-background/80 backdrop-blur-xl border border-border/40 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
             <div className="p-4 border-b border-border/10 bg-card/40 flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-widest text-foreground/70">
@@ -194,7 +194,7 @@ export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isL
               }}
             >
               <Popup className="odp-popup">
-                <div className="p-1 min-w-[150px]">
+                <div className="p-1 w-[130px]">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="size-2 rounded-full bg-blue-500 animate-pulse" />
                     <h4 className="font-black text-[11px] m-0 text-foreground uppercase tracking-tight">

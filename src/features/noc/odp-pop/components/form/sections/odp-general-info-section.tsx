@@ -83,16 +83,27 @@ export function OdpGeneralInfoSection({
                 <RiStackLine className="size-3" />
                 Total Ports
               </FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="16"
-                  {...field}
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(e.target.value === "" ? 0 : Number(e.target.value))}
-                  disabled={readOnly || isPending}
-                />
-              </FormControl>
+              <Select
+                onValueChange={(val) => field.onChange(Number(val))}
+                value={field.value?.toString()}
+                disabled={readOnly || isPending}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Ports" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="4">4</SelectItem>
+                  <SelectItem value="8">8</SelectItem>
+                  <SelectItem value="12">12</SelectItem>
+                  <SelectItem value="16">16</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="24">24</SelectItem>
+                  <SelectItem value="28">28</SelectItem>
+                  <SelectItem value="32">32</SelectItem>
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}

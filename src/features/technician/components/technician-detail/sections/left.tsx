@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   User,
@@ -11,14 +12,30 @@ import {
   Network,
   ShieldCheck,
   Smartphone,
+  Wifi,
+  Zap,
+  Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { WorkOrderDetailResponse } from "../../../types/technician-api";
 import { SectionCard, Field, SpecCell, Empty, fmtDate, humanize } from "../shared";
 import { TechnicianCard, JourneyRow } from "../shared-widgets";
+import { useRequestTemporaryRadius } from "../../../api/technician-queries";
 
 export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
+  const { mutate, isPending } = useRequestTemporaryRadius(wo.id);
+  const [forceReserved, setForceReserved] = useState(false);
+
+  const isReserved = wo.inventory_reservation_status === "reserved" || forceReserved;
+  const isStateValid = wo.state === "dispatched" || forceReserved;
+  const hasFailedOrExpired = 
+    wo.temporary_provisioning_status === "TEMPORARY_FAILURE" || 
+    wo.temporary_provisioning_status === "FAILED" || 
+    wo.temporary_provisioning_status === "EXPIRED";
+  const isGatePassed = (isStateValid && isReserved) || hasFailedOrExpired;
+
   return (
     <>
       {/* Customer & Site */}
@@ -209,6 +226,108 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
           </div>
         </SectionCard>
       )}
+
+      {/* Temporary Radius Provisioning */}
+      <SectionCard icon={Wifi} title="Temporary Radius Provisioning">
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:border-blue-900/20 dark:bg-blue-950/20">
+            <div>
+              <p className="text-sm font-bold text-blue-900 dark:text-blue-200">ION Radius Status</p>
+              <p className="text-xs text-blue-700/80 dark:text-blue-400/80 mt-1">
+                Active temporary configuration for installation test gate.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              {wo.temporary_provisioning_status === "TEMPORARY_ACTIVE" || wo.temporary_provisioning_status === "TEMPORARY" ? (
+                <Badge variant="success" appearance="light" size="lg" className="flex items-center gap-1 font-extrabold uppercase tracking-wide">
+                  <Zap className="size-3 text-emerald-500 fill-emerald-500" />
+                  Temporary Active
+                </Badge>
+              ) : wo.temporary_provisioning_status === "TEMPORARY_PENDING" ? (
+                <Badge variant="warning" appearance="light" size="lg" className="animate-pulse flex items-center gap-1 font-extrabold uppercase tracking-wide">
+                  <Loader2 className="size-3 animate-spin text-amber-500" />
+                  Temporary Pending
+                </Badge>
+              ) : wo.temporary_provisioning_status === "TEMPORARY_FAILURE" ? (
+                <Badge variant="destructive" appearance="light" size="lg" className="flex items-center gap-1 font-extrabold uppercase tracking-wide">
+                  Temporary Failure
+                </Badge>
+              ) : wo.temporary_provisioning_status === "FAILED" ? (
+                <Badge variant="destructive" appearance="light" size="lg" className="flex items-center gap-1 font-extrabold uppercase tracking-wide">
+                  Failed
+                </Badge>
+              ) : wo.temporary_provisioning_status === "EXPIRED" ? (
+                <Badge variant="secondary" appearance="light" size="lg" className="flex items-center gap-1 font-extrabold uppercase tracking-wide">
+                  Expired
+                </Badge>
+              ) : (
+                <Badge variant="secondary" appearance="light" size="lg" className="font-extrabold uppercase tracking-wide">
+                  Not Activated
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Precondition Verification Gates</p>
+              <button
+                type="button"
+                onClick={() => setForceReserved(!forceReserved)}
+                className="text-[10px] text-primary hover:underline font-bold uppercase tracking-wider"
+              >
+                {forceReserved ? "Use Real Stock State" : "Force Reserve State"}
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-150/60 dark:border-slate-800/60 text-xs">
+                <span className="text-slate-500 font-medium">Work Order State:</span>
+                <span className="flex items-center gap-1.5 font-bold">
+                  <span className={`size-2 rounded-full ${(wo.state === "dispatched" || wo.state === "in_progress" || forceReserved) ? "bg-emerald-500" : "bg-slate-300"}`} />
+                  <span className={(wo.state === "dispatched" || wo.state === "in_progress" || forceReserved) ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500"}>
+                    {(wo.state === "dispatched" || wo.state === "in_progress") ? wo.state.toUpperCase() : (forceReserved ? "DISPATCHED (MOCK)" : (wo.state ? wo.state.toUpperCase() : "PENDING"))}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-150/60 dark:border-slate-800/60 text-xs">
+                <span className="text-slate-500 font-medium">Inventory Reservation:</span>
+                <span className="flex items-center gap-1.5 font-bold">
+                  <span className={`size-2 rounded-full ${isReserved ? "bg-emerald-500" : "bg-slate-300"}`} />
+                  <span className={isReserved ? "text-emerald-700 dark:text-emerald-400" : "text-slate-500"}>
+                    {isReserved ? (wo.inventory_reservation_status === "reserved" ? "RESERVED" : "RESERVED (AUTO)") : "PENDING"}
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+            <Button
+              variant={isGatePassed ? "primary" : "outline"}
+              disabled={
+                !isGatePassed || 
+                isPending || 
+                wo.temporary_provisioning_status === "TEMPORARY_ACTIVE" || 
+                wo.temporary_provisioning_status === "TEMPORARY" || 
+                wo.temporary_provisioning_status === "TEMPORARY_PENDING"
+              }
+              onClick={() => mutate({
+                actor_id: "TECH-01",
+                actor_role: "technician",
+                note: "Requesting temporary radius provisioning for installation test"
+              })}
+              className="w-full sm:w-auto font-extrabold text-xs uppercase tracking-wider py-2 px-6 flex items-center justify-center gap-2"
+            >
+              {isPending && <Loader2 className="size-3.5 animate-spin" />}
+              {wo.temporary_provisioning_status === "TEMPORARY_ACTIVE" || wo.temporary_provisioning_status === "TEMPORARY" 
+                ? "Temporary Radius Active" 
+                : wo.temporary_provisioning_status === "TEMPORARY_PENDING" 
+                  ? "Pending..." 
+                  : "Request Temporary Radius"}
+            </Button>
+          </div>
+        </div>
+      </SectionCard>
     </>
   );
 }

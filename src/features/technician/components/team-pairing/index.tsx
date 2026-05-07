@@ -88,6 +88,7 @@ export function TeamPairingDashboard() {
         <div className="col-span-12 lg:col-span-7 space-y-4 lg:space-y-6">
           <QueueList
             items={data.queue ?? []}
+            selectedDate={date}
             onAssign={(wo) => setPairingTarget(wo)}
           />
           <CrossAreaPanel requests={data.cross_area_requests ?? []} />
