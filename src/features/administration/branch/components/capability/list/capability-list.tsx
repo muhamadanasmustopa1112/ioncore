@@ -36,6 +36,7 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
   const { data: capabilities = [], isLoading, isError, refetch } = useCapabilityList(branchId);
 
   const [search, setSearch] = useState("");
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const filteredData = useMemo(() => {
@@ -51,10 +52,20 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
   const table = useReactTable({
     columns,
     data: filteredData,
+    pageCount: Math.ceil(filteredData.length / pagination.limit),
     getRowId: (row) => row.id,
-    state: { rowSelection },
+    state: {
+      rowSelection,
+      pagination: { pageIndex: pagination.page - 1, pageSize: pagination.limit },
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === "function"
+        ? updater({ pageIndex: pagination.page - 1, pageSize: pagination.limit })
+        : updater;
+      setPagination({ page: next.pageIndex + 1, limit: next.pageSize });
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -140,7 +151,7 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
           </ScrollArea>
         </CardTable>
         <CardFooter>
-          <DataGridPagination />
+          <DataGridPagination setFilter={setPagination} filter={pagination} />
         </CardFooter>
       </Card>
     </DataGrid>

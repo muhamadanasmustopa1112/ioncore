@@ -2,17 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { useUsers } from "@/features/user-service/api/users";
+import { getPageCount } from "@/lib/pagination";
 import { mapAuthUserToUserData } from "../../mappers";
 import {
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
-import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
+import { useQueryStates, parseAsString } from "nuqs";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -39,16 +39,15 @@ import { DataTableToolbar } from "./table/data-table-toolbar";
 
 export function UserList() {
   const [filter, setFilter] = useQueryStates({
-    limit: parseAsInteger.withDefault(10),
-    page: parseAsInteger.withDefault(1),
     search: parseAsString,
     status: parseAsString,
   });
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const { data: usersResp, isLoading } = useUsers({
-    page: filter.page || 1,
-    per_page: filter.limit || 10,
+    page: pagination.page,
+    per_page: pagination.limit,
   });
   const data = useMemo<UserData[]>(
     () => (usersResp?.data || []).map(mapAuthUserToUserData),
@@ -78,21 +77,30 @@ export function UserList() {
   const table = useReactTable({
     columns,
     data: filteredData,
-    pageCount: Math.ceil(filteredData.length / (filter.limit || 10)),
+    manualPagination: true,
+    pageCount: getPageCount(usersResp?.metadata, pagination.limit) || 1,
     getRowId: (row) => row.id,
-    state: { rowSelection },
+    state: {
+      rowSelection,
+      pagination: { pageIndex: pagination.page - 1, pageSize: pagination.limit },
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === "function"
+        ? updater({ pageIndex: pagination.page - 1, pageSize: pagination.limit })
+        : updater;
+      setPagination({ page: next.pageIndex + 1, limit: next.pageSize });
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
   return (
     <DataGrid
       table={table}
-      recordCount={filteredData.length}
+      recordCount={usersResp?.metadata?.total ?? filteredData.length}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -152,7 +160,7 @@ export function UserList() {
           </ScrollArea>
         </CardTable>
         <CardFooter>
-          <DataGridPagination setFilter={setFilter} filter={filter} />
+          <DataGridPagination setFilter={setPagination} filter={pagination} />
         </CardFooter>
       </Card>
     </DataGrid>

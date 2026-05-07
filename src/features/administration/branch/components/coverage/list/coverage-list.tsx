@@ -35,6 +35,7 @@ export function CoverageList({ branchId }: CoverageListProps) {
   const { data: coverages = [], isLoading, isError, refetch } = useCoverageList(branchId);
 
   const [search, setSearch] = useState("");
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
 
   const filteredData = useMemo(() => {
     if (!search) return coverages;
@@ -51,7 +52,17 @@ export function CoverageList({ branchId }: CoverageListProps) {
   const table = useReactTable({
     columns,
     data: filteredData,
+    pageCount: Math.ceil(filteredData.length / pagination.limit),
     getRowId: (row) => row.id,
+    state: {
+      pagination: { pageIndex: pagination.page - 1, pageSize: pagination.limit },
+    },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === "function"
+        ? updater({ pageIndex: pagination.page - 1, pageSize: pagination.limit })
+        : updater;
+      setPagination({ page: next.pageIndex + 1, limit: next.pageSize });
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -137,7 +148,7 @@ export function CoverageList({ branchId }: CoverageListProps) {
           </ScrollArea>
         </CardTable>
         <CardFooter>
-          <DataGridPagination />
+          <DataGridPagination setFilter={setPagination} filter={pagination} />
         </CardFooter>
       </Card>
     </DataGrid>

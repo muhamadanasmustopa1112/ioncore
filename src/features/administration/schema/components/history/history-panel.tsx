@@ -76,6 +76,8 @@ export function HistoryPanel() {
         return "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
       case "approved":
         return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+      case "rejected":
+        return "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400";
       case "submitted":
         return "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400";
       case "draft":

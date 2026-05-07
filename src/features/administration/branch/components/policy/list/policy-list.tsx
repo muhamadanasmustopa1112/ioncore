@@ -36,6 +36,7 @@ export function PolicyList({ branchId }: PolicyListProps) {
   const { data: policies = [], isLoading, isError, refetch } = usePolicyList(branchId);
 
   const [search, setSearch] = useState("");
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const filteredData = useMemo(() => {
@@ -52,10 +53,20 @@ export function PolicyList({ branchId }: PolicyListProps) {
   const table = useReactTable({
     columns,
     data: filteredData,
+    pageCount: Math.ceil(filteredData.length / pagination.limit),
     getRowId: (row) => row.id,
-    state: { rowSelection },
+    state: {
+      rowSelection,
+      pagination: { pageIndex: pagination.page - 1, pageSize: pagination.limit },
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === "function"
+        ? updater({ pageIndex: pagination.page - 1, pageSize: pagination.limit })
+        : updater;
+      setPagination({ page: next.pageIndex + 1, limit: next.pageSize });
+    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -141,7 +152,7 @@ export function PolicyList({ branchId }: PolicyListProps) {
           </ScrollArea>
         </CardTable>
         <CardFooter>
-          <DataGridPagination />
+          <DataGridPagination setFilter={setPagination} filter={pagination} />
         </CardFooter>
       </Card>
     </DataGrid>

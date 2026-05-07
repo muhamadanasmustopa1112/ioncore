@@ -105,7 +105,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
         <div className="flex items-center justify-between md:col-span-2">
           <Label className="text-xs font-medium text-muted-foreground">Late Fee Enabled</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={lateFeeEnabled}
             onCheckedChange={(v) => setValue("recurring_payment.late_fee_enabled", v)}
             disabled={disabled}
@@ -154,7 +154,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
         <div className="flex items-center justify-between md:col-span-2">
           <Label className="text-xs font-medium text-muted-foreground">Suspension Automatic</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={suspensionAutomatic}
             onCheckedChange={(v) => setValue("recurring_payment.suspension_automatic", v)}
             disabled={disabled}
@@ -165,7 +165,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
             <div className="flex items-center justify-between">
               <Label className="text-xs font-medium text-muted-foreground">Requires Manual Approval</Label>
               <Switch
-                size="sm"
+                size="lg"
                 checked={watch("recurring_payment.suspension_requires_manual_approval")}
                 onCheckedChange={(v) =>
                   setValue("recurring_payment.suspension_requires_manual_approval", v)
@@ -176,7 +176,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
             <div className="flex items-center justify-between">
               <Label className="text-xs font-medium text-muted-foreground">Requires Executive Approval</Label>
               <Switch
-                size="sm"
+                size="lg"
                 checked={watch("recurring_payment.suspension_requires_executive_approval")}
                 onCheckedChange={(v) =>
                   setValue("recurring_payment.suspension_requires_executive_approval", v)

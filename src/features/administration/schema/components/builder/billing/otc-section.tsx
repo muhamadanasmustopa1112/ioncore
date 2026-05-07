@@ -69,7 +69,7 @@ export function OtcSection({ form, disabled }: OtcSectionProps) {
         <div className="flex items-center justify-between">
           <Label className="text-xs font-medium text-muted-foreground">Payment Required Before WO</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={watch("otc.payment_required_before_wo")}
             onCheckedChange={(v) => setValue("otc.payment_required_before_wo", v)}
             disabled={disabled}
@@ -78,7 +78,7 @@ export function OtcSection({ form, disabled }: OtcSectionProps) {
         <div className="flex items-center justify-between">
           <Label className="text-xs font-medium text-muted-foreground">Generate Faktur Pajak</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={watch("otc.generate_faktur_pajak")}
             onCheckedChange={(v) => setValue("otc.generate_faktur_pajak", v)}
             disabled={disabled}

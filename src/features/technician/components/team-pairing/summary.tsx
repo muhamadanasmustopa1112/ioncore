@@ -46,7 +46,7 @@ export function TeamPairingSummary({
       </div>
 
       {alerts && alerts.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
           {alerts.map((alert) => {
             const colorMap = {
               critical: "bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-900/10 dark:border-rose-900/30",

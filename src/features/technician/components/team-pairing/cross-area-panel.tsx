@@ -39,7 +39,7 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
             {req.lending_leader_name}
           </p>
           <p className="text-[10px] text-slate-400 mt-0.5">
-            Area {req.requesting_area_id} → {req.lending_area_id} · {req.candidate_technician_ids.length} candidates
+            Area {req.requesting_area_id} → {req.lending_area_id} · {req.candidate_technician_ids?.length || 0} candidates
           </p>
           {req.note && <p className="text-xs text-slate-500 mt-1 italic">{req.note}</p>}
         </div>

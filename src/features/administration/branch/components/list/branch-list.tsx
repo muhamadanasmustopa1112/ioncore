@@ -47,7 +47,7 @@ export function BranchList() {
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
     search: parseAsString,
-    level: parseAsString,
+    branch_type: parseAsString,
   });
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
@@ -63,18 +63,38 @@ export function BranchList() {
           b.code.toLowerCase().includes(q)
       );
     }
-    if (filter.level && filter.level !== "all") {
-      result = result.filter((b) => b.level === filter.level);
+    if (filter.branch_type && filter.branch_type !== "all") {
+      result = result.filter((b) => b.branchType === filter.branch_type);
     }
     return result;
-  }, [branches, filter.search, filter.level]);
+  }, [branches, filter.search, filter.branch_type]);
 
   const table = useReactTable({
     columns,
     data: filteredData,
     pageCount: Math.ceil(filteredData.length / (filter.limit || 10)),
     getRowId: (row) => row.id,
-    state: { rowSelection },
+    state: {
+      rowSelection,
+      pagination: {
+        pageIndex: (filter.page || 1) - 1,
+        pageSize: filter.limit || 10,
+      },
+    },
+    onPaginationChange: (updater) => {
+      const next =
+        typeof updater === "function"
+          ? updater({
+              pageIndex: (filter.page || 1) - 1,
+              pageSize: filter.limit || 10,
+            })
+          : updater;
+      setFilter({
+        ...filter,
+        page: next.pageIndex + 1,
+        limit: next.pageSize,
+      });
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
@@ -132,21 +152,22 @@ export function BranchList() {
               <CollapsibleContent>
                 <div className="flex items-center gap-3 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-muted-foreground">Level:</span>
+                    <span className="text-xs font-medium text-muted-foreground">Type:</span>
                     <Select
-                      value={filter.level || "all"}
+                      value={filter.branch_type || "all"}
                       onValueChange={(val) =>
-                        setFilter({ ...filter, level: val === "all" ? null : val })
+                        setFilter({ ...filter, branch_type: val === "all" ? null : val })
                       }
                     >
                       <SelectTrigger className="h-8 w-36 text-xs">
-                        <SelectValue placeholder="All Levels" />
+                        <SelectValue placeholder="All Types" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="regional">Regional</SelectItem>
-                        <SelectItem value="area">Area</SelectItem>
-                        <SelectItem value="sub_area">Sub Area</SelectItem>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="office">Office</SelectItem>
+                        <SelectItem value="noc">NOC</SelectItem>
+                        <SelectItem value="warehouse">Warehouse</SelectItem>
+                        <SelectItem value="hybrid">Hybrid</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -165,7 +186,7 @@ export function BranchList() {
           </ScrollArea>
         </CardTable>
         <CardFooter>
-          <DataGridPagination setFilter={setFilter} filter={filter} />
+          <DataGridPagination />
         </CardFooter>
       </Card>
     </DataGrid>

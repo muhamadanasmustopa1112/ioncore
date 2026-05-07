@@ -37,7 +37,7 @@ export function RestorationTerminationSection({ form, disabled }: RestorationTer
           <div className="flex items-center justify-between md:col-span-2">
             <Label className="text-xs font-medium text-muted-foreground">Auto Restore</Label>
             <Switch
-              size="sm"
+              size="lg"
               checked={restorationAutomatic}
               onCheckedChange={(v) => setValue("restoration_automatic", v)}
               disabled={disabled}
@@ -64,7 +64,7 @@ export function RestorationTerminationSection({ form, disabled }: RestorationTer
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium text-muted-foreground">Requires Manual Trigger</Label>
             <Switch
-              size="sm"
+              size="lg"
               checked={watch("restoration_requires_manual_trigger")}
               onCheckedChange={(v) => setValue("restoration_requires_manual_trigger", v)}
               disabled={disabled}
@@ -73,7 +73,7 @@ export function RestorationTerminationSection({ form, disabled }: RestorationTer
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium text-muted-foreground">Requires Approval</Label>
             <Switch
-              size="sm"
+              size="lg"
               checked={watch("restoration_requires_approval")}
               onCheckedChange={(v) => setValue("restoration_requires_approval", v)}
               disabled={disabled}
@@ -92,7 +92,7 @@ export function RestorationTerminationSection({ form, disabled }: RestorationTer
           <div className="flex items-center justify-between md:col-span-2">
             <Label className="text-xs font-medium text-muted-foreground">Termination Enabled</Label>
             <Switch
-              size="sm"
+              size="lg"
               checked={terminationEnabled}
               onCheckedChange={(v) => setValue("termination_enabled", v)}
               disabled={disabled}
@@ -147,7 +147,7 @@ export function RestorationTerminationSection({ form, disabled }: RestorationTer
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-medium text-muted-foreground">Auto Create WO</Label>
                 <Switch
-                  size="sm"
+                  size="lg"
                   checked={watch("termination_auto_create_wo") ?? false}
                   onCheckedChange={(v) => setValue("termination_auto_create_wo", v)}
                   disabled={disabled}
@@ -156,7 +156,7 @@ export function RestorationTerminationSection({ form, disabled }: RestorationTer
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-medium text-muted-foreground">Requires Approval</Label>
                 <Switch
-                  size="sm"
+                  size="lg"
                   checked={watch("termination_requires_approval") ?? false}
                   onCheckedChange={(v) => setValue("termination_requires_approval", v)}
                   disabled={disabled}

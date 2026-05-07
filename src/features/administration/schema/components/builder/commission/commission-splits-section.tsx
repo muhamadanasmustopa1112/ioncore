@@ -62,7 +62,7 @@ export function CommissionSplitsSection({ form, disabled }: CommissionSplitsSect
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium text-muted-foreground">Sales Manager Enabled</Label>
             <Switch
-              size="sm"
+              size="lg"
               checked={salesManagerEnabled}
               onCheckedChange={(v) => setValue("assignment.sales_manager_enabled", v)}
               disabled={disabled}
@@ -116,7 +116,7 @@ export function CommissionSplitsSection({ form, disabled }: CommissionSplitsSect
           <div className="flex items-center justify-between">
             <Label className="text-xs font-medium text-muted-foreground">Infrastructure Branch Enabled</Label>
             <Switch
-              size="sm"
+              size="lg"
               checked={infraBranchEnabled}
               onCheckedChange={(v) => setValue("assignment.infrastructure_branch_enabled", v)}
               disabled={disabled}

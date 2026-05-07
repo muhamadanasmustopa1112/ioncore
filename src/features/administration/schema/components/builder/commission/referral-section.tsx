@@ -34,7 +34,7 @@ export function ReferralSection({ form, disabled }: ReferralSectionProps) {
         <div className="flex items-center justify-between md:col-span-2">
           <Label className="text-xs font-medium text-muted-foreground">Referral Enabled</Label>
           <Switch
-            size="sm"
+            size="lg"
             checked={referralEnabled}
             onCheckedChange={(v) => setValue("referral_enabled", v)}
             disabled={disabled}
@@ -140,7 +140,7 @@ export function ReferralSection({ form, disabled }: ReferralSectionProps) {
             <div className="flex items-center justify-between">
               <Label className="text-xs font-medium text-muted-foreground">Referrer Must Be Active</Label>
               <Switch
-                size="sm"
+                size="lg"
                 checked={watch("referral_referrer_must_be_active") ?? false}
                 onCheckedChange={(v) => setValue("referral_referrer_must_be_active", v)}
                 disabled={disabled}

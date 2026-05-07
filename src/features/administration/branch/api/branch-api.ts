@@ -52,7 +52,11 @@ export function getBranchTree(params: BranchListParams = {}) {
 export function listRegional(params: BranchListParams = {}) {
   return cast<ApiResponse<BranchListResponse<RegionalBranchDto>>>(
     userServiceApi.get(`${BASE}/regional`, {
-      params: { page: params.page ?? 1, per_page: params.per_page ?? 100 },
+      params: {
+        page: params.page ?? 1,
+        per_page: params.per_page ?? 100,
+        branch_type: params.type ? params.type.toUpperCase() : undefined,
+      },
     })
   );
 }
@@ -84,7 +88,11 @@ export function deleteRegional(id: string) {
 export function listArea(regionalId: string, params: BranchListParams = {}) {
   return cast<ApiResponse<BranchListResponse<AreaBranchDto>>>(
     userServiceApi.get(`${BASE}/regional/${regionalId}/area`, {
-      params: { page: params.page ?? 1, per_page: params.per_page ?? 100 },
+      params: {
+        page: params.page ?? 1,
+        per_page: params.per_page ?? 100,
+        branch_type: params.type ? params.type.toUpperCase() : undefined,
+      },
     })
   );
 }

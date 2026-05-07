@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   listSchemas,
@@ -36,6 +36,12 @@ export const schemaKeys = {
   versions: (id: string) => [...schemaKeys.all, "versions", id] as const,
   diff: (id: string, v1: string, v2: string) =>
     [...schemaKeys.all, "diff", id, v1, v2] as const,
+};
+
+const invalidateSchemaDetail = (qc: QueryClient, schemaId?: string | null) => {
+  if (!schemaId) return;
+  qc.invalidateQueries({ queryKey: schemaKeys.detail(schemaId) });
+  qc.invalidateQueries({ queryKey: schemaKeys.versions(schemaId) });
 };
 
 export function useSchemaList(params: SchemaListParams = {}) {
@@ -124,7 +130,7 @@ export function useUpdateSchemaContent() {
     mutationFn: ({ id, payload }: { id: string; payload: UpdateSchemaContentPayload }) =>
       updateSchemaContent(id, payload),
     onSuccess: (_, { id }) => {
-      qc.invalidateQueries({ queryKey: schemaKeys.detail(id) });
+      invalidateSchemaDetail(qc, id);
       qc.invalidateQueries({ queryKey: schemaKeys.all });
       const store = useSchemaStore.getState();
       if (store.pendingApproval) {
@@ -148,6 +154,8 @@ export function usePublishSchemaVersion() {
   return useMutation({
     mutationFn: (versionId: string) => publishSchemaVersion(versionId),
     onSuccess: () => {
+      const selectedSchemaId = useSchemaStore.getState().selectedSchemaId;
+      invalidateSchemaDetail(qc, selectedSchemaId);
       qc.invalidateQueries({ queryKey: schemaKeys.all });
       closeApprovalPanel();
       toast.success("Schema published.");
@@ -169,6 +177,8 @@ export function useCloneSchemaVersion() {
       payload: CloneVersionPayload;
     }) => cloneSchemaVersion(versionId, payload),
     onSuccess: () => {
+      const selectedSchemaId = useSchemaStore.getState().selectedSchemaId;
+      invalidateSchemaDetail(qc, selectedSchemaId);
       qc.invalidateQueries({ queryKey: schemaKeys.all });
       toast.success("Schema cloned.");
     },
@@ -184,6 +194,7 @@ export function useRollbackSchemaVersion() {
     mutationFn: ({ id, payload }: { id: string; payload: RollbackPayload }) =>
       rollbackSchemaVersion(id, payload),
     onSuccess: () => {
+      invalidateSchemaDetail(qc, useSchemaStore.getState().selectedSchemaId);
       qc.invalidateQueries({ queryKey: schemaKeys.all });
       toast.success("Rolled back.");
     },
@@ -226,7 +237,16 @@ export function useSubmitForReview() {
   return useMutation({
     mutationFn: ({ versionId, payload }: { versionId: string; payload: SubmitForReviewPayload }) =>
       submitForReview(versionId, payload),
+    onMutate: ({ versionId }) => {
+      const selectedSchemaId = useSchemaStore.getState().selectedSchemaId;
+      if (!selectedSchemaId) return;
+      qc.setQueryData<SchemaVersion[]>(schemaKeys.versions(selectedSchemaId), (prev = []) =>
+        prev.map((v) => (v.id === versionId ? { ...v, status: "SUBMITTED" } : v))
+      );
+    },
     onSuccess: (_, { versionId }) => {
+      const selectedSchemaId = useSchemaStore.getState().selectedSchemaId;
+      invalidateSchemaDetail(qc, selectedSchemaId);
       qc.invalidateQueries({ queryKey: schemaKeys.all });
       qc.invalidateQueries({ queryKey: ["schema-approval", versionId] });
       toast.success("Submitted for review.");
@@ -242,10 +262,58 @@ export function useAddApprovalDecision() {
   return useMutation({
     mutationFn: ({ versionId, payload }: { versionId: string; payload: AddDecisionPayload }) =>
       addApprovalDecision(versionId, payload),
-    onSuccess: (data, { versionId }) => {
-      const approvalId = data.data?.schema_approval_id;
-      if (approvalId) qc.invalidateQueries({ queryKey: ["schema-approval-decisions", approvalId] });
+    onMutate: ({ versionId, payload }) => {
+      // Optimistically assume the version status updates immediately when approved/rejected
+      const selectedSchemaId = useSchemaStore.getState().selectedSchemaId;
+      if (selectedSchemaId) {
+        qc.setQueryData<SchemaVersion[]>(schemaKeys.versions(selectedSchemaId), (prev = []) =>
+          prev.map((v) => {
+            if (v.id === versionId) {
+              const newStatus = payload.decision.toUpperCase();
+              // In a real flow, it might still need more approvals, so don't force 'APPROVED'
+              // unless it's REJECTED which is usually instant. Let's avoid forceful optimistic
+              // status change except putting it deeply into pending UI if needed.
+              return v;
+            }
+            return v;
+          })
+        );
+      }
+    },
+    onSuccess: (data, { versionId, payload }) => {
+      const decision = data.data;
+      const approvalId = decision?.schema_approval_id;
+      if (approvalId) {
+        qc.setQueryData<SchemaApprovalDecisionRecord[]>(
+          ["schema-approval-decisions", approvalId],
+          (prev = []) => {
+            if (!decision) return prev;
+            if (prev.some((d) => d.id === decision.id)) return prev;
+            return [...prev, decision];
+          }
+        );
+        qc.invalidateQueries({ queryKey: ["schema-approval-decisions", approvalId] });
+      }
+      
+      const isApproved = payload?.decision?.toUpperCase() === "APPROVED";
+      const isRejected = payload?.decision?.toUpperCase() === "REJECTED";
+      const selectedSchemaId = useSchemaStore.getState().selectedSchemaId;
+      
+      // Optimistically put the version into APPROVED or REJECTED state immediately 
+      // instead of relying on the backend to propagate the event quickly.
+      // This prevents the UI from bouncing back to "Submit for Review".
+      if (selectedSchemaId) {
+        qc.setQueryData<SchemaVersion[]>(schemaKeys.versions(selectedSchemaId), (prev = []) =>
+          prev.map((v) => (v.id === versionId ? { 
+            ...v, 
+            status: isApproved ? "APPROVED" : isRejected ? "REJECTED" : v.status 
+          } : v))
+        );
+      }
+
+      qc.invalidateQueries({ queryKey: ["schema-approval-decisions"] });
       qc.invalidateQueries({ queryKey: ["schema-approval", versionId] });
+      invalidateSchemaDetail(qc, selectedSchemaId);
       qc.invalidateQueries({ queryKey: schemaKeys.all });
       toast.success("Decision submitted.");
     },

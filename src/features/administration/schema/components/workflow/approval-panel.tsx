@@ -30,6 +30,8 @@ export function ApprovalPanel() {
   const { approvalPanelOpen, closeApprovalPanel, selectedSchemaId } = useSchemaStore();
   const [comment, setComment] = useState("");
   const [changeReason, setChangeReason] = useState("");
+  const [minApprovals, setMinApprovals] = useState(1);
+  const [requiredApprovers, setRequiredApprovers] = useState("");
   const publishVersion = usePublishSchemaVersion();
   const submitForReview = useSubmitForReview();
   const addDecision = useAddApprovalDecision();
@@ -37,23 +39,62 @@ export function ApprovalPanel() {
   const { data: schema } = useSchema(approvalPanelOpen ? selectedSchemaId : null);
   const { data: versions } = useSchemaVersions(approvalPanelOpen ? selectedSchemaId : null);
 
-  const latestDraftVersion = versions?.find((v) => {
-    const s = v.status?.toUpperCase();
-    return s === "DRAFT" || s === "APPROVED" || s === "REVIEW";
-  }) ?? versions?.[0];
+  // Priority: REVIEW/SUBMITTED > DRAFT > APPROVED. Within each, newest first.
+  const sortedVersions = [...(versions ?? [])].sort((a, b) => {
+    const ta = new Date(a.created_at ?? 0).getTime();
+    const tb = new Date(b.created_at ?? 0).getTime();
+    return tb - ta;
+  });
+  const isReviewStatus = (status?: string) => {
+    const s = status?.toUpperCase();
+    return s === "REVIEW" || s === "SUBMITTED" || s === "PENDING";
+  };
+  const byStatus = (s: string) =>
+    sortedVersions.find((v) => v.status?.toUpperCase() === s);
+  const latestDraftVersion =
+    sortedVersions.find((v) => isReviewStatus(v.status))
+    ?? byStatus("DRAFT")
+    ?? byStatus("APPROVED")
+    ?? sortedVersions[0];
 
   const versionStatus = latestDraftVersion?.status?.toUpperCase();
-  const isDraft = versionStatus === "DRAFT";
-  const isInReview = versionStatus === "REVIEW";
-
+  const schemaStatus = schema?.schema_status?.toUpperCase();
   const { data: approval } = useVersionApproval(
-    approvalPanelOpen && !isDraft ? latestDraftVersion?.id ?? null : null
+    approvalPanelOpen ? latestDraftVersion?.id ?? null : null
   );
+  // Default to empty array, but we track if we truly don't have decisions vs losing them from missing approval
   const { data: decisions = [] } = useApprovalDecisions(approvalPanelOpen ? approval?.id ?? null : null);
 
-  const approvedCount = decisions.filter((d) => d.decision === "APPROVED").length;
-  const minRequired = approval?.min_approvals ?? 0;
-  const progressPercent = minRequired > 0 ? Math.min((approvedCount / minRequired) * 100, 100) : 0;
+  const approvalStatus = approval?.status?.toUpperCase();
+  const hasRejected = decisions.some((d) => d.decision?.toUpperCase() === "REJECTED");
+  const approvedCount = decisions.filter((d) => d.decision?.toUpperCase() === "APPROVED").length;
+  // Use known states to deduce intent, even if queries temporarily drop approval.
+  const knownApprovalExists = !!approval || decisions.length > 0;
+  const minRequired = approval?.min_approvals ?? minApprovals;
+  const safeMinRequired = Math.max(1, minRequired);
+
+  // Derive logical workflow status
+  let workflowStatus = versionStatus;
+  
+  if (versionStatus !== "PUBLISHED" && versionStatus !== "ARCHIVED") {
+    if (approvalStatus === "REJECTED" || hasRejected || versionStatus === "REJECTED") {
+      workflowStatus = "REJECTED";
+    } else if (approvalStatus === "APPROVED" || (knownApprovalExists && approvedCount >= safeMinRequired) || versionStatus === "APPROVED") {
+      workflowStatus = "APPROVED";
+    } else if (approvalStatus === "PENDING" || isReviewStatus(versionStatus) || knownApprovalExists) {
+      workflowStatus = "REVIEW";
+    }
+  }
+
+  const isDraft = workflowStatus === "DRAFT";
+  const isInReview = workflowStatus === "REVIEW";
+  const isRejected = workflowStatus === "REJECTED";
+  const isApproved = workflowStatus === "APPROVED";
+
+  const progressPercent = Math.min((approvedCount / safeMinRequired) * 100, 100);
+  const canPublish = isApproved && !hasRejected;
+  // If we have ANY sign of an approval cycle, we can't show 'Submit for review'
+  const canSubmitForReview = isDraft && latestDraftVersion && !knownApprovalExists && !canPublish && !hasRejected;
 
   return (
     <Sheet open={approvalPanelOpen} onOpenChange={(open) => !open && closeApprovalPanel()}>
@@ -85,8 +126,8 @@ export function ApprovalPanel() {
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-foreground">Approval Decisions</h3>
             {decisions.length > 0 ? decisions.map((d) => {
-              const isApproved = d.decision === "APPROVED";
-              const isRejected = d.decision === "REJECTED";
+              const isApproved = d.decision?.toUpperCase() === "APPROVED";
+              const isRejected = d.decision?.toUpperCase() === "REJECTED";
               return (
                 <div key={d.id} className="flex items-start gap-3 rounded-lg border p-3">
                   <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
@@ -123,20 +164,61 @@ export function ApprovalPanel() {
             )}
           </div>
 
+          {/* Last rejection feedback (visible when back in DRAFT after a reject) */}
+          {isDraft && decisions.some((d) => d.decision?.toUpperCase() === "REJECTED") && (
+            <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50/60 dark:bg-amber-950/20 p-3 space-y-1.5">
+              <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                Previously Rejected
+              </p>
+              {(() => {
+                const lastReject = [...decisions].reverse().find((d) => d.decision?.toUpperCase() === "REJECTED");
+                return lastReject ? (
+                  <p className="text-xs text-foreground/80 italic">
+                    &ldquo;{lastReject.comment || "(no reason given)"}&rdquo; — {lastReject.approver_user_id}
+                  </p>
+                ) : null;
+              })()}
+            </div>
+          )}
+
           {/* Submit for Review */}
-          {isDraft && latestDraftVersion && (
+          {canSubmitForReview && (
             <div className="space-y-3 border-t pt-5">
               <h3 className="text-sm font-semibold text-foreground">Submit for Review</h3>
               <p className="text-xs text-muted-foreground">
                 Send this draft version to approvers for review.
               </p>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Minimum approvals required
+                </label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={minApprovals}
+                  onChange={(e) => setMinApprovals(Math.max(1, parseInt(e.target.value || "1", 10)))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-xs font-medium text-muted-foreground">
+                  Required approver IDs (comma-separated, optional)
+                </label>
+                <Input
+                  placeholder="e.g. finance_mgr_id, ops_admin_id"
+                  value={requiredApprovers}
+                  onChange={(e) => setRequiredApprovers(e.target.value)}
+                />
+              </div>
               <Button
                 variant="outline"
                 className="w-full"
-                disabled={submitForReview.isPending}
+                disabled={submitForReview.isPending || minApprovals < 1}
                 onClick={() => submitForReview.mutate({
                   versionId: latestDraftVersion.id,
-                  payload: { min_approvals: 1, required_approvers: "" },
+                  payload: {
+                    min_approvals: minApprovals,
+                    required_approvers: requiredApprovers.trim(),
+                  },
                 })}
               >
                 <RiSendPlaneLine className="mr-2 size-4" /> Submit for Review
@@ -145,7 +227,7 @@ export function ApprovalPanel() {
           )}
 
           {/* Your Decision */}
-          {isInReview && latestDraftVersion && (
+          {(isInReview || addDecision.isPending) && latestDraftVersion && (
             <div className="space-y-3 border-t pt-5">
               <h3 className="text-sm font-semibold text-foreground">Your Decision</h3>
               <Textarea
@@ -153,51 +235,78 @@ export function ApprovalPanel() {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 className="min-h-[80px] resize-none"
+                disabled={addDecision.isPending}
               />
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   className="flex-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
                   disabled={addDecision.isPending}
-                  onClick={() => {
-                    addDecision.mutate({ versionId: latestDraftVersion.id, payload: { decision: "REJECTED", notes: comment } });
-                    setComment("");
+                  onClick={async () => {
+                    try {
+                      await addDecision.mutateAsync({
+                        versionId: latestDraftVersion.id,
+                        payload: { decision: "REJECTED", notes: comment },
+                      });
+                      setComment("");
+                    } catch {
+                      // toast already shown by hook
+                    }
                   }}
                 >
-                  Reject
+                  {addDecision.isPending ? "Submitting..." : "Reject"}
                 </Button>
                 <Button
                   variant="primary"
                   className="flex-1"
                   disabled={addDecision.isPending}
-                  onClick={() => {
-                    addDecision.mutate({ versionId: latestDraftVersion.id, payload: { decision: "APPROVED", notes: comment } });
-                    setComment("");
+                  onClick={async () => {
+                    try {
+                      await addDecision.mutateAsync({
+                        versionId: latestDraftVersion.id,
+                        payload: { decision: "APPROVED", notes: comment },
+                      });
+                      setComment("");
+                    } catch {
+                      // toast already shown by hook
+                    }
                   }}
                 >
-                  Approve
+                  {addDecision.isPending ? "Submitting..." : "Approve"}
                 </Button>
               </div>
             </div>
           )}
 
+          {/* Rejected state */}
+          {isRejected && latestDraftVersion && (
+            <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20 p-4">
+              <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                Version Rejected
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Edit the schema and resubmit a new draft for review.
+              </p>
+            </div>
+          )}
+
           {/* Publish */}
           <Can permission="master.manage">
-            {approval?.status?.toUpperCase() === "APPROVED" && (
+            {canPublish && (
               <div className="space-y-3 border-t border-border/50 pt-4">
                 <p className="text-sm font-semibold">Publish Schema</p>
                 <p className="text-xs text-muted-foreground">
-                  All required approvals received. Enter a change reason and publish.
+                  All required approvals received. Add a change reason if needed, then publish.
                 </p>
                 <Input
-                  placeholder="Change reason (required, min 10 chars)"
+                  placeholder="Change reason (optional)"
                   value={changeReason}
                   onChange={(e) => setChangeReason(e.target.value)}
                 />
                 <Button
                   variant="primary"
                   className="w-full font-semibold"
-                  disabled={changeReason.length < 10 || publishVersion.isPending || !latestDraftVersion}
+                  disabled={publishVersion.isPending || !latestDraftVersion}
                   onClick={() => {
                     if (latestDraftVersion) publishVersion.mutate(latestDraftVersion.id);
                   }}

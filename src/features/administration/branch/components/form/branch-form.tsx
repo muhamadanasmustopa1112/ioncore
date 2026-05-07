@@ -108,8 +108,6 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const isEditMode = formMode === "edit";
   const isDetailMode = formMode === "details";
 
-  const { data: regionals = [] } = useRegionalList();
-
   const defaultValues = useMemo(
     () => ({
       name: "",
@@ -126,31 +124,9 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
     [],
   );
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    watch,
-    setValue,
-    reset,
-    formState: { errors },
-  } = useForm<BranchFormValues>({
-    resolver: zodResolver(branchSchema),
-    defaultValues,
-  });
-
-  const level = watch("level");
-  const regionalId = watch("regionalId") ?? "";
-
-  const { data: areas = [] } = useAreaList(regionalId);
-
-  const isRegional = level === "regional";
-  const isArea = level === "area";
-  const isSubArea = level === "sub_area";
-
-  useEffect(() => {
+  const formValues = useMemo<BranchFormValues | undefined>(() => {
     if (selectedBranch && (isEditMode || isDetailMode)) {
-      reset({
+      return {
         name: selectedBranch.name,
         code: selectedBranch.code,
         type: (selectedBranch.branchType as "office" | "noc" | "warehouse" | undefined) ?? "office",
@@ -160,19 +136,41 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
         areaId: selectedBranch._areaId ?? "",
         address: selectedBranch.address ?? "",
         geographic_polygon: toPolygonInputValue(selectedBranch.geographic_polygon),
-      });
+      };
     }
-    if (!selectedBranch && !isEditMode && !isDetailMode) {
-      reset({ name: "", code: "", type: "office", level: "regional", active: true, regionalId: "", areaId: "", address: "", geographic_polygon: "" });
-    }
-  }, [selectedBranch, isEditMode, isDetailMode, reset]);
+    return undefined;
+  }, [selectedBranch, isEditMode, isDetailMode]);
 
-  useEffect(() => {
-    if (!isEditMode && !isDetailMode) {
-      setValue("regionalId", "");
-      setValue("areaId", "");
-    }
-  }, [level, isEditMode, isDetailMode, setValue]);
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<BranchFormValues>({
+    resolver: zodResolver(branchSchema),
+    defaultValues,
+    values: formValues,
+  });
+
+  const level = watch("level");
+  const branchType = watch("type");
+  const regionalId = watch("regionalId") ?? "";
+
+  const { data: regionals = [] } = useRegionalList(branchType);
+  const { data: areas = [] } = useAreaList(regionalId, branchType);
+
+  const isRegional = level === "regional";
+  const isArea = level === "area";
+  const isSubArea = level === "sub_area";
+
+  const isLocked = isEditMode || isDetailMode;
+  const clearParents = () => {
+    if (isLocked) return;
+    setValue("regionalId", "");
+    setValue("areaId", "");
+  };
 
   const onFormSubmit = (values: BranchFormValues) => {
     onSubmit?.({
@@ -257,7 +255,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                     name="type"
                     control={control}
                     render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select value={field.value} onValueChange={(v) => { field.onChange(v); clearParents(); }}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="office">Office</SelectItem>
@@ -285,7 +283,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                     render={({ field }) => (
                       <Select
                         value={field.value}
-                        onValueChange={(val) => field.onChange(val as BranchLevel)}
+                        onValueChange={(val) => { field.onChange(val as BranchLevel); clearParents(); }}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select Level" />
@@ -353,9 +351,15 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                           <SelectValue placeholder="Select Regional Branch" />
                         </SelectTrigger>
                         <SelectContent>
-                          {regionals.map((r) => (
-                            <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
-                          ))}
+                          {regionals.length === 0 ? (
+                            <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                              No regional branches available for type &quot;{branchType}&quot;
+                            </div>
+                          ) : (
+                            regionals.map((r) => (
+                              <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     )}
@@ -394,9 +398,15 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                           />
                         </SelectTrigger>
                         <SelectContent>
-                          {areas.map((a) => (
-                            <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
-                          ))}
+                          {areas.length === 0 ? (
+                            <div className="px-3 py-6 text-center text-xs text-muted-foreground">
+                              No area branches available{regionalId ? ` for type "${branchType}"` : ""}
+                            </div>
+                          ) : (
+                            areas.map((a) => (
+                              <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                     )}
