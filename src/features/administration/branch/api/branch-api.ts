@@ -35,7 +35,7 @@ export function getBranchList(params: BranchListParams = {}) {
       params: {
         page: params.page ?? 1,
         per_page: params.per_page ?? 100,
-        search: params.search?.trim() ? params.search.trim() : undefined,
+        keyword: params.search?.trim() ? params.search.trim() : undefined,
         branch_type: params.branch_type
           ? params.branch_type.toUpperCase()
           : undefined,

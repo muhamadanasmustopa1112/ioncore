@@ -197,7 +197,7 @@ export function BranchList() {
           </ScrollArea>
         </CardTable>
         <CardFooter>
-          <DataGridPagination />
+          <DataGridPagination filter={filter} setFilter={setFilter} />
         </CardFooter>
       </Card>
     </DataGrid>
