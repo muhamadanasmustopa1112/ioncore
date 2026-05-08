@@ -117,18 +117,18 @@ function OrderDetailSheet({
                 <p className="text-muted-foreground text-xs font-medium mb-1">Created</p>
                 <p>{new Date(order.created_at).toLocaleDateString()}</p>
               </div>
-              {order.broadband_plan_name && (
+              {order.plan_name && (
                 <div className="col-span-2">
                   <p className="text-muted-foreground text-xs font-medium mb-1">Plan</p>
-                  <p>{order.broadband_plan_name}</p>
+                  <p>{order.plan_name}</p>
                 </div>
               )}
-              {order.notes && (
+              {/* {order.notes && (
                 <div className="col-span-2">
                   <p className="text-muted-foreground text-xs font-medium mb-1">Notes</p>
                   <p className="text-muted-foreground">{order.notes}</p>
                 </div>
-              )}
+              )} */}
             </div>
 
             {order.addon_orders && order.addon_orders.length > 0 && (
@@ -141,7 +141,8 @@ function OrderDetailSheet({
                     <div key={a.id} className="flex justify-between items-center px-4 py-2">
                       <span>{a.addon_name}</span>
                       <span className="text-muted-foreground font-mono">
-                        {a.price > 0 ? `+${a.price}/mo` : "Free"}
+                        {/* a.price → a.addon_price */}
+                      {a.addon_price > 0 ? `+${a.addon_price}/mo` : "Free"}
                       </span>
                     </div>
                   ))}
@@ -216,7 +217,7 @@ export function OrdersPage() {
     ...(typeFilter !== "all" && { order_type: typeFilter }),
     ...(statusFilter !== "all" && { status: statusFilter }),
     page,
-    size: 20,
+    per_page: 20,
   });
 
   const orders: OrderDto[] = data?.orders ?? [];
@@ -320,7 +321,7 @@ export function OrdersPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {order.broadband_plan_name ?? "—"}
+                    {order.plan_name ?? "—"}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {new Date(order.created_at).toLocaleDateString()}

@@ -5,6 +5,7 @@ import {
   deleteCustomer,
   getCustomer,
   listCustomers,
+  scanKtpPhoto,
   updateCustomer,
   updateCustomerAttribute,
   updateCustomerLocation,
@@ -38,6 +39,7 @@ export function useCustomerList(params: CustomerListParams = {}) {
       const res = await listCustomers(params);
       return { items: res.data.customers ?? [], meta: res.data.metadata };
     },
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -144,6 +146,12 @@ export function useCreateCustomerDocumentsBulk(customerId: string) {
       qc.invalidateQueries({ queryKey: customerKeys.detail(customerId) });
     },
     onError: () => toast.error("Failed to upload documents"),
+  });
+}
+
+export function useScanKtpPhoto() {
+  return useMutation({
+    mutationFn: (imageUrl: string) => scanKtpPhoto({ image_url: imageUrl }),
   });
 }
 

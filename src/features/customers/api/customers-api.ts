@@ -10,6 +10,8 @@ import type {
   UpdateCustomerPayload,
   UpdateCustomerLocationPayload,
   UpdateCustomerAttributePayload,
+  KtpScanPayload,
+  KtpScanResult,
 } from "../types/customers-api";
 
 const BASE = `${services.customer}/customers`;
@@ -74,5 +76,12 @@ export function updateCustomerAttribute(
 ) {
   return cast<CustomerEnvelope<CustomerDto>>(
     userServiceApi.patch(`${BASE}/${id}/attribute`, payload)
+  );
+}
+
+// confirm endpoint path with BE — expected: POST /v1/customers/ktp/scan
+export function scanKtpPhoto(payload: KtpScanPayload) {
+  return cast<CustomerEnvelope<KtpScanResult>>(
+    userServiceApi.post(`${services.customer}/ktp/scan`, payload)
   );
 }

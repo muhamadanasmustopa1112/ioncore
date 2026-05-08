@@ -234,7 +234,7 @@ export function ProductSelectorSheet({
 
   const { data: plansData, isLoading: plansLoading } = useBroadbandPlans(
     open && leadType === "broadband"
-      ? { branch_id: branchId, per_page: 50 }
+      ? { /* branch_id: branchId, */ per_page: 50 }
       : {}
   );
   const { data: addonsData, isLoading: addonsLoading } = useAddons(

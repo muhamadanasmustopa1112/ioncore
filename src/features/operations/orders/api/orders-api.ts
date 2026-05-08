@@ -1,7 +1,7 @@
 import { userServiceApi } from "@/features/user-service/api/client";
 import { services } from "@/config/constants";
 import type {
-  OrderDto,
+  OrderDetail,
   OrderListResponse,
   OrderFilters,
   CreateOrderPayload,
@@ -28,15 +28,15 @@ export function listOrders(filters?: OrderFilters) {
 }
 
 export function getOrder(id: string) {
-  return cast<ApiResponse<OrderDto>>(userServiceApi.get(`${BASE}/${id}`));
+  return cast<ApiResponse<OrderDetail>>(userServiceApi.get(`${BASE}/${id}`));
 }
 
 export function createOrder(payload: CreateOrderPayload) {
-  return cast<ApiResponse<OrderDto>>(userServiceApi.post(BASE, payload));
+  return cast<ApiResponse<OrderDetail>>(userServiceApi.post(BASE, payload));
 }
 
 export function updateOrderStatus(id: string, payload: UpdateOrderStatusPayload) {
-  return cast<ApiResponse<OrderDto>>(
+  return cast<ApiResponse<OrderDetail>>(
     userServiceApi.patch(`${BASE}/${id}/status`, payload),
   );
 }

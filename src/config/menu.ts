@@ -161,6 +161,23 @@ export const DASHBOARD_MENU: MenuConfig = [
     path: paths.dashboard.crmAndSales.root.getHref(),
     heading: 'General',
     icon: UserSearch,
+    children: [
+      {
+        title: "Overview",
+        path: paths.dashboard.crmAndSales.root.getHref(),
+        icon: BarChart3,
+      },
+      {
+        title: "Customers",
+        path: paths.dashboard.crmAndSales.customer.root.getHref(),
+        icon: UserIcon,
+      },
+      {
+        title: "Leads",
+        path: paths.dashboard.crmAndSales.leads.root.getHref(),
+        icon: Users,
+      },
+    ],
   },
   {
     title: "Network & Orchestration",
