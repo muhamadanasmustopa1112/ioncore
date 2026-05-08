@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { format } from "date-fns";
 import { Loader2, AlertCircle, RefreshCw, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTeamLeaderDashboard } from "../../api/technician-queries";
+import { useTeamLeaderDashboard } from "../../api/team-leader";
 import { AutoAssignModal } from "../technician-detail/modals";
 import { PairingModal } from "../technician-detail/modals";
 import type { WorkOrderDashboardItem } from "../../types/technician-api";
@@ -13,11 +14,11 @@ import { AvailabilityBoard } from "./availability-board";
 import { CrossAreaPanel } from "./cross-area-panel";
 
 export function TeamPairingDashboard() {
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [showAutoAssign, setShowAutoAssign] = useState(false);
   const [pairingTarget, setPairingTarget] = useState<WorkOrderDashboardItem | null>(null);
 
-  const { data, isLoading, isError, refetch, isFetching } = useTeamLeaderDashboard({ date });
+  const { data, isLoading, isError, refetch, isFetching } = useTeamLeaderDashboard({ params: { date } });
 
   if (isLoading) {
     return (
@@ -79,11 +80,11 @@ export function TeamPairingDashboard() {
         <TeamPairingSummary
           summary={data.daily_summary}
           alerts={data.alerts?.filter(
-            (alert) => alert.created_at?.slice(0, 10) === date
+            (alert) => alert.created_at ? format(new Date(alert.created_at), "yyyy-MM-dd") === date : false
           )}
         />
       </div>
-
+ 
       {/* Main Grid */}
       <div className="grid grid-cols-12 gap-4 lg:gap-6">
         {/* Left: Queue + Cross-Area */}
@@ -95,7 +96,7 @@ export function TeamPairingDashboard() {
           />
           <CrossAreaPanel
             requests={data.cross_area_requests?.filter(
-              (req) => req.created_at?.slice(0, 10) === date
+              (req) => req.created_at ? format(new Date(req.created_at), "yyyy-MM-dd") === date : false
             ) ?? []}
           />
         </div>
@@ -115,6 +116,8 @@ export function TeamPairingDashboard() {
           workOrderId={pairingTarget.id}
           workOrderNumber={pairingTarget.number}
           currentTeam={pairingTarget.assigned_team ?? []}
+          branchId={pairingTarget.branch_id}
+          teamLeaderId={pairingTarget.queue_owner_id}
           onClose={() => setPairingTarget(null)}
         />
       )}

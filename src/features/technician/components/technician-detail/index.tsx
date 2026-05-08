@@ -15,7 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useWorkOrder } from "../../api/technician-queries";
+import { useWorkOrder } from "../../api/dashboard";
 import {
   PairingModal,
   NOCApprovalModal,
@@ -36,7 +36,7 @@ import {
 } from "./shared";
 
 export function TechnicianWorkOrderDetail({ id }: { id: string }) {
-  const { data: wo, isLoading, isError, error } = useWorkOrder(id);
+  const { data: wo, isLoading, isError, error } = useWorkOrder({ id });
 
   const [showPairing, setShowPairing] = useState(false);
   const [showNOC, setShowNOC] = useState(false);
@@ -179,6 +179,8 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
           workOrderId={wo.id}
           workOrderNumber={wo.number}
           currentTeam={wo.assigned_team ?? []}
+          branchId={wo.branch_id}
+          teamLeaderId={wo.routing?.routed_to_user_id}
           onClose={() => setShowPairing(false)}
         />
       )}

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { paths } from "@/config/paths";
-import { useTechnicianHistory } from "../../../api/technician-queries";
+import { useTechnicianHistory } from "../../../api/analytics";
 import { ModalShell } from "./shell";
 import { STATE_VARIANT, STATE_LABEL, TYPE_LABEL } from "../shared";
 import type { WorkOrderHistoryItem } from "../../../types/technician-api";
@@ -77,7 +77,7 @@ export function TechnicianHistoryModal({
   technicianName: string;
   onClose: () => void;
 }) {
-  const { data, isLoading, isError, refetch } = useTechnicianHistory(technicianId, {});
+  const { data, isLoading, isError, refetch } = useTechnicianHistory({ technicianId, params: {} });
 
   return (
     <ModalShell
@@ -135,7 +135,7 @@ export function TechnicianHistoryModal({
             <p className="text-sm text-slate-400 italic text-center py-8">No work orders found.</p>
           ) : (
             <ol className="space-y-2">
-              {data.items.map((item, index) => (
+              {data.items.map((item: WorkOrderHistoryItem, index: number) => (
                 <HistoryRow key={`${item.work_order_id || "history"}-${index}`} item={item} />
               ))}
             </ol>

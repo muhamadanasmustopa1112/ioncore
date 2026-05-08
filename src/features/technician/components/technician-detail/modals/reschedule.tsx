@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useUpdateWorkOrder } from "../../../api/technician-queries";
+import { useUpdateWorkOrder } from "../../../api/actions";
 import type { WorkOrderPriority } from "../../../types/technician-api";
 import { ModalShell, FieldLabel } from "./shell";
 
@@ -28,15 +28,18 @@ export function RescheduleModal({
   const [priority, setPriority] = useState<WorkOrderPriority>(currentPriority ?? "medium");
   const [note, setNote] = useState("");
 
-  const mutation = useUpdateWorkOrder(workOrderId);
+  const mutation = useUpdateWorkOrder();
 
   function handleSubmit() {
     if (!scheduledAt) return;
     mutation.mutate(
       {
-        requested_installation: new Date(scheduledAt).toISOString(),
-        priority,
-        note: note || undefined,
+        id: workOrderId,
+        data: {
+          requested_installation: new Date(scheduledAt).toISOString(),
+          priority,
+          note: note || undefined,
+        },
       },
       { onSuccess: () => onClose() }
     );

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useProcessNOCApproval } from "../../../api/technician-queries";
+import { useProcessNOCApproval } from "../../../api/noc";
 import { ModalShell, FieldLabel } from "./shell";
 
 type Decision = "approved" | "rejected";
@@ -26,11 +26,11 @@ export function NOCApprovalModal({
   const [decision, setDecision] = useState<Decision>("approved");
   const [note, setNote] = useState("");
 
-  const mutation = useProcessNOCApproval(workOrderId);
+  const mutation = useProcessNOCApproval();
 
   function handleSubmit() {
     mutation.mutate(
-      { decision, note: note || undefined },
+      { id: workOrderId, data: { decision, note: note || undefined } },
       { onSuccess: () => onClose() }
     );
   }

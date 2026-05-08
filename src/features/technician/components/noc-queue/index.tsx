@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { paths } from "@/config/paths";
-import { useNOCQueue } from "../../api/technician-queries";
+import { useNOCQueue } from "../../api/noc";
 import { NOCApprovalModal } from "../technician-detail/modals";
 import type {
   NOCQueueItem,
@@ -104,7 +104,7 @@ export function NOCQueueDashboard() {
   const [activeItem, setActiveItem] = useState<NOCQueueItem | null>(null);
 
   const { data, isLoading, isError, refetch, isFetching } = useNOCQueue({
-    type: typeFilter || undefined,
+    params: { type: typeFilter || undefined },
   });
 
   if (isLoading) {

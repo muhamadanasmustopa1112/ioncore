@@ -17,7 +17,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { useCustomerStore } from "../../../store/customer";
-import { useWorkOrderList } from "@/features/technician/api/technician-queries";
+import { useWorkOrderList } from "@/features/technician/api/dashboard";
 
 export function CustomerInfoSection() {
     const { formData, updateFormData, form } = useCustomerStore();
@@ -25,9 +25,11 @@ export function CustomerInfoSection() {
 
     // Fetch Work Orders for auto-fill
     const { data: woResponse, isLoading: isLoadingWO } = useWorkOrderList({
-        per_page: 100,
-        page: 1,
-        type: "new_installation_broadband"
+        params: {
+            per_page: 100,
+            page: 1,
+            type: "new_installation_broadband"
+        }
     });
     const workOrders = woResponse?.items || [];
 

@@ -5,7 +5,7 @@ import { Loader2, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateCrossAreaRequest } from "../../../api/technician-queries";
+import { useCreateCrossAreaRequest } from "../../../api/cross-area";
 import { ModalShell, FieldLabel } from "./shell";
 
 export function CrossAreaModal({
@@ -24,7 +24,7 @@ export function CrossAreaModal({
   const [candidatesText, setCandidatesText] = useState("");
   const [note, setNote] = useState("");
 
-  const mutation = useCreateCrossAreaRequest(workOrderId);
+  const mutation = useCreateCrossAreaRequest();
 
   const candidates = candidatesText
     .split(/\n/)
@@ -42,12 +42,15 @@ export function CrossAreaModal({
     if (!ready) return;
     mutation.mutate(
       {
-        lending_area_id: lendingAreaId,
-        lending_leader_id: lendingLeaderId,
-        lending_leader_name: lendingLeaderName,
-        requesting_leader_name: requestingLeaderName,
-        candidate_technician_ids: candidates,
-        note: note || undefined,
+        workOrderId,
+        data: {
+          lending_area_id: lendingAreaId,
+          lending_leader_id: lendingLeaderId,
+          lending_leader_name: lendingLeaderName,
+          requesting_leader_name: requestingLeaderName,
+          candidate_technician_ids: candidates,
+          note: note || undefined,
+        },
       },
       { onSuccess: () => onClose() }
     );

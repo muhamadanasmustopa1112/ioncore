@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useCancelWorkOrder } from "../../../api/technician-queries";
+import { useCancelWorkOrder } from "../../../api/actions";
 import { ModalShell, FieldLabel } from "./shell";
 
 export function CancelModal({
@@ -19,12 +19,12 @@ export function CancelModal({
   const [reasonCode, setReasonCode] = useState("");
   const [note, setNote] = useState("");
 
-  const mutation = useCancelWorkOrder(workOrderId);
+  const mutation = useCancelWorkOrder();
 
   function handleSubmit() {
     if (!reasonCode.trim()) return;
     mutation.mutate(
-      { reason_code: reasonCode, note: note || undefined },
+      { id: workOrderId, data: { reason_code: reasonCode, note: note || undefined } },
       { onSuccess: () => onClose() }
     );
   }
