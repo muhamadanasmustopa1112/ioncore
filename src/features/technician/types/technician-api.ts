@@ -319,6 +319,7 @@ export interface WorkOrderTimelineItem {
 }
 
 export interface WorkOrderHistoryItem {
+  id?: string;
   work_order_id: string;
   number: string;
   type: WorkOrderType;
@@ -518,7 +519,7 @@ export interface TechnicianAvailabilityItem {
   technician_id: string;
   technician_name: string;
   level: TechnicianLevel;
-  status: TechnicianAvailabilityStatus;
+  availability_status: TechnicianAvailabilityStatus;
   active_workload: number;
   skills: string[];
   area_id: string;
@@ -561,6 +562,7 @@ export interface DailyAssignmentDashboard {
 
 export interface CrossAreaRequest {
   id: string;
+  work_order_id?: string;
   status: CrossAreaRequestStatus;
   requesting_area_id: string;
   requesting_leader_id: string;

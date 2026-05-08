@@ -30,7 +30,7 @@ function HistoryRow({ item }: { item: WorkOrderHistoryItem }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <Link
-              href={paths.dashboard.technician.detail.getHref(item.work_order_id)}
+              href={paths.dashboard.technician.detail.getHref(item.id || item.work_order_id)}
               className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
             >
               {item.number}
@@ -106,7 +106,7 @@ export function WOHistoryModal({
             <p className="text-sm text-slate-400 italic text-center py-8">No work order history found.</p>
           ) : (
             <ol className="space-y-2">
-              {items.map((item) => <HistoryRow key={item.work_order_id} item={item} />)}
+              {items.map((item, index) => <HistoryRow key={item.id || item.work_order_id || index} item={item} />)}
             </ol>
           )}
         </>

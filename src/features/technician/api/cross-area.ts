@@ -30,27 +30,31 @@ export const createCrossAreaRequest = ({
 };
 
 export const approveCrossAreaRequest = ({
+  workOrderId,
   id,
   data,
 }: {
+  workOrderId: string;
   id: string;
   data: ReviewCrossAreaPayload;
 }): Promise<ResponseEnvelope<any>> => {
   return userServiceApi.post(
-    `${BASE}/cross-area-requests/${id}/approve`,
+    `${BASE}/work-orders/${workOrderId}/cross-area-requests/${id}/approve`,
     data,
   ) as unknown as Promise<ResponseEnvelope<any>>;
 };
 
 export const rejectCrossAreaRequest = ({
+  workOrderId,
   id,
   data,
 }: {
+  workOrderId: string;
   id: string;
   data: ReviewCrossAreaPayload;
 }): Promise<ResponseEnvelope<any>> => {
   return userServiceApi.post(
-    `${BASE}/cross-area-requests/${id}/reject`,
+    `${BASE}/work-orders/${workOrderId}/cross-area-requests/${id}/reject`,
     data,
   ) as unknown as Promise<ResponseEnvelope<any>>;
 };
@@ -101,7 +105,7 @@ export const useApproveCrossAreaRequest = ({
     mutationFn: approveCrossAreaRequest,
     onSuccess: (data, variables, context) => {
       toast.success("Cross-area request approved");
-      invalidateWO();
+      invalidateWO(variables.workOrderId);
       onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
@@ -124,7 +128,7 @@ export const useRejectCrossAreaRequest = ({
     mutationFn: rejectCrossAreaRequest,
     onSuccess: (data, variables, context) => {
       toast.success("Cross-area request rejected");
-      invalidateWO();
+      invalidateWO(variables.workOrderId);
       onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {

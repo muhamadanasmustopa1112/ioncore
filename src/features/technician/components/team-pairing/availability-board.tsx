@@ -41,8 +41,8 @@ function TechnicianRow({ tech }: { tech: TechnicianAvailabilityItem }) {
             <Badge variant={LEVEL_VARIANT[tech.level] ?? "primary"} appearance="light" size="sm" className="uppercase">
               {tech.level}
             </Badge>
-            <Badge variant={AVAILABILITY_VARIANT[tech.status] ?? "info"} appearance="light" size="sm" className="capitalize">
-              {humanize(tech.status)}
+            <Badge variant={AVAILABILITY_VARIANT[tech.availability_status || tech.availability_status] ?? "info"} appearance="light" size="sm" className="capitalize">
+              {humanize(tech.availability_status || tech.availability_status)}
             </Badge>
           </div>
         </div>
@@ -70,8 +70,8 @@ function TechnicianRow({ tech }: { tech: TechnicianAvailabilityItem }) {
 }
 
 export function AvailabilityBoard({ technicians }: { technicians: TechnicianAvailabilityItem[] }) {
-  const available = technicians.filter((t) => t.status === "available");
-  const busy = technicians.filter((t) => t.status !== "available");
+  const available = technicians.filter((t) => (t.availability_status || t.availability_status) === "available");
+  const busy = technicians.filter((t) => (t.availability_status || t.availability_status) !== "available");
 
   return (
     <Card>
