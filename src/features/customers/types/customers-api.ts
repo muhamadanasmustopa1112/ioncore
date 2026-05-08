@@ -100,7 +100,7 @@ export type KtpEntryMode = "ocr" | "photo";
 export interface CreateCustomerPayload {
   customer_type: CustomerType;
   full_name: string;
-  branch_id: string;
+  branch_id?: string;
   email?: string;
   phone?: string;
   nik?: string;
