@@ -231,7 +231,7 @@ export function AssignmentSection({ branchId, setBranchId, accountManagerId, set
     <Card>
       <CardContent className="p-6">
         <SectionTitle>Assignment</SectionTitle>
-        <FieldRow label="Branch">
+        <FieldRow label="Branch" required>
           <Select value={branchId} onValueChange={setBranchId} disabled={branchesLoading}>
             <SelectTrigger>
               <SelectValue placeholder={branchesLoading ? "Loading…" : "Select branch"} />

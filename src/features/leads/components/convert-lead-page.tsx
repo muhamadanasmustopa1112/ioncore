@@ -19,13 +19,13 @@ import { useLead } from "../api/leads-queries";
 import { uploadImageToS3 } from "@/lib/s3-upload";
 import { paths } from "@/config/paths";
 import { useCreateCustomerFromLead } from "@/features/customers/api/customers-queries";
-import { updateCustomerLocation } from "@/features/customers/api/customers-api";
 import type { CustomerType } from "@/features/customers/types/customers-api";
 import {
   IdentitySection,
   ContactSection,
   AssignmentSection,
 } from "@/features/customers/components/create-customer-sections";
+import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 
 function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, "");
@@ -58,12 +58,21 @@ export function ConvertLeadPage() {
   const [ktpScanning, setKtpScanning] = useState(false);
   const [ktpError, setKtpError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [installLat, setInstallLat] = useState(INSTALL_DEFAULT[0]);
+  const [installLng, setInstallLng] = useState(INSTALL_DEFAULT[1]);
+  const [covered, setCovered] = useState<boolean | null>(null);
+  const pinMoved = installLat !== INSTALL_DEFAULT[0] || installLng !== INSTALL_DEFAULT[1];
 
   useEffect(() => {
     if (!lead) return;
     setFullName(lead.lead_name);
     setBranchId(lead.branch_id);
     setCustomerType(lead.customer_sub_type === "residential" ? "residential" : "business");
+    if (lead.installation_point_lat && lead.installation_point_lng) {
+      setInstallLat(lead.installation_point_lat);
+      setInstallLng(lead.installation_point_lng);
+      setCovered(true); // coords already validated at lead creation
+    }
   }, [lead]);
 
   const activeBranches = branches.filter((b) => b.active);
@@ -117,6 +126,10 @@ export function ConvertLeadPage() {
 
   async function handleSubmit() {
     if (!canSubmit || !lead) return;
+    if (covered !== true) {
+      toast.error("Please check coverage at the installation point before converting the lead.");
+      return;
+    }
 
     let ktpPhotoUrl: string | undefined;
     if (ktpFile) {
@@ -147,25 +160,10 @@ export function ConvertLeadPage() {
         ...(ktpPhotoUrl ? { ktp_photo_url: ktpPhotoUrl } : {}),
         ...(needsCompany && companyName.trim() ? { company_name: companyName.trim() } : {}),
         ...(accountManagerId.trim() ? { account_manager_id: accountManagerId.trim() } : {}),
+        ...(pinMoved ? { lat: installLat, lon: installLng } : {}),
       });
 
       const customerId = (res as any)?.data?.id;
-
-      // Save lead installation coords as customer location (non-blocking)
-      if (customerId && lead.installation_point_lat && lead.installation_point_lng) {
-        try {
-          await updateCustomerLocation(customerId, {
-            location: {
-              latitude: lead.installation_point_lat,
-              longitude: lead.installation_point_lng,
-              address: address.trim() || `${lead.installation_point_lat.toFixed(6)}, ${lead.installation_point_lng.toFixed(6)}`,
-            },
-          });
-        } catch {
-          // non-blocking
-        }
-      }
-
       router.push(paths.dashboard.crmAndSales.customer.detail.getHref(customerId));
     } catch (err) {
       toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? "Failed to create customer");
@@ -262,6 +260,13 @@ export function ConvertLeadPage() {
             accountManagerId={accountManagerId} setAccountManagerId={setAccountManagerId}
             activeBranches={activeBranches} branchesLoading={branchesLoading}
           />
+          <InstallationSection
+            lat={installLat}
+            lng={installLng}
+            onLatLngChange={(lat, lng) => { setInstallLat(lat); setInstallLng(lng); }}
+            onAddressChange={() => {}}
+            onCoverageChange={setCovered}
+          />
         </div>
 
         <div className="space-y-4 xl:sticky xl:top-6">
@@ -277,6 +282,7 @@ export function ConvertLeadPage() {
                   { label: "Phone", value: phone || null },
                   { label: "Branch", value: activeBranches.find((b) => b.id === branchId)?.name ?? null },
                   { label: "KTP photo", value: ktpFile ? (ktpScanning ? "Scanning…" : "✓ Ready") : null },
+                  { label: "Coords", value: pinMoved ? `${installLat.toFixed(4)}, ${installLng.toFixed(4)}` : null },
                 ] as { label: string; value: string | null }[]).map(({ label, value }) => value ? (
                   <div key={label} className="flex justify-between py-1.5 first:pt-0">
                     <span className="text-muted-foreground shrink-0">{label}</span>

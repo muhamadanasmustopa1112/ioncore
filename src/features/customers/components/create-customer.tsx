@@ -71,10 +71,10 @@ export function CreateCustomer() {
 
   const canSubmit =
     !!fullName.trim() &&
+    !!branchId &&
     !isBusy &&
     !ktpScanning &&
-    !!ktpFile &&
-    covered !== false;
+    !!ktpFile;
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -127,6 +127,10 @@ export function CreateCustomer() {
 
   async function handleSubmit() {
     if (!canSubmit) return;
+    if (covered !== true) {
+      toast.error("Please check coverage at the installation point before creating the customer.");
+      return;
+    }
 
     let ktpPhotoUrl: string | undefined;
     if (ktpEntryMode === "ocr" && ktpFile) {
@@ -154,7 +158,7 @@ export function CreateCustomer() {
             source: "other",
             branch_id: branchId,
             referrer_customer_id: null,
-            status: "new",
+            status: "converted",
             ...(nik.trim() ? { nik: nik.trim() } : {}),
             ...(installMoved ? { latitude: installLat, longitude: installLng } : {}),
           });

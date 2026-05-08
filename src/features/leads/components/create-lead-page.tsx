@@ -95,6 +95,7 @@ export function CreateLeadPage() {
   const [nik, setNik] = useState("");
   const [lat, setLat] = useState(INSTALL_DEFAULT[0]);
   const [lng, setLng] = useState(INSTALL_DEFAULT[1]);
+  const [covered, setCovered] = useState<boolean | null>(null);
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerPickerOpen, setCustomerPickerOpen] = useState(false);
 
@@ -126,6 +127,10 @@ export function CreateLeadPage() {
 
   async function handleSubmit() {
     if (!canSubmit) return;
+    if (covered !== true) {
+      toast.error("Please check coverage at the installation point before creating the lead.");
+      return;
+    }
     try {
       await createLead.mutateAsync({
         lead_type: leadType,
@@ -134,7 +139,7 @@ export function CreateLeadPage() {
         source,
         branch_id: branchId,
         referrer_customer_id: source === "referral" && referrerCustomerId ? referrerCustomerId : null,
-        status: "new",
+        status: "converted",
         ...(nik.trim() ? { nik: nik.trim() } : {}),
         ...(pinMoved ? { latitude: lat, longitude: lng } : {}),
       });
@@ -328,6 +333,7 @@ export function CreateLeadPage() {
             lng={lng}
             onLatLngChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }}
             onAddressChange={() => {}}
+            onCoverageChange={setCovered}
           />
         </div>
 

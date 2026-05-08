@@ -134,6 +134,8 @@ export interface CreateCustomerFromLeadPayload {
   account_manager_id?: string;
   customer_attribute?: Record<string, unknown>;
   documents?: { document_type: string; file_url: string }[];
+  lat?: number;
+  lon?: number;
 }
 
 export interface KtpScanPayload {

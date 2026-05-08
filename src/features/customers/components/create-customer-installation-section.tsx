@@ -189,8 +189,8 @@ export function InstallationSection({ lat, lng, onLatLngChange, onAddressChange,
 
         <div className="space-y-2">
           <Button
-            variant="outline"
-            className="w-full"
+            variant={coverage === "available" ? "outline" : "primary"}
+            className="w-full font-semibold"
             onClick={handleCheckCoverage}
             disabled={coverage === "checking"}
           >
