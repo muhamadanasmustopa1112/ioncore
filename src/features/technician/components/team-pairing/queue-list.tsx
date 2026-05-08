@@ -44,7 +44,7 @@ export function QueueList({
 
     if (selectedDate) {
       try {
-        const woDate = wo.requested_installation ? new Date(wo.requested_installation).toISOString().slice(0, 10) : "";
+        const woDate = wo.requested_installation ? format(new Date(wo.requested_installation), "yyyy-MM-dd") : "";
         return woDate === selectedDate;
       } catch {
         return true;

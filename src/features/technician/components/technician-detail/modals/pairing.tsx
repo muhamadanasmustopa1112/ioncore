@@ -9,8 +9,8 @@ import {
   useAssignPairing,
   useUpdatePairing,
   usePairingRecommendation,
-  useTechnicianList,
-} from "../../../api/technician-queries";
+} from "../../../api/team-leader";
+import { useTechnicianList } from "../../../api/dashboard";
 import type {
   AssignedTechnician,
   DispatchCandidate,
@@ -104,11 +104,15 @@ export function PairingModal({
   workOrderId,
   workOrderNumber,
   currentTeam,
+  branchId,
+  teamLeaderId,
   onClose,
 }: {
   workOrderId: string;
   workOrderNumber: string;
   currentTeam: AssignedTechnician[];
+  branchId?: string;
+  teamLeaderId?: string;
   onClose: () => void;
 }) {
   const isReassign = currentTeam.length > 0;
@@ -120,17 +124,22 @@ export function PairingModal({
   const [viewMode, setViewMode] = useState<"recommend" | "all">("recommend");
   const [searchTerm, setSearchTerm] = useState("");
 
-  const assignMutation = useAssignPairing(workOrderId);
-  const updateMutation = useUpdatePairing(workOrderId);
-  const recommendMutation = usePairingRecommendation(workOrderId);
+  const assignMutation = useAssignPairing();
+  const updateMutation = useUpdatePairing();
+  const recommendMutation = usePairingRecommendation();
   const mutation = isReassign ? updateMutation : assignMutation;
 
   // Load all technicians dynamically from the newly implemented POST /technicians/list endpoint
-  const { data: allTechnicians = [], isLoading: isTechListLoading } = useTechnicianList();
+  const { data: allTechnicians = [], isLoading: isTechListLoading } = useTechnicianList({
+    params: {
+      branch_id: branchId,
+      team_leader_id: teamLeaderId,
+    },
+  });
 
   function handleRecommend() {
     recommendMutation.mutate(
-      { use_auto_pairing: false },
+      { id: workOrderId, data: { use_auto_pairing: false } },
       {
         onSuccess: (res) => {
           const rec = res?.data ?? null;
@@ -150,7 +159,7 @@ export function PairingModal({
   function handleSubmit() {
     if (!useAuto && selectedIds.length < 1) return;
     mutation.mutate(
-      { technician_ids: selectedIds, use_auto_pairing: useAuto, override_current: override, note: note || undefined },
+      { id: workOrderId, data: { technician_ids: selectedIds, use_auto_pairing: useAuto, override_current: override, note: note || undefined } },
       { onSuccess: () => onClose() }
     );
   }

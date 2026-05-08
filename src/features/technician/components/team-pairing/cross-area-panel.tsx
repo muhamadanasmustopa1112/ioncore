@@ -5,7 +5,7 @@ import { Loader2, Network } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useApproveCrossAreaRequest, useRejectCrossAreaRequest } from "../../api/technician-queries";
+import { useApproveCrossAreaRequest, useRejectCrossAreaRequest } from "../../api/cross-area";
 import type { CrossAreaRequest, CrossAreaRequestStatus } from "../../types/technician-api";
 
 const STATUS_VARIANT: Record<CrossAreaRequestStatus, "warning" | "success" | "destructive"> = {
@@ -20,8 +20,8 @@ function fmtDate(s: string | null | undefined) {
 }
 
 function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
-  const approveMutation = useApproveCrossAreaRequest(req.id);
-  const rejectMutation = useRejectCrossAreaRequest(req.id);
+  const approveMutation = useApproveCrossAreaRequest();
+  const rejectMutation = useRejectCrossAreaRequest();
 
   return (
     <div className="p-4 border-b border-slate-100 dark:border-slate-800 last:border-0">
@@ -50,7 +50,7 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => approveMutation.mutate({ approved_technician_ids: Array.isArray(req.candidate_technician_ids) ? req.candidate_technician_ids : [] })}
+            onClick={() => approveMutation.mutate({ id: req.id, data: { approved_technician_ids: Array.isArray(req.candidate_technician_ids) ? req.candidate_technician_ids : [] } })}
             disabled={approveMutation.isPending || rejectMutation.isPending}
             className="text-[10px] uppercase font-bold"
           >
@@ -61,7 +61,7 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
             variant="destructive"
             appearance="ghost"
             size="sm"
-            onClick={() => rejectMutation.mutate({ note: "Rejected by team leader" })}
+            onClick={() => rejectMutation.mutate({ id: req.id, data: { note: "Rejected by team leader" } })}
             disabled={approveMutation.isPending || rejectMutation.isPending}
             className="text-[10px] uppercase font-bold"
           >

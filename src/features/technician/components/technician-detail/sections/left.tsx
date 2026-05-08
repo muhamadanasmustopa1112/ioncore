@@ -22,10 +22,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { WorkOrderDetailResponse } from "../../../types/technician-api";
 import { SectionCard, Field, SpecCell, Empty, fmtDate, humanize } from "../shared";
 import { TechnicianCard, JourneyRow } from "../shared-widgets";
-import { useRequestTemporaryRadius } from "../../../api/technician-queries";
+import { useRequestTemporaryRadius } from "../../../api/warehouse";
 
 export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
-  const { mutate, isPending } = useRequestTemporaryRadius(wo.id);
+  const { mutate, isPending } = useRequestTemporaryRadius();
   const [forceReserved, setForceReserved] = useState(false);
 
   const isReserved = wo.inventory_reservation_status === "reserved" || forceReserved;
@@ -312,9 +312,12 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
                 wo.temporary_provisioning_status === "TEMPORARY_PENDING"
               }
               onClick={() => mutate({
-                actor_id: "TECH-01",
-                actor_role: "technician",
-                note: "Requesting temporary radius provisioning for installation test"
+                id: wo.id,
+                data: {
+                  actor_id: "TECH-01",
+                  actor_role: "technician",
+                  note: "Requesting temporary radius provisioning for installation test"
+                }
               })}
               className="w-full sm:w-auto font-extrabold text-xs uppercase tracking-wider py-2 px-6 flex items-center justify-center gap-2"
             >

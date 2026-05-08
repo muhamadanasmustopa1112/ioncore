@@ -5,8 +5,8 @@ import { Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useAutoAssignWorkOrders } from "../../../api/technician-queries";
 import { ModalShell, FieldLabel } from "./shell";
+import { useAutoAssignWorkOrders } from "@/features/technician/api/team-leader";
 
 export function AutoAssignModal({
   branchId,

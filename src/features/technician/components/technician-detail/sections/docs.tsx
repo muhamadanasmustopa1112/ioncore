@@ -5,7 +5,8 @@ import { Loader2, FileText, CheckCircle2, ClipboardCheck, AlertTriangle, PenTool
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useUpdateWorkOrder, useCustomerHistory, useSiteHistory } from "../../../api/technician-queries";
+import { useUpdateWorkOrder } from "../../../api/actions";
+import { useCustomerHistory, useSiteHistory } from "../../../api/analytics";
 import type { WorkOrderDetailResponse } from "../../../types/technician-api";
 import { WOHistoryModal } from "../modals/wo-history";
 import {
@@ -25,10 +26,10 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
   const [notes, setNotes] = useState(wo.description ?? "");
   const [showCustomerHistory, setShowCustomerHistory] = useState(false);
   const [showSiteHistory, setShowSiteHistory] = useState(false);
-  const updateMutation = useUpdateWorkOrder(wo.id);
+  const updateMutation = useUpdateWorkOrder();
 
-  const customerHistory = useCustomerHistory(showCustomerHistory ? wo.customer_id : "");
-  const siteHistory = useSiteHistory(showSiteHistory ? wo.site_id : "");
+  const customerHistory = useCustomerHistory({ customerId: showCustomerHistory ? wo.customer_id : "" });
+  const siteHistory = useSiteHistory({ siteId: showSiteHistory ? wo.site_id : "" });
 
   const proofItems = useMemo(() => wo.proof_of_work ?? [], [wo.proof_of_work]);
 
@@ -46,7 +47,7 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => updateMutation.mutate({ description: notes })}
+            onClick={() => updateMutation.mutate({ id: wo.id, data: { description: notes } })}
             disabled={updateMutation.isPending || notes === (wo.description ?? "")}
             className="font-bold uppercase tracking-widest text-[10px]"
           >

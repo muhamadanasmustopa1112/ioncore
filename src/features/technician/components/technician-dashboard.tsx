@@ -12,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { paths } from "@/config/paths";
-import { useWorkOrderList } from "../api/technician-queries";
+import { useWorkOrderList } from "../api/dashboard";
 import type { WorkOrderListParams } from "../types/technician-api";
 import { TechnicianKpiCards } from "./technician-kpi-cards";
 import { TechnicianWorkOrdersTable } from "./technician-work-orders-table";
@@ -27,7 +27,7 @@ export function TechnicianDashboard() {
   const [pendingFilters, setPendingFilters] = useState<WorkOrderListParams>(DEFAULT_FILTERS);
   const [appliedFilters, setAppliedFilters] = useState<WorkOrderListParams>(DEFAULT_FILTERS);
 
-  const { data, isLoading } = useWorkOrderList(appliedFilters);
+  const { data, isLoading } = useWorkOrderList({ params: appliedFilters });
 
   function handleApply() {
     setAppliedFilters({ ...pendingFilters, page: 1 });
