@@ -21,6 +21,8 @@ import { TechnicianFilterBar } from "./technician-filter-bar";
 const DEFAULT_FILTERS: WorkOrderListParams = {
   page: 1,
   per_page: 15,
+  order: "desc",
+  sort_by: "created_at",
 };
 
 export function TechnicianDashboard() {

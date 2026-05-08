@@ -153,6 +153,8 @@ export interface WorkOrderListParams {
   technician_id?: string;
   page?: number;
   per_page?: number;
+  order?: "asc" | "desc";
+  sort_by?: string;
 }
 
 // ── Work order detail ──────────────────────────────────────────────────────

@@ -37,6 +37,8 @@ export const getWorkOrders = (
       ...(params.sub_area_id && { sub_area_id: params.sub_area_id }),
       ...(params.queue_owner_id && { queue_owner_id: params.queue_owner_id }),
       ...(params.technician_id && { technician_id: params.technician_id }),
+      ...(params.order && { order: params.order }),
+      ...(params.sort_by && { sort_by: params.sort_by }),
     },
   }) as unknown as Promise<WorkOrderDashboardEnvelope>;
 };

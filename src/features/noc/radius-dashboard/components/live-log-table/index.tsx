@@ -85,17 +85,25 @@ export function RadiusLiveLogTable() {
     return filteredLogs.slice(startIndex, endIndex);
   }, [filteredLogs, filter.page, filter.limit]);
 
+  const columns = useMemo(() => radiusLogColumns, []);
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    columns.map((column) => column.id as string),
+  );
+
   const table = useReactTable({
     data: paginatedLogs,
-    columns: radiusLogColumns,
+    columns,
     pageCount: Math.ceil(filteredLogs.length / (filter.limit || 10)),
     state: {
       pagination: {
         pageIndex: filter.page - 1,
         pageSize: filter.limit,
       },
+      columnOrder,
       rowSelection,
     },
+    onColumnOrderChange: setColumnOrder,
+    columnResizeMode: "onChange",
     manualPagination: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,

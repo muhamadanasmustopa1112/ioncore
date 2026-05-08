@@ -83,3 +83,24 @@ export interface NocTopologyStatus {
   odps: TopologyStats;
   links: TopologyStats;
 }
+
+export interface GateAlert {
+  id: string;
+  workOrderId: string;
+  workOrderNumber: string;
+  technicianName: string;
+  status: "EXPIRED" | "REVOKED";
+  expiredAt: string;
+  message: string;
+}
+
+export interface RetryQueueItem {
+  id: string;
+  workOrderId: string;
+  workOrderNumber: string;
+  technicianName: string;
+  status: "TEMPORARY_PENDING" | "RETRY_QUEUED";
+  attempts: number;
+  lastAttemptAt: string;
+  errorMessage: string;
+}

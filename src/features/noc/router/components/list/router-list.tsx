@@ -62,6 +62,10 @@ export function RouterList() {
   const data = useMemo(() => routerData?.data ?? [], [routerData]);
   const metadata = useMemo(() => routerData?.metadata, [routerData]);
 
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    columns.map((column) => column.id as string),
+  );
+
   const table = useReactTable({
     columns,
     data,
@@ -72,8 +76,11 @@ export function RouterList() {
         pageIndex: filter.page - 1,
         pageSize: filter.limit,
       },
+      columnOrder,
       rowSelection,
     },
+    onColumnOrderChange: setColumnOrder,
+    columnResizeMode: "onChange",
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
