@@ -145,7 +145,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
       )}
 
       {/* Required Skills */}
-      {wo.required_skills && wo.required_skills.length > 0 && (
+      {Array.isArray(wo.required_skills) && wo.required_skills.length > 0 && (
         <SectionCard icon={ShieldCheck} title="Required Skills">
           <div className="flex flex-wrap gap-2">
             {wo.required_skills.map((s) => (

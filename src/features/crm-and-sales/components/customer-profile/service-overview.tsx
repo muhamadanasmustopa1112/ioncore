@@ -54,8 +54,11 @@ export function ServiceOverview({ customerId }: { customerId: string }) {
                 <h4 className="text-xl font-bold mt-1">
                   {activeOrder.plan_name ?? "—"}
                 </h4>
+                <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                  {activeOrder.order_number}
+                </p>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Order created {new Date(activeOrder.created_at).toLocaleDateString()}
+                  {new Date(activeOrder.created_at).toLocaleDateString()}
                 </p>
               </div>
             </div>
@@ -86,7 +89,8 @@ export function ServiceOverview({ customerId }: { customerId: string }) {
                       {ORDER_TYPE_LABELS[order.order_type]}
                       {order.plan_name ? ` — ${order.plan_name}` : ""}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-xs font-mono text-muted-foreground">{order.order_number}</p>
+                    <p className="text-xs text-muted-foreground">
                       {new Date(order.created_at).toLocaleDateString()}
                     </p>
                   </div>

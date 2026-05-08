@@ -86,7 +86,13 @@ export function LeadsList() {
       id: "lead_name",
       accessorKey: "lead_name",
       header: ({ column }) => <DataGridColumnHeader column={column} title="Name" className="font-semibold" />,
-      cell: ({ row }) => <span className="font-medium">{row.original.lead_name}</span>,
+      cell: ({ row }) => (
+        <Button asChild variant="ghost" mode="link" size="sm" className="font-medium text-foreground">
+          <Link href={paths.dashboard.crmAndSales.leads.detail.getHref(row.original.id)}>
+            {row.original.lead_name}
+          </Link>
+        </Button>
+      ),
       size: 200,
     },
     {
@@ -119,20 +125,42 @@ export function LeadsList() {
       size: 110,
     },
     {
+      id: "branch_id",
+      accessorKey: "branch_id",
+      header: ({ column }) => <DataGridColumnHeader column={column} title="Branch ID" className="font-semibold" />,
+      cell: ({ row }) => (
+        <span className="font-mono text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded">
+          {row.original.branch_id}
+        </span>
+      ),
+      size: 240,
+    },
+    {
       id: "cable_distance_meters",
       accessorKey: "cable_distance_meters",
       header: ({ column }) => <DataGridColumnHeader column={column} title="Cable (m)" className="font-semibold" />,
       cell: ({ row }) => (
         <span className="text-muted-foreground text-sm">
-          {row.original.cable_distance_meters}
+          {row.original.cable_distance_meters ?? "—"}
           {row.original.is_excess_cable_accepted && " (excess ok)"}
         </span>
       ),
       size: 110,
     },
     {
+      id: "created_at",
+      accessorKey: "created_at",
+      header: ({ column }) => <DataGridColumnHeader column={column} title="Created" className="font-semibold" />,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-sm">
+          {new Date(row.original.created_at).toLocaleDateString()}
+        </span>
+      ),
+      size: 120,
+    },
+    {
       id: "actions",
-      header: () => null,
+      header: () => <span className="text-[0.8125rem] font-semibold text-accent-foreground">Action</span>,
       cell: ({ row }) => (
         <div className="flex items-center gap-1">
           <Button asChild variant="ghost" mode="link" size="sm">

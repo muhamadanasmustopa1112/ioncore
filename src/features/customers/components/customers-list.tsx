@@ -81,7 +81,13 @@ export function CustomersList() {
       id: "full_name",
       accessorKey: "full_name",
       header: ({ column }) => <DataGridColumnHeader column={column} title="Full Name" className="font-semibold" />,
-      cell: ({ row }) => <span className="font-medium">{row.original.full_name}</span>,
+      cell: ({ row }) => (
+        <Button asChild variant="ghost" mode="link" size="sm" className="font-medium text-foreground">
+          <Link href={paths.dashboard.crmAndSales.customer.detail.getHref(row.original.id)}>
+            {row.original.full_name}
+          </Link>
+        </Button>
+      ),
       size: 200,
     },
     {
@@ -134,8 +140,19 @@ export function CustomersList() {
       size: 240,
     },
     {
+      id: "created_at",
+      accessorKey: "created_at",
+      header: ({ column }) => <DataGridColumnHeader column={column} title="Created" className="font-semibold" />,
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-sm">
+          {new Date(row.original.created_at).toLocaleDateString()}
+        </span>
+      ),
+      size: 120,
+    },
+    {
       id: "actions",
-      header: () => null,
+      header: () => <span className="text-[0.8125rem] font-semibold text-accent-foreground">Action</span>,
       cell: ({ row }) => (
         <Button asChild variant="ghost" mode="link" size="sm">
           <Link href={paths.dashboard.crmAndSales.customer.detail.getHref(row.original.id)}>
