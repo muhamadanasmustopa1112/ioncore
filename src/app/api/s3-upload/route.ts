@@ -1,5 +1,4 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from "next/server";
 
 const ENDPOINT = process.env.S3_UPLOAD_ENDPOINT!;
@@ -20,20 +19,24 @@ function getClient() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { filename, contentType } = await req.json();
-    if (!filename) return NextResponse.json({ error: "filename required" }, { status: 400 });
+    const form = await req.formData();
+    const file = form.get("file") as File | null;
+    if (!file) return NextResponse.json({ error: "file required" }, { status: 400 });
 
-    const key = `uploads/${Date.now()}-${filename}`;
+    const key = `uploads/${Date.now()}-${file.name}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
 
-    const putUrl = await getSignedUrl(
-      getClient(),
-      new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: contentType }),
-      { expiresIn: 3600 },
+    await getClient().send(
+      new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: key,
+        Body: buffer,
+        ContentType: file.type,
+      }),
     );
 
-    const publicUrl = `${ENDPOINT}/${BUCKET}/${key}`;
-
-    return NextResponse.json({ putUrl, url: publicUrl, key });
+    const url = `${ENDPOINT}/${BUCKET}/${key}`;
+    return NextResponse.json({ url, key });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[s3-upload]", err);
