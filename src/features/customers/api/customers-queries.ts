@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   createCustomer,
+  createCustomerFromLead,
   deleteCustomer,
   getCustomer,
   listCustomers,
@@ -18,6 +19,7 @@ import {
 } from "./customer-documents-api";
 import type {
   CreateCustomerDocumentPayload,
+  CreateCustomerFromLeadPayload,
   CreateCustomerPayload,
   CustomerListParams,
   UpdateCustomerAttributePayload,
@@ -59,7 +61,19 @@ export function useCreateCustomer() {
       toast.success("Customer created");
       qc.invalidateQueries({ queryKey: customerKeys.all });
     },
-    onError: () => toast.error("Failed to create customer"),
+    onError: (err) => toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? "Failed to create customer"),
+  });
+}
+
+export function useCreateCustomerFromLead() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateCustomerFromLeadPayload) => createCustomerFromLead(payload),
+    onSuccess: () => {
+      toast.success("Customer created from lead");
+      qc.invalidateQueries({ queryKey: customerKeys.all });
+    },
+    onError: (err) => toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? "Failed to create customer"),
   });
 }
 

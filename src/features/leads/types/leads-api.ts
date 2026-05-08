@@ -80,6 +80,10 @@ export interface CreateLeadPayload {
   source: LeadSource;
   referrer_customer_id?: string | null;
   branch_id: string;
+  nik?: string;
+  status?: LeadStatus;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface UpdateLeadPayload {

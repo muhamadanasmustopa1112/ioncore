@@ -1,8 +1,8 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { RiArrowRightUpLine, RiShoppingBag3Line, RiCheckboxCircleLine, RiUserAddLine, RiMapPinLine, RiRouteLine } from "@remixicon/react";
+import { RiArrowRightUpLine, RiUserAddLine, RiMapPinLine, RiRouteLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,9 +37,6 @@ import {
 } from "../api/leads-queries";
 import type { LeadActivityType, LeadStatus } from "../types/leads-api";
 import { RerouteLeadSheet } from "./reroute-lead-sheet";
-import { ConvertLeadSheet } from "./convert-lead-sheet";
-import { ProductSelectorSheet } from "@/features/products/components/product-selector-sheet";
-import type { BroadbandPlan, Addon } from "@/features/products/types/products";
 
 const STATUS_VARIANT: Record<LeadStatus, "primary" | "success" | "warning" | "destructive" | "secondary"> = {
   new: "secondary",
@@ -59,11 +56,8 @@ export function LeadDetail() {
   const id = params?.id ?? "";
   const { data: lead, isLoading } = useLead(id);
 
+  const router = useRouter();
   const [rerouteOpen, setRerouteOpen] = useState(false);
-  const [convertOpen, setConvertOpen] = useState(false);
-  const [productSelectorOpen, setProductSelectorOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<BroadbandPlan | null>(null);
-  const [selectedAddons, setSelectedAddons] = useState<Addon[]>([]);
   const [statusDraft, setStatusDraft] = useState<LeadStatus>("new");
   const [statusNote, setStatusNote] = useState("");
   const [cable, setCable] = useState("");
@@ -115,16 +109,12 @@ export function LeadDetail() {
           </div>
         </ToolbarHeading>
         <ToolbarActions>
-          <Button variant="outline" size="sm" onClick={() => setProductSelectorOpen(true)} className="gap-1.5">
-            <RiShoppingBag3Line className="size-4" />
-            Select Plan
-          </Button>
           <Button variant="outline" size="sm" onClick={() => setRerouteOpen(true)} className="gap-1.5">
             <RiArrowRightUpLine className="size-4" />
             Reroute
           </Button>
           {lead.status !== "converted" && (
-            <Button variant="primary" size="sm" onClick={() => setConvertOpen(true)} className="gap-1.5">
+            <Button variant="primary" size="sm" onClick={() => router.push(paths.dashboard.crmAndSales.leads.convert.getHref(id))} className="gap-1.5">
               <RiUserAddLine className="size-4" />
               Convert
             </Button>
@@ -147,28 +137,6 @@ export function LeadDetail() {
           </div>
         ))}
       </div>
-
-      {selectedPlan && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <RiCheckboxCircleLine className="size-4 text-primary" />
-              Selected Package
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex items-center justify-between gap-4">
-            <div>
-              <p className="font-semibold">{selectedPlan.name}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {selectedPlan.speed_download_mbps}/{selectedPlan.speed_upload_mbps} Mbps ·{" "}
-                {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(selectedPlan.price)}/mo
-                {selectedAddons.length > 0 && ` · ${selectedAddons.length} add-on${selectedAddons.length > 1 ? "s" : ""}`}
-              </p>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => setProductSelectorOpen(true)}>Change</Button>
-          </CardContent>
-        </Card>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
@@ -282,16 +250,6 @@ export function LeadDetail() {
       </div>
 
       <RerouteLeadSheet lead={lead} open={rerouteOpen} onClose={() => setRerouteOpen(false)} />
-      <ConvertLeadSheet lead={lead} selectedPlan={selectedPlan} selectedAddons={selectedAddons} open={convertOpen} onClose={() => setConvertOpen(false)} />
-      <ProductSelectorSheet
-        open={productSelectorOpen}
-        onOpenChange={setProductSelectorOpen}
-        leadType={lead.lead_type}
-        branchId={lead.branch_id}
-        cableDistanceMeters={lead.cable_distance_meters}
-        isExcessCableAccepted={lead.is_excess_cable_accepted}
-        onConfirm={(plan, addons) => { setSelectedPlan(plan); setSelectedAddons(addons); }}
-      />
     </div>
   );
 }

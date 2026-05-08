@@ -1,9 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
-import { RiUserAddLine } from "@remixicon/react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Command,
   CommandEmpty,
@@ -12,9 +15,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -22,30 +23,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import {
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Toolbar,
+  ToolbarActions,
+  ToolbarHeading,
+  ToolbarTitle,
+} from "@/components/common/toolbar";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
-import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { useCustomerList } from "@/features/customers/api/customers-queries";
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
+import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
+import { paths } from "@/config/paths";
 import { useCreateLead } from "../api/leads-queries";
-import type {
-  CreateLeadPayload,
-  CustomerSubType,
-  LeadSource,
-  LeadType,
-} from "../types/leads-api";
-
-interface Props {
-  open: boolean;
-  onClose: () => void;
-}
+import type { CustomerSubType, LeadSource, LeadType } from "../types/leads-api";
 
 const LEAD_TYPES: { value: LeadType; label: string }[] = [
   { value: "broadband", label: "Broadband" },
@@ -81,34 +72,33 @@ function StatusBadge({ status }: { status: CustomerStatus }) {
   );
 }
 
-function resetState() {
-  return {
-    leadName: "",
-    leadType: "broadband" as LeadType,
-    subType: "residential" as CustomerSubType,
-    source: "referral" as LeadSource,
-    referrerCustomerId: "",
-    branchId: "",
-    nik: "",
-    lat: INSTALL_DEFAULT[0],
-    lng: INSTALL_DEFAULT[1],
-  };
+function FieldRow({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs">
+        {label} {required && <span className="text-destructive">*</span>}
+      </Label>
+      {children}
+    </div>
+  );
 }
 
-export function CreateLeadSheet({ open, onClose }: Props) {
-  const initial = resetState();
-  const [leadName, setLeadName] = useState(initial.leadName);
-  const [leadType, setLeadType] = useState<LeadType>(initial.leadType);
-  const [subType, setSubType] = useState<CustomerSubType>(initial.subType);
-  const [source, setSource] = useState<LeadSource>(initial.source);
-  const [referrerCustomerId, setReferrerCustomerId] = useState(initial.referrerCustomerId);
-  const [branchId, setBranchId] = useState(initial.branchId);
-  const [nik, setNik] = useState(initial.nik);
-  const [lat, setLat] = useState(initial.lat);
-  const [lng, setLng] = useState(initial.lng);
-  const pinMoved = lat !== INSTALL_DEFAULT[0] || lng !== INSTALL_DEFAULT[1];
+export function CreateLeadPage() {
+  const router = useRouter();
+
+  const [leadName, setLeadName] = useState("");
+  const [leadType, setLeadType] = useState<LeadType>("broadband");
+  const [subType, setSubType] = useState<CustomerSubType>("residential");
+  const [source, setSource] = useState<LeadSource>("referral");
+  const [referrerCustomerId, setReferrerCustomerId] = useState("");
+  const [branchId, setBranchId] = useState("");
+  const [nik, setNik] = useState("");
+  const [lat, setLat] = useState(INSTALL_DEFAULT[0]);
+  const [lng, setLng] = useState(INSTALL_DEFAULT[1]);
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerPickerOpen, setCustomerPickerOpen] = useState(false);
+
+  const pinMoved = lat !== INSTALL_DEFAULT[0] || lng !== INSTALL_DEFAULT[1];
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList();
   const { data: customersData, isLoading: customersLoading } = useCustomerList(
@@ -134,69 +124,68 @@ export function CreateLeadSheet({ open, onClose }: Props) {
     !createLead.isPending &&
     (source !== "referral" || !!referrerCustomerId);
 
-  function handleOpenChange(o: boolean) {
-    if (!o) {
-      const s = resetState();
-      setLeadName(s.leadName);
-      setLeadType(s.leadType);
-      setSubType(s.subType);
-      setSource(s.source);
-      setReferrerCustomerId(s.referrerCustomerId);
-      setBranchId(s.branchId);
-      setNik(s.nik);
-      setLat(s.lat);
-      setLng(s.lng);
-      setCustomerSearch("");
-      setCustomerPickerOpen(false);
-      onClose();
+  async function handleSubmit() {
+    if (!canSubmit) return;
+    try {
+      await createLead.mutateAsync({
+        lead_type: leadType,
+        customer_sub_type: subType,
+        lead_name: leadName.trim(),
+        source,
+        branch_id: branchId,
+        referrer_customer_id: source === "referral" && referrerCustomerId ? referrerCustomerId : null,
+        status: "new",
+        ...(nik.trim() ? { nik: nik.trim() } : {}),
+        ...(pinMoved ? { latitude: lat, longitude: lng } : {}),
+      });
+      router.push(paths.dashboard.crmAndSales.leads.root.getHref());
+    } catch (err) {
+      toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? "Failed to create lead");
     }
   }
 
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    const payload: CreateLeadPayload = {
-      lead_type: leadType,
-      customer_sub_type: subType,
-      lead_name: leadName.trim(),
-      source,
-      branch_id: branchId,
-      referrer_customer_id:
-        source === "referral" && referrerCustomerId ? referrerCustomerId : null,
-      status: "new",
-      ...(nik.trim() ? { nik: nik.trim() } : {}),
-      ...(pinMoved ? { latitude: lat, longitude: lng } : {}),
-    };
-    createLead.mutate(payload, { onSuccess: () => handleOpenChange(false) });
-  };
-
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent className="inset-y-0 sm:inset-y-8 lg:end-10 start-auto h-full sm:max-h-[calc(100vh-64px)] gap-0 sm:rounded-lg border p-0 sm:max-w-none w-full md:w-[480px] lg:w-[520px] flex flex-col shadow-2xl">
-        <SheetHeader className="border-border border-b px-5 py-4">
-          <SheetTitle className="font-medium text-xl flex items-center gap-2">
-            <RiUserAddLine className="size-5 text-primary" />
-            Create Lead
-          </SheetTitle>
-        </SheetHeader>
+    <div className="flex flex-col">
+      <div className="px-6 pt-4 pb-2">
+        <Toolbar>
+          <ToolbarHeading>
+            <PageBreadcrumb
+              items={[
+                { title: "CRM & Sales", path: paths.dashboard.crmAndSales.root.getHref() },
+                { title: "Leads", path: paths.dashboard.crmAndSales.leads.root.getHref() },
+                { title: "Create Lead" },
+              ]}
+            />
+            <ToolbarTitle className="text-2xl font-extrabold tracking-tight mt-1">
+              Create Lead
+            </ToolbarTitle>
+          </ToolbarHeading>
+          <ToolbarActions>
+            <Button variant="outline" onClick={() => router.back()} size="sm" disabled={createLead.isPending}>
+              <ArrowLeft className="size-4" />
+              Back
+            </Button>
+          </ToolbarActions>
+        </Toolbar>
+      </div>
 
-        <SheetBody className="flex-1 p-0 overflow-hidden">
-          <ScrollArea className="h-full px-6 py-6">
-            <div className="space-y-5">
-              <div className="space-y-2">
-                <Label className="text-xs">
-                  Lead Name <span className="text-destructive">*</span>
-                </Label>
+      <div className="px-6 py-4 grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
+        <div className="space-y-5">
+          <Card>
+            <CardContent className="p-6 space-y-5">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lead Info</p>
+
+              <FieldRow label="Lead Name" required>
                 <input
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   value={leadName}
                   onChange={(e) => setLeadName(e.target.value)}
                   placeholder="Prospect name"
                 />
-              </div>
+              </FieldRow>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-2">
-                  <Label className="text-xs">Lead Type *</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <FieldRow label="Lead Type" required>
                   <Select value={leadType} onValueChange={(v) => setLeadType(v as LeadType)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -205,10 +194,9 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </FieldRow>
 
-                <div className="space-y-2">
-                  <Label className="text-xs">Sub Type *</Label>
+                <FieldRow label="Sub Type" required>
                   <Select value={subType} onValueChange={(v) => setSubType(v as CustomerSubType)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -217,11 +205,10 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                       ))}
                     </SelectContent>
                   </Select>
-                </div>
+                </FieldRow>
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-xs">Source *</Label>
+              <FieldRow label="Source" required>
                 <Select
                   value={source}
                   onValueChange={(v) => {
@@ -237,25 +224,19 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </FieldRow>
 
               {source === "referral" && (
-                <div className="space-y-2">
-                  <Label className="text-xs">
-                    Referrer Customer <span className="text-destructive">*</span>
-                  </Label>
+                <FieldRow label="Referrer Customer" required>
                   <Popover open={customerPickerOpen} onOpenChange={setCustomerPickerOpen}>
                     <PopoverTrigger asChild>
                       <button
                         type="button"
-                        className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                       >
                         <span className={selectedCustomer ? "text-foreground flex items-center gap-2" : "text-muted-foreground"}>
                           {selectedCustomer ? (
-                            <>
-                              {selectedCustomer.full_name}
-                              <StatusBadge status={selectedCustomer.status} />
-                            </>
+                            <>{selectedCustomer.full_name}<StatusBadge status={selectedCustomer.status} /></>
                           ) : "Search customer…"}
                         </span>
                         <ChevronsUpDown className="size-4 opacity-50 shrink-0 ml-2" />
@@ -271,8 +252,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                         <CommandList>
                           {customersLoading && (
                             <div className="flex items-center justify-center py-6 gap-2 text-sm text-muted-foreground">
-                              <Loader2 className="size-4 animate-spin" />
-                              Loading…
+                              <Loader2 className="size-4 animate-spin" /> Loading…
                             </div>
                           )}
                           {!customersLoading && customerOptions.length === 0 && (
@@ -308,33 +288,12 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                     </PopoverContent>
                   </Popover>
                   {referrerCustomerId && (
-                    <p className="text-xs text-muted-foreground font-mono truncate">{referrerCustomerId}</p>
+                    <p className="text-xs text-muted-foreground font-mono truncate mt-1">{referrerCustomerId}</p>
                   )}
-                </div>
+                </FieldRow>
               )}
 
-              <div className="space-y-2">
-                <Label className="text-xs">NIK</Label>
-                <input
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  value={nik}
-                  onChange={(e) => setNik(e.target.value)}
-                  placeholder="16-digit NIK"
-                  maxLength={16}
-                />
-              </div>
-
-              <InstallationSection
-                lat={lat}
-                lng={lng}
-                onLatLngChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }}
-                onAddressChange={() => {}}
-              />
-
-              <div className="space-y-2">
-                <Label className="text-xs">
-                  Branch <span className="text-destructive">*</span>
-                </Label>
+              <FieldRow label="Branch" required>
                 <Select value={branchId} onValueChange={setBranchId} disabled={branchesLoading}>
                   <SelectTrigger>
                     <SelectValue placeholder={branchesLoading ? "Loading…" : "Select branch"} />
@@ -350,18 +309,61 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
-            </div>
-          </ScrollArea>
-        </SheetBody>
+              </FieldRow>
 
-        <SheetFooter className="border-border flex-row gap-2 border-t p-5 pb-4 mt-auto justify-end">
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>Cancel</Button>
-          <Button variant="primary" onClick={handleSubmit} disabled={!canSubmit} className="font-semibold">
-            {createLead.isPending ? "Creating…" : "Create Lead"}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+              <FieldRow label="NIK">
+                <input
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  value={nik}
+                  onChange={(e) => setNik(e.target.value)}
+                  placeholder="16-digit NIK"
+                  maxLength={16}
+                />
+              </FieldRow>
+            </CardContent>
+          </Card>
+
+          <InstallationSection
+            lat={lat}
+            lng={lng}
+            onLatLngChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }}
+            onAddressChange={() => {}}
+          />
+        </div>
+
+        <div className="space-y-4 xl:sticky xl:top-6">
+          <Card>
+            <CardContent className="p-5 space-y-4">
+              <p className="text-sm font-semibold">Summary</p>
+              <div className="text-sm space-y-2 divide-y divide-border/40">
+                {([
+                  { label: "Type", value: `${leadType} · ${subType}` },
+                  { label: "Name", value: leadName || null },
+                  { label: "NIK", value: nik || null },
+                  { label: "Source", value: source.replace("_", " ") },
+                  { label: "Branch", value: activeBranches.find((b) => b.id === branchId)?.name ?? null },
+                  { label: "Referrer", value: selectedCustomer?.full_name ?? null },
+                  { label: "Coords", value: pinMoved ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : null },
+                ] as { label: string; value: string | null }[]).map(({ label, value }) => value ? (
+                  <div key={label} className="flex justify-between py-1.5 first:pt-0">
+                    <span className="text-muted-foreground shrink-0">{label}</span>
+                    <span className="font-medium text-right truncate max-w-[160px] ml-2 capitalize">{value}</span>
+                  </div>
+                ) : null)}
+              </div>
+
+              <div className="space-y-2 pt-1">
+                <Button variant="primary" className="w-full font-semibold" onClick={handleSubmit} disabled={!canSubmit}>
+                  {createLead.isPending ? <><Loader2 className="size-4 animate-spin" /> Creating…</> : "Create Lead"}
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => router.back()} disabled={createLead.isPending}>
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }

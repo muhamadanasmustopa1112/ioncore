@@ -296,24 +296,24 @@ export const DASHBOARD_MENU: MenuConfig = [
   //   heading: 'Finance & Support',
   //   icon: Headset,
   // },
-  // {
-  //   title: "Operations",
-  //   path: paths.dashboard.operations.root.getHref(),
-  //   heading: 'Strategic',
-  //   icon: Activity,
-  //   children: [
-  //     {
-  //       title: "Work Orders",
-  //       path: paths.dashboard.operations.workOrders.root.getHref(),
-  //       icon: Wrench,
-  //     },
-  //     {
-  //       title: "Orders",
-  //       path: paths.dashboard.operations.orders.root.getHref(),
-  //       icon: Package,
-  //     },
-  //   ],
-  // },
+  {
+    title: "Orders",
+    path: paths.dashboard.operations.orders.root.getHref(),
+    heading: 'Strategic',
+    icon: Package,
+    // children: [
+      // {
+      //   title: "Work Orders",
+      //   path: paths.dashboard.operations.workOrders.root.getHref(),
+      //   icon: Wrench,
+      // },
+      // {
+      //   title: "Orders",
+      //   path: paths.dashboard.operations.orders.root.getHref(),
+      //   icon: Package,
+      // },
+    // ],
+  },
   // {
   //   title: "Enterprise System",
   //   path: "#",

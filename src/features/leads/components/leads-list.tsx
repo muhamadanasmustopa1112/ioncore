@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Search, Settings2, X } from "lucide-react";
 import { RiArrowRightUpLine } from "@remixicon/react";
 import {
@@ -35,7 +36,6 @@ import {
 import { paths } from "@/config/paths";
 import { useAdminLeads } from "../api/leads-queries";
 import type { LeadDto, LeadStatus } from "../types/leads-api";
-import { CreateLeadSheet } from "./create-lead-sheet";
 import { RerouteLeadSheet } from "./reroute-lead-sheet";
 
 function LeadsViewToggle() {
@@ -69,8 +69,8 @@ export function LeadsList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const router = useRouter();
   const [rerouteLead, setRerouteLead] = useState<LeadDto | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
 
   const { data, isLoading } = useAdminLeads({
     name: search || undefined,
@@ -198,7 +198,7 @@ export function LeadsList() {
           </ToolbarTitle>
         </ToolbarHeading>
         <ToolbarActions>
-          <Button variant="primary" onClick={() => setCreateOpen(true)} className="font-semibold">
+          <Button variant="primary" onClick={() => router.push(paths.dashboard.crmAndSales.leads.create.getHref())} className="font-semibold">
             <Plus className="size-4" />
             Create Lead
           </Button>
@@ -246,7 +246,6 @@ export function LeadsList() {
         </DataGridContainer>
       </DataGrid>
 
-      <CreateLeadSheet open={createOpen} onClose={() => setCreateOpen(false)} />
       <RerouteLeadSheet
         lead={rerouteLead}
         open={!!rerouteLead}

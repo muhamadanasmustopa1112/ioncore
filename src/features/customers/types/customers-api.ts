@@ -55,6 +55,7 @@ export interface CustomerDocumentDto {
 
 export interface CustomerDto {
   id: string;
+  lead_id?: string | null;
   customer_type: CustomerType;
   full_name: string;
   company_name?: string | null;
@@ -68,6 +69,8 @@ export interface CustomerDto {
   suspension_schema_version_id?: string | null;
   customer_attribute?: Record<string, unknown> | null;
   location?: CustomerLocation | null;
+  lat?: number | null;
+  lon?: number | null;
   activation_date?: string | null;
   created_at: string;
   updated_at: string;
@@ -108,10 +111,30 @@ export interface CreateCustomerPayload {
   company_name?: string;
   account_manager_id?: string;
   customer_attribute?: Record<string, unknown>;
-  
+  lead_id?: string;
+  lat?: number;
+  lon?: number;
 }
 
 export type UpdateCustomerPayload = CreateCustomerPayload;
+
+export interface CreateCustomerFromLeadPayload {
+  lead_id: string;
+  customer_type: CustomerType;
+  full_name: string;
+  branch_id?: string;
+  email?: string;
+  phone?: string;
+  nik?: string;
+  address?: string;
+  ktp_address?: string;
+  ktp_entry_mode?: KtpEntryMode;
+  ktp_photo_url?: string;
+  company_name?: string;
+  account_manager_id?: string;
+  customer_attribute?: Record<string, unknown>;
+  documents?: { document_type: string; file_url: string }[];
+}
 
 export interface KtpScanPayload {
   image_url: string;

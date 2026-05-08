@@ -63,7 +63,6 @@ export interface IdentitySectionProps {
   // ktp
   nik: string;
   setNik: (v: string) => void;
-  scannedNik: string;
   ktpAddress: string;
   setKtpAddress: (v: string) => void;
   ktpPreview: string | null;
@@ -79,7 +78,7 @@ export function IdentitySection({
   fullName, setFullName,
   companyName, setCompanyName,
   needsCompany,
-  nik, setNik, scannedNik,
+  nik, setNik,
   ktpAddress, setKtpAddress,
   ktpPreview, ktpScanning, ktpFileSelected, ktpError,
   onFileChange, onClearPhoto,
@@ -165,34 +164,13 @@ export function IdentitySection({
             )}
           </FieldRow>
 
-        <FieldRow label="NIK" required hint="Auto-filled from scan — verify before submitting">
-          <div className="space-y-1.5">
-            <Input
-              value={nik}
-              onChange={(e) => setNik(e.target.value)}
-              placeholder="3271xxxxxxxxxxxxxxxx"
-              maxLength={16}
-              className={
-                scannedNik && nik && nik !== scannedNik
-                  ? "border-destructive focus-visible:ring-destructive/30"
-                  : scannedNik && nik === scannedNik
-                    ? "border-success focus-visible:ring-success/30"
-                    : ""
-              }
-            />
-            {scannedNik && nik && nik !== scannedNik && (
-              <p className="text-xs text-destructive flex items-center gap-1">
-                <AlertCircle className="size-3.5 shrink-0" />
-                Doesn&apos;t match scanned value ({scannedNik}) — double-check before submitting
-              </p>
-            )}
-            {scannedNik && nik === scannedNik && (
-              <p className="text-xs text-success flex items-center gap-1">
-                <span className="inline-block size-1.5 rounded-full bg-success" />
-                Matches scanned KTP
-              </p>
-            )}
-          </div>
+        <FieldRow label="NIK" required hint="Fill manually — OCR may not be accurate">
+          <Input
+            value={nik}
+            onChange={(e) => setNik(e.target.value)}
+            placeholder="3271xxxxxxxxxxxxxxxx"
+            maxLength={16}
+          />
         </FieldRow>
 
         <FieldRow label="KTP Address" hint="Address as printed on KTP">
@@ -219,7 +197,17 @@ export function ContactSection({ email, setEmail, phone, setPhone, address, setA
           <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="customer@email.com" />
         </FieldRow>
         <FieldRow label="Phone">
-          <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+62812xxxxxxxx" />
+          <div className="flex">
+            <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm text-muted-foreground select-none shrink-0">
+              +62
+            </span>
+            <Input
+              className="rounded-l-none"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="812xxxxxxxx"
+            />
+          </div>
         </FieldRow>
         <FieldRow label="Address">
           <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Domicile address" />

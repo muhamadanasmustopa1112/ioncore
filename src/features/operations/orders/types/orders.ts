@@ -1,9 +1,9 @@
 export type OrderType =
-  | "new_installation"
-  | "relocation"
-  | "termination"
-  | "upgrade"
-  | "downgrade";
+  | "NEW_CONNECTION"
+  // | "RELOCATION" // just dummy
+  // | "TERMINATION" // just dummy
+  // | "UPGRADE" // just dummy 
+  // | "DOWNGRADE"; // just dummy
 
 export type OrderStatus =
   | "PENDING"
@@ -13,11 +13,11 @@ export type OrderStatus =
   | "CANCELLED";
 
 export const ORDER_TYPE_LABELS: Record<OrderType, string> = {
-  new_installation: "New Installation",
-  relocation: "Relocation",
-  termination: "Termination",
-  upgrade: "Upgrade",
-  downgrade: "Downgrade",
+  NEW_CONNECTION: "New Connection",
+  // RELOCATION: "Relocation", // just dummy
+  // TERMINATION: "Termination", // just dummy
+  // UPGRADE: "Upgrade", // just dummy
+  // DOWNGRADE: "Downgrade", // just dummy
 };
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
@@ -95,15 +95,18 @@ export interface OrderFilters {
   per_page?: number;
 }
 
-// ── Payloads — do not change ──────────────────────────────────────────────────
+// ── Payloads ──────────────────────────────────────────────────────────────────
 
 export interface CreateOrderPayload {
   customer_id: string;
   order_type: OrderType;
-  broadband_plan_id?: string;
-  addon_ids?: string[];
-  branch_id?: string;
-  notes?: string;
+  plan_id: string;
+  latitude: number;
+  longitude: number;
+  addon_orders?: { addon_id: string; addon_attribute?: Record<string, unknown> }[];
+  lead_id?: string;
+  channel?: string;
+  excess_cable_meters?: number;
 }
 
 export interface UpdateOrderStatusPayload {

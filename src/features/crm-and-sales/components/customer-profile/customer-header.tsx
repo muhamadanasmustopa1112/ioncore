@@ -69,15 +69,21 @@ export function CustomerHeader({ customer, onAddService, onChangePlan, onDeactiv
       </div>
       <div className="flex flex-wrap gap-3">
         {!isInactive && (
-          <Button
-            variant="outline"
-            className="border-destructive/40 text-destructive hover:bg-destructive/5"
-            onClick={onDeactivate}
-            disabled={isDeactivating}
-          >
-            {isDeactivating && <Loader2 className="size-4 animate-spin" />}
-            Deactivate Service
-          </Button>
+          <>
+            <Button variant="primary" onClick={onAddService}>
+              <PlusCircle className="size-4" />
+              Add Service
+            </Button>
+            <Button
+              variant="outline"
+              className="border-destructive/40 text-destructive hover:bg-destructive/5"
+              onClick={onDeactivate}
+              disabled={isDeactivating}
+            >
+              {isDeactivating && <Loader2 className="size-4 animate-spin" />}
+              Deactivate Service
+            </Button>
+          </>
         )}
       </div>
     </div>

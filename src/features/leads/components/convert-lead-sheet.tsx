@@ -95,10 +95,15 @@ export function ConvertLeadSheet({ lead, selectedPlan, selectedAddons, open, onC
       if (selectedPlan) {
         await createOrder.mutateAsync({
           customer_id: customerId,
-          order_type: "new_installation",
-          broadband_plan_id: selectedPlan.id,
-          addon_ids: selectedAddons.map((a) => a.id),
-          branch_id: lead.branch_id,
+          order_type: "NEW_CONNECTION",
+          plan_id: selectedPlan.id,
+          latitude: lead.installation_point_lat ?? 0,
+          longitude: lead.installation_point_lng ?? 0,
+          channel: "DIRECT",
+          lead_id: lead.id,
+          ...(selectedAddons.length > 0 && {
+            addon_orders: selectedAddons.map((a) => ({ addon_id: a.id, addon_attribute: {} })),
+          }),
         });
       }
 
@@ -187,6 +192,14 @@ export function ConvertLeadSheet({ lead, selectedPlan, selectedAddons, open, onC
                       <AlertDescription className="text-sm">
                         No plan selected. Customer will be created without an order.
                         You can create an order later from the customer profile.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {selectedPlan && !lead.installation_point_lat && (
+                    <Alert variant="destructive">
+                      <AlertDescription className="text-sm">
+                        No installation coordinates on this lead. Order will use (0, 0) — set the pin on the lead before converting.
                       </AlertDescription>
                     </Alert>
                   )}

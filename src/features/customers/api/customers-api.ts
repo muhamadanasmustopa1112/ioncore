@@ -7,6 +7,7 @@ import type {
   CustomerDetail,
   CustomerListParams,
   CreateCustomerPayload,
+  CreateCustomerFromLeadPayload,
   UpdateCustomerPayload,
   UpdateCustomerLocationPayload,
   UpdateCustomerAttributePayload,
@@ -43,6 +44,10 @@ export function getCustomer(id: string) {
 
 export function createCustomer(payload: CreateCustomerPayload) {
   return cast<CustomerEnvelope<CustomerDto>>(userServiceApi.post(`${BASE}/`, payload));
+}
+
+export function createCustomerFromLead(payload: CreateCustomerFromLeadPayload) {
+  return cast<CustomerEnvelope<CustomerDto>>(userServiceApi.post(`${BASE}/from-lead`, payload));
 }
 
 export function updateCustomer(id: string, payload: UpdateCustomerPayload) {

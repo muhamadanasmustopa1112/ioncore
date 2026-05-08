@@ -57,9 +57,17 @@ export const paths = {
           path: "/crm-and-sales/leads",
           getHref: () => "/crm-and-sales/leads",
         },
+        create: {
+          path: "/crm-and-sales/leads/create",
+          getHref: () => "/crm-and-sales/leads/create",
+        },
         detail: {
           path: "/crm-and-sales/leads/:id",
           getHref: (id: string) => `/crm-and-sales/leads/${id}`,
+        },
+        convert: {
+          path: "/crm-and-sales/leads/:id/convert",
+          getHref: (id: string) => `/crm-and-sales/leads/${id}/convert`,
         },
       },
     },

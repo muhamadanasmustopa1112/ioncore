@@ -13,13 +13,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCustomer, useUpdateCustomerStatus } from "@/features/customers/api/customers-queries";
-import { ProductSelectorSheet } from "@/features/products/components/product-selector-sheet";
-import type { BroadbandPlan, Addon } from "@/features/products/types/products";
-import { useCreateOrder } from "@/features/operations/orders/api/orders-queries";
 import { CustomerHeader } from "./customer-header";
 import { ServiceOverview } from "./service-overview";
 import { PaymentHistoryTable } from "./payment-history-table";
 import { CustomerWidgets } from "./customer-widgets";
+import { AddServiceSheet } from "./add-service-sheet";
 
 function DetailRow({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -40,9 +38,7 @@ export function CustomerProfile() {
   const id = params?.customerId ?? "";
   const { data: customer, isLoading } = useCustomer(id);
   const updateStatus = useUpdateCustomerStatus(id);
-  const createOrder = useCreateOrder();
-
-  const [productSelectorOpen, setProductSelectorOpen] = useState(false);
+  const [addServiceOpen, setAddServiceOpen] = useState(false);
 
   const attrEntries = customer?.customer_attribute
     ? Object.entries(customer.customer_attribute)
@@ -51,17 +47,6 @@ export function CustomerProfile() {
   function handleDeactivate() {
     if (!window.confirm("Deactivate this customer's service? This will set their status to suspended.")) return;
     updateStatus.mutate("suspended");
-  }
-
-  function handleProductConfirm(plan: BroadbandPlan, addons: Addon[]) {
-    if (!customer) return;
-    createOrder.mutateAsync({
-      customer_id: id,
-      order_type: "new_installation",
-      broadband_plan_id: plan.id,
-      addon_ids: addons.map((a) => a.id),
-      branch_id: customer.branch_id ?? "",
-    });
   }
 
   return (
@@ -86,18 +71,20 @@ export function CustomerProfile() {
 
       <CustomerHeader
         customer={customer ?? undefined}
-        onAddService={() => setProductSelectorOpen(true)}
-        onChangePlan={() => setProductSelectorOpen(true)}
+        onAddService={() => setAddServiceOpen(true)}
+
         onDeactivate={handleDeactivate}
         isDeactivating={updateStatus.isPending}
       />
 
-      <ProductSelectorSheet
-        open={productSelectorOpen}
-        onOpenChange={setProductSelectorOpen}
-        leadType="broadband"
-        branchId={customer?.branch_id ?? ""}
-        onConfirm={handleProductConfirm}
+      <AddServiceSheet
+        open={addServiceOpen}
+        onOpenChange={setAddServiceOpen}
+        customerId={id}
+        customerLat={customer?.lat}
+        customerLon={customer?.lon}
+        customerAddress={customer?.location?.address}
+        leadId={customer?.lead_id}
       />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -173,16 +160,18 @@ export function CustomerProfile() {
         {/* ── Sidebar ── */}
         <div className="flex flex-col gap-6">
           {/* Location */}
-          {customer?.location && (
+          {(customer?.lat || customer?.location) && (
             <Card>
               <CardHeader className="border-b pb-3">
                 <CardTitle className="text-sm">Location</CardTitle>
               </CardHeader>
               <CardContent className="pt-3 text-sm space-y-1">
-                <p>{customer.location.address}</p>
-                <p className="text-xs text-muted-foreground">
-                  {customer.location.latitude.toFixed(6)}, {customer.location.longitude.toFixed(6)}
-                </p>
+                {customer.location?.address && <p>{customer.location.address}</p>}
+                {customer.lat && customer.lon && (
+                  <p className="text-xs text-muted-foreground">
+                    {customer.lat.toFixed(6)}, {customer.lon.toFixed(6)}
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}

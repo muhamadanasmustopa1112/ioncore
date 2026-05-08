@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import {
   Toolbar,
@@ -14,18 +15,17 @@ import {
   ToolbarTitle,
 } from "@/components/common/toolbar";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
-import { createLead } from "@/features/leads/api/leads-api";
+import { useLead } from "../api/leads-queries";
 import { uploadImageToS3 } from "@/lib/s3-upload";
 import { paths } from "@/config/paths";
-import { useCreateCustomer } from "../api/customers-queries";
-import type { CreateCustomerPayload, CustomerType } from "../types/customers-api";
+import { useCreateCustomerFromLead } from "@/features/customers/api/customers-queries";
+import { updateCustomerLocation } from "@/features/customers/api/customers-api";
+import type { CustomerType } from "@/features/customers/types/customers-api";
 import {
-  AssignmentSection,
-  ContactSection,
   IdentitySection,
-} from "./create-customer-sections";
-import { InstallationSection, INSTALL_DEFAULT } from "./create-customer-installation-section";
-
+  ContactSection,
+  AssignmentSection,
+} from "@/features/customers/components/create-customer-sections";
 
 function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, "");
@@ -34,8 +34,14 @@ function formatPhone(raw: string): string {
   return `+62${digits}`;
 }
 
-export function CreateCustomer() {
+export function ConvertLeadPage() {
+  const params = useParams<{ id: string }>();
+  const leadId = params?.id ?? "";
   const router = useRouter();
+
+  const { data: lead, isLoading: leadLoading } = useLead(leadId);
+  const { data: branches = [], isLoading: branchesLoading } = useBranchList();
+  const createCustomerFromLead = useCreateCustomerFromLead();
 
   const [customerType, setCustomerType] = useState<CustomerType>("residential");
   const [fullName, setFullName] = useState("");
@@ -46,45 +52,32 @@ export function CreateCustomer() {
   const [companyName, setCompanyName] = useState("");
   const [branchId, setBranchId] = useState("");
   const [accountManagerId, setAccountManagerId] = useState("");
-
-  const ktpEntryMode = "ocr" as const;
   const [ktpAddress, setKtpAddress] = useState("");
   const [ktpFile, setKtpFile] = useState<File | null>(null);
   const [ktpPreview, setKtpPreview] = useState<string | null>(null);
   const [ktpScanning, setKtpScanning] = useState(false);
   const [ktpError, setKtpError] = useState<string | null>(null);
-
   const [isUploading, setIsUploading] = useState(false);
 
-  const [installLat, setInstallLat] = useState(INSTALL_DEFAULT[0]);
-  const [installLng, setInstallLng] = useState(INSTALL_DEFAULT[1]);
-  const [covered, setCovered] = useState<boolean | null>(null);
-  const installMoved =
-    installLat !== INSTALL_DEFAULT[0] || installLng !== INSTALL_DEFAULT[1];
-
-  const { data: branches = [], isLoading: branchesLoading } = useBranchList();
-  const createCustomer = useCreateCustomer();
+  useEffect(() => {
+    if (!lead) return;
+    setFullName(lead.lead_name);
+    setBranchId(lead.branch_id);
+    setCustomerType(lead.customer_sub_type === "residential" ? "residential" : "business");
+  }, [lead]);
 
   const activeBranches = branches.filter((b) => b.active);
   const needsCompany = customerType !== "residential";
-  const isBusy = isUploading || createCustomer.isPending;
-
-  const canSubmit =
-    !!fullName.trim() &&
-    !isBusy &&
-    !ktpScanning &&
-    !!ktpFile &&
-    covered !== false;
+  const isBusy = isUploading || createCustomerFromLead.isPending;
+  const canSubmit = !!fullName.trim() && !isBusy && !ktpScanning && !!ktpFile;
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setKtpError(null);
     setKtpFile(null);
     setKtpPreview(null);
     setKtpScanning(true);
-
     const dataUrl = await new Promise<string>((resolve) => {
       const reader = new FileReader();
       reader.onload = (ev) => resolve(ev.target?.result as string);
@@ -92,28 +85,25 @@ export function CreateCustomer() {
     });
     setKtpPreview(dataUrl);
     setKtpFile(file);
-
     try {
       const { createWorker } = await import("tesseract.js");
       const worker = await createWorker("eng");
       try {
         const { data } = await worker.recognize(dataUrl);
         const raw = data.text;
-
         const nameMatch = raw.match(/Nama\s*[:\-]?\s*(.+)/i);
         if (nameMatch && !fullName.trim()) setFullName(nameMatch[1].trim());
-
         const addressMatch = raw.match(/Alamat\s*[:\-]?\s*(.+)/i);
         if (addressMatch) {
-          const extractedAddr = addressMatch[1].trim();
-          if (!ktpAddress.trim()) setKtpAddress(extractedAddr);
-          if (!address.trim()) setAddress(extractedAddr);
+          const extracted = addressMatch[1].trim();
+          if (!ktpAddress.trim()) setKtpAddress(extracted);
+          if (!address.trim()) setAddress(extracted);
         }
       } finally {
         await worker.terminate();
       }
     } catch {
-      // OCR failure is non-blocking — user fills manually
+      // non-blocking
     } finally {
       setKtpScanning(false);
     }
@@ -126,10 +116,10 @@ export function CreateCustomer() {
   }
 
   async function handleSubmit() {
-    if (!canSubmit) return;
+    if (!canSubmit || !lead) return;
 
     let ktpPhotoUrl: string | undefined;
-    if (ktpEntryMode === "ocr" && ktpFile) {
+    if (ktpFile) {
       setIsUploading(true);
       try {
         const { url } = await uploadImageToS3(ktpFile);
@@ -143,28 +133,8 @@ export function CreateCustomer() {
     }
 
     try {
-      // Create lead first to get lead_id
-      let leadId: string | undefined;
-      if (branchId) {
-        try {
-          const leadRes = await createLead({
-            lead_type: "broadband",
-            customer_sub_type: customerType === "residential" ? "residential" : "business",
-            lead_name: fullName.trim(),
-            source: "other",
-            branch_id: branchId,
-            referrer_customer_id: null,
-            status: "new",
-            ...(nik.trim() ? { nik: nik.trim() } : {}),
-            ...(installMoved ? { latitude: installLat, longitude: installLng } : {}),
-          });
-          leadId = (leadRes as any)?.data?.id;
-        } catch {
-          // non-blocking — customer creation proceeds even if lead fails
-        }
-      }
-
-      const payload: CreateCustomerPayload = {
+      const res = await createCustomerFromLead.mutateAsync({
+        lead_id: leadId,
         customer_type: customerType,
         full_name: fullName.trim(),
         ...(branchId ? { branch_id: branchId } : {}),
@@ -173,26 +143,51 @@ export function CreateCustomer() {
         ...(nik.trim() ? { nik: nik.trim() } : {}),
         ...(address.trim() ? { address: address.trim() } : {}),
         ...(ktpAddress.trim() ? { ktp_address: ktpAddress.trim() } : {}),
-        ktp_entry_mode: ktpEntryMode,
+        ktp_entry_mode: "ocr",
         ...(ktpPhotoUrl ? { ktp_photo_url: ktpPhotoUrl } : {}),
         ...(needsCompany && companyName.trim() ? { company_name: companyName.trim() } : {}),
         ...(accountManagerId.trim() ? { account_manager_id: accountManagerId.trim() } : {}),
-        ...(leadId ? { lead_id: leadId } : {}),
-        ...(installMoved ? { lat: installLat, lon: installLng } : {}),
-      };
+      });
 
-      await createCustomer.mutateAsync(payload);
-      router.push(paths.dashboard.crmAndSales.customer.root.getHref());
+      const customerId = (res as any)?.data?.id;
+
+      // Save lead installation coords as customer location (non-blocking)
+      if (customerId && lead.installation_point_lat && lead.installation_point_lng) {
+        try {
+          await updateCustomerLocation(customerId, {
+            location: {
+              latitude: lead.installation_point_lat,
+              longitude: lead.installation_point_lng,
+              address: address.trim() || `${lead.installation_point_lat.toFixed(6)}, ${lead.installation_point_lng.toFixed(6)}`,
+            },
+          });
+        } catch {
+          // non-blocking
+        }
+      }
+
+      router.push(paths.dashboard.crmAndSales.customer.detail.getHref(customerId));
     } catch (err) {
       toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? "Failed to create customer");
     }
   }
 
+  if (leadLoading) {
+    return (
+      <div className="flex items-center justify-center py-24 text-muted-foreground">
+        <Loader2 className="size-5 animate-spin mr-2" /> Loading lead…
+      </div>
+    );
+  }
+  if (!lead) {
+    return <div className="p-8 text-center text-muted-foreground text-sm">Lead not found</div>;
+  }
+
   const submitLabel = isUploading
     ? <><Loader2 className="size-4 animate-spin" /> Uploading KTP…</>
-    : createCustomer.isPending
+    : createCustomerFromLead.isPending
       ? <><Loader2 className="size-4 animate-spin" /> Creating…</>
-      : "Create Customer";
+      : "Convert to Customer";
 
   return (
     <div className="flex flex-col">
@@ -202,12 +197,13 @@ export function CreateCustomer() {
             <PageBreadcrumb
               items={[
                 { title: "CRM & Sales", path: paths.dashboard.crmAndSales.root.getHref() },
-                { title: "Customers", path: paths.dashboard.crmAndSales.customer.root.getHref() },
-                { title: "Create Customer" },
+                { title: "Leads", path: paths.dashboard.crmAndSales.leads.root.getHref() },
+                { title: lead.lead_name, path: paths.dashboard.crmAndSales.leads.detail.getHref(leadId) },
+                { title: "Convert to Customer" },
               ]}
             />
             <ToolbarTitle className="text-2xl font-extrabold tracking-tight mt-1">
-              Create Customer
+              Convert Lead to Customer
             </ToolbarTitle>
           </ToolbarHeading>
           <ToolbarActions>
@@ -221,12 +217,35 @@ export function CreateCustomer() {
 
       <div className="px-6 py-4 grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6 items-start">
         <div className="space-y-5">
+          {/* Lead context */}
+          <Card className="border-primary/20 bg-primary/5">
+            <CardContent className="p-4 flex flex-wrap gap-4 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">Lead</p>
+                <p className="font-semibold">{lead.lead_name}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">Type</p>
+                <Badge variant="secondary" size="sm" className="capitalize">{lead.lead_type} · {lead.customer_sub_type}</Badge>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-0.5">Source</p>
+                <p className="capitalize">{lead.source.replace("_", " ")}</p>
+              </div>
+              {lead.installation_point_lat && (
+                <div>
+                  <p className="text-xs text-muted-foreground mb-0.5">Installation coords</p>
+                  <p className="font-mono text-xs">{lead.installation_point_lat.toFixed(4)}, {lead.installation_point_lng?.toFixed(4)}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <IdentitySection
             customerType={customerType} setCustomerType={setCustomerType}
             fullName={fullName} setFullName={setFullName}
             companyName={companyName} setCompanyName={setCompanyName}
             needsCompany={needsCompany}
-
             nik={nik} setNik={setNik}
             ktpAddress={ktpAddress} setKtpAddress={setKtpAddress}
             ktpPreview={ktpPreview} ktpScanning={ktpScanning}
@@ -243,16 +262,8 @@ export function CreateCustomer() {
             accountManagerId={accountManagerId} setAccountManagerId={setAccountManagerId}
             activeBranches={activeBranches} branchesLoading={branchesLoading}
           />
-          <InstallationSection
-            lat={installLat}
-            lng={installLng}
-            onLatLngChange={(lat, lng) => { setInstallLat(lat); setInstallLng(lng); }}
-            onAddressChange={() => {}}
-            onCoverageChange={setCovered}
-          />
         </div>
 
-        {/* Summary sidebar */}
         <div className="space-y-4 xl:sticky xl:top-6">
           <Card>
             <CardContent className="p-5 space-y-4">
@@ -273,8 +284,7 @@ export function CreateCustomer() {
                   </div>
                 ) : null)}
               </div>
-
-<div className="space-y-2 pt-1">
+              <div className="space-y-2 pt-1">
                 <Button variant="primary" className="w-full font-semibold" onClick={handleSubmit} disabled={!canSubmit}>
                   {submitLabel}
                 </Button>
@@ -284,7 +294,6 @@ export function CreateCustomer() {
               </div>
             </CardContent>
           </Card>
-
         </div>
       </div>
     </div>
