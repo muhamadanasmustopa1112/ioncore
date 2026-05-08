@@ -58,6 +58,7 @@ export function useAdminLeads(params: LeadListParams = {}) {
   return useQuery({
     queryKey: leadKeys.list(params),
     queryFn: async () => (await listLeadsAdmin(params)).data,
+    placeholderData: (prev) => prev,
   });
 }
 

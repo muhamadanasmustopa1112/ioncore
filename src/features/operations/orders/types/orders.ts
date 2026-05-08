@@ -41,30 +41,44 @@ export const ORDER_STATUS_VARIANTS: Record<
 
 export interface AddonOrderDto {
   id: string;
+  order_id: string;
   addon_id: string;
   addon_name: string;
-  price: number;
-  one_time_charge: number;
+  addon_price: number;
+  addon_one_time_charge: number;
+  created_at: string;
+  created_by: string;
 }
 
 export interface OrderDto {
   id: string;
+  order_number: string;
   customer_id: string;
+  lead_id: string;
+  plan_id: string;
+  plan_name: string;
+  plan_price: number;
+  plan_one_time_charge: number;
   order_type: OrderType;
+  channel: string;
   status: OrderStatus;
-  broadband_plan_id?: string | null;
-  broadband_plan_name?: string | null;
-  branch_id: string;
-  notes?: string | null;
-  addon_orders?: AddonOrderDto[];
+  order_attribute: Record<string, unknown>;
+  grand_total: number;
+  total_monthly_price: number;
+  total_one_time_charge: number;
   created_at: string;
+  created_by: string;
   updated_at: string;
-  created_by?: string | null;
+  updated_by: string;
+}
+
+export interface OrderDetail extends OrderDto {
+  addon_orders: AddonOrderDto[];
 }
 
 export interface OrderListMeta {
   page: number;
-  size: number;
+  per_page: number;
   total: number;
 }
 
@@ -78,8 +92,10 @@ export interface OrderFilters {
   status?: OrderStatus;
   order_type?: OrderType;
   page?: number;
-  size?: number;
+  per_page?: number;
 }
+
+// ── Payloads — do not change ──────────────────────────────────────────────────
 
 export interface CreateOrderPayload {
   customer_id: string;

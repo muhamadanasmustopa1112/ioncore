@@ -92,20 +92,37 @@ export interface CustomerListParams {
   search?: string;
 }
 
+export type KtpEntryMode = "ocr" | "photo";
+
 export interface CreateCustomerPayload {
   customer_type: CustomerType;
   full_name: string;
-  company_name?: string;
   branch_id: string;
+  email?: string;
+  phone?: string;
+  nik?: string;
+  address?: string;
+  ktp_address?: string;
+  ktp_entry_mode?: KtpEntryMode;
+  ktp_photo_url?: string;
+  company_name?: string;
   account_manager_id?: string;
-  onboarding_schema_version_id?: string;
-  billing_schema_version_id?: string;
-  service_schema_version_id?: string;
-  commission_schema_version_id?: string;
-  suspension_schema_version_id?: string;
+  customer_attribute?: Record<string, unknown>;
+  
 }
 
 export type UpdateCustomerPayload = CreateCustomerPayload;
+
+export interface KtpScanPayload {
+  image_url: string;
+}
+
+export interface KtpScanResult {
+  nik?: string | null;
+  full_name?: string | null;
+  address?: string | null;
+  dob?: string | null;
+}
 
 export interface UpdateCustomerLocationPayload {
   location: CustomerLocation;

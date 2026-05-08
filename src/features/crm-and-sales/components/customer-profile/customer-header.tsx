@@ -1,5 +1,7 @@
+"use client";
+
 import * as React from "react";
-import { PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -17,9 +19,13 @@ function initials(name: string) {
 
 interface Props {
   customer?: CustomerDetail;
+  onAddService?: () => void;
+  onChangePlan?: () => void;
+  onDeactivate?: () => void;
+  isDeactivating?: boolean;
 }
 
-export function CustomerHeader({ customer }: Props) {
+export function CustomerHeader({ customer, onAddService, onChangePlan, onDeactivate, isDeactivating }: Props) {
   const name = customer?.full_name ?? "—";
   const display = customer?.company_name
     ? `${customer.full_name} (${customer.company_name})`
@@ -33,6 +39,8 @@ export function CustomerHeader({ customer }: Props) {
         : status === "deactivated" || status === "churned"
           ? "destructive"
           : "secondary";
+
+  const isInactive = status === "deactivated" || status === "churned";
 
   return (
     <div className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -60,16 +68,17 @@ export function CustomerHeader({ customer }: Props) {
         </div>
       </div>
       <div className="flex flex-wrap gap-3">
-        <Button variant="primary">
-          <PlusCircle className="size-4" /> Add Service
-        </Button>
-        <Button variant="secondary">Change Plan</Button>
-        <Button
-          className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-900/20"
-          variant="outline"
-        >
-          Deactivate Service
-        </Button>
+        {!isInactive && (
+          <Button
+            variant="outline"
+            className="border-destructive/40 text-destructive hover:bg-destructive/5"
+            onClick={onDeactivate}
+            disabled={isDeactivating}
+          >
+            {isDeactivating && <Loader2 className="size-4 animate-spin" />}
+            Deactivate Service
+          </Button>
+        )}
       </div>
     </div>
   );

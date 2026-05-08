@@ -17,7 +17,7 @@ import {
 } from "@/features/operations/orders/types/orders";
 
 export function ServiceOverview({ customerId }: { customerId: string }) {
-  const { data, isLoading } = useOrderList({ customer_id: customerId, size: 10 });
+  const { data, isLoading } = useOrderList({ customer_id: customerId, per_page: 10 });
   const orders = data?.orders ?? [];
   const activeOrder = orders.find(
     (o) => o.status === "PROCESSING" || o.status === "CONFIRMED",
@@ -52,7 +52,7 @@ export function ServiceOverview({ customerId }: { customerId: string }) {
                   {ORDER_TYPE_LABELS[activeOrder.order_type]}
                 </p>
                 <h4 className="text-xl font-bold mt-1">
-                  {activeOrder.broadband_plan_name ?? "—"}
+                  {activeOrder.plan_name ?? "—"}
                 </h4>
                 <p className="text-sm text-muted-foreground mt-0.5">
                   Order created {new Date(activeOrder.created_at).toLocaleDateString()}
@@ -84,7 +84,7 @@ export function ServiceOverview({ customerId }: { customerId: string }) {
                   <div>
                     <p className="font-medium">
                       {ORDER_TYPE_LABELS[order.order_type]}
-                      {order.broadband_plan_name ? ` — ${order.broadband_plan_name}` : ""}
+                      {order.plan_name ? ` — ${order.plan_name}` : ""}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {new Date(order.created_at).toLocaleDateString()}

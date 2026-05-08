@@ -39,6 +39,14 @@ export const paths = {
         getHref: () => "/crm-and-sales",
       },
       customer: {
+        root: {
+          path: "/crm-and-sales/customers",
+          getHref: () => "/crm-and-sales/customers",
+        },
+        create: {
+          path: "/crm-and-sales/customers/create",
+          getHref: () => "/crm-and-sales/customers/create",
+        },
         detail: {
           path: "/crm-and-sales/:customerId",
           getHref: (customerId: string) => `/crm-and-sales/${customerId}`,

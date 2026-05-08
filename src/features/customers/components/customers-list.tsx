@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Plus, Search, Settings2, X } from "lucide-react";
-import { RiArrowRightUpLine } from "@remixicon/react";
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -33,12 +33,10 @@ import {
   ToolbarTitle,
 } from "@/components/common/toolbar";
 import { paths } from "@/config/paths";
-import { useAdminLeads } from "../api/leads-queries";
-import type { LeadDto, LeadStatus } from "../types/leads-api";
-import { CreateLeadSheet } from "./create-lead-sheet";
-import { RerouteLeadSheet } from "./reroute-lead-sheet";
+import { useCustomerList } from "../api/customers-queries";
+import type { CustomerDto, CustomerStatus } from "../types/customers-api";
 
-function LeadsViewToggle() {
+function CustomersViewToggle() {
   const { table } = useDataGrid();
   return (
     <DataGridColumnVisibility
@@ -53,59 +51,65 @@ function LeadsViewToggle() {
   );
 }
 
-const STATUS_VARIANT: Record<LeadStatus, "primary" | "success" | "warning" | "destructive" | "secondary"> = {
-  new: "secondary",
-  active: "primary",
-  warm: "warning",
-  hot: "destructive",
-  converted: "success",
-  lost: "secondary",
-  potential: "warning",
+const STATUS_VARIANT: Record<CustomerStatus, "primary" | "success" | "warning" | "destructive" | "secondary"> = {
+  pending: "warning",
+  active: "success",
+  suspended: "warning",
+  deactivated: "secondary",
+  churned: "destructive",
 };
 
 const PAGE_SIZE = 25;
 
-export function LeadsList() {
+export function CustomersList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
-  const [rerouteLead, setRerouteLead] = useState<LeadDto | null>(null);
-  const [createOpen, setCreateOpen] = useState(false);
+  const router = useRouter();
 
-  const { data, isLoading } = useAdminLeads({
-    name: search || undefined,
+  const { data, isLoading } = useCustomerList({
+    search: search || undefined,
     page,
-    per_page: PAGE_SIZE,
+    size: PAGE_SIZE,
   });
 
-  const leads = data?.leads ?? [];
-  const total = data?.metadata?.total ?? 0;
+  const items = data?.items ?? [];
+  const total = data?.meta?.total ?? 0;
 
-  const columns = useMemo<ColumnDef<LeadDto>[]>(() => [
+  const columns = useMemo<ColumnDef<CustomerDto>[]>(() => [
     {
-      id: "lead_name",
-      accessorKey: "lead_name",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Name" className="font-semibold" />,
-      cell: ({ row }) => <span className="font-medium">{row.original.lead_name}</span>,
+      id: "full_name",
+      accessorKey: "full_name",
+      header: ({ column }) => <DataGridColumnHeader column={column} title="Full Name" className="font-semibold" />,
+      cell: ({ row }) => <span className="font-medium">{row.original.full_name}</span>,
       size: 200,
     },
     {
-      id: "lead_type",
-      accessorKey: "lead_type",
+      id: "customer_type",
+      accessorKey: "customer_type",
       header: ({ column }) => <DataGridColumnHeader column={column} title="Type" className="font-semibold" />,
-      cell: ({ row }) => (
-        <span className="text-muted-foreground text-sm capitalize">
-          {row.original.lead_type} / {row.original.customer_sub_type}
-        </span>
-      ),
-      size: 160,
+      cell: ({ row }) => {
+        const type = row.original.customer_type;
+        const cls =
+          type === "residential"
+            ? "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+            : type === "business"
+              ? "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400"
+              : "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+        return <span className={cls}>{type.charAt(0).toUpperCase() + type.slice(1)}</span>;
+      },
+      size: 130,
     },
     {
-      id: "source",
-      accessorKey: "source",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Source" className="font-semibold" />,
-      cell: ({ row }) => <span className="text-muted-foreground text-sm capitalize">{row.original.source.replace("_", " ")}</span>,
-      size: 130,
+      id: "company_name",
+      accessorKey: "company_name",
+      header: ({ column }) => <DataGridColumnHeader column={column} title="Company" className="font-semibold" />,
+      cell: ({ row }) => (
+        <span className={row.original.company_name ? "text-foreground" : "text-muted-foreground/40"}>
+          {row.original.company_name ?? "—"}
+        </span>
+      ),
+      size: 180,
     },
     {
       id: "status",
@@ -119,46 +123,34 @@ export function LeadsList() {
       size: 110,
     },
     {
-      id: "cable_distance_meters",
-      accessorKey: "cable_distance_meters",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Cable (m)" className="font-semibold" />,
+      id: "branch_id",
+      accessorKey: "branch_id",
+      header: ({ column }) => <DataGridColumnHeader column={column} title="Branch ID" className="font-semibold" />,
       cell: ({ row }) => (
-        <span className="text-muted-foreground text-sm">
-          {row.original.cable_distance_meters}
-          {row.original.is_excess_cable_accepted && " (excess ok)"}
+        <span className="font-mono text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded">
+          {row.original.branch_id}
         </span>
       ),
-      size: 110,
+      size: 240,
     },
     {
       id: "actions",
       header: () => null,
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          <Button asChild variant="ghost" mode="link" size="sm">
-            <Link href={paths.dashboard.crmAndSales.leads.detail.getHref(row.original.id)}>
-              Detail
-            </Link>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setRerouteLead(row.original)}
-            className="gap-1 text-xs"
-          >
-            <RiArrowRightUpLine className="size-3.5" />
-            Reroute
-          </Button>
-        </div>
+        <Button asChild variant="ghost" mode="link" size="sm">
+          <Link href={paths.dashboard.crmAndSales.customer.detail.getHref(row.original.id)}>
+            Detail
+          </Link>
+        </Button>
       ),
-      size: 150,
+      size: 80,
       enableSorting: false,
     },
   ], []);
 
   const table = useReactTable({
     columns,
-    data: leads,
+    data: items,
     pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)),
     rowCount: total,
     manualPagination: true,
@@ -187,20 +179,20 @@ export function LeadsList() {
       <PageBreadcrumb
         items={[
           { title: "CRM & Sales", path: paths.dashboard.crmAndSales.root.getHref() },
-          { title: "Leads" },
+          { title: "Customers" },
         ]}
       />
 
       <Toolbar className="items-start sm:items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Leads
+            Customers
           </ToolbarTitle>
         </ToolbarHeading>
         <ToolbarActions>
-          <Button variant="primary" onClick={() => setCreateOpen(true)} className="font-semibold">
+          <Button variant="primary" onClick={() => router.push(paths.dashboard.crmAndSales.customer.create.getHref())} className="font-semibold">
             <Plus className="size-4" />
-            Create Lead
+            Create Customer
           </Button>
         </ToolbarActions>
       </Toolbar>
@@ -231,7 +223,7 @@ export function LeadsList() {
                   )}
                 </div>
               </CardHeading>
-              <LeadsViewToggle />
+              <CustomersViewToggle />
             </CardHeader>
             <CardTable>
               <ScrollArea>
@@ -246,12 +238,6 @@ export function LeadsList() {
         </DataGridContainer>
       </DataGrid>
 
-      <CreateLeadSheet open={createOpen} onClose={() => setCreateOpen(false)} />
-      <RerouteLeadSheet
-        lead={rerouteLead}
-        open={!!rerouteLead}
-        onClose={() => setRerouteLead(null)}
-      />
     </div>
   );
 }
