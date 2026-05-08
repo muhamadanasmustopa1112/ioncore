@@ -61,6 +61,10 @@ export function PPPProfileList() {
   const data = useMemo(() => pppProfileData?.data ?? [], [pppProfileData]);
   const metadata = useMemo(() => pppProfileData?.metadata, [pppProfileData]);
 
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    columns.map((column) => column.id as string),
+  );
+
   const table = useReactTable({
     columns,
     data,
@@ -71,8 +75,11 @@ export function PPPProfileList() {
         pageIndex: filter.page - 1,
         pageSize: filter.limit,
       },
+      columnOrder,
       rowSelection,
     },
+    onColumnOrderChange: setColumnOrder,
+    columnResizeMode: "onChange",
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),

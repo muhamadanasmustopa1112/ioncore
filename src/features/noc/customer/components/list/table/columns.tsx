@@ -13,10 +13,10 @@ export const columns: ColumnDef<PPPCustomer>[] = [
     id: "member_id",
     accessorFn: (row) => row.member_id,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Member ID" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Member ID" column={column} className="text-foreground font-semibold whitespace-nowrap" />
     ),
     cell: ({ row }) => (
-      <div className="font-medium text-foreground">
+      <div className="font-medium text-foreground whitespace-nowrap">
         {row.original.member_id}
       </div>
     ),
@@ -24,16 +24,16 @@ export const columns: ColumnDef<PPPCustomer>[] = [
       skeleton: <Skeleton className="h-4 w-24" />,
     },
     enableSorting: true,
-    size: 130,
+    size: 200,
   },
   {
     id: "username",
     accessorFn: (row) => row.username,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Username" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Username" column={column} className="text-foreground font-semibold whitespace-nowrap" />
     ),
     cell: ({ row }) => (
-      <div className="font-medium text-foreground">
+      <div className="font-medium text-foreground whitespace-nowrap">
         {row.original.username}
       </div>
     ),
@@ -41,16 +41,16 @@ export const columns: ColumnDef<PPPCustomer>[] = [
       skeleton: <Skeleton className="h-4 w-24" />,
     },
     enableSorting: true,
-    size: 135,
+    size: 200,
   },
   {
     id: "fullname",
     accessorFn: (row) => row.fullname,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Name" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Name" column={column} className="text-foreground font-semibold whitespace-nowrap" />
     ),
     cell: ({ row }) => (
-      <div className="font-semibold text-foreground">
+      <div className="font-semibold text-foreground whitespace-nowrap overflow-hidden text-ellipsis max-w-[250px]">
         {row.original.fullname}
       </div>
     ),
@@ -58,15 +58,15 @@ export const columns: ColumnDef<PPPCustomer>[] = [
       skeleton: <Skeleton className="h-4 w-32" />,
     },
     enableSorting: true,
-    size: 180,
+    size: 220,
   },
   {
     id: "servicetype",
     accessorFn: (row) => row.servicetype,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Service Type" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Service Type" column={column} className="text-foreground font-semibold whitespace-nowrap" />
     ),
-    cell: ({ row }) => <div>{row.original.servicetype}</div>,
+    cell: ({ row }) => <div className="whitespace-nowrap">{row.original.servicetype}</div>,
     meta: {
       skeleton: <Skeleton className="h-4 w-20" />,
     },
@@ -77,10 +77,10 @@ export const columns: ColumnDef<PPPCustomer>[] = [
     id: "plan_name",
     accessorFn: (row) => row.plan_name,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Service Plan" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Service Plan" column={column} className="text-foreground font-semibold whitespace-nowrap" />
     ),
     cell: ({ row }) => (
-      <div className="text-primary font-medium">
+      <div className="text-primary font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">
         {row.original.plan_name}
       </div>
     ),
@@ -88,16 +88,16 @@ export const columns: ColumnDef<PPPCustomer>[] = [
       skeleton: <Skeleton className="h-4 w-28" />,
     },
     enableSorting: true,
-    size: 150,
+    size: 200,
   },
   {
     id: "auth_status",
     accessorFn: (row) => row.auth_status,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Auth Status" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title="Auth Status" column={column} className="text-foreground font-semibold whitespace-nowrap" />
     ),
     cell: ({ row }) => (
-      <div className={`font-semibold ${row.original.auth_status === "Enabled-Users" ? "text-emerald-600" : "text-rose-600"}`}>
+      <div className={`font-semibold whitespace-nowrap ${row.original.auth_status === "Enabled-Users" ? "text-emerald-600" : "text-rose-600"}`}>
         {row.original.auth_status}
       </div>
     ),
@@ -127,7 +127,7 @@ export const columns: ColumnDef<PPPCustomer>[] = [
       <DataGridColumnHeader title="Tx Status" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
-      <Badge color={row.original.trx_status === "PAID" ? "emerald" : "orange"} variant="primary" className="font-bold">
+      <Badge variant={row.original.trx_status === "PAID" ? "success" : "warning"}>
         {row.original.trx_status}
       </Badge>
     ),

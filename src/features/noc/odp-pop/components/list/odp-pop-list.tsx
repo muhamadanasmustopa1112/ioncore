@@ -28,6 +28,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { getPopColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { PopResponse } from "../../types/pop";
@@ -52,8 +53,13 @@ export function OdpPopList({
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const columns = useMemo(() => getPopColumns(type), [type]);
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    columns.map((column) => column.id as string),
+  );
+
   const table = useReactTable({
-    columns: useMemo(() => getPopColumns(type), [type]),
+    columns,
     data,
     meta: {
       onPopSelect,
@@ -65,8 +71,11 @@ export function OdpPopList({
         pageIndex: (filter.page ?? 1) - 1,
         pageSize: filter.limit ?? 10,
       },
+      columnOrder,
       rowSelection,
     },
+    onColumnOrderChange: setColumnOrder,
+    columnResizeMode: "onChange",
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
@@ -138,11 +147,12 @@ export function OdpPopList({
         </CardHeader>
 
         <CardTable className="p-0 border-t border-border/50">
-          <div className="w-full overflow-x-auto overflow-y-hidden custom-scrollbar">
-            <div className="min-w-max">
+          <ScrollArea>
+            <DataGridContainer className="w-full">
               <DataGridTable />
-            </div>
-          </div>
+            </DataGridContainer>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </CardTable>
         <CardFooter className="py-3 mt-auto">
           <DataGridPagination

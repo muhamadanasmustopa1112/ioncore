@@ -18,7 +18,7 @@ import {
   CardFooter,
   CardToolbar,
 } from "@/components/ui/card";
-import { DataGrid } from "@/components/ui/data-grid";
+import { DataGrid, DataGridContainer } from "@/components/ui/data-grid";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid-column-visibility";
@@ -28,6 +28,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { RiRouterLine } from "@remixicon/react";
 import { columns } from "../../details/list/table/columns_odp";
 import { OdpDialog } from "../../form/add-odp-dialog";
@@ -53,6 +54,10 @@ export function OltOdpListTable({
   const data = useMemo(() => odpResponse?.data || [], [odpResponse]);
   const [openFilter, setOpenFilter] = useState<boolean>(false);
 
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    columns.map((column) => column.id as string),
+  );
+
   const table = useReactTable({
     data,
     columns,
@@ -66,7 +71,10 @@ export function OltOdpListTable({
         pageIndex: filter.page - 1,
         pageSize: filter.limit,
       },
+      columnOrder,
     },
+    onColumnOrderChange: setColumnOrder,
+    columnResizeMode: "onChange",
     manualPagination: true,
   });
 
@@ -157,11 +165,12 @@ export function OltOdpListTable({
         </CardHeader>
 
         <CardTable className="p-0 border-t border-border/50">
-          <div className="w-full overflow-x-auto overflow-y-hidden custom-scrollbar">
-            <div className="min-w-max">
+          <ScrollArea>
+            <DataGridContainer className="w-full">
               <DataGridTable />
-            </div>
-          </div>
+            </DataGridContainer>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
         </CardTable>
 
         <CardFooter className="bg-card border-t border-border/40 p-4">

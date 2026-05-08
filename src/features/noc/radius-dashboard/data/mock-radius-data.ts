@@ -92,3 +92,37 @@ export const NOC_TOPOLOGY_STATUS: NocTopologyStatus = {
     UP: 0
   }
 };
+
+export const GATE_ALERTS: import("../types/radius-dashboard").GateAlert[] = [
+  {
+    id: "alert-1",
+    workOrderId: "53f15fa4-1fc7-4bcf-98fd-bcc5384c3523",
+    workOrderNumber: "WO-20260507-644",
+    technicianName: "Budi Santoso",
+    status: "EXPIRED",
+    expiredAt: format(subHours(new Date(), 1), "yyyy-MM-dd HH:mm:ss"),
+    message: "Temporary Radius window expired. No BAST received.",
+  },
+  {
+    id: "alert-2",
+    workOrderId: "efe6f4cb-2d1a-407d-aec6-bf291fd49000",
+    workOrderNumber: "WO-20260507-358",
+    technicianName: "Agus Pratama",
+    status: "REVOKED",
+    expiredAt: format(subHours(new Date(), 3), "yyyy-MM-dd HH:mm:ss"),
+    message: "Radius revoked due to WO cancellation.",
+  }
+];
+
+export const RETRY_QUEUE: import("../types/radius-dashboard").RetryQueueItem[] = [
+  {
+    id: "retry-1",
+    workOrderId: "19e0437-e10f-78f0-b714-bfc22a716beb",
+    workOrderNumber: "WO-20260508-012",
+    technicianName: "Dedi Setiawan",
+    status: "TEMPORARY_PENDING",
+    attempts: 3,
+    lastAttemptAt: format(new Date(), "yyyy-MM-dd HH:mm:ss"),
+    errorMessage: "RADIUS server timeout (5xx). Queued for retry.",
+  }
+];

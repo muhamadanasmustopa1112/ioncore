@@ -29,11 +29,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { usePPPCustomers } from "../../api/get-ppp-customers";
 import { columns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { CustomerAdvancedFilter } from "./customer-advanced-filter";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export function CustomerList() {
   const [filter, setFilter] = useQueryStates({
@@ -53,6 +53,9 @@ export function CustomerList() {
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [columnOrder, setColumnOrder] = useState<string[]>(
+    columns.map((column) => column.id as string),
+  );
 
   const table = useReactTable({
     columns,
@@ -64,8 +67,11 @@ export function CustomerList() {
         pageIndex: filter.page - 1,
         pageSize: filter.limit,
       },
+      columnOrder,
       rowSelection,
     },
+    onColumnOrderChange: setColumnOrder,
+    columnResizeMode: "onChange",
     manualPagination: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,

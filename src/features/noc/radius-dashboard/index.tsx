@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import {
@@ -9,7 +10,8 @@ import {
   ToolbarTitle
 } from "@/components/common/toolbar";
 import { Button } from "@/components/ui/button";
-import { RiRefreshLine, RiDownloadLine } from "@remixicon/react";
+import { Badge } from "@/components/ui/badge";
+import { RiRefreshLine, RiDownloadLine, RiAlarmWarningLine } from "@remixicon/react";
 import { RadiusKpiCards } from "./components/kpi-cards";
 import { RadiusSessionChart } from "./components/session-chart";
 import { RadiusAuthStatsChart } from "./components/auth-stats-chart";
@@ -18,16 +20,21 @@ import { RadiusLiveLogTable } from "./components/live-log-table";
 import { RadiusServiceInfo } from "./components/service-info";
 import { NocSummaryCards } from "./components/noc-summary-cards";
 import { NocTopologyStatus } from "./components/noc-topology-status";
+import { RadiusGateDrawer } from "./components/radius-gate-drawer";
 import { useRadiusDashboardStore } from "./store/use-radius-dashboard-store";
 import { useQueryClient, useIsFetching } from "@tanstack/react-query";
 import { RADIUS_DASHBOARD_KEYS } from "./api/key";
+import { GATE_ALERTS, RETRY_QUEUE } from "./data/mock-radius-data";
 
 export function RadiusDashboard() {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { refreshData, isLoading: isStoreLoading } = useRadiusDashboardStore();
   const queryClient = useQueryClient();
   const isFetchingQueries = useIsFetching({ queryKey: RADIUS_DASHBOARD_KEYS.all });
 
   const isLoading = isStoreLoading || isFetchingQueries > 0;
+  
+  const pendingCount = GATE_ALERTS.length + RETRY_QUEUE.length;
 
   const handleRefresh = async () => {
     // Refresh store data (mock)
@@ -62,6 +69,19 @@ export function RadiusDashboard() {
         <ToolbarActions>
           <Button
             variant="outline"
+            className="h-12 px-6 font-bold shadow-sm rounded-2xl border-2 relative"
+            onClick={() => setIsDrawerOpen(true)}
+          >
+            <RiAlarmWarningLine className="size-5 text-amber-500" />
+            Gate Alerts
+            {pendingCount > 0 && (
+              <Badge variant="destructive" className="absolute -top-2 -right-2 size-6 p-0 flex items-center justify-center rounded-full text-[10px]">
+                {pendingCount}
+              </Badge>
+            )}
+          </Button>
+          <Button
+            variant="outline"
             className="h-12 px-6 font-bold shadow-sm rounded-2xl border-2"
           >
             <RiDownloadLine className="size-5" />
@@ -77,6 +97,7 @@ export function RadiusDashboard() {
           </Button>
         </ToolbarActions>
       </Toolbar>
+      <RadiusGateDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
 
       <div className="space-y-6">
         {/* NOC Summary Section */}
