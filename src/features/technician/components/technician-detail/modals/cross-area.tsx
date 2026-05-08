@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Loader2, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCrossAreaRequest } from "../../../api/cross-area";
+import { useTechnicianList } from "../../../api/dashboard";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { ModalShell, FieldLabel } from "./shell";
 
 export function CrossAreaModal({
@@ -21,15 +23,48 @@ export function CrossAreaModal({
   const [lendingLeaderId, setLendingLeaderId] = useState("");
   const [lendingLeaderName, setLendingLeaderName] = useState("");
   const [requestingLeaderName, setRequestingLeaderName] = useState("");
-  const [candidatesText, setCandidatesText] = useState("");
+  const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [note, setNote] = useState("");
+
+  const { data: allTechnicians = [], isLoading: isTechListLoading } = useTechnicianList();
+
+  const handleCandidatesChange = (newCandidates: string[]) => {
+    setSelectedCandidates(newCandidates);
+    if (newCandidates.length > 0) {
+      const firstId = newCandidates[0];
+      const tech = allTechnicians.find((t: any) => t.technician_id === firstId);
+      if (tech) {
+        if (tech.team_leader) {
+          setLendingLeaderId(tech.team_leader.id || "");
+          setLendingLeaderName(tech.team_leader.name || "");
+          setLendingAreaId(tech.team_leader.area_id || tech.area_id || "");
+        } else {
+          setLendingAreaId(tech.area_id || "");
+        }
+      }
+    } else {
+      setLendingAreaId("");
+      setLendingLeaderId("");
+      setLendingLeaderName("");
+    }
+  };
 
   const mutation = useCreateCrossAreaRequest();
 
-  const candidates = candidatesText
-    .split(/\n/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  const options = useMemo(() => {
+    return allTechnicians.map((t) => ({
+      value: t.technician_id,
+      label: `${t.technician_name} (${t.level.toUpperCase()})`,
+    }));
+  }, [allTechnicians]);
+
+  const filteredOptions = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return options.filter((opt) => opt.label.toLowerCase().includes(q));
+  }, [options, searchQuery]);
+
+  const candidates = selectedCandidates;
 
   const ready =
     lendingAreaId &&
@@ -94,41 +129,23 @@ export function CrossAreaModal({
             placeholder="Requesting leader name"
           />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <FieldLabel required>Lending Area ID</FieldLabel>
-            <Input
-              value={lendingAreaId}
-              onChange={(e) => setLendingAreaId(e.target.value)}
-              placeholder="area-xyz"
+        <div>
+          <FieldLabel required>Candidate Technicians</FieldLabel>
+          <div className="w-full [&>button]:h-10">
+            <MultiSelect
+              value={selectedCandidates}
+              onChange={handleCandidatesChange}
+              filteredText="Technicians"
+              placeholder="Select candidate technicians..."
+              className="w-full text-xs font-semibold"
+              options={filteredOptions}
+              isLoading={isTechListLoading}
+              onSearch={setSearchQuery}
+              maxHeight="250px"
+              emptyText="No technicians found"
             />
           </div>
-          <div>
-            <FieldLabel required>Lending Leader ID</FieldLabel>
-            <Input
-              value={lendingLeaderId}
-              onChange={(e) => setLendingLeaderId(e.target.value)}
-              placeholder="leader-xyz"
-            />
-          </div>
-        </div>
-        <div>
-          <FieldLabel required>Lending Leader Name</FieldLabel>
-          <Input
-            value={lendingLeaderName}
-            onChange={(e) => setLendingLeaderName(e.target.value)}
-            placeholder="Approver's full name"
-          />
-        </div>
-        <div>
-          <FieldLabel required>Candidate Technician IDs</FieldLabel>
-          <Textarea
-            value={candidatesText}
-            onChange={(e) => setCandidatesText(e.target.value)}
-            placeholder="One ID per line"
-            className="min-h-[80px] font-mono text-xs"
-          />
-          <p className="text-[10px] text-slate-400 mt-1">{candidates.length} candidates</p>
+          <p className="text-[10px] text-slate-400 mt-1">{candidates.length} candidates selected</p>
         </div>
         <div>
           <FieldLabel>Note</FieldLabel>

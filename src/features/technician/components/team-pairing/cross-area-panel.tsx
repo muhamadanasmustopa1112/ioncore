@@ -35,11 +35,11 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
           </div>
           <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
             {req.requesting_leader_name}
-            <span className="text-slate-400 font-normal"> requests from </span>
+            <span className="text-slate-400 font-normal"> requests to </span>
             {req.lending_leader_name}
           </p>
           <p className="text-[10px] text-slate-400 mt-0.5">
-            Area {req.requesting_area_id} → {req.lending_area_id} · {Array.isArray(req.candidate_technician_ids) ? req.candidate_technician_ids.length : 0} candidates
+            Area {req.lending_area_id} → {req.requesting_area_id} · {Array.isArray(req.candidate_technician_ids) ? req.candidate_technician_ids.length : 0} candidates
           </p>
           {req.note && <p className="text-xs text-slate-500 mt-1 italic">{req.note}</p>}
         </div>
@@ -50,7 +50,17 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
           <Button
             variant="primary"
             size="sm"
-            onClick={() => approveMutation.mutate({ id: req.id, data: { approved_technician_ids: Array.isArray(req.candidate_technician_ids) ? req.candidate_technician_ids : [] } })}
+            onClick={() =>
+              approveMutation.mutate({
+                workOrderId: req.work_order_id || "",
+                id: req.id,
+                data: {
+                  approved_technician_ids: Array.isArray(req.candidate_technician_ids)
+                    ? req.candidate_technician_ids
+                    : [],
+                },
+              })
+            }
             disabled={approveMutation.isPending || rejectMutation.isPending}
             className="text-[10px] uppercase font-bold"
           >
@@ -61,7 +71,13 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
             variant="destructive"
             appearance="ghost"
             size="sm"
-            onClick={() => rejectMutation.mutate({ id: req.id, data: { note: "Rejected by team leader" } })}
+            onClick={() =>
+              rejectMutation.mutate({
+                workOrderId: req.work_order_id || "",
+                id: req.id,
+                data: { note: "Rejected by team leader" },
+              })
+            }
             disabled={approveMutation.isPending || rejectMutation.isPending}
             className="text-[10px] uppercase font-bold"
           >

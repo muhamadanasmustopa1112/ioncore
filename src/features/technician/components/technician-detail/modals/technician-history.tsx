@@ -31,7 +31,7 @@ function HistoryRow({ item }: { item: WorkOrderHistoryItem }) {
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <Link
-              href={paths.dashboard.technician.detail.getHref(item.work_order_id)}
+              href={paths.dashboard.technician.detail.getHref(item.id || item.work_order_id)}
               className="text-sm font-bold text-primary hover:underline flex items-center gap-1"
             >
               {item.number}
@@ -136,7 +136,7 @@ export function TechnicianHistoryModal({
           ) : (
             <ol className="space-y-2">
               {data.items.map((item: WorkOrderHistoryItem, index: number) => (
-                <HistoryRow key={`${item.work_order_id || "history"}-${index}`} item={item} />
+                <HistoryRow key={`${item.id || item.work_order_id || "history"}-${index}`} item={item} />
               ))}
             </ol>
           )}
