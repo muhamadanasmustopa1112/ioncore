@@ -30,11 +30,12 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
   const isDraft = status === "DRAFT";
   const isReview = status === "REVIEW";
   const isApproved = status === "APPROVED";
+  const isRejected = status === "REJECTED";
   const isPublished = status === "PUBLISHED";
   const isArchived = status === "ARCHIVED";
 
   const canEdit = isDraft || isPublished;
-  const canSubmitOrPublish = isDraft || isReview || isApproved;
+  const canSubmitOrPublish = isDraft || isReview || isApproved || isRejected;
   const canClone = !isArchived;
 
   return (
@@ -90,7 +91,7 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
             onClick={() => openApprovalPanel(schema.id)}
           >
             <RiSendPlaneLine />
-            {isDraft ? "Submit for Review" : isReview ? "Review Status" : "Publish"}
+            {isDraft ? "Submit for Review" : isReview ? "Review Status" : isRejected ? "Review Rejected" : "Publish"}
           </DropdownMenuItem>
         )}
 

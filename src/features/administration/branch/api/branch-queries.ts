@@ -133,6 +133,8 @@ function mapBranchDetailToData(dto: BranchDetailDto): BranchData {
     updatedAt: dto.updated_at,
     _regionalId: dto.branch_regional?.id,
     _areaId: dto.branch_area?.id,
+    _regionalName: dto.branch_regional?.branch_name,
+    _areaName: dto.branch_area?.branch_name,
   };
 }
 

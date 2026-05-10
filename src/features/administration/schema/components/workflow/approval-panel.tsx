@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { format } from "date-fns";
 import { RiCheckLine, RiCheckboxCircleLine, RiCloseLine, RiTimeLine, RiSendPlaneLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
   usePublishSchemaVersion,
   useSchema,
   useSchemaVersions,
+  useSchemaVersion,
   useVersionApproval,
   useApprovalDecisions,
   useSubmitForReview,
@@ -39,49 +40,64 @@ export function ApprovalPanel() {
   const { data: schema } = useSchema(approvalPanelOpen ? selectedSchemaId : null);
   const { data: versions } = useSchemaVersions(approvalPanelOpen ? selectedSchemaId : null);
 
-  // Priority: REVIEW/SUBMITTED > DRAFT > APPROVED. Within each, newest first.
-  const sortedVersions = [...(versions ?? [])].sort((a, b) => {
-    const ta = new Date(a.created_at ?? 0).getTime();
-    const tb = new Date(b.created_at ?? 0).getTime();
-    return tb - ta;
-  });
   const isReviewStatus = (status?: string) => {
     const s = status?.toUpperCase();
     return s === "REVIEW" || s === "SUBMITTED" || s === "PENDING";
   };
-  const byStatus = (s: string) =>
-    sortedVersions.find((v) => v.status?.toUpperCase() === s);
-  const latestDraftVersion =
-    sortedVersions.find((v) => isReviewStatus(v.status))
-    ?? byStatus("DRAFT")
-    ?? byStatus("APPROVED")
-    ?? sortedVersions[0];
 
-  const versionStatus = latestDraftVersion?.status?.toUpperCase();
-  const schemaStatus = schema?.schema_status?.toUpperCase();
-  const { data: approval } = useVersionApproval(
+  // Newest version is always index 0 — use it directly
+  const latestDraftVersion = versions?.[0] ?? null;
+
+  // Fetch the single version directly — authoritative status, avoids list staleness
+  const { data: liveVersion } = useSchemaVersion(
     approvalPanelOpen ? latestDraftVersion?.id ?? null : null
   );
-  // Default to empty array, but we track if we truly don't have decisions vs losing them from missing approval
-  const { data: decisions = [] } = useApprovalDecisions(approvalPanelOpen ? approval?.id ?? null : null);
+  const versionStatus = (liveVersion?.status ?? latestDraftVersion?.status)?.toUpperCase();
+const { data: approval } = useVersionApproval(
+    approvalPanelOpen ? latestDraftVersion?.id ?? null : null
+  );
+
+  // Stable refs — prevent decisions query from going disabled during refetch.
+  // Reset both when schema OR version changes so stale approval data from a previous
+  // schema / approval cycle never bleeds into a fresh Draft.
+  const stableApprovalIdRef = useRef<string | null>(null);
+  const stableVersionIdRef = useRef<string | null>(null);
+  const stableSchemaIdRef = useRef<string | null>(null);
+  const currentVersionId = latestDraftVersion?.id ?? null;
+  if (selectedSchemaId !== stableSchemaIdRef.current) {
+    stableSchemaIdRef.current = selectedSchemaId;
+    stableVersionIdRef.current = null;
+    stableApprovalIdRef.current = null;
+  }
+  if (currentVersionId !== stableVersionIdRef.current) {
+    stableVersionIdRef.current = currentVersionId;
+    stableApprovalIdRef.current = null;
+  }
+  if (approval?.id) stableApprovalIdRef.current = approval.id;
+  const stableApprovalId = stableApprovalIdRef.current;
+
+  const { data: decisions = [] } = useApprovalDecisions(approvalPanelOpen ? stableApprovalId : null);
 
   const approvalStatus = approval?.status?.toUpperCase();
   const hasRejected = decisions.some((d) => d.decision?.toUpperCase() === "REJECTED");
   const approvedCount = decisions.filter((d) => d.decision?.toUpperCase() === "APPROVED").length;
-  // Use known states to deduce intent, even if queries temporarily drop approval.
-  const knownApprovalExists = !!approval || decisions.length > 0;
   const minRequired = approval?.min_approvals ?? minApprovals;
   const safeMinRequired = Math.max(1, minRequired);
 
-  // Derive logical workflow status
+  // Derive logical workflow status.
+  // versionStatus from the BE single-version endpoint is ground truth.
+  // Only override when there is evidence of an ACTIVE approval cycle for this version.
+  // A DRAFT version with no pending approval must stay DRAFT regardless of stale cache.
   let workflowStatus = versionStatus;
-  
   if (versionStatus !== "PUBLISHED" && versionStatus !== "ARCHIVED") {
     if (approvalStatus === "REJECTED" || hasRejected || versionStatus === "REJECTED") {
       workflowStatus = "REJECTED";
-    } else if (approvalStatus === "APPROVED" || (knownApprovalExists && approvedCount >= safeMinRequired) || versionStatus === "APPROVED") {
+    } else if (
+      versionStatus === "APPROVED" ||
+      (versionStatus !== "DRAFT" && (approvalStatus === "APPROVED" || approvedCount >= safeMinRequired))
+    ) {
       workflowStatus = "APPROVED";
-    } else if (approvalStatus === "PENDING" || isReviewStatus(versionStatus) || knownApprovalExists) {
+    } else if (approvalStatus === "PENDING" || isReviewStatus(versionStatus) || !!stableApprovalId) {
       workflowStatus = "REVIEW";
     }
   }
@@ -94,75 +110,72 @@ export function ApprovalPanel() {
   const progressPercent = Math.min((approvedCount / safeMinRequired) * 100, 100);
   const canPublish = isApproved && !hasRejected;
   // If we have ANY sign of an approval cycle, we can't show 'Submit for review'
-  const canSubmitForReview = isDraft && latestDraftVersion && !knownApprovalExists && !canPublish && !hasRejected;
+  const canSubmitForReview = isDraft && latestDraftVersion && !stableApprovalId && !canPublish && !hasRejected;
 
   return (
     <Sheet open={approvalPanelOpen} onOpenChange={(open) => !open && closeApprovalPanel()}>
       <SheetContent className="inset-y-8 lg:end-10 start-auto h-full max-h-[calc(100vh-64px)] gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[560px] flex flex-col [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5 shadow-2xl">
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl">
-            Approval — {schema?.name ?? "Schema"}
+            {isDraft ? "Draft" : isInReview ? "In Review" : isRejected ? "Rejected" : "Approval"} — {schema?.name ?? "Schema"}
           </SheetTitle>
         </SheetHeader>
 
         <SheetBody className="flex-1 overflow-y-auto p-5 space-y-6">
-          {/* Progress */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Approval Progress</span>
-              <span className="font-medium">
-                {approvedCount} / {minRequired} required
-              </span>
+          {/* Progress — only shown when there are final decisions */}
+          {(isApproved || isRejected) && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Approval Progress</span>
+                <span className="font-medium">{approvedCount} / {minRequired} required</span>
+              </div>
+              <div className="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-800">
+                <div className="h-2 rounded-full bg-emerald-500 transition-all" style={{ width: `${progressPercent}%` }} />
+              </div>
             </div>
-            <div className="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-800">
-              <div
-                className="h-2 rounded-full bg-emerald-500 transition-all"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
+          )}
 
-          {/* Approver decisions list */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Approval Decisions</h3>
-            {decisions.length > 0 ? decisions.map((d) => {
-              const isApproved = d.decision?.toUpperCase() === "APPROVED";
-              const isRejected = d.decision?.toUpperCase() === "REJECTED";
-              return (
-                <div key={d.id} className="flex items-start gap-3 rounded-lg border p-3">
-                  <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
-                    isApproved ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
-                    : isRejected ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                    : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
-                  }`}>
-                    {isApproved ? <RiCheckLine className="h-4 w-4" /> : isRejected ? <RiCloseLine className="h-4 w-4" /> : <RiTimeLine className="h-4 w-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-sm font-medium">{d.approver_user_id}</span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                        isApproved ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                        : isRejected ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                        : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
-                      }`}>
-                        {d.decision.charAt(0) + d.decision.slice(1).toLowerCase()}
-                      </span>
+          {/* Approver decisions list — only shown when there are final decisions */}
+          {(isApproved || isRejected) && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold text-foreground">Approval Decisions</h3>
+              {decisions.length > 0 ? decisions.map((d) => {
+                const isDecisionApproved = d.decision?.toUpperCase() === "APPROVED";
+                const isDecisionRejected = d.decision?.toUpperCase() === "REJECTED";
+                return (
+                  <div key={d.id} className="flex items-start gap-3 rounded-lg border p-3">
+                    <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+                      isDecisionApproved ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
+                      : isDecisionRejected ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                      : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+                    }`}>
+                      {isDecisionApproved ? <RiCheckLine className="h-4 w-4" /> : isDecisionRejected ? <RiCloseLine className="h-4 w-4" /> : <RiTimeLine className="h-4 w-4" />}
                     </div>
-                    {d.comment && (
-                      <p className="mt-1 text-sm text-foreground/80 italic">&ldquo;{d.comment}&rdquo;</p>
-                    )}
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {format(new Date(d.decided_at), "dd MMM yyyy, HH:mm")}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-sm font-medium">{d.approver_user_id}</span>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                          isDecisionApproved ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                          : isDecisionRejected ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                          : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                        }`}>
+                          {d.decision.charAt(0) + d.decision.slice(1).toLowerCase()}
+                        </span>
+                      </div>
+                      {d.comment && (
+                        <p className="mt-1 text-sm text-foreground/80 italic">&ldquo;{d.comment}&rdquo;</p>
+                      )}
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {format(new Date(d.decided_at), "dd MMM yyyy, HH:mm")}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            }) : (
-              <p className="text-sm text-muted-foreground">
-                {isInReview ? "No decisions yet — waiting for approvers." : "Submit for review to start the approval process."}
-              </p>
-            )}
-          </div>
+                );
+              }) : (
+                <p className="text-sm text-muted-foreground">No decisions recorded.</p>
+              )}
+            </div>
+          )}
 
           {/* Last rejection feedback (visible when back in DRAFT after a reject) */}
           {isDraft && decisions.some((d) => d.decision?.toUpperCase() === "REJECTED") && (

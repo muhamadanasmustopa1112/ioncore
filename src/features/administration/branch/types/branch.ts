@@ -19,4 +19,6 @@ export interface BranchData {
   // Internal fields used for nested API routing — not displayed in UI
   _regionalId?: string;
   _areaId?: string;
+  _regionalName?: string;
+  _areaName?: string;
 }

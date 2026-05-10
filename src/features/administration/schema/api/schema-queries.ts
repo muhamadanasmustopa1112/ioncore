@@ -6,6 +6,7 @@ import {
   createSchema,
   updateSchemaContent,
   listSchemaVersions,
+  getSchemaVersion,
   publishSchemaVersion,
   cloneSchemaVersion,
   getSchemaVersionDiff,
@@ -89,6 +90,18 @@ export function useSchemaTypes() {
   });
 }
 
+export function useSchemaVersion(versionId: string | null) {
+  return useQuery<SchemaVersion | null>({
+    queryKey: ["schema-version", versionId],
+    queryFn: async () => {
+      const res = await getSchemaVersion(versionId!);
+      return res.data ?? null;
+    },
+    enabled: !!versionId,
+    placeholderData: (prev) => prev,
+  });
+}
+
 export function useSchemaVersionDiff(
   id: string | null,
   version: string,
@@ -160,8 +173,12 @@ export function usePublishSchemaVersion() {
       closeApprovalPanel();
       toast.success("Schema published.");
     },
-    onError: (err: Error) => {
-      toast.error(err.message ?? "Failed to publish.");
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        (err as Error)?.message ??
+        "Failed to publish.";
+      toast.error(msg);
     },
   });
 }
@@ -217,6 +234,8 @@ export function useVersionApproval(versionId: string | null) {
     },
     enabled: !!versionId,
     retry: false,
+    // Keep previous data during background refetch so approval ID never goes null
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -228,7 +247,8 @@ export function useApprovalDecisions(approvalId: string | null) {
       return res.data?.decisions ?? [];
     },
     enabled: !!approvalId,
-    placeholderData: [],
+    // Keep previous data so decisions never drop to [] during refetch
+    placeholderData: (prev) => prev ?? [],
   });
 }
 
@@ -262,28 +282,15 @@ export function useAddApprovalDecision() {
   return useMutation({
     mutationFn: ({ versionId, payload }: { versionId: string; payload: AddDecisionPayload }) =>
       addApprovalDecision(versionId, payload),
-    onMutate: ({ versionId, payload }) => {
-      // Optimistically assume the version status updates immediately when approved/rejected
-      const selectedSchemaId = useSchemaStore.getState().selectedSchemaId;
-      if (selectedSchemaId) {
-        qc.setQueryData<SchemaVersion[]>(schemaKeys.versions(selectedSchemaId), (prev = []) =>
-          prev.map((v) => {
-            if (v.id === versionId) {
-              const newStatus = payload.decision.toUpperCase();
-              // In a real flow, it might still need more approvals, so don't force 'APPROVED'
-              // unless it's REJECTED which is usually instant. Let's avoid forceful optimistic
-              // status change except putting it deeply into pending UI if needed.
-              return v;
-            }
-            return v;
-          })
-        );
-      }
-    },
     onSuccess: (data, { versionId, payload }) => {
       const decision = data.data;
       const approvalId = decision?.schema_approval_id;
+      const isApproved = payload?.decision?.toUpperCase() === "APPROVED";
+      const isRejected = payload?.decision?.toUpperCase() === "REJECTED";
+      const selectedSchemaId = useSchemaStore.getState().selectedSchemaId;
+
       if (approvalId) {
+        // Append the new decision to cache immediately
         qc.setQueryData<SchemaApprovalDecisionRecord[]>(
           ["schema-approval-decisions", approvalId],
           (prev = []) => {
@@ -292,27 +299,30 @@ export function useAddApprovalDecision() {
             return [...prev, decision];
           }
         );
-        qc.invalidateQueries({ queryKey: ["schema-approval-decisions", approvalId] });
+        // Also patch the approval record's own status so the APPROVED branch fires
+        qc.setQueryData<SchemaApprovalRecord | null>(
+          ["schema-approval", versionId],
+          (prev) => prev ? {
+            ...prev,
+            status: isApproved ? "APPROVED" : isRejected ? "REJECTED" : prev.status,
+          } : prev
+        );
       }
-      
-      const isApproved = payload?.decision?.toUpperCase() === "APPROVED";
-      const isRejected = payload?.decision?.toUpperCase() === "REJECTED";
-      const selectedSchemaId = useSchemaStore.getState().selectedSchemaId;
-      
-      // Optimistically put the version into APPROVED or REJECTED state immediately 
-      // instead of relying on the backend to propagate the event quickly.
-      // This prevents the UI from bouncing back to "Submit for Review".
+
+      // Optimistically flip version status — prevents bouncing back to REVIEW
       if (selectedSchemaId) {
         qc.setQueryData<SchemaVersion[]>(schemaKeys.versions(selectedSchemaId), (prev = []) =>
-          prev.map((v) => (v.id === versionId ? { 
-            ...v, 
-            status: isApproved ? "APPROVED" : isRejected ? "REJECTED" : v.status 
+          prev.map((v) => (v.id === versionId ? {
+            ...v,
+            status: isApproved ? "APPROVED" : isRejected ? "REJECTED" : v.status,
           } : v))
         );
       }
 
-      qc.invalidateQueries({ queryKey: ["schema-approval-decisions"] });
+      // Background refetch — placeholderData keeps UI stable while they resolve
+      qc.invalidateQueries({ queryKey: ["schema-approval-decisions", approvalId] });
       qc.invalidateQueries({ queryKey: ["schema-approval", versionId] });
+      qc.invalidateQueries({ queryKey: ["schema-version", versionId] });
       invalidateSchemaDetail(qc, selectedSchemaId);
       qc.invalidateQueries({ queryKey: schemaKeys.all });
       toast.success("Decision submitted.");

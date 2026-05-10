@@ -59,7 +59,7 @@ const useSchemaStore = create<SchemaStore>((set) => ({
   setPendingApproval: (v) => set({ pendingApproval: v }),
   openApprovalPanel: (schemaId) =>
     set({ approvalPanelOpen: true, selectedSchemaId: schemaId }),
-  closeApprovalPanel: () => set({ approvalPanelOpen: false }),
+  closeApprovalPanel: () => set({ approvalPanelOpen: false, selectedSchemaId: null }),
   openMigrationPanel: () => set({ migrationPanelOpen: true }),
   closeMigrationPanel: () => set({ migrationPanelOpen: false }),
   openHistoryPanel: (schemaId) =>

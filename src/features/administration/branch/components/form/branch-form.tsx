@@ -5,6 +5,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { RiInformationLine, RiMapPinLine } from "@remixicon/react";
+import { RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,6 +21,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { useBranchStore } from "../../store/branch";
 import { useAreaList, useRegionalList } from "../../api/branch-queries";
 import { BranchData, BranchLevel, GeographicPolygon } from "../../types";
+
+// ─── Code Generator ───────────────────────────────────────────────────────────
+
+const TYPE_PREFIX: Record<string, string> = { office: "OFC", noc: "NOC", warehouse: "WHS" };
+const LEVEL_PREFIX: Record<string, string> = { regional: "REG", area: "AREA", sub_area: "SUB" };
+
+function generateBranchCode(type: string, level: string, name: string): string {
+  const t = TYPE_PREFIX[type] ?? type.toUpperCase().slice(0, 3);
+  const l = LEVEL_PREFIX[level] ?? level.toUpperCase().slice(0, 3);
+  const n = name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w.slice(0, 3).toUpperCase())
+    .join("-");
+  return n ? `${t}-${l}-${n}` : `${t}-${l}`;
+}
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -156,7 +174,20 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
 
   const level = watch("level");
   const branchType = watch("type");
+  const name = watch("name");
   const regionalId = watch("regionalId") ?? "";
+
+  const isCodeManual = useRef(isEditMode || isDetailMode);
+
+  useEffect(() => {
+    if (isEditMode || isDetailMode) { isCodeManual.current = true; return; }
+    isCodeManual.current = false;
+  }, [isEditMode, isDetailMode]);
+
+  useEffect(() => {
+    if (isCodeManual.current) return;
+    setValue("code", generateBranchCode(branchType, level, name), { shouldValidate: false });
+  }, [name, branchType, level, setValue]);
 
   const { data: regionals = [] } = useRegionalList(branchType);
   const { data: areas = [] } = useAreaList(regionalId, branchType);
@@ -232,13 +263,38 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
                   Branch Code <span className="text-red-500">*</span>
+                  {!isDetailMode && !isEditMode && (
+                    <span className="ml-2 text-[10px] font-normal text-muted-foreground/60">
+                      {isCodeManual.current ? "— manual" : "— auto generated"}
+                    </span>
+                  )}
                 </Label>
-                <Input
-                  placeholder="e.g. JKT-PST"
-                  {...register("code")}
-                  disabled={isDetailMode}
-                  className="font-mono"
-                />
+                <div className="relative">
+                  <Input
+                    placeholder="e.g. OFC-REG-JKT"
+                    {...register("code", {
+                      onChange: (e) => {
+                        const auto = generateBranchCode(branchType, level, name);
+                        isCodeManual.current = e.target.value !== auto;
+                      },
+                    })}
+                    disabled={isDetailMode}
+                    className="font-mono pr-8"
+                  />
+                  {!isDetailMode && !isEditMode && (
+                    <button
+                      type="button"
+                      title="Reset to auto-generated code"
+                      onClick={() => {
+                        isCodeManual.current = false;
+                        setValue("code", generateBranchCode(branchType, level, name), { shouldValidate: true });
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <RefreshCw className="size-3.5" />
+                    </button>
+                  )}
+                </div>
                 {errors.code && (
                   <p className="text-xs text-destructive">{errors.code.message}</p>
                 )}
@@ -332,7 +388,11 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                 </Label>
                 {isDetailMode ? (
                   <Input
-                    value={regionals.find((r) => r.id === regionalId)?.name ?? regionalId}
+                    value={
+                      regionals.find((r) => r.id === regionalId)?.name
+                      ?? selectedBranch?._regionalName
+                      ?? regionalId
+                    }
                     disabled
                   />
                 ) : (
@@ -348,7 +408,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                         }}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Regional Branch" />
+                          <SelectValue placeholder={selectedBranch?._regionalName ?? "Select Regional Branch"} />
                         </SelectTrigger>
                         <SelectContent>
                           {regionals.length === 0 ? (
@@ -379,7 +439,11 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                 </Label>
                 {isDetailMode ? (
                   <Input
-                    value={areas.find((a) => a.id === watch("areaId"))?.name ?? watch("areaId")}
+                    value={
+                      areas.find((a) => a.id === watch("areaId"))?.name
+                      ?? selectedBranch?._areaName
+                      ?? watch("areaId")
+                    }
                     disabled
                   />
                 ) : (
@@ -394,7 +458,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                       >
                         <SelectTrigger>
                           <SelectValue
-                            placeholder={!regionalId ? "Select Regional first" : "Select Area Branch"}
+                            placeholder={!regionalId ? "Select Regional first" : (selectedBranch?._areaName ?? "Select Area Branch")}
                           />
                         </SelectTrigger>
                         <SelectContent>
