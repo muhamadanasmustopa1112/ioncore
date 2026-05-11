@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Settings2, X } from "lucide-react";
-import { RiArrowRightUpLine } from "@remixicon/react";
+import { RiArrowRightUpLine, RiUserAddLine } from "@remixicon/react";
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -161,25 +161,37 @@ export function LeadsList() {
     {
       id: "actions",
       header: () => <span className="text-[0.8125rem] font-semibold text-accent-foreground">Action</span>,
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          <Button asChild variant="ghost" mode="link" size="sm">
-            <Link href={paths.dashboard.crmAndSales.leads.detail.getHref(row.original.id)}>
-              Detail
-            </Link>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setRerouteLead(row.original)}
-            className="gap-1 text-xs"
-          >
-            <RiArrowRightUpLine className="size-3.5" />
-            Reroute
-          </Button>
-        </div>
-      ),
-      size: 150,
+      cell: ({ row }) => {
+        const { id, status } = row.original;
+        const canConvert = status !== "converted" && status !== "lost";
+        return (
+          <div className="flex items-center gap-1">
+            <Button asChild variant="ghost" mode="link" size="sm">
+              <Link href={paths.dashboard.crmAndSales.leads.detail.getHref(id)}>
+                Detail
+              </Link>
+            </Button>
+            {canConvert && (
+              <Button asChild variant="outline" size="sm" className="gap-1 text-xs">
+                <Link href={paths.dashboard.crmAndSales.leads.convert.getHref(id)}>
+                  <RiUserAddLine className="size-3.5" />
+                  Convert
+                </Link>
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setRerouteLead(row.original)}
+              className="gap-1 text-xs"
+            >
+              <RiArrowRightUpLine className="size-3.5" />
+              Reroute
+            </Button>
+          </div>
+        );
+      },
+      size: 210,
       enableSorting: false,
     },
   ], []);

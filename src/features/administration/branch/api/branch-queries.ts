@@ -127,6 +127,7 @@ function mapBranchDetailToData(dto: BranchDetailDto): BranchData {
     parentName: dto.branch_area?.branch_name ?? dto.branch_regional?.branch_name,
     branchType: dto.type as BranchType | undefined,
     address: dto.address,
+    cable_route_factor: dto.cable_route_factor,
     geographic_polygon: normalizeGeographicPolygon(dto.geographic_polygon),
     active: dto.is_active,
     createdAt: dto.created_at,

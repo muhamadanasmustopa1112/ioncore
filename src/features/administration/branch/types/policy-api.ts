@@ -2,6 +2,21 @@ import { ApiResponse, PaginationMeta } from "./branch-api";
 
 // ─── Policy JSON nested fields ────────────────────────────────────────────────
 
+export type OdpSelectionStrategyType =
+  | "nearest"
+  | "least_loaded"
+  | "round_robin"
+  | "priority"
+  | "weighted";
+
+export interface OdpSelectionStrategy {
+  type: OdpSelectionStrategyType;
+  weights?: {
+    distance: number;
+    available_capacity: number;
+  };
+}
+
 export interface PolicyJson {
   sla_hours: number;
   working_hours: {
@@ -17,6 +32,8 @@ export interface PolicyJson {
   };
   excess_cable_price: number;
   cable_threshold_meter: number;
+  cable_route_factor?: number;
+  odp_selection_strategy?: OdpSelectionStrategy;
 }
 
 // ─── Policy Payload ───────────────────────────────────────────────────────────

@@ -12,6 +12,7 @@ export interface BranchData {
   parentName?: string;
   branchType?: BranchType;
   address?: string;
+  cable_route_factor?: number;
   geographic_polygon?: GeographicPolygon;
   active: boolean;
   createdAt: string;

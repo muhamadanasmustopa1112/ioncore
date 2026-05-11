@@ -5,7 +5,9 @@ import {
   RiInformationLine,
   RiShieldLine,
   RiTimeLine,
+  RiRouteLine,
 } from "@remixicon/react";
+import { OdpSelectionStrategyType } from "../../../types/policy-api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,9 +24,11 @@ import { PolicyPayload } from "../../../types/policy-api";
 
 interface PolicyFormProps {
   onSubmit?: (payload: PolicyPayload) => void;
+  branchType?: string;
 }
 
-export function PolicyForm({ onSubmit }: PolicyFormProps) {
+export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
+  const isNoc = branchType?.toLowerCase() === "noc";
   const { form, selectedPolicy } = usePolicyStore();
   const isDetailMode = form === "details";
 
@@ -41,6 +45,10 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
   const [approvalL2, setApprovalL2] = useState("");
   const [excessCablePrice, setExcessCablePrice] = useState("35000");
   const [cableThresholdMeter, setCableThresholdMeter] = useState("210");
+  const [cableRouteFactor, setCableRouteFactor] = useState("1.0");
+  const [odpStrategy, setOdpStrategy] = useState<OdpSelectionStrategyType>("nearest");
+  const [odpWeightDistance, setOdpWeightDistance] = useState("0.6");
+  const [odpWeightCapacity, setOdpWeightCapacity] = useState("0.4");
 
   useEffect(() => {
     if (selectedPolicy && (form === "edit" || form === "details")) {
@@ -58,6 +66,10 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
       setApprovalL2(p.policyJson.approval_matrix?.level_2 ?? "");
       setExcessCablePrice(p.policyJson.excess_cable_price?.toString() ?? "35000");
       setCableThresholdMeter(p.policyJson.cable_threshold_meter?.toString() ?? "210");
+      setCableRouteFactor(p.policyJson.cable_route_factor?.toString() ?? "1.0");
+      setOdpStrategy((p.policyJson.odp_selection_strategy?.type as OdpSelectionStrategyType) ?? "nearest");
+      setOdpWeightDistance(p.policyJson.odp_selection_strategy?.weights?.distance?.toString() ?? "0.6");
+      setOdpWeightCapacity(p.policyJson.odp_selection_strategy?.weights?.available_capacity?.toString() ?? "0.4");
     } else if (form === "new") {
       setName("");
       setDescription("");
@@ -72,6 +84,10 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
       setApprovalL2("");
       setExcessCablePrice("35000");
       setCableThresholdMeter("210");
+      setCableRouteFactor("1.0");
+      setOdpStrategy("nearest");
+      setOdpWeightDistance("0.6");
+      setOdpWeightCapacity("0.4");
     }
   }, [selectedPolicy, form]);
 
@@ -91,11 +107,23 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
           .map((s) => s.trim())
           .filter(Boolean),
         approval_matrix: { level_1: approvalL1, level_2: approvalL2 },
-        excess_cable_price: Number(excessCablePrice) || 0,
-        cable_threshold_meter: Number(cableThresholdMeter) || 0,
+        ...(isNoc && {
+          excess_cable_price: Number(excessCablePrice) || 0,
+          cable_threshold_meter: Number(cableThresholdMeter) || 0,
+          cable_route_factor: Number(cableRouteFactor) || 1.0,
+        }),
+        ...(isNoc && {
+          odp_selection_strategy: {
+            type: odpStrategy,
+            weights: {
+              distance: Number(odpWeightDistance) || 0.6,
+              available_capacity: Number(odpWeightCapacity) || 0.4,
+            },
+          },
+        }),
       },
     });
-  }, [name, description, isActive, slaHours, workStart, workEnd, timezone, taxDefault, contacts, approvalL1, approvalL2, excessCablePrice, cableThresholdMeter, onSubmit]);
+  }, [name, description, isActive, slaHours, workStart, workEnd, timezone, taxDefault, contacts, approvalL1, approvalL2, excessCablePrice, cableThresholdMeter, cableRouteFactor, odpStrategy, odpWeightDistance, odpWeightCapacity, onSubmit]);
 
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__policyFormSubmit =
@@ -243,8 +271,8 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
             </div>
           </div>
 
-          {/* Cable Configuration */}
-          <div className="space-y-4 pt-2">
+          {/* Cable Configuration — NOC only */}
+          {isNoc && <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 pb-1 border-b border-border/50">
               <RiInformationLine className="size-4 text-emerald-500" />
               <h3 className="text-sm font-semibold">Cable Configuration</h3>
@@ -278,8 +306,85 @@ export function PolicyForm({ onSubmit }: PolicyFormProps) {
                   min={0}
                 />
               </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Cable Route Factor
+                </Label>
+                <Input
+                  type="number"
+                  placeholder="1.0"
+                  step="0.01"
+                  min="0"
+                  value={cableRouteFactor}
+                  onChange={(e) => setCableRouteFactor(e.target.value)}
+                  disabled={isDetailMode}
+                />
+              </div>
             </div>
-          </div>
+          </div>}
+
+          {/* ODP Selection Strategy — NOC only */}
+          {isNoc && (
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center gap-2 pb-1 border-b border-border/50">
+                <RiRouteLine className="size-4 text-orange-500" />
+                <h3 className="text-sm font-semibold">ODP Selection Strategy</h3>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">Strategy Type</Label>
+                {isDetailMode ? (
+                  <Input value={odpStrategy} disabled />
+                ) : (
+                  <Select value={odpStrategy} onValueChange={(v) => setOdpStrategy(v as OdpSelectionStrategyType)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="nearest">Nearest</SelectItem>
+                      <SelectItem value="least_loaded">Least Loaded</SelectItem>
+                      <SelectItem value="round_robin">Round Robin</SelectItem>
+                      <SelectItem value="priority">Priority</SelectItem>
+                      <SelectItem value="weighted">Weighted</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    Weight — Distance
+                    <span className="ml-1 text-muted-foreground/60 font-normal">(0–1)</span>
+                  </Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="1"
+                    placeholder="0.6"
+                    value={odpWeightDistance}
+                    onChange={(e) => setOdpWeightDistance(e.target.value)}
+                    disabled={isDetailMode}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">
+                    Weight — Available Capacity
+                    <span className="ml-1 text-muted-foreground/60 font-normal">(0–1)</span>
+                  </Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    max="1"
+                    placeholder="0.4"
+                    value={odpWeightCapacity}
+                    onChange={(e) => setOdpWeightCapacity(e.target.value)}
+                    disabled={isDetailMode}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Notifications & Approval */}
           <div className="space-y-4 pt-2">

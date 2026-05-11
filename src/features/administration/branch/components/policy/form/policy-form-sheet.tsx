@@ -14,7 +14,7 @@ import { useCreatePolicy, useUpdatePolicy } from "../../../api/policy-queries";
 import { PolicyForm } from "./policy-form";
 import { PolicyPayload } from "../../../types/policy-api";
 
-export function PolicyFormSheet() {
+export function PolicyFormSheet({ branchType }: { branchType?: string }) {
   const { sheetOpen, closeSheet, form, selectedPolicy, selectedBranchId } =
     usePolicyStore();
 
@@ -65,7 +65,7 @@ export function PolicyFormSheet() {
         </SheetHeader>
 
         <SheetBody className="flex-1 p-0 overflow-hidden">
-          <PolicyForm onSubmit={handleFormSubmit} />
+          <PolicyForm onSubmit={handleFormSubmit} branchType={branchType} />
         </SheetBody>
 
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">

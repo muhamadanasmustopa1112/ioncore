@@ -49,6 +49,9 @@ const STATUS_VARIANT: Record<LeadStatus, "primary" | "success" | "warning" | "de
 };
 
 const STATUSES: LeadStatus[] = ["new", "active", "warm", "hot", "converted", "lost", "potential"];
+const STATUS_INDEX: Record<LeadStatus, number> = Object.fromEntries(
+  STATUSES.map((s, i) => [s, i])
+) as Record<LeadStatus, number>;
 const ACTIVITY_TYPES: LeadActivityType[] = ["call", "visit", "note", "email"];
 
 export function LeadDetail() {
@@ -145,7 +148,7 @@ export function LeadDetail() {
             <Select value={statusDraft} onValueChange={(v) => setStatusDraft(v as LeadStatus)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {STATUSES.map((s) => (
+                {STATUSES.filter((s) => STATUS_INDEX[s] >= STATUS_INDEX[lead.status]).map((s) => (
                   <SelectItem key={s} value={s}>
                     <div className="flex items-center gap-2">
                       <Badge variant={STATUS_VARIANT[s]} appearance="light" size="sm">{s}</Badge>
@@ -154,11 +157,25 @@ export function LeadDetail() {
                 ))}
               </SelectContent>
             </Select>
-            <Textarea placeholder="Notes (optional)" value={statusNote} onChange={(e) => setStatusNote(e.target.value)} />
+            <div className="flex flex-col gap-1">
+              <Textarea
+                placeholder={statusDraft === "lost" ? "Reason required for Lost status…" : "Notes (optional)"}
+                value={statusNote}
+                onChange={(e) => setStatusNote(e.target.value)}
+                className={statusDraft === "lost" && !statusNote.trim() ? "border-destructive focus-visible:ring-destructive" : ""}
+              />
+              {statusDraft === "lost" && !statusNote.trim() && (
+                <p className="text-xs text-destructive">Reason is required when marking as Lost.</p>
+              )}
+            </div>
             <Button
               variant="primary"
               onClick={() => updateStatus.mutate({ status: statusDraft, notes: statusNote })}
-              disabled={updateStatus.isPending}
+              disabled={
+                updateStatus.isPending ||
+                STATUS_INDEX[statusDraft] < STATUS_INDEX[lead.status] ||
+                (statusDraft === "lost" && !statusNote.trim())
+              }
             >
               {updateStatus.isPending && <Loader2 className="size-4 animate-spin" />}
               Save Status

@@ -310,7 +310,13 @@ export function UserForm() {
               <h3 className="text-sm font-semibold">Role Assignments</h3>
             </div>
             <div className="space-y-3">
-              {roleRows.map((row) => (
+              {roleRows.map((row) => {
+                const roleName = roles.find((r) => r.id === row.roleId)?.name ?? "";
+                const isTechRole = /technician|technical/i.test(roleName);
+                const filteredBranches = isTechRole
+                  ? branches.filter((b) => b.branchType === "noc")
+                  : branches;
+                return (
                 <div key={row.id} className="flex items-center gap-2">
                   <div className="flex-1">
                     <Select
@@ -340,7 +346,7 @@ export function UserForm() {
                         <SelectValue placeholder="Select branch" />
                       </SelectTrigger>
                       <SelectContent>
-                        {branches.map((b) => (
+                        {filteredBranches.map((b) => (
                           <SelectItem key={b.id} value={b.id}>
                             {b.name}
                           </SelectItem>
@@ -361,7 +367,7 @@ export function UserForm() {
                     </Button>
                   )}
                 </div>
-              ))}
+              );})}
               {!isDetailMode && (
                 <Button
                   type="button"

@@ -109,7 +109,7 @@ export function BranchPolicyPage() {
         </div>
       )}
 
-      <PolicyFormSheet />
+      <PolicyFormSheet branchType={selectedBranch?.branchType} />
     </div>
   );
 }

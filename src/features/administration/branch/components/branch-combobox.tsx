@@ -39,10 +39,19 @@ export function BranchCombobox({
   isLoading,
 }: BranchComboboxProps) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const selected = branches.find((b) => b.id === value);
 
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      setSearch("");
+      onSearchChange?.("");
+    }
+    setOpen(next);
+  };
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -67,7 +76,11 @@ export function BranchCombobox({
         <Command shouldFilter={!onSearchChange}>
           <CommandInput
             placeholder="Search branch..."
-            onValueChange={onSearchChange}
+            value={search}
+            onValueChange={(v) => {
+              setSearch(v);
+              onSearchChange?.(v);
+            }}
           />
           <CommandList>
             <CommandEmpty>
