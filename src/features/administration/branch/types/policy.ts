@@ -13,8 +13,8 @@ export interface PolicyData {
     tax_default: number;
     notification_contacts: string[];
     approval_matrix: { level_1: string; level_2: string };
-    excess_cable_price: number;
-    cable_threshold_meter: number;
+    excess_cable_price?: number;
+    cable_threshold_meter?: number;
     cable_route_factor?: number;
     odp_selection_strategy?: {
       type: string;

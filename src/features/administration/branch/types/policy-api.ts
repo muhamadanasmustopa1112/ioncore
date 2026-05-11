@@ -30,8 +30,8 @@ export interface PolicyJson {
     level_1: string;
     level_2: string;
   };
-  excess_cable_price: number;
-  cable_threshold_meter: number;
+  excess_cable_price?: number;
+  cable_threshold_meter?: number;
   cable_route_factor?: number;
   odp_selection_strategy?: OdpSelectionStrategy;
 }
