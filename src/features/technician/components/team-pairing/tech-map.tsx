@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
 import type { DispatchMapItem } from "../../types/technician-api";
 
-// Important for loading base leaflet styles within Next dynamically
 import "leaflet/dist/leaflet.css";
 
 const getStatusColor = (status: string) => {
@@ -94,7 +93,7 @@ export default function TechnicianDispatchMap({ items = [] }: { items?: Dispatch
   }
 
   return (
-    <Card className="overflow-hidden border border-slate-100 dark:border-slate-800/80 shadow-lg rounded-xl relative group">
+    <Card className="overflow-hidden border border-slate-100 dark:border-slate-800/80 shadow-lg rounded-xl relative group z-0">
       {/* Legend Overlay */}
       <div className="absolute top-3 right-3 z-[1000] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-2.5 rounded-lg shadow-sm border border-slate-200/60 dark:border-slate-700/50 text-[10px] space-y-1.5 font-bold w-32">
         <div className="flex items-center justify-between text-slate-400 uppercase tracking-wider border-b pb-1 mb-1 dark:border-slate-700">

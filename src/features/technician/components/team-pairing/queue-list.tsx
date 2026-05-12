@@ -39,20 +39,9 @@ export function QueueList({
   selectedDate?: string;
   onAssign: (wo: WorkOrderDashboardItem) => void;
 }) {
-  const unassigned = items.filter((wo) => {
-    const isUnassigned = wo.state === "unassigned" || wo.assigned_team.length === 0;
-    if (!isUnassigned) return false;
 
-    if (selectedDate) {
-      try {
-        const woDate = wo.requested_installation ? format(new Date(wo.requested_installation), "yyyy-MM-dd") : "";
-        return woDate === selectedDate;
-      } catch {
-        return true;
-      }
-    }
-    return true;
-  });
+  // We now let backend handle the filtering entirely (state, type, date)
+  const displayItems = items;
 
   return (
     <Card>
@@ -60,20 +49,20 @@ export function QueueList({
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
             <ClipboardList className="size-4 text-primary" />
-            Unassigned Queue
-            <Badge variant="warning" appearance="light" size="sm">{unassigned.length}</Badge>
+            Work Order Queue
+            <Badge variant="warning" appearance="light" size="sm">{displayItems.length}</Badge>
           </CardTitle>
         </div>
       </CardHeader>
       <CardContent className="p-0 max-h-[480px] overflow-y-auto">
-        {unassigned.length === 0 ? (
-          <p className="text-sm text-slate-400 italic p-4">All work orders assigned.</p>
+        {displayItems.length === 0 ? (
+          <p className="text-sm text-slate-400 italic p-4">No work orders matching criteria.</p>
         ) : (
-          <div className={`divide-y divide-slate-100 dark:divide-slate-800 ${unassigned.length >= 10 ? "max-h-[480px] overflow-y-auto pr-1.5 scrollbar-thin" : ""
+          <div className={`divide-y divide-slate-100 dark:divide-slate-800 ${displayItems.length >= 10 ? "max-h-[480px] overflow-y-auto pr-1.5 scrollbar-thin" : ""
             }`}>
-            {unassigned.map((wo) => {
+            {displayItems.map((wo) => {
               const isWarning = !!wo.assignment_sla?.warning_triggered_at;
-              const isBreached = false;
+              const isBreached = !!wo.assignment_sla?.breached_at;
 
               return (
                 <div key={wo.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
@@ -139,14 +128,16 @@ export function QueueList({
                       </div>
                     )}
                   </div>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => onAssign(wo)}
-                    className="shrink-0 text-[10px] uppercase font-bold"
-                  >
-                    Assign Pairing
-                  </Button>
+                  {(wo.state === "unassigned" || wo.state === "created") && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => onAssign(wo)}
+                      className="shrink-0 text-[10px] uppercase font-bold"
+                    >
+                      Assign Pairing
+                    </Button>
+                  )}
                 </div>
               );
             })}
