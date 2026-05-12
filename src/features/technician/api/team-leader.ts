@@ -13,6 +13,7 @@ import type {
   PairingRecommendationResponse,
   ResponseEnvelope,
   TeamLeaderDashboardEnvelope,
+  TeamLeaderDashboardResponse,
   TeamLeaderDashboardParams,
   UpsertPairingPayload,
   WorkOrderDetailEnvelope,
@@ -90,14 +91,14 @@ const invalidateWO = (id?: string) => {
 // --- Hooks ---
 type UseTeamLeaderDashboardOptions = {
   params?: TeamLeaderDashboardParams;
-  queryConfig?: QueryConfig<typeof getTeamLeaderDashboard>;
+  queryConfig?: any;
 };
 
 export const useTeamLeaderDashboard = ({
   params = {},
   queryConfig,
 }: UseTeamLeaderDashboardOptions = {}) => {
-  return useQuery({
+  return useQuery<TeamLeaderDashboardResponse>({
     queryKey: TECHNICIAN_KEYS.teamLeaderDashboard(params),
     queryFn: async () => (await getTeamLeaderDashboard(params)).data,
     retry: false,

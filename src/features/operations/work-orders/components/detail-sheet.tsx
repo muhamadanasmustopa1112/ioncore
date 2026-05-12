@@ -330,7 +330,7 @@ export function DetailSheet() {
                         htmlFor="isCrossArea"
                         className="text-xs text-muted-foreground font-medium select-none cursor-pointer"
                       >
-                        Cross-Area Assignment (SIT §4.4 Overflow)
+                        Cross-Area Assignment
                       </label>
                     </div>
                     <div className="flex gap-2">

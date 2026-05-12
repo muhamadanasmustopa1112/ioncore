@@ -52,7 +52,6 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
             size="sm"
             onClick={() =>
               approveMutation.mutate({
-                workOrderId: req.work_order_id || "",
                 id: req.id,
                 data: {
                   approved_technician_ids: Array.isArray(req.candidate_technician_ids)
@@ -73,7 +72,6 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
             size="sm"
             onClick={() =>
               rejectMutation.mutate({
-                workOrderId: req.work_order_id || "",
                 id: req.id,
                 data: { note: "Rejected by team leader" },
               })

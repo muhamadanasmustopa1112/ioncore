@@ -125,6 +125,7 @@ export interface WorkOrderDashboardItem {
   requested_installation: string;
   assigned_team: AssignedTechnician[];
   assignment_sla: AssignmentSLA;
+  cross_area?: boolean;
 }
 
 export interface WorkOrderDashboardSummary {

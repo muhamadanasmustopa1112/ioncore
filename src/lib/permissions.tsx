@@ -9,7 +9,6 @@ import { paths } from "@/config/paths";
 export type PermissionInput = string | string[] | undefined | null;
 
 export interface PermissionCheckOptions {
-  /** When permission is an array: require all (default false = any) */
   requireAll?: boolean;
 }
 
@@ -172,6 +171,7 @@ interface FilterContext {
   held: Set<string>;
   isSuper: boolean;
   loaded: boolean;
+  roles?: string[];
 }
 
 function itemAllowed(item: MenuItem, ctx: FilterContext): boolean {
@@ -190,7 +190,6 @@ function filterItems(items: MenuConfig, ctx: FilterContext): MenuConfig {
 
     if (item.children && item.children.length > 0) {
       const kids = filterItems(item.children, ctx);
-      // If the item is a pure container (no path) and no children survived, drop it.
       if (kids.length === 0 && !item.path) continue;
       out.push({ ...item, children: kids });
     } else {
@@ -204,6 +203,10 @@ export function filterMenuByPermissions(
   menu: MenuConfig,
   ctx: FilterContext,
 ): MenuConfig {
+  // Ensure consistent empty state while loading user state
+  if (!ctx.loaded) return [];
+
+  // Standard recursive permissions evaluation
   return filterItems(menu, ctx);
 }
 
@@ -212,13 +215,19 @@ export function useFilteredMenu(menu: MenuConfig): MenuConfig {
   const held = usePermissionSet();
   const isSuper = useIsSuperAdmin();
 
+  const roles = useMemo(
+    () => (rawUser?.roles || []).map((r) => r.name),
+    [rawUser?.roles],
+  );
+
   return useMemo(
     () =>
       filterMenuByPermissions(menu, {
         held,
         isSuper,
         loaded: !!rawUser,
+        roles,
       }),
-    [menu, held, isSuper, rawUser],
+    [menu, held, isSuper, rawUser, roles],
   );
 }

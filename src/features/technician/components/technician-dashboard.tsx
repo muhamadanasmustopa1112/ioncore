@@ -14,19 +14,18 @@ import {
 } from "@/components/ui/breadcrumb";
 import { paths } from "@/config/paths";
 import { useWorkOrderList } from "../api/dashboard";
+import { useAuthStore } from "@/store/auth-store";
 import type { WorkOrderListParams, WorkOrderState, WorkOrderType } from "../types/technician-api";
 import { TechnicianKpiCards } from "./technician-kpi-cards";
-import { TechnicianWorkOrdersTable } from "./technician-work-orders-table";
+import { WorkOrdersTable } from "./work-order-table/work-orders-table";
 import { TechnicianFilterBar } from "./technician-filter-bar";
-
-const PAGE_SIZE_OPTIONS = [10, 15, 25, 50];
 
 export function TechnicianDashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const page = Math.max(1, Number(searchParams.get("page") ?? 1));
-  const perPage = Number(searchParams.get("per_page") ?? 15);
+  const perPage = Number(searchParams.get("per_page") ?? 10);
   const stateParam = (searchParams.get("state") ?? "") as WorkOrderState | "";
   const typeParam = (searchParams.get("type") ?? "") as WorkOrderType | "";
 
@@ -48,7 +47,20 @@ export function TechnicianDashboard() {
     ...(typeParam ? { type: typeParam } : {}),
   });
 
-  const { data, isLoading } = useWorkOrderList({ params: appliedFilters });
+  const { rawUser } = useAuthStore();
+  const isTechnicalRole = rawUser?.roles?.some((r) => {
+    const n = (r.name || "").toLowerCase();
+    return n === "team_leader";
+  });
+  const branchId = isTechnicalRole ? (rawUser?.active_branch_id || "") : "";
+
+  const { data, isLoading } = useWorkOrderList({
+    params: {
+      ...appliedFilters,
+      area_id: appliedFilters.area_id || branchId,
+    },
+    queryConfig: { enabled: !!rawUser }
+  });
 
   const setParams = useCallback((updates: Record<string, string | number | undefined>) => {
     const p = new URLSearchParams(searchParams.toString());
@@ -107,14 +119,13 @@ export function TechnicianDashboard() {
         onApply={handleApply}
       />
 
-      <TechnicianWorkOrdersTable
+      <WorkOrdersTable
         items={data?.items ?? []}
-        total={data?.metadata?.count ?? 0}
+        metadata={data?.metadata}
         isLoading={isLoading}
         page={page}
-        perPage={perPage}
-        pageSizeOptions={PAGE_SIZE_OPTIONS}
         onPageChange={handlePageChange}
+        perPage={perPage}
         onPerPageChange={handlePerPageChange}
       />
 

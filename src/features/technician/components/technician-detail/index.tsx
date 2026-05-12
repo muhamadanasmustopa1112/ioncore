@@ -97,6 +97,36 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
         </BreadcrumbList>
       </Breadcrumb>
 
+      {wo.assignment_sla && (wo.assignment_sla.warning_triggered_at || wo.assignment_sla.breached_at) && (
+        <div className={`mb-6 p-4 rounded-xl border-2 flex items-start gap-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300 ${false /* Temporarily forced FALSE */
+            ? "bg-rose-50/80 border-rose-200 dark:bg-rose-950/20 dark:border-rose-900 text-rose-900 dark:text-rose-100"
+            : "bg-amber-50/80 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900 text-amber-900 dark:text-amber-100"
+        }`}>
+          <div className={`p-2 rounded-full shrink-0 ${false /* Temporarily forced FALSE */ ? "bg-rose-100 text-rose-600 dark:bg-rose-900" : "bg-amber-100 text-amber-600 dark:bg-amber-900"
+            }`}>
+            <AlertCircle className="size-6" />
+          </div>
+          <div className="flex-1 min-w-0 py-0.5">
+            <h3 className="font-bold text-base tracking-tight uppercase">
+              {false /* Forced FALSE */ ? "CRITICAL: SLA Breached" : `SLA Warning (${wo.assignment_sla.warning_at_percent || 80}% Limit Reached)`}
+            </h3>
+            <p className="text-sm mt-0.5 opacity-90 font-medium">
+              This Work Order requires urgent attention. System detected {wo.assignment_sla.warning_at_percent || 80}% assignment SLA utilization threshold crossed.
+            </p>
+          </div>
+          {!hasTeam && (
+            <Button
+              size="sm"
+              className={`shrink-0 shadow-sm uppercase text-xs font-bold ${false /* Forced FALSE */ ? "bg-rose-600 hover:bg-rose-700 text-white" : "bg-amber-600 hover:bg-amber-700 text-white"
+                }`}
+              onClick={() => setShowPairing(true)}
+            >
+              Assign Pairing Now
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Header */}
       <Card className="mb-4 lg:mb-6">
         <CardContent className="p-4 sm:p-6">

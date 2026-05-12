@@ -79,8 +79,9 @@ export function SigninForm() {
     try {
       const res = await login({ email, password });
       const payload = res?.data;
+
       if (!payload?.tokens?.access_token || !payload?.user) {
-        setError(res?.message || "Invalid login response.");
+        setError("Invalid login response.");
         return false;
       }
       setFailedAttempts((prev) => ({ ...prev, [email]: 0 }));

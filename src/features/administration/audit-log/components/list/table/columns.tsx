@@ -83,7 +83,7 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
           {row.original.actionType}
         </Badge>
       ),
-      size: 120,
+      size: 200,
       minSize: 110,
     },
     {
