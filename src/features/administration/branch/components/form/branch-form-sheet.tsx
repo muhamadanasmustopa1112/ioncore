@@ -35,7 +35,7 @@ export function BranchFormSheet() {
 
   const handleFormSubmit = (formData: {
     name: string;
-    code: string;
+    code?: string;
     is_active: boolean;
     type: string;
     level: BranchLevel;

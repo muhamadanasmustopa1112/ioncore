@@ -7,7 +7,7 @@ import {
   RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
-import { Filter, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,22 +21,17 @@ import { DataGrid, DataGridContainer } from "@/components/ui/data-grid";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useBranchListPaginated } from "../../api/branch-queries";
 import { columns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
+
+const BRANCH_TYPES = [
+  { value: "all",       label: "All" },
+  { value: "office",    label: "Office" },
+  { value: "noc",       label: "NOC" },
+  { value: "warehouse", label: "Warehouse" },
+] as const;
 
 export function BranchList() {
   const [filter, setFilter] = useQueryStates({
@@ -63,21 +58,18 @@ export function BranchList() {
 
   const page = filter.page || 1;
   const limit = filter.limit || 10;
+  const activeType = filter.branch_type || "all";
 
   const { data: result = { items: [], total: 0 }, isLoading } = useBranchListPaginated({
     page,
     per_page: limit,
     search: filter.search ?? undefined,
-    branch_type:
-      filter.branch_type && filter.branch_type !== "all"
-        ? filter.branch_type
-        : undefined,
+    branch_type: activeType !== "all" ? activeType : undefined,
   });
 
   const branches = result.items;
   const total = result.total;
 
-  const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const table = useReactTable({
@@ -90,21 +82,14 @@ export function BranchList() {
     getRowId: (row) => row.id,
     state: {
       rowSelection,
-      pagination: {
-        pageIndex: page - 1,
-        pageSize: limit,
-      },
+      pagination: { pageIndex: page - 1, pageSize: limit },
     },
     onPaginationChange: (updater) => {
       const next =
         typeof updater === "function"
           ? updater({ pageIndex: page - 1, pageSize: limit })
           : updater;
-      setFilter({
-        ...filter,
-        page: next.pageIndex + 1,
-        limit: next.pageSize,
-      });
+      setFilter({ ...filter, page: next.pageIndex + 1, limit: next.pageSize });
     },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
@@ -125,81 +110,64 @@ export function BranchList() {
       }}
       isLoading={isLoading}
     >
-      <Card className="mt-[10px]">
-        <CardHeader>
-          <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
+      <div className="mt-[10px] space-y-0">
+        {/* Type tabs */}
+        <div className="flex items-center gap-1 border-b border-border px-1">
+          {BRANCH_TYPES.map((t) => (
+            <button
+              key={t.value}
+              onClick={() => setFilter({ ...filter, branch_type: t.value === "all" ? null : t.value, page: 1 })}
+              className={[
+                "relative px-4 py-2.5 text-sm font-medium transition-colors",
+                "after:absolute after:inset-x-0 after:bottom-[-1px] after:h-[2px] after:rounded-full after:transition-all",
+                activeType === t.value
+                  ? "text-primary after:bg-primary"
+                  : "text-muted-foreground hover:text-foreground after:bg-transparent",
+              ].join(" ")}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        <Card className="rounded-tl-none rounded-tr-none border-t-0">
+          <CardHeader>
             <CardHeading className="py-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline">
-                    <Filter />
-                    Filter
+              <div className="relative">
+                <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
+                <Input
+                  placeholder="Search branch..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  className="w-64 ps-9"
+                />
+                {searchInput && (
+                  <Button
+                    mode="icon"
+                    variant="ghost"
+                    className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
+                    onClick={() => setSearchInput("")}
+                  >
+                    <X />
                   </Button>
-                </CollapsibleTrigger>
-                <div className="relative flex-1 min-w-[150px]">
-                  <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
-                  <Input
-                    placeholder="Search branch..."
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    className="w-full ps-9"
-                  />
-                  {searchInput && (
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-                      onClick={() => setSearchInput("")}
-                    >
-                      <X />
-                    </Button>
-                  )}
-                </div>
+                )}
               </div>
-              <CollapsibleContent>
-                <div className="flex items-center gap-3 py-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-muted-foreground">Type:</span>
-                    <Select
-                      value={filter.branch_type || "all"}
-                      onValueChange={(val) =>
-                        setFilter({
-                          ...filter,
-                          branch_type: val === "all" ? null : val,
-                          page: 1,
-                        })
-                      }
-                    >
-                      <SelectTrigger className="h-8 w-36 text-xs">
-                        <SelectValue placeholder="All Types" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="office">Office</SelectItem>
-                        <SelectItem value="noc">NOC</SelectItem>
-                        <SelectItem value="warehouse">Warehouse</SelectItem>
-                        <SelectItem value="hybrid">Hybrid</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CollapsibleContent>
             </CardHeading>
-          </Collapsible>
-          <DataTableToolbar />
-        </CardHeader>
-        <CardTable>
-          <ScrollArea>
-            <DataGridContainer className="w-full">
-              <DataGridTable />
-            </DataGridContainer>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </CardTable>
-        <CardFooter>
-          <DataGridPagination filter={filter} setFilter={setFilter} />
-        </CardFooter>
-      </Card>
+            <DataTableToolbar />
+          </CardHeader>
+          <CardTable>
+            <ScrollArea>
+              <DataGridContainer className="w-full">
+                <DataGridTable />
+              </DataGridContainer>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </CardTable>
+          <CardFooter>
+            <DataGridPagination filter={filter} setFilter={setFilter} />
+          </CardFooter>
+        </Card>
+      </div>
     </DataGrid>
   );
 }

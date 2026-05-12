@@ -38,7 +38,8 @@ interface BranchState {
   selectedBranch: BranchData | null;
   setForm: (form: BranchFormMode) => void;
   setBranchFormSheetOpen: (open: boolean) => void;
-  openBranchFormSheet: (form: BranchFormMode, branch?: BranchData) => void;
+  defaultNewType: string;
+  openBranchFormSheet: (form: BranchFormMode, branch?: BranchData, defaultType?: string) => void;
   closeBranchFormSheet: () => void;
 
   // ─── Flat list (GET /branch) ─────────────────────────────────────────────────
@@ -94,13 +95,14 @@ const useBranchStore = create<BranchState>((set, get) => ({
   form: "new",
   branchSheetOpen: false,
   selectedBranch: null,
+  defaultNewType: "office",
 
   setForm: (form) => set({ form }),
   setBranchFormSheetOpen: (open) => set({ branchSheetOpen: open }),
-  openBranchFormSheet: (form, branch) =>
-    set({ branchSheetOpen: true, form, selectedBranch: branch ?? null }),
+  openBranchFormSheet: (form, branch, defaultType) =>
+    set({ branchSheetOpen: true, form, selectedBranch: branch ?? null, defaultNewType: defaultType ?? "office" }),
   closeBranchFormSheet: () =>
-    set({ branchSheetOpen: false, form: null, selectedBranch: null }),
+    set({ branchSheetOpen: false, form: null, selectedBranch: null, defaultNewType: "office" }),
 
   // ─── Flat list ──────────────────────────────────────────────────────────────
   flatList: [],

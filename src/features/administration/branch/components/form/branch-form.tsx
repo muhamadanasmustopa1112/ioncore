@@ -5,7 +5,6 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { RiInformationLine, RiMapPinLine } from "@remixicon/react";
-import { RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -24,27 +23,12 @@ import { BranchData, BranchLevel, GeographicPolygon } from "../../types";
 
 // ─── Code Generator ───────────────────────────────────────────────────────────
 
-const TYPE_PREFIX: Record<string, string> = { office: "OFC", noc: "NOC", warehouse: "WHS" };
-const LEVEL_PREFIX: Record<string, string> = { regional: "REG", area: "AREA", sub_area: "SUB" };
-
-function generateBranchCode(type: string, level: string, name: string): string {
-  const t = TYPE_PREFIX[type] ?? type.toUpperCase().slice(0, 3);
-  const l = LEVEL_PREFIX[level] ?? level.toUpperCase().slice(0, 3);
-  const n = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((w) => w.slice(0, 3).toUpperCase())
-    .join("-");
-  return n ? `${t}-${l}-${n}` : `${t}-${l}`;
-}
-
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 const branchSchema = z
   .object({
     name: z.string().min(1, "Branch name is required"),
-    code: z.string().min(1, "Branch code is required"),
+    code: z.string().optional(),
     type: z.enum(["office", "noc", "warehouse"]),
     level: z.enum(["regional", "area", "sub_area"]),
     active: z.boolean(),
@@ -106,7 +90,7 @@ interface BranchFormProps {
   branchData?: BranchData | null;
   onSubmit?: (payload: {
     name: string;
-    code: string;
+    code?: string;
     is_active: boolean;
     type: string;
     level: BranchLevel;
@@ -122,6 +106,7 @@ interface BranchFormProps {
 export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const formMode = useBranchStore((s) => s.form);
   const storedBranch = useBranchStore((s) => s.selectedBranch);
+  const defaultNewType = useBranchStore((s) => s.defaultNewType);
   const selectedBranch = branchData ?? storedBranch;
   const isEditMode = formMode === "edit";
   const isDetailMode = formMode === "details";
@@ -130,7 +115,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
     () => ({
       name: "",
       code: "",
-      type: "office" as const,
+      type: (defaultNewType as "office" | "noc" | "warehouse") ?? "office",
       level: "regional" as const,
       active: true,
       regionalId: "",
@@ -138,8 +123,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
       address: "",
       geographic_polygon: "",
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [defaultNewType],
   );
 
   const formValues = useMemo<BranchFormValues | undefined>(() => {
@@ -177,24 +161,21 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const name = watch("name");
   const regionalId = watch("regionalId") ?? "";
 
-  const isCodeManual = useRef(isEditMode || isDetailMode);
+  const isSubArea = level === "sub_area";
 
+  // Auto-fill code from name for regional/area (user can override)
   useEffect(() => {
-    if (isEditMode || isDetailMode) { isCodeManual.current = true; return; }
-    isCodeManual.current = false;
-  }, [isEditMode, isDetailMode]);
-
-  useEffect(() => {
-    if (isCodeManual.current) return;
-    setValue("code", generateBranchCode(branchType, level, name), { shouldValidate: false });
-  }, [name, branchType, level, setValue]);
+    if (isEditMode || isDetailMode || isSubArea) return;
+    const words = name.trim().split(/\s+/).filter(Boolean);
+    const generated = words.map((w) => w.slice(0, 3).toUpperCase()).join("-");
+    setValue("code", generated, { shouldValidate: false });
+  }, [name, isSubArea, isEditMode, isDetailMode, setValue]);
 
   const { data: regionals = [] } = useRegionalList(branchType);
   const { data: areas = [] } = useAreaList(regionalId, branchType);
 
   const isRegional = level === "regional";
   const isArea = level === "area";
-  const isSubArea = level === "sub_area";
 
   const isLocked = isEditMode || isDetailMode;
   const clearParents = () => {
@@ -226,7 +207,6 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
     return () => {
       delete (window as unknown as Record<string, unknown>).__branchFormSubmit;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const levelDisplayName = (l: BranchLevel) =>
@@ -244,87 +224,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
               <h3 className="text-sm font-semibold">General Information</h3>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-1">
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Branch Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="e.g. Jakarta Pusat Area"
-                  {...register("name")}
-                  disabled={isDetailMode}
-                />
-                {errors.name && (
-                  <p className="text-xs text-destructive">{errors.name.message}</p>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Branch Code <span className="text-red-500">*</span>
-                  {!isDetailMode && !isEditMode && (
-                    <span className="ml-2 text-[10px] font-normal text-muted-foreground/60">
-                      {isCodeManual.current ? "— manual" : "— auto generated"}
-                    </span>
-                  )}
-                </Label>
-                <div className="relative">
-                  <Input
-                    placeholder="e.g. OFC-REG-JKT"
-                    {...register("code", {
-                      onChange: (e) => {
-                        const auto = generateBranchCode(branchType, level, name);
-                        isCodeManual.current = e.target.value !== auto;
-                      },
-                    })}
-                    disabled={isDetailMode}
-                    className="font-mono pr-8"
-                  />
-                  {!isDetailMode && !isEditMode && (
-                    <button
-                      type="button"
-                      title="Reset to auto-generated code"
-                      onClick={() => {
-                        isCodeManual.current = false;
-                        setValue("code", generateBranchCode(branchType, level, name), { shouldValidate: true });
-                      }}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <RefreshCw className="size-3.5" />
-                    </button>
-                  )}
-                </div>
-                {errors.code && (
-                  <p className="text-xs text-destructive">{errors.code.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Branch Type <span className="text-red-500">*</span>
-                </Label>
-                {isDetailMode ? (
-                  <Input value={watch("type").charAt(0).toUpperCase() + watch("type").slice(1)} disabled />
-                ) : (
-                  <Controller
-                    name="type"
-                    control={control}
-                    render={({ field }) => (
-                      <Select value={field.value} onValueChange={(v) => { field.onChange(v); clearParents(); }}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="office">Office</SelectItem>
-                          <SelectItem value="noc">NOC</SelectItem>
-                          <SelectItem value="warehouse">Warehouse</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    )}
-                  />
-                )}
-              </div>
-            </div>
-
+            {/* Level + Type first */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
@@ -355,6 +255,68 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                 )}
               </div>
 
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Branch Type <span className="text-red-500">*</span>
+                </Label>
+                {isDetailMode ? (
+                  <Input value={watch("type").charAt(0).toUpperCase() + watch("type").slice(1)} disabled />
+                ) : (
+                  <Controller
+                    name="type"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value} onValueChange={(v) => { field.onChange(v); clearParents(); }}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="office">Office</SelectItem>
+                          <SelectItem value="noc">NOC</SelectItem>
+                          <SelectItem value="warehouse">Warehouse</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Name + Code */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-1">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Branch Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  placeholder="e.g. Jakarta Pusat Area"
+                  {...register("name")}
+                  disabled={isDetailMode}
+                />
+                {errors.name && (
+                  <p className="text-xs text-destructive">{errors.name.message}</p>
+                )}
+              </div>
+            </div>
+            {!isSubArea && (
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Branch Code <span className="text-red-500">*</span>
+                  {!isDetailMode && !isEditMode && (
+                    <span className="ml-2 text-[10px] font-normal text-muted-foreground/60">— generated from name, editable</span>
+                  )}
+                </Label>
+                <Input
+                  placeholder="e.g. JAK-PUS"
+                  {...register("code")}
+                  disabled={isDetailMode}
+                  className="font-mono"
+                />
+                {errors.code && (
+                  <p className="text-xs text-destructive">{errors.code.message}</p>
+                )}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">Status</Label>
                 {isDetailMode ? (

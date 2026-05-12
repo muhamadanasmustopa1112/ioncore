@@ -19,7 +19,7 @@ import { CoverageFormSheet } from "./form/coverage-form-sheet";
 
 
 export function BranchCoveragePage() {
-  const { branches, isLoading, onSearchChange } = useBranchSelect();
+  const { branches, isLoading, onSearchChange, onTypeChange, branchType } = useBranchSelect();
   const openSheet = useCoverageStore((s) => s.openSheet);
   const selectedBranchId = useCoverageStore((s) => s.selectedBranchId);
   const setSelectedBranchId = useCoverageStore((s) => s.setSelectedBranchId);
@@ -85,6 +85,8 @@ export function BranchCoveragePage() {
           value={selectedBranchId || ""}
           onValueChange={setSelectedBranchId}
           onSearchChange={onSearchChange}
+          onTypeChange={onTypeChange}
+          branchType={branchType}
           isLoading={isLoading}
         />
         {selectedBranch && (

@@ -19,7 +19,7 @@ import { CapabilityFormSheet } from "./form/capability-form-sheet";
 
 
 export function BranchCapabilityPage() {
-  const { branches, isLoading, onSearchChange } = useBranchSelect();
+  const { branches, isLoading, onSearchChange, onTypeChange, branchType } = useBranchSelect();
   const openSheet = useCapabilityStore((s) => s.openSheet);
   const selectedBranchId = useCapabilityStore((s) => s.selectedBranchId);
   const setSelectedBranchId = useCapabilityStore((s) => s.setSelectedBranchId);
@@ -85,6 +85,8 @@ export function BranchCapabilityPage() {
           value={selectedBranchId || ""}
           onValueChange={setSelectedBranchId}
           onSearchChange={onSearchChange}
+          onTypeChange={onTypeChange}
+          branchType={branchType}
           isLoading={isLoading}
         />
         {selectedBranch && (

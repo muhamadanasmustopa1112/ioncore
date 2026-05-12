@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { RiAddLine, RiBuilding2Line, RiDownloadLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,8 @@ import { useRegionalList, useBranchList } from "../api/branch-queries";
 
 export function BranchListPage() {
   const openBranchFormSheet = useBranchStore((s) => s.openBranchFormSheet);
+  const searchParams = useSearchParams();
+  const activeType = searchParams.get("branch_type") ?? "office";
   const { data: branches = [] } = useBranchList();
   // Warm the regional list cache so it's ready when the form sheet opens
   useRegionalList();
@@ -57,7 +60,7 @@ export function BranchListPage() {
           <Button
             variant="primary"
             className="h-9 px-4 text-sm font-semibold shadow-md sm:h-11 sm:px-6"
-            onClick={() => openBranchFormSheet("new")}
+            onClick={() => openBranchFormSheet("new", undefined, activeType === "all" ? "office" : activeType)}
           >
             <RiAddLine className="size-4 sm:size-5" />
             Add New Branch
