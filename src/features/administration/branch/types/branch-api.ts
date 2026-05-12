@@ -4,7 +4,7 @@ import type { GeographicPolygon } from "./branch";
 
 export interface BranchPayload {
   name: string;
-  code: string;
+  code?: string;
   is_active: boolean;
   type?: string;
   level?: string;

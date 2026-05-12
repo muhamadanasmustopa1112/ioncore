@@ -19,7 +19,7 @@ import { PolicyFormSheet } from "./form/policy-form-sheet";
 
 
 export function BranchPolicyPage() {
-  const { branches, isLoading, onSearchChange } = useBranchSelect();
+  const { branches, isLoading, onSearchChange, onTypeChange, branchType } = useBranchSelect();
   const openSheet = usePolicyStore((s) => s.openSheet);
   const selectedBranchId = usePolicyStore((s) => s.selectedBranchId);
   const setSelectedBranchId = usePolicyStore((s) => s.setSelectedBranchId);
@@ -85,6 +85,8 @@ export function BranchPolicyPage() {
           value={selectedBranchId || ""}
           onValueChange={setSelectedBranchId}
           onSearchChange={onSearchChange}
+          onTypeChange={onTypeChange}
+          branchType={branchType}
           isLoading={isLoading}
         />
         {selectedBranch && (

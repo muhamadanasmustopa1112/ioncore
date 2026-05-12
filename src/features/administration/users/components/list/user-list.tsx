@@ -12,7 +12,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
-import { useQueryStates, parseAsString } from "nuqs";
+import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -42,7 +42,10 @@ export function UserList() {
     search: parseAsString,
     status: parseAsString,
   });
-  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+  const [pagination, setPagination] = useQueryStates({
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(10),
+  });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const { data: usersResp, isLoading } = useUsers({
@@ -90,7 +93,7 @@ export function UserList() {
       const next = typeof updater === "function"
         ? updater({ pageIndex: pagination.page - 1, pageSize: pagination.limit })
         : updater;
-      setPagination({ page: next.pageIndex + 1, limit: next.pageSize });
+      void setPagination({ page: next.pageIndex + 1, limit: next.pageSize });
     },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -160,7 +163,14 @@ export function UserList() {
           </ScrollArea>
         </CardTable>
         <CardFooter>
-          <DataGridPagination setFilter={setPagination} filter={pagination} />
+          <DataGridPagination
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setFilter={(updater: any) => {
+              const next = typeof updater === "function" ? updater(pagination) : updater;
+              void setPagination(next);
+            }}
+            filter={pagination}
+          />
         </CardFooter>
       </Card>
     </DataGrid>
