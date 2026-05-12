@@ -17,6 +17,7 @@ import type {
   PairingRecommendationResponse,
 } from "../../../types/technician-api";
 import { ModalShell, FieldLabel } from "./shell";
+import { createAuditLog } from "@/features/administration/audit-log/api/audit-log-api";
 
 const LEVEL_COLOR: Record<string, { bg: string; text: string; ring: string }> = {
   senior: { bg: "bg-primary/10", text: "text-primary", ring: "ring-primary/30" },
@@ -123,6 +124,7 @@ export function PairingModal({
   const [recommendation, setRecommendation] = useState<PairingRecommendationResponse | null>(null);
   const [viewMode, setViewMode] = useState<"recommend" | "all">("recommend");
   const [searchTerm, setSearchTerm] = useState("");
+  const [validationError, setValidationError] = useState(false);
 
   const assignMutation = useAssignPairing();
   const updateMutation = useUpdatePairing();
@@ -131,10 +133,10 @@ export function PairingModal({
 
   // Load all technicians dynamically from the newly implemented POST /technicians/list endpoint
   const { data: allTechnicians = [], isLoading: isTechListLoading } = useTechnicianList({
-    params: {
-      branch_id: branchId,
-      team_leader_id: teamLeaderId,
-    },
+    // params: {
+    //   branch_id: branchId,
+    //   team_leader_id: teamLeaderId,
+    // },
   });
 
   function handleRecommend() {
@@ -153,14 +155,66 @@ export function PairingModal({
   }
 
   function toggleCandidate(id: string) {
+    setValidationError(false); // Reset error message if user changes candidate
     setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
   function handleSubmit() {
     if (!useAuto && selectedIds.length < 1) return;
+
+    // 1. Calculate level distribution at the moment of click
+    const currentSelectedLevels = selectedIds.map(id => {
+      const source = [
+        ...allTechnicians.map(t => ({ id: t.technician_id, level: t.level })),
+        ...(recommendation?.candidates ?? []).map(c => ({ id: c.technician_id, level: c.level })),
+        ...currentTeam.map(t => ({ id: t.technician_id, level: t.level })),
+        ...(recommendation?.suggested_team ?? []).map(t => ({ id: t.technician_id, level: t.level })),
+      ].filter(x => !!x.id);
+      const found = source.find(x => String(x.id) === String(id));
+      return found?.level?.toString().toLowerCase().trim();
+    });
+
+    // 2. Perform validation check here
+    const hasSenior = currentSelectedLevels.some(lvl => lvl === "senior" || lvl === "lead");
+    const isViolated = !useAuto && selectedIds.length > 0 && !hasSenior;
+
+    if (isViolated) {
+      setValidationError(true); // Show alert only on click fail
+      return;
+    }
+
+    setValidationError(false); // Clear error if valid
+
+    // 3. Prep audit mapping before mutation executes
+    const map: Record<string, string> = {};
+    currentTeam.forEach((t) => { if (t.technician_id) map[t.technician_id] = t.technician_name; });
+    (recommendation?.suggested_team ?? []).forEach((t) => { if (t.technician_id) map[t.technician_id] = t.technician_name; });
+    (recommendation?.candidates ?? []).forEach((c) => { map[c.technician_id] = c.technician_name; });
+    allTechnicians.forEach((t) => { map[t.technician_id] = t.technician_name; });
+
+    const beforeTeam = currentTeam.map(t => ({ id: t.technician_id, name: t.technician_name || map[t.technician_id] }));
+    const afterTeam = selectedIds.map(id => ({ id, name: map[id] || "Unknown Technician" }));
+
     mutation.mutate(
       { id: workOrderId, data: { technician_ids: selectedIds, use_auto_pairing: useAuto, override_current: override, note: note || undefined } },
-      { onSuccess: () => onClose() }
+      {
+        onSuccess: () => {
+          // Record the Audit Trail asynchronously
+          createAuditLog({
+            action_type: "override",
+            module: "technician_pairing",
+            record_type: "work_order_assignment",
+            record_id: workOrderId,
+            record_identifier: workOrderNumber,
+            before: { team: beforeTeam } as unknown as Record<string, unknown>,
+            after: { team: afterTeam, use_auto: useAuto } as unknown as Record<string, unknown>,
+            change_reason: note || "Pairing update executed",
+            status: "success"
+          }).catch(() => console.warn("⚠️ Silent failure recording audit trace for pairing event"));
+
+          onClose();
+        }
+      }
     );
   }
 
@@ -211,7 +265,6 @@ export function PairingModal({
             variant="primary"
             size="sm"
             onClick={handleSubmit}
-            disabled={mutation.isPending || (!useAuto && selectedIds.length === 0)}
           >
             {mutation.isPending && <Loader2 className="size-3 animate-spin mr-2" />}
             {isReassign ? "Reassign" : "Assign"} {!useAuto && selectedIds.length > 0 ? `(${selectedIds.length})` : ""}
@@ -220,9 +273,29 @@ export function PairingModal({
       }
     >
       <div className="space-y-5">
+        {validationError && (
+          <div className="flex items-start gap-3 p-3.5 rounded-lg bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900 animate-in fade-in slide-in-from-top-2 duration-200">
+            <AlertTriangle className="size-4 text-rose-500 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-xs text-rose-600 dark:text-rose-300 mt-0.5 leading-relaxed">
+                Setiap tim pairing wajib berisi setidaknya 1 teknisi level **Senior** atau **Lead**. Tim saat ini hanya berisi level Junior dan pengiriman ditolak oleh sistem.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Auto-pair toggle */}
         <div className={`flex items-start gap-3 p-3 rounded-lg border ${useAuto ? "bg-blue-50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800" : "border-slate-200 dark:border-slate-700"}`}>
-          <input id="use_auto" type="checkbox" checked={useAuto} onChange={(e) => setUseAuto(e.target.checked)} className="mt-0.5" />
+          <input
+            id="use_auto"
+            type="checkbox"
+            checked={useAuto}
+            onChange={(e) => {
+              setUseAuto(e.target.checked);
+              setValidationError(false); // Reset error if toggle changed
+            }}
+            className="mt-0.5"
+          />
           <label htmlFor="use_auto" className="flex-1 cursor-pointer">
             <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Auto Pairing</p>
             <p className="text-xs text-slate-500 mt-0.5">System picks best available Senior + Junior pair automatically.</p>
@@ -399,9 +472,8 @@ export function PairingModal({
                               key={c.technician_id}
                               type="button"
                               onClick={() => toggleCandidate(c.technician_id)}
-                              className={`w-full flex items-center justify-between p-2.5 text-left text-xs transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40 ${
-                                isSelected ? "bg-primary/5 dark:bg-primary/10" : ""
-                              }`}
+                              className={`w-full flex items-center justify-between p-2.5 text-left text-xs transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40 ${isSelected ? "bg-primary/5 dark:bg-primary/10" : ""
+                                }`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className={`size-7 rounded-full flex items-center justify-center shrink-0 text-[10px] font-black ring-1 ${lc.bg} ${lc.text} ${lc.ring}`}>
@@ -414,11 +486,10 @@ export function PairingModal({
                                       {c.level}
                                     </span>
                                     {(c as any).availability_status && (
-                                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
-                                        (c as any).availability_status === "available"
-                                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400"
-                                          : "bg-amber-100 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400"
-                                      }`}>
+                                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${(c as any).availability_status === "available"
+                                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400"
+                                        : "bg-amber-100 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400"
+                                        }`}>
                                         {(c as any).availability_status.replace(/_/g, " ")}
                                       </span>
                                     )}
@@ -428,9 +499,8 @@ export function PairingModal({
                                   </div>
                                 </div>
                               </div>
-                              <div className={`size-4 rounded-md border shrink-0 flex items-center justify-center transition-colors ${
-                                isSelected ? "bg-primary border-primary text-white" : "border-slate-300 dark:border-slate-600"
-                              }`}>
+                              <div className={`size-4 rounded-md border shrink-0 flex items-center justify-center transition-colors ${isSelected ? "bg-primary border-primary text-white" : "border-slate-300 dark:border-slate-600"
+                                }`}>
                                 {isSelected && <span className="text-[9px] font-black">✓</span>}
                               </div>
                             </button>

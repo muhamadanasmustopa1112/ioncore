@@ -14,6 +14,7 @@ export type AuditModule =
   | "branch"
   | "user"
   | "wo_checklist"
+  | "technician_pairing"
   | "platform_config"
   | "integration"
   | "audit";

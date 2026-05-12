@@ -1,4 +1,3 @@
-"use client";
 
 export { TechnicianDashboard } from "./technician-dashboard";
 export { TechnicianWorkOrderDetail } from "./technician-detail";

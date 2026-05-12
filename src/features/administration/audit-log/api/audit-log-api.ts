@@ -1,5 +1,5 @@
 import { api } from "@/lib/api-client";
-import type { AuditLogDto, AuditLogFilters, AuditLogListResponse } from "../types/audit-log-api";
+import type { AuditActionType, AuditLogDto, AuditLogFilters, AuditLogListResponse, AuditModule, AuditStatus } from "../types/audit-log-api";
 
 const BASE = "/administration/audit-log";
 
@@ -43,4 +43,20 @@ export function getEntityAuditLogs(recordType: string, recordId: string) {
 export function exportAuditLogs(filters: AuditLogFilters, format: "csv" | "json" = "csv") {
   const params: Record<string, unknown> = { format, ...filters };
   return cast<Blob>(api.get(`${BASE}/export`, { params, responseType: "blob" }));
+}
+export interface AuditLogPayload {
+  action_type: AuditActionType;
+  module: AuditModule;
+  section?: string;
+  record_type: string;
+  record_id: string;
+  record_identifier?: string;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  change_reason: string | null;
+  status: AuditStatus;
+}
+
+export function createAuditLog(payload: AuditLogPayload) {
+  return cast<ApiResponse<AuditLogDto>>(api.post(BASE, payload));
 }

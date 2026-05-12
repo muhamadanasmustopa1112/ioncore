@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Loader2, AlertCircle, RefreshCw, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTeamLeaderDashboard } from "../../api/team-leader";
+import { useAuthStore } from "@/store/auth-store";
 import { AutoAssignModal } from "../technician-detail/modals";
 import { PairingModal } from "../technician-detail/modals";
 import type { WorkOrderDashboardItem } from "../../types/technician-api";
@@ -12,15 +13,41 @@ import { TeamPairingSummary } from "./summary";
 import { QueueList } from "./queue-list";
 import { AvailabilityBoard } from "./availability-board";
 import { CrossAreaPanel } from "./cross-area-panel";
+import dynamic from "next/dynamic";
+
+const TechnicianDispatchMap = dynamic(() => import("./tech-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[320px] sm:h-[380px] w-full bg-slate-100 dark:bg-slate-800/50 animate-pulse rounded-xl flex items-center justify-center border border-dashed border-slate-200 dark:border-slate-700">
+      <div className="flex flex-col items-center gap-2 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
+        <Loader2 className="size-5 animate-spin" />
+        Initializing Map Engine
+      </div>
+    </div>
+  ),
+});
 
 export function TeamPairingDashboard() {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [showAutoAssign, setShowAutoAssign] = useState(false);
   const [pairingTarget, setPairingTarget] = useState<WorkOrderDashboardItem | null>(null);
 
-  const { data, isLoading, isError, refetch, isFetching } = useTeamLeaderDashboard({ params: { date } });
+  const { rawUser } = useAuthStore();
+  const branchId = rawUser?.active_branch_id || "";
 
-  if (isLoading) {
+  const isLeader = rawUser?.roles?.some((r) =>
+    (r.name).toLowerCase().includes("leader"),
+  );
+
+  const { data, isLoading, isError, refetch, isFetching } = useTeamLeaderDashboard({
+    params: {
+      date,
+      ...(isLeader && branchId ? { area_id: branchId } : {}),
+    },
+    queryConfig: { enabled: !!rawUser },
+  });
+
+  if (isLoading || !rawUser) {
     return (
       <div className="flex-1 p-6 flex items-center justify-center min-h-[60vh]">
         <Loader2 className="size-8 animate-spin text-primary" />
@@ -28,7 +55,7 @@ export function TeamPairingDashboard() {
     );
   }
 
-  if (isError || !data) {
+  if (isError) {
     return (
       <div className="flex-1 p-6 flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <AlertCircle className="size-10 text-rose-500" />
@@ -36,6 +63,10 @@ export function TeamPairingDashboard() {
         <Button variant="outline" size="sm" onClick={() => refetch()}>Retry</Button>
       </div>
     );
+  }
+
+  if (!data) {
+    return null;
   }
 
   return (
@@ -84,7 +115,12 @@ export function TeamPairingDashboard() {
           )}
         />
       </div>
- 
+
+      {/* Live Map Integration */}
+      <div className="mb-6 lg:mb-8">
+        <TechnicianDispatchMap items={data.map?.items ?? []} />
+      </div>
+
       {/* Main Grid */}
       <div className="grid grid-cols-12 gap-4 lg:gap-6">
         {/* Left: Queue + Cross-Area */}

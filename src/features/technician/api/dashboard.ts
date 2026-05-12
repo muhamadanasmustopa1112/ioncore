@@ -6,7 +6,10 @@ import { QueryConfig } from "@/lib/react-query";
 
 import type {
   ListTechniciansParams,
+  Metadata,
   WorkOrderDashboardEnvelope,
+  WorkOrderDashboardItem,
+  WorkOrderDashboardSummary,
   WorkOrderDetailEnvelope,
   WorkOrderListParams,
   WorkOrderTimelineEnvelope,
@@ -29,7 +32,7 @@ export const getWorkOrders = (
   return userServiceApi.get(`${BASE}/work-orders`, {
     params: {
       page: params.page ?? 1,
-      per_page: params.per_page ?? 15,
+      per_page: params.per_page ?? 10,
       ...(params.type && { type: params.type }),
       ...(params.state && { state: params.state }),
       ...(params.priority && { priority: params.priority }),
@@ -73,14 +76,18 @@ export const getWorkOrderTimeline = (
 // --- Hooks ---
 type UseWorkOrderListOptions = {
   params?: WorkOrderListParams;
-  queryConfig?: QueryConfig<typeof getWorkOrders>;
+  queryConfig?: any;
 };
 
 export const useWorkOrderList = ({
   params = {},
   queryConfig,
 }: UseWorkOrderListOptions = {}) => {
-  return useQuery({
+  return useQuery<{
+    items: WorkOrderDashboardItem[];
+    summary: WorkOrderDashboardSummary;
+    metadata: Metadata;
+  }>({
     queryKey: TECHNICIAN_KEYS.workOrders(params),
     queryFn: async () => {
       const res = await getWorkOrders(params);
@@ -97,7 +104,7 @@ export const useWorkOrderList = ({
     placeholderData: {
       items: [],
       summary: { total: 0, by_state: {} as never, by_type: {} as never },
-      metadata: { count: 0, page: 1, per_page: 15 },
+      metadata: { count: 0, page: 1, per_page: 10 },
     } as any,
     retry: false,
     meta: { suppressGlobalError: true },
