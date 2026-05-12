@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { Loader2, AlertCircle, RefreshCw, Zap } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { useTeamLeaderDashboard } from "../../api/team-leader";
 import { useAuthStore } from "@/store/auth-store";
@@ -29,6 +30,8 @@ const TechnicianDispatchMap = dynamic(() => import("./tech-map"), {
 
 export function TeamPairingDashboard() {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("");
   const [showAutoAssign, setShowAutoAssign] = useState(false);
   const [pairingTarget, setPairingTarget] = useState<WorkOrderDashboardItem | null>(null);
 
@@ -42,10 +45,14 @@ export function TeamPairingDashboard() {
   const { data, isLoading, isError, refetch, isFetching } = useTeamLeaderDashboard({
     params: {
       date,
+      ...(selectedState ? { state: selectedState } : {}),
+      ...(selectedType ? { type: selectedType } : {}),
       ...(isLeader && branchId ? { area_id: branchId } : {}),
     },
     queryConfig: { enabled: !!rawUser },
   });
+
+
 
   if (isLoading || !rawUser) {
     return (
@@ -78,6 +85,37 @@ export function TeamPairingDashboard() {
           <p className="text-sm text-slate-500 mt-0.5">Assign technician pairs to work orders</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          <select
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm py-2 px-3 text-slate-700 dark:text-slate-200"
+          >
+            <option value="">All Types</option>
+            <option value="new_installation_broadband">Broadband Install</option>
+            <option value="new_installation_enterprise">Enterprise Install</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="termination">Termination</option>
+          </select>
+
+          <select
+            value={selectedState}
+            onChange={(e) => setSelectedState(e.target.value)}
+            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm py-2 px-3 text-slate-700 dark:text-slate-200"
+          >
+            <option value="">All States</option>
+            <option value="created">Created</option>
+            <option value="unassigned">Unassigned</option>
+            <option value="assigned">Assigned</option>
+            <option value="accepted">Accepted</option>
+            <option value="dispatched">Dispatched</option>
+            <option value="in_progress">In Progress</option>
+            <option value="paused">Paused</option>
+            <option value="pending_noc_verification">Pending NOC Verify</option>
+            <option value="completed">Completed</option>
+            <option value="rescheduled">Rescheduled</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+
           <input
             type="date"
             value={date}
@@ -110,9 +148,7 @@ export function TeamPairingDashboard() {
       <div className="mb-6">
         <TeamPairingSummary
           summary={data.daily_summary}
-          alerts={data.alerts?.filter(
-            (alert) => alert.created_at ? format(new Date(alert.created_at), "yyyy-MM-dd") === date : false
-          )}
+          alerts={data.alerts}
         />
       </div>
 

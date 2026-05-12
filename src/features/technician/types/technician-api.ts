@@ -626,6 +626,8 @@ export interface TeamLeaderDashboardParams {
   branch_id?: string;
   area_id?: string;
   sub_area_id?: string;
+  state?: string;
+  type?: string;
   date?: string;
 }
 
