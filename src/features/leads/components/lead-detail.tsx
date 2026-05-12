@@ -44,7 +44,7 @@ const STATUS_VARIANT: Record<LeadStatus, "primary" | "success" | "warning" | "de
   warm: "warning",
   hot: "destructive",
   converted: "success",
-  lost: "secondary",
+  lost: "destructive",
   potential: "warning",
 };
 
@@ -104,7 +104,7 @@ export function LeadDetail() {
           </ToolbarTitle>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant={STATUS_VARIANT[lead.status]} appearance="light" size="md">
-              {lead.status}
+              {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
             </Badge>
             <span className="text-xs text-muted-foreground capitalize">
               {lead.lead_type} · {lead.customer_sub_type} · {lead.source.replace("_", " ")}
@@ -143,43 +143,69 @@ export function LeadDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><CardTitle>Update Status</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Status</CardTitle></CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <Select value={statusDraft} onValueChange={(v) => setStatusDraft(v as LeadStatus)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {STATUSES.filter((s) => STATUS_INDEX[s] >= STATUS_INDEX[lead.status]).map((s) => (
-                  <SelectItem key={s} value={s}>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={STATUS_VARIANT[s]} appearance="light" size="sm">{s}</Badge>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <div className="flex flex-col gap-1">
-              <Textarea
-                placeholder={statusDraft === "lost" ? "Reason required for Lost status…" : "Notes (optional)"}
-                value={statusNote}
-                onChange={(e) => setStatusNote(e.target.value)}
-                className={statusDraft === "lost" && !statusNote.trim() ? "border-destructive focus-visible:ring-destructive" : ""}
-              />
-              {statusDraft === "lost" && !statusNote.trim() && (
-                <p className="text-xs text-destructive">Reason is required when marking as Lost.</p>
-              )}
-            </div>
-            <Button
-              variant="primary"
-              onClick={() => updateStatus.mutate({ status: statusDraft, notes: statusNote })}
-              disabled={
-                updateStatus.isPending ||
-                STATUS_INDEX[statusDraft] < STATUS_INDEX[lead.status] ||
-                (statusDraft === "lost" && !statusNote.trim())
-              }
-            >
-              {updateStatus.isPending && <Loader2 className="size-4 animate-spin" />}
-              Save Status
-            </Button>
+            {(lead.status === "converted" || lead.status === "lost") ? (() => {
+              const lastEntry = [...(lead.status_timeline ?? [])].reverse().find((t) => t.status === lead.status);
+              return (
+                <div className="flex flex-col gap-3">
+                  <Badge variant={STATUS_VARIANT[lead.status]} appearance="light" size="md" className="w-fit">
+                    {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                  </Badge>
+                  <div className="rounded-lg border bg-muted/40 px-3 py-2.5 space-y-1">
+                    <p className="text-xs font-medium text-muted-foreground">Notes</p>
+                    {lastEntry?.notes ? (
+                      <>
+                        <p className="text-sm text-foreground">{lastEntry.notes}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(lastEntry.created_at).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">No notes recorded for this status change.</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })() : (
+              <>
+                <Select value={statusDraft} onValueChange={(v) => setStatusDraft(v as LeadStatus)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {STATUSES.filter((s) => STATUS_INDEX[s] >= STATUS_INDEX[lead.status]).map((s) => (
+                      <SelectItem key={s} value={s}>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={STATUS_VARIANT[s]} appearance="light" size="sm">{s.charAt(0).toUpperCase() + s.slice(1)}</Badge>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex flex-col gap-1">
+                  <Textarea
+                    placeholder={statusDraft === "lost" ? "Reason required for Lost status…" : "Notes (optional)"}
+                    value={statusNote}
+                    onChange={(e) => setStatusNote(e.target.value)}
+                    className={statusDraft === "lost" && !statusNote.trim() ? "border-destructive focus-visible:ring-destructive" : ""}
+                  />
+                  {statusDraft === "lost" && !statusNote.trim() && (
+                    <p className="text-xs text-destructive">Reason is required when marking as Lost.</p>
+                  )}
+                </div>
+                <Button
+                  variant="primary"
+                  onClick={() => updateStatus.mutate({ status: statusDraft, notes: statusNote })}
+                  disabled={
+                    updateStatus.isPending ||
+                    STATUS_INDEX[statusDraft] < STATUS_INDEX[lead.status] ||
+                    (statusDraft === "lost" && !statusNote.trim())
+                  }
+                >
+                  {updateStatus.isPending && <Loader2 className="size-4 animate-spin" />}
+                  Save Status
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -256,7 +282,7 @@ export function LeadDetail() {
             {(lead.status_timeline ?? []).map((t) => (
               <div key={t.id} className="border-b pb-3 last:border-0 last:pb-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge variant={STATUS_VARIANT[t.status]} appearance="light" size="sm">{t.status}</Badge>
+                  <Badge variant={STATUS_VARIANT[t.status]} appearance="light" size="sm">{t.status.charAt(0).toUpperCase() + t.status.slice(1)}</Badge>
                   <span className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</span>
                 </div>
                 {t.notes && <p className="text-sm text-muted-foreground">{t.notes}</p>}

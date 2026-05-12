@@ -59,7 +59,7 @@ const STATUS_VARIANT: Record<LeadStatus, "primary" | "success" | "warning" | "de
   warm: "warning",
   hot: "destructive",
   converted: "success",
-  lost: "secondary",
+  lost: "destructive",
   potential: "warning",
 };
 
@@ -119,7 +119,7 @@ export function LeadsList() {
       header: ({ column }) => <DataGridColumnHeader column={column} title="Status" className="font-semibold" />,
       cell: ({ row }) => (
         <Badge variant={STATUS_VARIANT[row.original.status] ?? "secondary"} appearance="light" size="md">
-          {row.original.status}
+          {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
         </Badge>
       ),
       size: 110,
