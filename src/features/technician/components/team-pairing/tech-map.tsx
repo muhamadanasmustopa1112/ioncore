@@ -11,16 +11,27 @@ import "leaflet/dist/leaflet.css";
 
 const getStatusColor = (status: string) => {
   switch (status) {
+    // Status Work Order Aktif
+    case "in_progress":
+      return "#10b981"; // Emerald-500 (Sukses / Berjalan)
+    case "dispatched":
+    case "accepted":
+      return "#3b82f6"; // Blue-500 (Dalam Perjalanan / Penugasan)
+    case "created":
+    case "unassigned":
+      return "#f59e0b"; // Amber-500 (Menunggu)
+    case "completed":
+      return "#64748b"; // Slate-500 (Selesai)
+
+    // Fallback lama
     case "available":
-      return "#10b981"; // Emerald-500
+      return "#10b981";
     case "on_other_wo":
-      return "#3b82f6"; // Blue-500
+      return "#3b82f6";
     case "cross_area":
-      return "#f59e0b"; // Amber-500
-    case "on_leave":
-      return "#64748b"; // Slate-500
+      return "#f59e0b";
     default:
-      return "#8b5cf6"; // Violet
+      return "#8b5cf6"; // Violet-500
   }
 };
 
@@ -67,13 +78,72 @@ function RecenterMap({ center, bounds }: { center: [number, number]; bounds?: L.
   return null;
 }
 
-// Fallback Dummy Data centered around a general Jakarta region for testing visuals
+// Fallback Dummy Data disesuaikan dengan response real API backend
 const DUMMY_TECH_DATA: DispatchMapItem[] = [
-  { technician_id: "t1", technician_name: "Budi Santoso", latitude: -6.1944, longitude: 106.8229, status: "available" },
-  { technician_id: "t2", technician_name: "Agus Darmawan", latitude: -6.2104, longitude: 106.8451, status: "on_other_wo" },
-  { technician_id: "t3", technician_name: "Rini Cahyani", latitude: -6.1824, longitude: 106.8312, status: "cross_area" },
-  { technician_id: "t4", technician_name: "Slamet Subagyo", latitude: -6.2224, longitude: 106.8101, status: "available" },
-  { technician_id: "t5", technician_name: "Taufik Hidayat", latitude: -6.1754, longitude: 106.8271, status: "on_other_wo" },
+  {
+    work_order_id: "wo-1",
+    work_order_number: "WO-20260422-001",
+    title: "New FTTH Installation",
+    type: "new_installation_broadband",
+    state: "in_progress",
+    priority: "high",
+    customer_name: "Bapak Andi",
+    site_name: "Andi Residence",
+    latitude: -6.1987,
+    longitude: 106.7694,
+    live_location: { latitude: -6.1944, longitude: 106.8229, recorded_at: "2026-05-13T03:00:00Z" },
+    branch_id: "b1",
+    area_id: "a1",
+    assigned_team: [
+      {
+        technician_id: "t1",
+        technician_name: "Budi Santoso",
+        role: "lead",
+        level: "senior",
+        accepted: true,
+        accepted_at: null,
+        active_workload: 1,
+        area_id: "a1",
+        branch_id: "b1",
+        sub_area_id: "sa1",
+        cross_area: false,
+        employee_id: "EMP-001",
+        skills: []
+      }
+    ]
+  },
+  {
+    work_order_id: "wo-2",
+    work_order_number: "WO-20260422-003",
+    title: "Router Troubleshooting",
+    type: "maintenance",
+    state: "dispatched",
+    priority: "high",
+    customer_name: "CV Sinar Data",
+    site_name: "Warehouse Bekasi",
+    latitude: -6.2104,
+    longitude: 106.8451,
+    live_location: { latitude: -6.2104, longitude: 106.8451, recorded_at: "2026-05-13T03:00:00Z" },
+    branch_id: "b1",
+    area_id: "a1",
+    assigned_team: [
+      {
+        technician_id: "t2",
+        technician_name: "Agus Darmawan",
+        role: "lead",
+        level: "senior",
+        accepted: true,
+        accepted_at: null,
+        active_workload: 1,
+        area_id: "a1",
+        branch_id: "b1",
+        sub_area_id: "sa1",
+        cross_area: false,
+        employee_id: "EMP-002",
+        skills: []
+      }
+    ]
+  }
 ];
 
 export default function TechnicianDispatchMap({ items = [] }: { items?: DispatchMapItem[] }) {
@@ -81,15 +151,28 @@ export default function TechnicianDispatchMap({ items = [] }: { items?: Dispatch
 
   const defaultCenter: [number, number] = [-6.2088, 106.8456];
 
-  const validPoints = techPoints.filter(t => t.latitude && t.longitude);
+  // Filter item yang memiliki koordinat (diutamakan live_location, fallback ke site latitude/longitude)
+  const validPoints = techPoints.filter(
+    t => (t.live_location && t.live_location.latitude && t.live_location.longitude) || (t.latitude && t.longitude)
+  );
+
+  // Helper untuk meresolve koordinat (Live GPS > Site Location)
+  const getPointPos = (point: DispatchMapItem): [number, number] => {
+    if (point.live_location && point.live_location.latitude && point.live_location.longitude) {
+      return [point.live_location.latitude, point.live_location.longitude];
+    }
+    return [point.latitude, point.longitude];
+  };
 
   const center: [number, number] = validPoints.length > 0
-    ? [validPoints[0].latitude, validPoints[0].longitude]
+    ? getPointPos(validPoints[0])
     : defaultCenter;
 
   let bounds: L.LatLngBounds | undefined = undefined;
   if (typeof window !== "undefined" && validPoints.length > 0) {
-    bounds = L.latLngBounds(validPoints.map(p => [p.latitude, p.longitude]));
+    bounds = L.latLngBounds(
+      validPoints.map(p => getPointPos(p))
+    );
   }
 
   return (
@@ -97,27 +180,27 @@ export default function TechnicianDispatchMap({ items = [] }: { items?: Dispatch
       {/* Legend Overlay */}
       <div className="absolute top-3 right-3 z-[1000] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-2.5 rounded-lg shadow-sm border border-slate-200/60 dark:border-slate-700/50 text-[10px] space-y-1.5 font-bold w-32">
         <div className="flex items-center justify-between text-slate-400 uppercase tracking-wider border-b pb-1 mb-1 dark:border-slate-700">
-          <span>Status</span>
+          <span>WO Status</span>
           <MapPin className="size-3" />
         </div>
         <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <div className="size-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
-          Available
+          In Progress
         </div>
         <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <div className="size-2 rounded-full bg-blue-500 shadow-[0_0_5px_rgba(59,130,246,0.5)]" />
-          On Work Order
+          Dispatched
         </div>
         <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <div className="size-2 rounded-full bg-amber-500 shadow-[0_0_5px_rgba(245,158,11,0.5)]" />
-          Cross Area
+          Pending Assign
         </div>
       </div>
 
       {/* Label indicator */}
       <div className="absolute top-3 left-3 z-[1000] bg-primary/90 backdrop-blur-md text-white px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
         <div className="size-1.5 bg-white rounded-full animate-pulse" />
-        Live Deployment
+        Live Tracking
       </div>
 
       <div className="h-[320px] sm:h-[380px] w-full z-0 bg-slate-50 dark:bg-slate-900 relative">
@@ -136,58 +219,81 @@ export default function TechnicianDispatchMap({ items = [] }: { items?: Dispatch
 
           <RecenterMap center={center} bounds={bounds} />
 
-          {validPoints.map((point, idx) => (
-            <Marker
-              key={`${point.technician_id || "t"}-${idx}`}
-              position={[point.latitude, point.longitude]}
-              icon={createTechIcon(point.status ?? "unknown", point.technician_name ?? "?")}
-            >
-              <Popup minWidth={200} className="tech-map-popup">
-                <div className="p-2 font-sans">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div
-                      className="size-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm"
-                      style={{ background: getStatusColor(point.status ?? "unknown") }}
-                    >
-                      {(point.technician_name || "?").charAt(0)}
-                    </div>
-                    <div>
-                      <h5 className="text-sm font-bold text-slate-900 leading-none mb-0.5">{point.technician_name ?? "Unnamed Tech"}</h5>
-                      <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Technician</p>
-                    </div>
-                  </div>
+          {validPoints.map((point, idx) => {
+            const leadTech = point.assigned_team?.[0];
+            const techName = leadTech?.technician_name || "Unassigned Tech";
+            const hasLive = !!(point.live_location && point.live_location.latitude && point.live_location.longitude);
+            const markerPos = getPointPos(point);
 
-                  <div className="flex flex-col gap-1.5 border-t pt-2 border-slate-100">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-slate-500 font-medium">Availability</span>
-                      <span
-                        className="font-bold uppercase text-[9px] px-1.5 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor: `${getStatusColor(point.status ?? "unknown")}15`,
-                          color: getStatusColor(point.status ?? "unknown")
-                        }}
+            return (
+              <Marker
+                key={`${point.work_order_id || "wo"}-${idx}`}
+                position={markerPos}
+                icon={createTechIcon(point.state ?? "unknown", techName)}
+              >
+                <Popup minWidth={200} className="tech-map-popup">
+                  <div className="p-2 font-sans">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div
+                        className="size-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm"
+                        style={{ background: getStatusColor(point.state ?? "unknown") }}
                       >
-                        {(point.status ?? "unknown").replace(/_/g, " ")}
-                      </span>
+                        {techName.charAt(0)}
+                      </div>
+                      <div>
+                        <h5 className="text-sm font-bold text-slate-900 leading-none mb-0.5">{techName}</h5>
+                        <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">
+                          Work Order: <span className="font-bold text-primary">{point.work_order_number || "N/A"}</span>
+                        </p>
+                      </div>
                     </div>
 
-                    {point.active_work_order_id && (
+                    <div className="flex flex-col gap-1.5 border-t pt-2 border-slate-100 dark:border-slate-800">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500 font-medium">Active Job</span>
-                        <span className="font-mono font-bold text-blue-600 truncate max-w-[80px]">
-                          {point.active_work_order_id}
+                        <span className="text-slate-500 font-medium">WO Status</span>
+                        <span
+                          className="font-bold uppercase text-[9px] px-1.5 py-0.5 rounded-full"
+                          style={{
+                            backgroundColor: `${getStatusColor(point.state ?? "unknown")}15`,
+                            color: getStatusColor(point.state ?? "unknown")
+                          }}
+                        >
+                          {(point.state ?? "unknown").replace(/_/g, " ")}
                         </span>
                       </div>
-                    )}
 
-                    <div className="text-[9px] text-slate-400 font-mono text-right mt-1">
-                      {point.latitude.toFixed(5)}, {point.longitude.toFixed(5)}
+                      <div className="flex flex-col gap-0.5 text-[11px]">
+                        <span className="text-slate-500 font-medium">Location Site</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 truncate">
+                          {point.site_name || "N/A"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-slate-500 font-medium">Pos Source</span>
+                        <span className={`font-bold text-[9px] uppercase px-1.5 py-0.5 rounded ${hasLive ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/30' : 'text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-800'}`}>
+                          {hasLive ? "📡 Live GPS" : "🏠 Site Loc"}
+                        </span>
+                      </div>
+
+                      {point.live_updated_at && hasLive && (
+                        <div className="flex items-center justify-between text-[11px]">
+                          <span className="text-slate-500 font-medium">Last Ping</span>
+                          <span className="text-slate-600 dark:text-slate-400">
+                            {new Date(point.live_updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="text-[9px] text-slate-400 font-mono text-right mt-1">
+                        GPS: {markerPos[0].toFixed(5)}, {markerPos[1].toFixed(5)}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       </div>
     </Card>

@@ -30,9 +30,9 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
   const isReserved = wo.inventory_reservation_status === "reserved" || forceReserved;
   const isStateValid = wo.state === "dispatched" || forceReserved;
-  const hasFailedOrExpired = 
-    wo.temporary_provisioning_status === "TEMPORARY_FAILURE" || 
-    wo.temporary_provisioning_status === "FAILED" || 
+  const hasFailedOrExpired =
+    wo.temporary_provisioning_status === "TEMPORARY_FAILURE" ||
+    wo.temporary_provisioning_status === "FAILED" ||
     wo.temporary_provisioning_status === "EXPIRED";
   const isGatePassed = (isStateValid && isReserved) || hasFailedOrExpired;
 
@@ -118,7 +118,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
       {wo.ont_configuration && (
         <SectionCard icon={Activity} title="Infrastructure / ONT Configuration">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <SpecCell label="ODP ID" value={wo.ont_configuration.odp_id} />
+            {/* <SpecCell label="ODP ID" value={wo.ont_configuration.odp_id} />
             <SpecCell label="Slot" value={wo.ont_configuration.odp_slot} />
             <SpecCell
               label="ODP Location"
@@ -135,11 +135,22 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
                   ? `${wo.ont_configuration.cable_distance_meters} m`
                   : undefined
               }
-            />
+            /> */}
             <SpecCell label="Model" value={wo.ont_configuration.model} />
             <SpecCell label="Serial #" value={wo.ont_configuration.serial_number} />
             <SpecCell label="VLAN" value={wo.ont_configuration.vlan_id} />
             <SpecCell label="IP Address" value={wo.ont_configuration.ip_address} />
+            <SpecCell label="Auth Status" value={wo.ont_configuration.authentication_status} />
+            <SpecCell label="Radius User" value={wo.ont_configuration.radius_username} />
+            <SpecCell label="Radius Pass" value={wo.ont_configuration.radius_password} />
+            <SpecCell
+              label="Bandwidth"
+              value={
+                wo.ont_configuration.expected_bandwidth_down_mbps && wo.ont_configuration.expected_bandwidth_up_mbps
+                  ? `↓${wo.ont_configuration.expected_bandwidth_down_mbps} / ↑${wo.ont_configuration.expected_bandwidth_up_mbps} Mbps`
+                  : undefined
+              }
+            />
           </div>
         </SectionCard>
       )}
@@ -163,7 +174,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <Field label="Dispatched At" value={fmtDate(wo.warehouse_dispatch.dispatched_at)} />
             <Field label="Dispatched By" value={wo.warehouse_dispatch.dispatched_by} />
-            <Field label="Warehouse Branch" value={wo.warehouse_dispatch.warehouse_branch_id} />
+            <Field label="Warehouse Branch" value={wo.warehouse_dispatch.warehouse_branch.name} />
             {wo.warehouse_dispatch.note && (
               <Field label="Note" value={wo.warehouse_dispatch.note} className="sm:col-span-2" />
             )}
@@ -305,10 +316,10 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
             <Button
               variant={isGatePassed ? "primary" : "outline"}
               disabled={
-                !isGatePassed || 
-                isPending || 
-                wo.temporary_provisioning_status === "TEMPORARY_ACTIVE" || 
-                wo.temporary_provisioning_status === "TEMPORARY" || 
+                !isGatePassed ||
+                isPending ||
+                wo.temporary_provisioning_status === "TEMPORARY_ACTIVE" ||
+                wo.temporary_provisioning_status === "TEMPORARY" ||
                 wo.temporary_provisioning_status === "TEMPORARY_PENDING"
               }
               onClick={() => mutate({
@@ -322,10 +333,10 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
               className="w-full sm:w-auto font-extrabold text-xs uppercase tracking-wider py-2 px-6 flex items-center justify-center gap-2"
             >
               {isPending && <Loader2 className="size-3.5 animate-spin" />}
-              {wo.temporary_provisioning_status === "TEMPORARY_ACTIVE" || wo.temporary_provisioning_status === "TEMPORARY" 
-                ? "Temporary Radius Active" 
-                : wo.temporary_provisioning_status === "TEMPORARY_PENDING" 
-                  ? "Pending..." 
+              {wo.temporary_provisioning_status === "TEMPORARY_ACTIVE" || wo.temporary_provisioning_status === "TEMPORARY"
+                ? "Temporary Radius Active"
+                : wo.temporary_provisioning_status === "TEMPORARY_PENDING"
+                  ? "Pending..."
                   : "Request Temporary Radius"}
             </Button>
           </div>

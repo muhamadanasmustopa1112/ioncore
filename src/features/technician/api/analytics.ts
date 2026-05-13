@@ -4,7 +4,7 @@ import { services } from "@/config/constants";
 import { userServiceApi } from "@/features/user-service/api/client";
 import { QueryConfig } from "@/lib/react-query";
 
-import type { ResponseEnvelope } from "../types/technician-api";
+import type { ResponseEnvelope, DispatchMapParams, DispatchMapResponse } from "../types/technician-api";
 import { TECHNICIAN_KEYS } from "./keys";
 
 const BASE = services.technical;
@@ -19,15 +19,11 @@ export const getRepeatIssues = (
 };
 
 export const getDispatchMap = (
-  params: {
-    branch_id?: string;
-    area_id?: string;
-    technician_id?: string;
-  } = {},
-): Promise<ResponseEnvelope<any>> => {
+  params: DispatchMapParams = {},
+): Promise<ResponseEnvelope<DispatchMapResponse>> => {
   return userServiceApi.get(`${BASE}/dispatch/map`, {
     params,
-  }) as unknown as Promise<ResponseEnvelope<any>>;
+  }) as unknown as Promise<ResponseEnvelope<DispatchMapResponse>>;
 };
 
 export const getTechnicianPerformance = (
@@ -84,15 +80,15 @@ export const useRepeatIssues = ({
 };
 
 type UseDispatchMapOptions = {
-  params?: { branch_id?: string; area_id?: string; technician_id?: string };
-  queryConfig?: QueryConfig<typeof getDispatchMap>;
+  params?: DispatchMapParams;
+  queryConfig?: any;
 };
 
 export const useDispatchMap = ({
   params = {},
   queryConfig,
 }: UseDispatchMapOptions = {}) => {
-  return useQuery({
+  return useQuery<DispatchMapResponse>({
     queryKey: TECHNICIAN_KEYS.dispatchMap(params),
     queryFn: async () => (await getDispatchMap(params)).data,
     retry: false,

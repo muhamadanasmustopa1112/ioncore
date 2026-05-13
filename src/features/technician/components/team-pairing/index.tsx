@@ -6,6 +6,7 @@ import { Loader2, AlertCircle, RefreshCw, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useTeamLeaderDashboard } from "../../api/team-leader";
+import { useDispatchMap } from "../../api/analytics";
 import { useAuthStore } from "@/store/auth-store";
 import { AutoAssignModal } from "../technician-detail/modals";
 import { PairingModal } from "../technician-detail/modals";
@@ -48,6 +49,15 @@ export function TeamPairingDashboard() {
       ...(selectedState ? { state: selectedState } : {}),
       ...(selectedType ? { type: selectedType } : {}),
       ...(isLeader && branchId ? { area_id: branchId } : {}),
+    },
+    queryConfig: { enabled: !!rawUser },
+  });
+
+  const { data: mapData, refetch: refetchMap } = useDispatchMap({
+    params: {
+      ...(selectedState ? { state: selectedState } : {}),
+      ...(selectedType ? { type: selectedType } : {}),
+      ...(isLeader && branchId ? { branch_id: branchId } : {}),
     },
     queryConfig: { enabled: !!rawUser },
   });
@@ -125,7 +135,10 @@ export function TeamPairingDashboard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => refetch()}
+            onClick={() => {
+              refetch();
+              refetchMap();
+            }}
             disabled={isFetching}
             className="text-[10px] uppercase font-bold"
           >
@@ -154,7 +167,7 @@ export function TeamPairingDashboard() {
 
       {/* Live Map Integration */}
       <div className="mb-6 lg:mb-8">
-        <TechnicianDispatchMap items={data.map?.items ?? []} />
+        <TechnicianDispatchMap items={mapData?.items ?? []} />
       </div>
 
       {/* Main Grid */}
