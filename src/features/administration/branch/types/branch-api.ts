@@ -72,6 +72,8 @@ export interface BranchFlatDto {
   parent_branch_name: string | null;
   address?: string;
   geographic_polygon?: GeographicPolygon | string;
+  branch_regional_id?: string | null;
+  branch_area_id?: string | null;
 }
 
 export interface BranchFlatListResponse {

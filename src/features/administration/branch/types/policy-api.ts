@@ -33,6 +33,7 @@ export interface PolicyJson {
   excess_cable_price?: number;
   cable_threshold_meter?: number;
   cable_route_factor?: number;
+  max_cable_run_meter?: number;
   odp_selection_strategy?: OdpSelectionStrategy;
 }
 

@@ -41,12 +41,7 @@ export function ActionsCell({ row }: { row: Row<BranchData> }) {
         areaId: branch._areaId,
       },
       {
-        onSuccess: () => toast.success(`Branch "${branch.name}" deleted`),
-        onError: (err: unknown) =>
-          toast.error(
-            (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
-            "Failed to delete branch",
-          ),
+        onSuccess: () => toast.success(`"${branch.name}" deleted`),
       },
     );
   };

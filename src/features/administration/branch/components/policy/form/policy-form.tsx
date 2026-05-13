@@ -46,6 +46,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
   const [excessCablePrice, setExcessCablePrice] = useState("35000");
   const [cableThresholdMeter, setCableThresholdMeter] = useState("210");
   const [cableRouteFactor, setCableRouteFactor] = useState("1.0");
+  const [maxCableRunMeter, setMaxCableRunMeter] = useState("500");
   const [odpStrategy, setOdpStrategy] = useState<OdpSelectionStrategyType>("nearest");
   const [odpWeightDistance, setOdpWeightDistance] = useState("0.6");
   const [odpWeightCapacity, setOdpWeightCapacity] = useState("0.4");
@@ -67,6 +68,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
       setExcessCablePrice(p.policyJson.excess_cable_price?.toString() ?? "35000");
       setCableThresholdMeter(p.policyJson.cable_threshold_meter?.toString() ?? "210");
       setCableRouteFactor(p.policyJson.cable_route_factor?.toString() ?? "1.0");
+      setMaxCableRunMeter(p.policyJson.max_cable_run_meter?.toString() ?? "500");
       setOdpStrategy((p.policyJson.odp_selection_strategy?.type as OdpSelectionStrategyType) ?? "nearest");
       setOdpWeightDistance(p.policyJson.odp_selection_strategy?.weights?.distance?.toString() ?? "0.6");
       setOdpWeightCapacity(p.policyJson.odp_selection_strategy?.weights?.available_capacity?.toString() ?? "0.4");
@@ -85,6 +87,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
       setExcessCablePrice("35000");
       setCableThresholdMeter("210");
       setCableRouteFactor("1.0");
+      setMaxCableRunMeter("500");
       setOdpStrategy("nearest");
       setOdpWeightDistance("0.6");
       setOdpWeightCapacity("0.4");
@@ -111,6 +114,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
           excess_cable_price: Number(excessCablePrice) || 0,
           cable_threshold_meter: Number(cableThresholdMeter) || 0,
           cable_route_factor: Number(cableRouteFactor) || 1.0,
+          max_cable_run_meter: Number(maxCableRunMeter) || 0,
         }),
         ...(isNoc && {
           odp_selection_strategy: {
@@ -123,7 +127,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
         }),
       },
     });
-  }, [name, description, isActive, slaHours, workStart, workEnd, timezone, taxDefault, contacts, approvalL1, approvalL2, excessCablePrice, cableThresholdMeter, cableRouteFactor, odpStrategy, odpWeightDistance, odpWeightCapacity, onSubmit]);
+  }, [name, description, isActive, slaHours, workStart, workEnd, timezone, taxDefault, contacts, approvalL1, approvalL2, excessCablePrice, cableThresholdMeter, cableRouteFactor, maxCableRunMeter, odpStrategy, odpWeightDistance, odpWeightCapacity, isNoc, onSubmit]);
 
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__policyFormSubmit =
@@ -318,6 +322,19 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                   value={cableRouteFactor}
                   onChange={(e) => setCableRouteFactor(e.target.value)}
                   disabled={isDetailMode}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Max Cable Run (meter)
+                </Label>
+                <Input
+                  type="number"
+                  placeholder="300"
+                  value={maxCableRunMeter}
+                  onChange={(e) => setMaxCableRunMeter(e.target.value)}
+                  disabled={isDetailMode}
+                  min={0}
                 />
               </div>
             </div>

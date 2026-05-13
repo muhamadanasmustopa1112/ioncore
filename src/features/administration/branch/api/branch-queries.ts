@@ -61,6 +61,8 @@ function mapBranchFlatToData(dto: BranchFlatDto): BranchData {
     active: dto.is_active,
     createdAt: "",
     updatedAt: "",
+    _regionalId: dto.branch_regional_id ?? undefined,
+    _areaId: dto.branch_area_id ?? undefined,
   };
 }
 
@@ -255,8 +257,12 @@ export function useCreateBranch() {
       toast.success("Branch created successfully");
       qc.invalidateQueries({ queryKey: branchKeys.all });
     },
-    onError: () => {
-      toast.error("Failed to create branch");
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        (err as Error)?.message ??
+        "Failed to create branch";
+      toast.error(msg);
     },
   });
 }
@@ -287,8 +293,12 @@ export function useUpdateBranch() {
       toast.success("Branch updated successfully");
       qc.invalidateQueries({ queryKey: branchKeys.all });
     },
-    onError: () => {
-      toast.error("Failed to update branch");
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        (err as Error)?.message ??
+        "Failed to update branch";
+      toast.error(msg);
     },
   });
 }
@@ -308,17 +318,32 @@ export function useDeleteBranch() {
       areaId?: string;
     }) => {
       if (level === "regional") return deleteRegional(id);
-      if (level === "area" && regionalId) return deleteArea(regionalId, id);
-      if (level === "sub_area" && regionalId && areaId)
-        return deleteSubArea(regionalId, areaId, id);
+
+      // Flat list doesn't carry parent IDs — fetch detail to resolve them
+      let resolvedRegionalId = regionalId;
+      let resolvedAreaId = areaId;
+      if (!resolvedRegionalId || (level === "sub_area" && !resolvedAreaId)) {
+        const detail = await getBranchById(id);
+        resolvedRegionalId = detail.data?.branch_regional?.id ?? resolvedRegionalId;
+        resolvedAreaId = detail.data?.branch_area?.id ?? resolvedAreaId;
+      }
+
+      if (level === "area" && resolvedRegionalId)
+        return deleteArea(resolvedRegionalId, id);
+      if (level === "sub_area" && resolvedRegionalId && resolvedAreaId)
+        return deleteSubArea(resolvedRegionalId, resolvedAreaId, id);
+
       throw new Error("Missing parent IDs for branch delete");
     },
     onSuccess: () => {
-      toast.success("Branch deleted successfully");
       qc.invalidateQueries({ queryKey: branchKeys.all });
     },
-    onError: () => {
-      toast.error("Failed to delete branch");
+    onError: (err: unknown) => {
+      const msg =
+        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
+        (err as Error)?.message ??
+        "Failed to delete branch";
+      toast.error(msg);
     },
   });
 }
