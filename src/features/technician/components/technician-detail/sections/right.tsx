@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Camera, Clock, History, Maximize2, Building, Image as ImageIcon } from "lucide-react";
+import { Camera, Clock, History, Maximize2, Building, Image as ImageIcon, FileText } from "lucide-react";
 import type { WorkOrderDetailResponse } from "../../../types/technician-api";
 import { SectionCard, Row, Empty, fmtDate } from "../shared";
 import { TimelineEntry } from "../shared-widgets";
@@ -134,12 +134,55 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
         </SectionCard>
       )}
 
-      {/* Audit */}
-      <SectionCard icon={Clock} title="Audit">
-        <div className="space-y-2 text-sm">
+      {/* Audit Trail */}
+      <SectionCard icon={FileText} title="Audit Trail">
+        {/* Basic metadata */}
+        <div className="space-y-2 text-sm mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <Row label="Created" value={fmtDate(wo.created_at)} />
           <Row label="Updated" value={fmtDate(wo.updated_at)} />
           <Row label="ID" value={<span className="font-mono text-[10px]">{wo.id}</span>} />
+        </div>
+
+        {/* Activity stream */}
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Activity Logs</p>
+          {wo.audit_trail && wo.audit_trail.length > 0 ? (
+            <div className="space-y-3">
+              {wo.audit_trail.map((item) => (
+                <div key={item.id} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
+                  <div className="flex items-start justify-between mb-1 gap-2">
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300 capitalize">
+                      {item.action.replace(/_/g, " ")}
+                    </p>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 font-bold font-mono shrink-0">
+                      {item.actor_role}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 mb-2">
+                    By {item.actor_id} · {fmtDate(item.created_at)}
+                  </p>
+
+                  {item.metadata && Object.keys(item.metadata).length > 0 && (
+                    <div className="text-[10px] bg-white dark:bg-slate-900/50 p-2 rounded border border-slate-100 dark:border-slate-800 space-y-2 font-medium text-slate-600">
+                      {Object.entries(item.metadata).map(([key, val]) => {
+                        if (!val) return null;
+                        return (
+                          <div key={key} className="flex flex-col">
+                            <span className="text-slate-400 uppercase text-[8px] font-bold tracking-wider">{key.replace(/_/g, " ")}</span>
+                            <span className="break-all font-mono text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 px-1 py-0.5 rounded mt-0.5 border border-slate-100/50 dark:border-slate-800">
+                              {String(val)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Empty>No audit trail records found.</Empty>
+          )}
         </div>
       </SectionCard>
 
