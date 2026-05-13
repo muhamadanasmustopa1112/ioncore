@@ -35,6 +35,13 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getLeadWeight = (t: any) => {
+  const lvl = (t?.level || "").toLowerCase().trim();
+  if (lvl === "lead") return 2;
+  if (lvl === "senior") return 1;
+  return 0;
+};
+
 const createTechIcon = (status: string, name: string) => {
   const color = getStatusColor(status);
   const initials = (name || "?")
@@ -220,7 +227,9 @@ export default function TechnicianDispatchMap({ items = [] }: { items?: Dispatch
           <RecenterMap center={center} bounds={bounds} />
 
           {validPoints.map((point, idx) => {
-            const leadTech = point.assigned_team?.[0];
+            // Urutkan berdasarkan kombinasi Level + Role agar Lead/Senior sesungguhnya berada di index [0]
+            const sortedTeam = [...(point.assigned_team || [])].sort((a, b) => getLeadWeight(b) - getLeadWeight(a));
+            const leadTech = sortedTeam[0];
             const techName = leadTech?.technician_name || "Unassigned Tech";
             const hasLive = !!(point.live_location && point.live_location.latitude && point.live_location.longitude);
             const markerPos = getPointPos(point);
@@ -241,7 +250,11 @@ export default function TechnicianDispatchMap({ items = [] }: { items?: Dispatch
                         {techName.charAt(0)}
                       </div>
                       <div>
-                        <h5 className="text-sm font-bold text-slate-900 leading-none mb-0.5">{techName}</h5>
+                        <h5 className="text-sm font-bold text-slate-900 leading-none mb-0.5">
+                          {point.assigned_team && point.assigned_team.length > 1
+                            ? `${techName} (+${point.assigned_team.length - 1} partner)`
+                            : techName}
+                        </h5>
                         <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">
                           Work Order: <span className="font-bold text-primary">{point.work_order_number || "N/A"}</span>
                         </p>
@@ -249,6 +262,23 @@ export default function TechnicianDispatchMap({ items = [] }: { items?: Dispatch
                     </div>
 
                     <div className="flex flex-col gap-1.5 border-t pt-2 border-slate-100 dark:border-slate-800">
+                      {/* List Seluruh Anggota Tim */}
+                      {sortedTeam.length > 0 && (
+                        <div className="flex flex-col gap-1 text-[11px] mb-1">
+                          <span className="text-slate-500 font-medium">Team Pair</span>
+                          <div className="flex flex-col gap-1">
+                            {sortedTeam.map((member, mIdx) => (
+                              <div key={mIdx} className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 px-2 py-1 rounded border border-slate-100 dark:border-slate-700/50">
+                                <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[110px]">{member.technician_name}</span>
+                                <span className="text-[8px] uppercase font-black text-slate-400 bg-white dark:bg-slate-800 px-1 py-0.5 rounded border border-slate-100 dark:border-slate-700 shrink-0">
+                                  {member.level || "junior"}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="text-slate-500 font-medium">WO Status</span>
                         <span
