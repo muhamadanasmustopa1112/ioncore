@@ -14,28 +14,36 @@ import { Input } from "@/components/ui/input";
 type LngLat = [number, number]; // [lng, lat] GeoJSON order
 type LatLng = [number, number]; // [lat, lng] Leaflet order
 
-// ─── Parse GeoJSON — supports Polygon + MultiPolygon ─────────────────────────
+// ─── Parse GeoJSON Polygon/MultiPolygon ──────────────────────────────────────
 
-function parseGeo(value: string): { rings: LngLat[][]; point: LngLat | null; error: string | null } {
-  if (!value?.trim()) return { rings: [], point: null, error: null };
+function extractRings(value: string | undefined): LngLat[][] {
+  if (!value?.trim()) return [];
   try {
     const parsed = JSON.parse(value);
-    if (parsed?.type === "Point" && Array.isArray(parsed.coordinates) && parsed.coordinates.length === 2) {
-      return { rings: [], point: parsed.coordinates as LngLat, error: null };
-    }
     if (parsed?.type === "Polygon" && Array.isArray(parsed.coordinates)) {
       const ring = parsed.coordinates[0] as LngLat[];
-      if (!ring || ring.length < 3) return { rings: [], point: null, error: "Polygon must have at least 3 points" };
-      return { rings: [ring], point: null, error: null };
+      if (!ring || ring.length < 3) return [];
+      return [ring];
     }
     if (parsed?.type === "MultiPolygon" && Array.isArray(parsed.coordinates)) {
       const rings: LngLat[][] = parsed.coordinates.map((poly: LngLat[][]) => poly[0]);
-      if (rings.some((r) => r.length < 3)) return { rings: [], point: null, error: "Each polygon ring must have at least 3 points" };
-      return { rings, point: null, error: null };
+      if (rings.some((r) => r.length < 3)) return [];
+      return rings;
     }
-    return { rings: [], point: null, error: "Unsupported format — use GeoJSON Point, Polygon or MultiPolygon" };
+    return [];
   } catch {
-    return { rings: [], point: null, error: "Invalid JSON" };
+    return [];
+  }
+}
+
+function parsePolygonError(value: string | undefined): string | null {
+  if (!value?.trim()) return null;
+  try {
+    const parsed = JSON.parse(value);
+    if (parsed?.type === "Polygon" || parsed?.type === "MultiPolygon") return null;
+    return "Unsupported format — use GeoJSON Polygon or MultiPolygon";
+  } catch {
+    return "Invalid JSON";
   }
 }
 
@@ -43,16 +51,12 @@ function toLeaflet(ring: LngLat[]): LatLng[] {
   return ring.map(([lng, lat]) => [lat, lng]);
 }
 
-function pointToGeoJSON(pt: LngLat): string {
-  return JSON.stringify({ type: "Point", coordinates: pt }, null, 2);
-}
-
 function polygonToGeoJSON(points: LngLat[]): string {
   const ring = [...points, points[0]];
   return JSON.stringify({ type: "Polygon", coordinates: [ring] }, null, 2);
 }
 
-// ─── Dot marker ───────────────────────────────────────────────────────────────
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
 const dotIcon = L.divIcon({
   className: "",
@@ -61,14 +65,24 @@ const dotIcon = L.divIcon({
   iconAnchor: [5, 5],
 });
 
-// ─── Map click handler ────────────────────────────────────────────────────────
+const pinIcon = L.divIcon({
+  className: "",
+  html: `<div style="width:14px;height:14px;border-radius:50%;background:#ef4444;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.5)"></div>`,
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+});
+
+// ─── Map helpers ──────────────────────────────────────────────────────────────
 
 function DrawHandler({ onAdd }: { onAdd: (pt: LngLat) => void }) {
   useMapEvents({ click(e) { onAdd([e.latlng.lng, e.latlng.lat]); } });
   return null;
 }
 
-// ─── Geocoder search (Nominatim) ──────────────────────────────────────────────
+function ClickHandler({ onClick }: { onClick: (lat: number, lng: number) => void }) {
+  useMapEvents({ click(e) { onClick(e.latlng.lat, e.latlng.lng); } });
+  return null;
+}
 
 interface GeocodeResult {
   display_name: string;
@@ -159,12 +173,12 @@ function MapResizeController() {
 
 // ─── Static preview map ───────────────────────────────────────────────────────
 
-function StaticMap({ rings, point }: { rings: LngLat[][]; point: LngLat | null }) {
+function StaticMap({ rings, pinLat, pinLng }: { rings: LngLat[][]; pinLat?: number; pinLng?: number }) {
   const ringPositions = rings.flatMap(toLeaflet);
-  const pointPos: LatLng | null = point ? [point[1], point[0]] : null;
-  const allPositions = pointPos ? [...ringPositions, pointPos] : ringPositions;
+  const pinPos: LatLng | null = pinLat != null && pinLng != null ? [pinLat, pinLng] : null;
+  const allPositions = pinPos ? [...ringPositions, pinPos] : ringPositions;
   const bounds = allPositions.length > 1 ? L.latLngBounds(allPositions) : undefined;
-  const center: LatLng | undefined = !bounds && pointPos ? pointPos : undefined;
+  const center: LatLng | undefined = !bounds && pinPos ? pinPos : undefined;
 
   return (
     <MapContainer
@@ -185,31 +199,48 @@ function StaticMap({ rings, point }: { rings: LngLat[][]; point: LngLat | null }
           pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.15, weight: 2 }}
         />
       ))}
-      {pointPos && <Marker position={pointPos} icon={dotIcon} />}
+      {pinPos && <Marker position={pinPos} icon={pinIcon} />}
     </MapContainer>
   );
 }
 
-// ─── Draw tool ────────────────────────────────────────────────────────────────
+// ─── Drop Pin picker ──────────────────────────────────────────────────────────
 
-function PointPicker({ initial, onSave, onCancel }: { initial: LngLat | null; onSave: (geojson: string) => void; onCancel: () => void }) {
-  const [point, setPoint] = useState<LngLat | null>(initial);
-  const set = useCallback((pt: LngLat) => setPoint(pt), []);
+function PointPicker({
+  initialLat,
+  initialLng,
+  existingRings,
+  onSave,
+  onCancel,
+}: {
+  initialLat?: number;
+  initialLng?: number;
+  existingRings: LngLat[][];
+  onSave: (lat: number, lng: number) => void;
+  onCancel: () => void;
+}) {
+  const [lat, setLat] = useState<number | null>(initialLat ?? null);
+  const [lng, setLng] = useState<number | null>(initialLng ?? null);
 
-  const pos: LatLng | null = point ? [point[1], point[0]] : null;
-  const center: LatLng = initial ? [initial[1], initial[0]] : [-6.2, 106.816];
+  const handleClick = useCallback((clickLat: number, clickLng: number) => {
+    setLat(clickLat);
+    setLng(clickLng);
+  }, []);
+
+  const pinPos: LatLng | null = lat != null && lng != null ? [lat, lng] : null;
+  const center: LatLng = pinPos ?? [-6.2, 106.816];
 
   return (
     <div className="flex flex-col gap-2 h-full">
       <div className="flex items-center gap-1.5 flex-wrap">
         <span className="text-xs text-muted-foreground flex-1">
-          {point ? `Point: ${point[1].toFixed(5)}, ${point[0].toFixed(5)}` : "Click map to drop a pin"}
+          {pinPos ? `Pin: ${lat!.toFixed(5)}, ${lng!.toFixed(5)}` : "Click map to drop a pin"}
         </span>
-        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive" onClick={() => setPoint(null)} disabled={!point}>
+        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive" onClick={() => { setLat(null); setLng(null); }} disabled={!pinPos}>
           <Trash2 className="size-3" /> Clear
         </Button>
         <Button size="sm" variant="outline" className="h-7 px-2 text-xs" onClick={onCancel}>Cancel</Button>
-        <Button size="sm" variant="primary" className="h-7 px-2 text-xs gap-1" onClick={() => point && onSave(pointToGeoJSON(point))} disabled={!point}>
+        <Button size="sm" variant="primary" className="h-7 px-2 text-xs gap-1" onClick={() => lat != null && lng != null && onSave(lat, lng)} disabled={!pinPos}>
           <CheckCheck className="size-3" /> Save
         </Button>
       </div>
@@ -218,20 +249,38 @@ function PointPicker({ initial, onSave, onCancel }: { initial: LngLat | null; on
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapResizeController />
           <MapSearch />
-          <DrawHandler onAdd={set} />
-          {pos && <Marker position={pos} icon={dotIcon} />}
+          <ClickHandler onClick={handleClick} />
+          {existingRings.map((ring, i) => (
+            <Polygon key={i} positions={toLeaflet(ring)} pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.12, weight: 2, dashArray: "4 4" }} />
+          ))}
+          {pinPos && <Marker position={pinPos} icon={pinIcon} />}
         </MapContainer>
       </div>
     </div>
   );
 }
 
-function PolygonPicker({ initial, onSave, onCancel }: { initial: LngLat[]; onSave: (geojson: string) => void; onCancel: () => void }) {
+// ─── Draw Polygon picker ──────────────────────────────────────────────────────
+
+function PolygonPicker({
+  initial,
+  existingPinLat,
+  existingPinLng,
+  onSave,
+  onCancel,
+}: {
+  initial: LngLat[];
+  existingPinLat?: number;
+  existingPinLng?: number;
+  onSave: (geojson: string) => void;
+  onCancel: () => void;
+}) {
   const [points, setPoints] = useState<LngLat[]>(initial);
   const add = useCallback((pt: LngLat) => setPoints((p) => [...p, pt]), []);
 
   const positions = toLeaflet(points);
   const center: LatLng = initial.length > 0 ? toLeaflet(initial)[0] : [-6.2, 106.816];
+  const pinPos: LatLng | null = existingPinLat != null && existingPinLng != null ? [existingPinLat, existingPinLng] : null;
 
   return (
     <div className="flex flex-col gap-2 h-full">
@@ -263,6 +312,7 @@ function PolygonPicker({ initial, onSave, onCancel }: { initial: LngLat[]; onSav
             <Polyline positions={positions} pathOptions={{ color: "#10b981", weight: 2, dashArray: "4 4" }} />
           )}
           {positions.map((pos, i) => <Marker key={i} position={pos} icon={dotIcon} />)}
+          {pinPos && <Marker position={pinPos} icon={pinIcon} />}
         </MapContainer>
       </div>
     </div>
@@ -272,40 +322,60 @@ function PolygonPicker({ initial, onSave, onCancel }: { initial: LngLat[]; onSav
 // ─── Main export ─────────────────────────────────────────────────────────────
 
 interface PolygonPreviewProps {
-  value: string;
-  onChange?: (geojson: string) => void;
+  pinLat?: number;
+  pinLng?: number;
+  onPinChange?: (lat: number, lng: number) => void;
+  polygonValue?: string;
+  onPolygonChange?: (geojson: string) => void;
   readOnly?: boolean;
 }
 
 type PickMode = "point" | "polygon" | null;
 
-export function PolygonPreview({ value, onChange, readOnly }: PolygonPreviewProps) {
+export function PolygonPreview({
+  pinLat,
+  pinLng,
+  onPinChange,
+  polygonValue,
+  onPolygonChange,
+  readOnly,
+}: PolygonPreviewProps) {
   const [pickMode, setPickMode] = useState<PickMode>(null);
 
-  const { rings, point, error } = useMemo(() => parseGeo(value), [value]);
-  const hasGeo = rings.length > 0 || point !== null;
-
-  const handleSave = useCallback((geojson: string) => {
-    onChange?.(geojson);
-    setPickMode(null);
-  }, [onChange]);
+  const rings = useMemo(() => extractRings(polygonValue), [polygonValue]);
+  const polygonError = useMemo(() => parsePolygonError(polygonValue), [polygonValue]);
+  const hasPin = pinLat != null && pinLng != null;
+  const hasPolygon = rings.length > 0;
+  const hasGeo = hasPin || hasPolygon;
 
   // ── Pick mode ──
-  if (pickMode === "point" && onChange) {
+  if (pickMode === "point" && onPinChange) {
     return (
       <div className="mt-2 space-y-2" style={{ minHeight: 320 }}>
-        <PointPicker initial={point} onSave={handleSave} onCancel={() => setPickMode(null)} />
+        <PointPicker
+          initialLat={pinLat}
+          initialLng={pinLng}
+          existingRings={rings}
+          onSave={(lat, lng) => { onPinChange(lat, lng); setPickMode(null); }}
+          onCancel={() => setPickMode(null)}
+        />
       </div>
     );
   }
-  if (pickMode === "polygon" && onChange) {
+  if (pickMode === "polygon" && onPolygonChange) {
     const firstRing = rings[0] ?? [];
     const initial = firstRing.length > 0 && firstRing[0] === firstRing[firstRing.length - 1]
       ? firstRing.slice(0, -1)
       : firstRing;
     return (
       <div className="mt-2 space-y-2" style={{ minHeight: 320 }}>
-        <PolygonPicker initial={initial} onSave={handleSave} onCancel={() => setPickMode(null)} />
+        <PolygonPicker
+          initial={initial}
+          existingPinLat={pinLat}
+          existingPinLng={pinLng}
+          onSave={(geojson) => { onPolygonChange(geojson); setPickMode(null); }}
+          onCancel={() => setPickMode(null)}
+        />
       </div>
     );
   }
@@ -313,26 +383,30 @@ export function PolygonPreview({ value, onChange, readOnly }: PolygonPreviewProp
   // ── Normal mode ──
   return (
     <div className="mt-1 space-y-2">
-      {value?.trim() && error && (
-        <p className="text-xs text-destructive">{error}</p>
+      {polygonValue?.trim() && polygonError && (
+        <p className="text-xs text-destructive">{polygonError}</p>
       )}
 
       {hasGeo && (
         <div className="rounded-md overflow-hidden border border-border" style={{ height: 220 }}>
-          <StaticMap rings={rings} point={point} />
+          <StaticMap rings={rings} pinLat={pinLat} pinLng={pinLng} />
         </div>
       )}
 
-      {!readOnly && onChange && (
+      {!readOnly && (onPinChange || onPolygonChange) && (
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="outline" className="h-7 px-3 text-xs gap-1.5" onClick={() => setPickMode("point")}>
-            <MapPin className="size-3.5" />
-            {point ? "Edit Pin" : "Drop Pin"}
-          </Button>
-          <Button size="sm" variant="outline" className="h-7 px-3 text-xs gap-1.5" onClick={() => setPickMode("polygon")}>
-            <Pencil className="size-3.5" />
-            {rings.length > 0 ? "Edit Polygon" : "Draw Polygon"}
-          </Button>
+          {onPinChange && (
+            <Button size="sm" variant="outline" className="h-7 px-3 text-xs gap-1.5" onClick={() => setPickMode("point")}>
+              <MapPin className="size-3.5" />
+              {hasPin ? "Edit Pin" : "Drop Pin"}
+            </Button>
+          )}
+          {onPolygonChange && (
+            <Button size="sm" variant="outline" className="h-7 px-3 text-xs gap-1.5" onClick={() => setPickMode("polygon")}>
+              <Pencil className="size-3.5" />
+              {hasPolygon ? "Edit Polygon" : "Draw Polygon"}
+            </Button>
+          )}
         </div>
       )}
 
@@ -342,8 +416,8 @@ export function PolygonPreview({ value, onChange, readOnly }: PolygonPreviewProp
         </div>
       )}
 
-      {readOnly && value?.trim() && (
-        <Textarea value={value} readOnly className="font-mono text-xs min-h-[80px] resize-none opacity-60" />
+      {readOnly && polygonValue?.trim() && (
+        <Textarea value={polygonValue} readOnly className="font-mono text-xs min-h-[80px] resize-none opacity-60" />
       )}
     </div>
   );

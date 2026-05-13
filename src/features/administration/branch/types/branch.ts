@@ -14,6 +14,8 @@ export interface BranchData {
   address?: string;
   cable_route_factor?: number;
   geographic_polygon?: GeographicPolygon;
+  lat?: number;
+  long?: number;
   active: boolean;
   createdAt: string;
   updatedAt: string;

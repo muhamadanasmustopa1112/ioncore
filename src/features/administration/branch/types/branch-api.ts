@@ -12,6 +12,8 @@ export interface BranchPayload {
   address?: string;
   geographic_polygon?: GeographicPolygon;
   cable_route_factor?: number;
+  lat?: number;
+  long?: number;
 }
 
 // ─── API Response Envelope ────────────────────────────────────────────────────
@@ -130,6 +132,8 @@ export interface BranchDetailDto {
   address?: string;
   cable_route_factor?: number;
   geographic_polygon?: GeographicPolygon | string | null;
+  lat?: number | null;
+  long?: number | null;
   branch_regional?: { id: string; branch_name: string } | null;
   branch_area?: { id: string; branch_name: string } | null;
   created_at: string;

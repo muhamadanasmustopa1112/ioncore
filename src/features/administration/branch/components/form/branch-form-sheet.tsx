@@ -43,6 +43,8 @@ export function BranchFormSheet() {
     areaId?: string;
     address?: string;
     geographic_polygon?: GeographicPolygon;
+    lat?: number;
+    long?: number;
   }) => {
     const branchPayload = {
       name: formData.name,
@@ -51,6 +53,8 @@ export function BranchFormSheet() {
       type: formData.type,
       address: formData.address,
       geographic_polygon: formData.geographic_polygon,
+      lat: formData.lat,
+      long: formData.long,
     };
 
     if (isNewMode) {

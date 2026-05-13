@@ -35,6 +35,8 @@ const branchSchema = z
     regionalId: z.string().optional(),
     areaId: z.string().optional(),
     address: z.string().optional(),
+    lat: z.number().optional(),
+    long: z.number().optional(),
     geographic_polygon: z.string().optional().refine((val) => {
       if (!val) return true;
       const trimmed = val.trim();
@@ -71,7 +73,7 @@ const parseGeographicPolygon = (value?: string) => {
   }
 };
 
-const toPolygonInputValue = (value?: GeographicPolygon | string | null) => {
+const toPolygonString = (value?: GeographicPolygon | string | null) => {
   if (!value) return "";
   if (typeof value === "string") {
     const trimmed = value.trim();
@@ -98,6 +100,8 @@ interface BranchFormProps {
     areaId?: string;
     address?: string;
     geographic_polygon?: GeographicPolygon;
+    lat?: number;
+    long?: number;
   }) => void;
 }
 
@@ -121,6 +125,8 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
       regionalId: "",
       areaId: "",
       address: "",
+      lat: undefined as number | undefined,
+      long: undefined as number | undefined,
       geographic_polygon: "",
     }),
     [defaultNewType],
@@ -137,7 +143,9 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
         regionalId: selectedBranch._regionalId ?? "",
         areaId: selectedBranch._areaId ?? "",
         address: selectedBranch.address ?? "",
-        geographic_polygon: toPolygonInputValue(selectedBranch.geographic_polygon),
+        lat: selectedBranch.lat,
+        long: selectedBranch.long,
+        geographic_polygon: toPolygonString(selectedBranch.geographic_polygon),
       };
     }
     return undefined;
@@ -195,6 +203,8 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
       areaId: isSubArea ? values.areaId : undefined,
       address: values.address?.trim() || undefined,
       geographic_polygon: parseGeographicPolygon(values.geographic_polygon),
+      lat: values.lat,
+      long: values.long,
     });
   };
 
@@ -466,8 +476,11 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
             </div>
             <div className="space-y-2">
               <PolygonPreview
-                value={watch("geographic_polygon") ?? ""}
-                onChange={isDetailMode ? undefined : (v) => setValue("geographic_polygon", v)}
+                pinLat={watch("lat")}
+                pinLng={watch("long")}
+                onPinChange={isDetailMode ? undefined : (lat, lng) => { setValue("lat", lat); setValue("long", lng); }}
+                polygonValue={watch("geographic_polygon") ?? ""}
+                onPolygonChange={isDetailMode ? undefined : (v) => setValue("geographic_polygon", v)}
                 readOnly={isDetailMode}
               />
               <Label className="text-xs font-medium text-muted-foreground">
