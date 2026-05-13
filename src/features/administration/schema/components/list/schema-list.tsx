@@ -9,7 +9,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
-import { useQueryStates, parseAsString } from "nuqs";
+import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -36,21 +36,43 @@ const SCHEMA_TABS: { value: SchemaType; label: string }[] = [
   { value: "service", label: "Service" },
   { value: "commission", label: "Commission" },
   { value: "suspension", label: "Suspension" },
+  { value: "work_order", label: "Work Order" },
 ];
 
 export function SchemaList() {
-  const { activeSchemaType, setActiveSchemaType } =
-    useSchemaStore();
+  const { setActiveSchemaType } = useSchemaStore();
 
-  const [filter, setFilter] = useQueryStates({
-    search: parseAsString,
+  const [urlParams, setUrlParams] = useQueryStates({
+    sc_type:   parseAsString.withDefault("billing"),
+    sc_search: parseAsString,
+    sc_page:   parseAsInteger.withDefault(1),
+    sc_limit:  parseAsInteger.withDefault(10),
   });
-  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const activeSchemaType = urlParams.sc_type as SchemaType;
+  const search           = urlParams.sc_search ?? "";
+  const pagination       = { page: urlParams.sc_page, limit: urlParams.sc_limit };
+
+  // Keep store in sync so SchemaFormSheet renders the right builder
   useEffect(() => {
-    setPagination((prev) => ({ ...prev, page: 1 }));
-  }, [activeSchemaType]);
+    setActiveSchemaType(activeSchemaType);
+  }, [activeSchemaType, setActiveSchemaType]);
+
+  // Reset page when type changes
+  const [prevType, setPrevType] = useState(activeSchemaType);
+  if (prevType !== activeSchemaType) {
+    setPrevType(activeSchemaType);
+    // nuqs batches — set page to 1 only if not already 1
+    if (pagination.page !== 1) setUrlParams({ sc_page: 1 });
+  }
+
+  // Adapter for DataGridPagination's setFilter interface
+  const setPagination = (updater: ((prev: { page: number; limit: number }) => { page: number; limit: number }) | { page: number; limit: number }) => {
+    const next = typeof updater === "function" ? updater(pagination) : updater;
+    setUrlParams({ sc_page: next.page, sc_limit: next.limit });
+  };
+
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const { data: queryResult, isLoading } = useSchemaList({
     schemaType: activeSchemaType,
@@ -61,15 +83,15 @@ export function SchemaList() {
   const rows = queryResult?.schemas ?? [];
 
   const filteredData = useMemo(() => {
-    if (!filter.search) return rows;
-    const q = filter.search.toLowerCase();
+    if (!search) return rows;
+    const q = search.toLowerCase();
     return rows.filter(
       (r: SchemaRecord) =>
         r.name.toLowerCase().includes(q) ||
         r.customer_type.toLowerCase().includes(q) ||
         (r.latest_version ?? "").toLowerCase().includes(q)
     );
-  }, [rows, filter.search]);
+  }, [rows, search]);
 
   const pageCountFromMeta = getPageCount(queryResult?.metadata, pagination.limit);
 
@@ -89,7 +111,7 @@ export function SchemaList() {
       const next = typeof updater === "function"
         ? updater({ pageIndex: pagination.page - 1, pageSize: pagination.limit })
         : updater;
-      setPagination({ page: next.pageIndex + 1, limit: next.pageSize });
+      setUrlParams({ sc_page: next.pageIndex + 1, sc_limit: next.pageSize });
     },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -109,17 +131,13 @@ export function SchemaList() {
       }}
       isLoading={isLoading}
     >
-      {/* Schema Type Tabs */}
-      <Tabs value={activeSchemaType} onValueChange={(v) => setActiveSchemaType(v as SchemaType)}>
-        <TabsList
-          variant="line"
-          size="sm"
-          className="w-full justify-start"
-        >
+      <Tabs
+        value={activeSchemaType}
+        onValueChange={(v) => setUrlParams({ sc_type: v, sc_page: 1, sc_search: null })}
+      >
+        <TabsList variant="line" size="sm" className="w-full justify-start">
           {SCHEMA_TABS.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
+            <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
           ))}
         </TabsList>
       </Tabs>
@@ -131,18 +149,16 @@ export function SchemaList() {
               <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
               <Input
                 placeholder="Search schemas..."
-                value={filter.search || ""}
-                onChange={(e) =>
-                  setFilter({ ...filter, search: e.target.value })
-                }
+                value={search}
+                onChange={(e) => setUrlParams({ sc_search: e.target.value || null, sc_page: 1 })}
                 className="w-full ps-9"
               />
-              {filter.search && (
+              {search && (
                 <Button
                   mode="icon"
                   variant="ghost"
                   className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-                  onClick={() => setFilter({ ...filter, search: "" })}
+                  onClick={() => setUrlParams({ sc_search: null })}
                 >
                   <X />
                 </Button>
@@ -152,9 +168,7 @@ export function SchemaList() {
         </CardHeader>
         <CardTable>
           <ScrollArea>
-            <DataGridContainer className="w-full">
-              <DataGridTable />
-            </DataGridContainer>
+            <DataGridContainer className="w-full"><DataGridTable /></DataGridContainer>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </CardTable>

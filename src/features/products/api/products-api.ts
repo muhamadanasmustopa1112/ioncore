@@ -5,6 +5,7 @@ import type {
   BroadbandPlan,
   BroadbandPlanListData,
   BroadbandPlanListParams,
+  BroadbandPlanBranchesData,
   CreateBroadbandPlanPayload,
   EnterpriseService,
   EnterpriseServiceListData,
@@ -96,9 +97,15 @@ export function adminDeleteBroadbandPlan(id: string) {
   );
 }
 
-export function adminAddBranchToBroadbandPlan(planId: string, branchId: string) {
+export function adminGetBroadbandPlanBranches(planId: string) {
+  return cast<ProductEnvelope<BroadbandPlanBranchesData>>(
+    userServiceApi.get(`${BASE}/admin/broadband-plans/${planId}/branches`)
+  );
+}
+
+export function adminAddBranchToBroadbandPlan(planId: string, branchIds: string[]) {
   return cast<ProductEnvelope<null>>(
-    userServiceApi.post(`${BASE}/admin/broadband-plans/${planId}/branches`, { branch_id: branchId })
+    userServiceApi.post(`${BASE}/admin/broadband-plans/${planId}/branches`, { branch_ids: branchIds })
   );
 }
 

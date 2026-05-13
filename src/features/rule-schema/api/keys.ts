@@ -22,4 +22,9 @@ export const ruleSchemaKeys = {
     [...ruleSchemaKeys.all, "customer-overrides", id] as const,
   customerOverrideDiff: (id: string) =>
     [...ruleSchemaKeys.all, "customer-overrides", id, "content-diff"] as const,
+
+  broadbandPlanSchemas: (params?: unknown) =>
+    [...ruleSchemaKeys.all, "broadband-plan-schemas", params] as const,
+  broadbandPlanSchema: (id: string) =>
+    [...ruleSchemaKeys.all, "broadband-plan-schemas", id] as const,
 };

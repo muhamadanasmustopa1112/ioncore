@@ -1,6 +1,7 @@
 import { services } from "@/config/constants";
 import { userServiceApi } from "@/features/user-service/api/client";
 import { SchemaRecord, SchemaVersion } from "../types";
+import { SCHEMA_TYPE_API } from "../types/schema-type-constants";
 
 const BASE = `${services.ruleScheme}/schemas`;
 const VERSIONS_BASE = `${services.ruleScheme}/schema-versions`;
@@ -111,14 +112,6 @@ export interface AddDecisionPayload {
   decision: "APPROVED" | "REJECTED" | "PENDING";
   notes?: string;
 }
-
-const SCHEMA_TYPE_API: Record<string, string> = {
-  billing: "BILLING",
-  onboarding: "ONBOARDING",
-  service: "SERVICE",
-  commission: "COMMISSION",
-  suspension: "SUSPENSION",
-};
 
 function toApiSchemaType(type: string): string {
   return SCHEMA_TYPE_API[type] ?? type;

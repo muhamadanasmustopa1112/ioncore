@@ -6,6 +6,7 @@ import { ServiceForm } from "./service/service-form";
 import { SuspensionForm } from "./suspension/suspension-form";
 import { CommissionForm } from "./commission/commission-form";
 import { OnboardingForm } from "./onboarding/onboarding-form";
+import { WorkOrderForm } from "./work-order/work-order-form";
 
 export function SchemaBuilder() {
   const { activeSchemaType } = useSchemaStore();
@@ -21,5 +22,7 @@ export function SchemaBuilder() {
       return <CommissionForm />;
     case "onboarding":
       return <OnboardingForm />;
+    case "work_order":
+      return <WorkOrderForm />;
   }
 }

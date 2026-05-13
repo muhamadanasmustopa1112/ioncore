@@ -107,7 +107,7 @@ export function CreateLeadPage() {
   );
   const createLead = useCreateLead();
 
-  const activeBranches = useMemo(() => branches.filter((b) => b.active), [branches]);
+  const activeBranches = useMemo(() => branches.filter((b) => b.active && b.level === "area"), [branches]);
 
   const customerOptions = useMemo(
     () => (source === "referral" ? (customersData?.items ?? []) : []),

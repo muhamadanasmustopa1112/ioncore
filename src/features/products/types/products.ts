@@ -14,9 +14,29 @@ export interface PaginationMeta {
 
 export type BroadbandCustomerType = "broadband" | "business" | "both";
 
+export interface BranchInfo {
+  id: string;
+  name: string;
+  level: string;
+  type: string;
+}
+
+export interface BroadbandPlanBranch {
+  id: string;
+  broadband_plan_id: string;
+  branch_id: string;
+  created_at: string;
+  created_by: string;
+}
+
+export interface BroadbandPlanBranchesData {
+  branches: BranchInfo[];
+}
+
 export interface BroadbandPlan {
   id: string;
   name: string;
+  channel: string;
   speed_download_mbps: number;
   speed_upload_mbps: number;
   price: number;
@@ -25,9 +45,11 @@ export interface BroadbandPlan {
   temporary_activation_window_hours: number;
   bandwidth_profile_id: string;
   is_active: boolean;
-  branches?: string[];
+  branches?: BranchInfo[];
   created_at: string;
   updated_at: string;
+  created_by: string;
+  updated_by: string;
 }
 
 export interface BroadbandPlanListData {
@@ -38,6 +60,7 @@ export interface BroadbandPlanListData {
 export interface BroadbandPlanListParams {
   branch_id?: string;
   customer_type?: BroadbandCustomerType;
+  channel?: string;
   name?: string;
   is_active?: boolean;
   page?: number;
@@ -52,7 +75,6 @@ export interface CreateBroadbandPlanPayload {
   one_time_charge: number;
   customer_type: BroadbandCustomerType;
   temporary_activation_window_hours: number;
-  bandwidth_profile_id?: string;
   is_active: boolean;
 }
 

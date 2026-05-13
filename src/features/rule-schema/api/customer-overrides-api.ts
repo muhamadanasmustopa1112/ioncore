@@ -106,29 +106,25 @@ export const useCustomerOverrideDiff = (id: string, enabled = true) =>
     retry: false,
   });
 
+const CO_PREFIX = [...ruleSchemaKeys.all, "customer-overrides"] as const;
+
 export const useCreateCustomerOverride = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreateCustomerOverrideRequest) =>
       createCustomerOverride(payload),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ruleSchemaKeys.customerOverrides() }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CO_PREFIX }),
   });
 };
 
 export const useUpdateCustomerOverride = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      payload,
-    }: {
-      id: string;
-      payload: UpdateCustomerOverrideRequest;
-    }) => updateCustomerOverride(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateCustomerOverrideRequest }) =>
+      updateCustomerOverride(id, payload),
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: ruleSchemaKeys.customerOverride(id) });
-      qc.invalidateQueries({ queryKey: ruleSchemaKeys.customerOverrides() });
+      qc.invalidateQueries({ queryKey: CO_PREFIX });
     },
   });
 };
@@ -137,7 +133,6 @@ export const useDeleteCustomerOverride = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteCustomerOverride(id),
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ruleSchemaKeys.customerOverrides() }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CO_PREFIX }),
   });
 };

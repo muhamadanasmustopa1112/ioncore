@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { getApiError } from "@/lib/helpers";
 import type {
   BroadbandPlan,
+  BroadbandPlanBranchesData,
   BroadbandPlanListData,
   BroadbandPlanListParams,
   CreateBroadbandPlanPayload,
@@ -23,6 +25,7 @@ import {
   getActiveAddon,
   adminListBroadbandPlans,
   adminGetBroadbandPlan,
+  adminGetBroadbandPlanBranches,
   adminCreateBroadbandPlan,
   adminUpdateBroadbandPlan,
   adminDeleteBroadbandPlan,
@@ -147,6 +150,19 @@ export function useAdminBroadbandPlan(id: string | null) {
   });
 }
 
+export function useAdminBroadbandPlanBranches(planId: string | null) {
+  return useQuery<BroadbandPlanBranchesData>({
+    queryKey: [...productKeys.broadbandPlan(planId!), "branches"],
+    queryFn: async () => {
+      const res = await adminGetBroadbandPlanBranches(planId!);
+      return res.data;
+    },
+    enabled: !!planId,
+    placeholderData: { branches: [] },
+    retry: false,
+  });
+}
+
 export function useCreateBroadbandPlan() {
   const qc = useQueryClient();
   return useMutation({
@@ -155,7 +171,7 @@ export function useCreateBroadbandPlan() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Broadband plan created.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to create plan."),
+    onError: (err) => toast.error(getApiError(err, "Failed to create plan.")),
   });
 }
 
@@ -169,7 +185,7 @@ export function useUpdateBroadbandPlan() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Broadband plan updated.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to update plan."),
+    onError: (err) => toast.error(getApiError(err, "Failed to update plan.")),
   });
 }
 
@@ -181,20 +197,20 @@ export function useDeleteBroadbandPlan() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Broadband plan deleted.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to delete plan."),
+    onError: (err) => toast.error(getApiError(err, "Failed to delete plan.")),
   });
 }
 
 export function useAddBranchToBroadbandPlan() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ planId, branchId }: { planId: string; branchId: string }) =>
-      adminAddBranchToBroadbandPlan(planId, branchId),
+    mutationFn: ({ planId, branchIds }: { planId: string; branchIds: string[] }) =>
+      adminAddBranchToBroadbandPlan(planId, branchIds),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Branch assigned.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to assign branch."),
+    onError: (err) => toast.error(getApiError(err, "Failed to assign branch.")),
   });
 }
 
@@ -207,7 +223,7 @@ export function useRemoveBranchFromBroadbandPlan() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Branch removed.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to remove branch."),
+    onError: (err) => toast.error(getApiError(err, "Failed to remove branch.")),
   });
 }
 
@@ -233,7 +249,7 @@ export function useCreateEnterpriseService() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Enterprise service created.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to create service."),
+    onError: (err) => toast.error(getApiError(err, "Failed to create service.")),
   });
 }
 
@@ -247,7 +263,7 @@ export function useUpdateEnterpriseService() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Enterprise service updated.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to update service."),
+    onError: (err) => toast.error(getApiError(err, "Failed to update service.")),
   });
 }
 
@@ -259,7 +275,7 @@ export function useDeleteEnterpriseService() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Enterprise service deleted.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to delete service."),
+    onError: (err) => toast.error(getApiError(err, "Failed to delete service.")),
   });
 }
 
@@ -272,7 +288,7 @@ export function useAddBranchToEnterpriseService() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Branch assigned.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to assign branch."),
+    onError: (err) => toast.error(getApiError(err, "Failed to assign branch.")),
   });
 }
 
@@ -285,7 +301,7 @@ export function useRemoveBranchFromEnterpriseService() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Branch removed.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to remove branch."),
+    onError: (err) => toast.error(getApiError(err, "Failed to remove branch.")),
   });
 }
 
@@ -322,7 +338,7 @@ export function useCreateAddon() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Add-on created.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to create add-on."),
+    onError: (err) => toast.error(getApiError(err, "Failed to create add-on.")),
   });
 }
 
@@ -336,7 +352,7 @@ export function useUpdateAddon() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Add-on updated.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to update add-on."),
+    onError: (err) => toast.error(getApiError(err, "Failed to update add-on.")),
   });
 }
 
@@ -348,6 +364,6 @@ export function useDeleteAddon() {
       qc.invalidateQueries({ queryKey: productKeys.all });
       toast.success("Add-on deleted.");
     },
-    onError: (err: Error) => toast.error(err.message ?? "Failed to delete add-on."),
+    onError: (err) => toast.error(getApiError(err, "Failed to delete add-on.")),
   });
 }

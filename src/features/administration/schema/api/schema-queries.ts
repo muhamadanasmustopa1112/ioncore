@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { getApiError } from "@/lib/helpers";
 import {
   listSchemas,
   getSchema,
@@ -132,7 +133,7 @@ export function useCreateSchema() {
       toast.success("Schema created.");
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Failed to create schema.");
+      toast.error(getApiError(err, "Failed to create schema."));
     },
   });
 }
@@ -156,7 +157,7 @@ export function useUpdateSchemaContent() {
       }
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Failed to save schema.");
+      toast.error(getApiError(err, "Failed to save schema."));
     },
   });
 }
@@ -173,12 +174,8 @@ export function usePublishSchemaVersion() {
       closeApprovalPanel();
       toast.success("Schema published.");
     },
-    onError: (err: unknown) => {
-      const msg =
-        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
-        (err as Error)?.message ??
-        "Failed to publish.";
-      toast.error(msg);
+    onError: (err) => {
+      toast.error(getApiError(err, "Failed to publish."));
     },
   });
 }
@@ -200,7 +197,7 @@ export function useCloneSchemaVersion() {
       toast.success("Schema cloned.");
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Failed to clone.");
+      toast.error(getApiError(err, "Failed to clone."));
     },
   });
 }
@@ -216,7 +213,7 @@ export function useRollbackSchemaVersion() {
       toast.success("Rolled back.");
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Failed to rollback.");
+      toast.error(getApiError(err, "Failed to rollback."));
     },
   });
 }
@@ -272,7 +269,7 @@ export function useSubmitForReview() {
       toast.success("Submitted for review.");
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Failed to submit for review.");
+      toast.error(getApiError(err, "Failed to submit for review."));
     },
   });
 }
@@ -328,7 +325,7 @@ export function useAddApprovalDecision() {
       toast.success("Decision submitted.");
     },
     onError: (err: Error) => {
-      toast.error(err.message ?? "Failed to submit decision.");
+      toast.error(getApiError(err, "Failed to submit decision."));
     },
   });
 }

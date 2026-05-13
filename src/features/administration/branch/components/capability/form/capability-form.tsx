@@ -25,6 +25,7 @@ const CAPABILITY_LABELS: Record<keyof CapabilityJson, string> = {
   monitoring: "Monitoring",
   collection: "Collection",
   approval: "Approval",
+  auto_assignment: "Auto Assignment",
 };
 
 const DEFAULT_JSON: CapabilityJson = {
@@ -35,6 +36,7 @@ const DEFAULT_JSON: CapabilityJson = {
   monitoring: false,
   collection: false,
   approval: false,
+  auto_assignment: false,
 };
 
 interface CapabilityFormProps {

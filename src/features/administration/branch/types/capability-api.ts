@@ -10,6 +10,7 @@ export interface CapabilityJson {
   monitoring: boolean;
   collection: boolean;
   approval: boolean;
+  auto_assignment: boolean;
 }
 
 // ─── Capability Payload ───────────────────────────────────────────────────────

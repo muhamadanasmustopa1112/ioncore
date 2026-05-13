@@ -18,7 +18,6 @@ const schema = z.object({
   one_time_charge: z.number({ error: "Required" }).min(0, "Required"),
   customer_type: z.enum(["broadband", "business", "both"]),
   temporary_activation_window_hours: z.number({ error: "Required" }).min(0, "Required"),
-  bandwidth_profile_id: z.string().optional(),
   is_active: z.boolean(),
 });
 
@@ -38,7 +37,7 @@ export function PlanForm({ selected, mode, onSubmit }: PlanFormProps) {
     defaultValues: {
       name: "", speed_download_mbps: 0, speed_upload_mbps: 0,
       price: 0, one_time_charge: 0, customer_type: "broadband",
-      temporary_activation_window_hours: 24, bandwidth_profile_id: "", is_active: true,
+      temporary_activation_window_hours: 24, is_active: true,
     },
   });
 
@@ -52,16 +51,15 @@ export function PlanForm({ selected, mode, onSubmit }: PlanFormProps) {
         one_time_charge: selected.one_time_charge,
         customer_type: selected.customer_type,
         temporary_activation_window_hours: selected.temporary_activation_window_hours,
-        bandwidth_profile_id: selected.bandwidth_profile_id ?? "",
         is_active: selected.is_active,
       });
     } else if (!selected && mode === "new") {
-      reset({ name: "", speed_download_mbps: 0, speed_upload_mbps: 0, price: 0, one_time_charge: 0, customer_type: "broadband", temporary_activation_window_hours: 24, bandwidth_profile_id: "", is_active: true });
+      reset({ name: "", speed_download_mbps: 0, speed_upload_mbps: 0, price: 0, one_time_charge: 0, customer_type: "broadband", temporary_activation_window_hours: 24, is_active: true });
     }
   }, [selected, mode, reset]);
 
   const submitRef = useRef<(() => void) | undefined>(undefined);
-  submitRef.current = handleSubmit((v) => onSubmit({ ...v, bandwidth_profile_id: v.bandwidth_profile_id || undefined }));
+  submitRef.current = handleSubmit((v) => onSubmit(v));
 
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__productFormSubmit = () => submitRef.current?.();
@@ -132,9 +130,7 @@ export function PlanForm({ selected, mode, onSubmit }: PlanFormProps) {
           <Input type="number" {...register("temporary_activation_window_hours", { valueAsNumber: true })} disabled={isDetail} />
         </Field>
 
-        <Field label="Bandwidth Profile ID">
-          <Input placeholder="Optional" {...register("bandwidth_profile_id")} disabled={isDetail} />
-        </Field>
+
       </div>
     </ScrollArea>
   );

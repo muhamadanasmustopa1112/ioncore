@@ -15,17 +15,24 @@ import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useQueryStates, parseAsString } from "nuqs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useBranchList } from "@/features/administration/branch/api/branch-queries";
 import { useAdminBroadbandPlans, useDeleteBroadbandPlan } from "../../api/products-queries";
 import type { BroadbandPlan } from "../../types/products";
 import { getPlanColumns } from "./plan-columns";
 import { PlanSheet } from "./plan-sheet";
 
 export function PlanList() {
-  const { data, isLoading } = useAdminBroadbandPlans();
-  const deletePlan = useDeleteBroadbandPlan();
-
   const [pagination, setPagination] = useState({ limit: 10, page: 1 });
-  const [search, setSearch] = useQueryStates({ pl_search: parseAsString });
+  const [search, setSearch] = useQueryStates({ pl_search: parseAsString, pl_branch: parseAsString });
+
+  const { data: branchesData } = useBranchList({ per_page: 200 });
+  const branches = branchesData ?? [];
+
+  const { data, isLoading } = useAdminBroadbandPlans(
+    search.pl_branch ? { branch_id: search.pl_branch } : {}
+  );
+  const deletePlan = useDeleteBroadbandPlan();
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -86,6 +93,20 @@ export function PlanList() {
                     </Button>
                   )}
                 </div>
+                <Select
+                  value={search.pl_branch || "all"}
+                  onValueChange={(v) => setSearch({ pl_branch: v === "all" ? null : v })}
+                >
+                  <SelectTrigger className="h-9 w-[180px]">
+                    <SelectValue placeholder="All branches" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All branches</SelectItem>
+                    {branches.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button variant="primary" className="h-9 px-4 text-sm font-semibold" onClick={openNew}>
                   <RiAddLine className="size-4" /> Add Plan
                 </Button>

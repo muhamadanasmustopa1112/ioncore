@@ -11,14 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { useSchemaStore } from "../store/schema";
 import { SchemaBuilder } from "./builder/schema-builder";
-
-const SCHEMA_LABELS: Record<string, string> = {
-  billing: "Billing Schema",
-  onboarding: "Onboarding Schema",
-  service: "Service Schema",
-  commission: "Commission Schema",
-  suspension: "Suspension Schema",
-};
+import { SCHEMA_TYPE_LABEL } from "../types/schema-type-constants";
 
 export function SchemaFormSheet() {
   const {
@@ -32,7 +25,9 @@ export function SchemaFormSheet() {
   const isNewMode = form === "new";
   const isCloneMode = form === "clone";
   const isDetailMode = form === "details";
-  const label = SCHEMA_LABELS[activeSchemaType] ?? "Schema";
+  const label = activeSchemaType
+    ? `${SCHEMA_TYPE_LABEL[activeSchemaType.toUpperCase()] ?? activeSchemaType} Schema`
+    : "Schema";
 
   return (
     <Sheet open={schemaSheetOpen} onOpenChange={(open) => !open && closeSchemaSheet()}>

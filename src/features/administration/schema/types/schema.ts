@@ -3,7 +3,8 @@ export type SchemaType =
   | "billing"
   | "service"
   | "commission"
-  | "suspension";
+  | "suspension"
+  | "work_order";
 
 export type SchemaStatus =
   | "draft"

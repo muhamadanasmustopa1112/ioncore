@@ -14,6 +14,7 @@ export interface CapabilityData {
     monitoring: boolean;
     collection: boolean;
     approval: boolean;
+    auto_assignment: boolean;
   };
   createdAt: string;
   updatedAt: string;

@@ -1,14 +1,12 @@
 "use client";
 
+import { useEffect } from "react";
 import {
   RiAddLine,
   RiDownloadLine,
   RiFileTextLine,
-  RiGroupLine,
   RiUserSettingsLine,
-  RiRefreshLine,
-  RiArrowUpLine,
-  RiGridLine,
+  RiWifiLine,
 } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +19,7 @@ import {
 } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
+import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { useSchemaStore, SchemaView } from "../store/schema";
 import { useSchemaList } from "../api/schema-queries";
 import { SchemaList } from "./list/schema-list";
@@ -33,11 +32,13 @@ import { CustomerOverridePanel } from "./policy/customer-override-panel";
 import { ServiceChangePolicyPanel } from "./policy/service-change-policy-panel";
 import { UpgradeEligibilityPanel } from "./policy/upgrade-eligibility-panel";
 import { ChangeMatrixPanel } from "./policy/change-matrix-panel";
+import { BroadbandPlanSchemasPanel } from "./policy/broadband-plan-schemas-panel";
 
 const VIEWS: { value: SchemaView; label: string; icon: React.ReactNode }[] = [
   { value: "schemas", label: "Schema Library", icon: <RiFileTextLine className="size-3.5" /> },
   // { value: "assignment-rules", label: "Assignment Rules", icon: <RiGroupLine className="size-3.5" /> },
   { value: "customer-overrides", label: "Customer Overrides", icon: <RiUserSettingsLine className="size-3.5" /> },
+  { value: "broadband-plan-schemas", label: "Broadband Plan Schemas", icon: <RiWifiLine className="size-3.5" /> },
   // { value: "change-policies", label: "Change Policies", icon: <RiRefreshLine className="size-3.5" /> },
   // { value: "upgrade-rules", label: "Upgrade Eligibility", icon: <RiArrowUpLine className="size-3.5" /> },
   // { value: "change-matrix", label: "Change Matrix", icon: <RiGridLine className="size-3.5" /> },
@@ -47,6 +48,7 @@ const VIEW_TITLES: Record<SchemaView, string> = {
   "schemas": "Schema Library",
   "assignment-rules": "Assignment Rules Manager",
   "customer-overrides": "Per-Customer Schema Override",
+  "broadband-plan-schemas": "Broadband Plan Schema Assignments",
   "change-policies": "Service Change Policy",
   "upgrade-rules": "Package Upgrade Eligibility",
   "change-matrix": "Instant vs WO-based Change Matrix",
@@ -57,14 +59,42 @@ function ViewContent({ view }: { view: SchemaView }) {
     case "schemas": return <SchemaList />;
     case "assignment-rules": return <AssignmentRulesPanel />;
     case "customer-overrides": return <CustomerOverridePanel />;
+    case "broadband-plan-schemas": return <BroadbandPlanSchemasPanel />;
     case "change-policies": return <ServiceChangePolicyPanel />;
     case "upgrade-rules": return <UpgradeEligibilityPanel />;
     case "change-matrix": return <ChangeMatrixPanel />;
   }
 }
 
+const ALL_PANEL_PARAMS = {
+  sc_view:  parseAsString,
+  sc_type:  parseAsString, sc_search: parseAsString,
+  sc_page:  parseAsInteger, sc_limit: parseAsInteger,
+  bps_page: parseAsInteger, bps_size: parseAsInteger,
+  bps_plan: parseAsString,  bps_search: parseAsString,
+  co_page:  parseAsInteger, co_size:  parseAsInteger,
+  co_search: parseAsString,
+};
+
 export function SchemaManagementPage() {
-  const { openSchemaSheet, view, setView, activeSchemaType } = useSchemaStore();
+  const { openSchemaSheet, setView, activeSchemaType } = useSchemaStore();
+  const [urlParams, setPanelParams] = useQueryStates(ALL_PANEL_PARAMS);
+
+  // URL is source of truth for the active view
+  const view = (urlParams.sc_view as SchemaView | null) ?? "schemas";
+
+  // Keep Zustand in sync (used by SchemaFormSheet & toolbar)
+  useEffect(() => { setView(view); }, [view, setView]);
+
+  function handleSetView(v: SchemaView) {
+    setPanelParams({
+      sc_view: v,
+      sc_type: null, sc_search: null, sc_page: null, sc_limit: null,
+      bps_page: null, bps_size: null, bps_plan: null, bps_search: null,
+      co_page: null, co_size: null, co_search: null,
+    });
+  }
+
   const { data: schemaResult } = useSchemaList({ schemaType: activeSchemaType });
   const schemaCount = schemaResult?.metadata?.total ?? schemaResult?.schemas?.length ?? 0;
 
@@ -116,7 +146,7 @@ export function SchemaManagementPage() {
       </Toolbar>
 
       {/* View switcher */}
-      <Tabs value={view} onValueChange={(v) => setView(v as SchemaView)} className="mt-4">
+      <Tabs value={view} onValueChange={(v) => handleSetView(v as SchemaView)} className="mt-4">
         <TabsList
           variant="line"
           size="sm"

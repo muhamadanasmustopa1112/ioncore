@@ -1,3 +1,22 @@
+// Extracts a human-readable message from an Axios error or plain Error.
+// Backend envelopes use either `message` or `error` field on the response body.
+export function getApiError(err: unknown, fallback = "Something went wrong."): string {
+  if (!err) return fallback;
+  const e = err as {
+    response?: { data?: { message?: string; error?: string; errors?: Record<string, string[]> } };
+    message?: string;
+  };
+  const data = e.response?.data;
+  if (data?.message && data.message !== "OK") return data.message;
+  if (data?.error && data.error !== "") return data.error;
+  if (data?.errors) {
+    const first = Object.values(data.errors).flat()[0];
+    if (first) return first;
+  }
+  if (e.message && !e.message.startsWith("Request failed with status")) return e.message;
+  return fallback;
+}
+
 export const throttle = (
   func: (...args: unknown[]) => void,
   limit: number,
