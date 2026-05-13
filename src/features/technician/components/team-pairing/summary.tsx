@@ -127,7 +127,7 @@ export function TeamPairingSummary({
               Critical Pairing Real-time Alerts ({alerts.length})
             </h4>
           </div>
-          <div className={`grid grid-cols-1 md:grid-cols-2 gap-3.5 ${alerts.length > 10 ? "max-h-[380px] overflow-y-auto pr-1.5 scrollbar-thin" : ""
+          <div className={`grid grid-cols-1 gap-3.5 ${alerts.length > 10 ? "max-h-[380px] overflow-y-auto pr-1.5 scrollbar-thin" : ""
             }`}>
             {alerts.map((alert, index) => {
               const severityStyles = {

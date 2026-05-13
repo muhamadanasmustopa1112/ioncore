@@ -61,8 +61,39 @@ export function QueueList({
           <div className={`divide-y divide-slate-100 dark:divide-slate-800 ${displayItems.length >= 10 ? "max-h-[480px] overflow-y-auto pr-1.5 scrollbar-thin" : ""
             }`}>
             {displayItems.map((wo) => {
-              const isWarning = !!wo.assignment_sla?.warning_triggered_at;
-              const isBreached = !!wo.assignment_sla?.breached_at;
+              // SLA Assignment hanya aktif dihitung jika statusnya masih butuh dipairing
+              const isPendingAssignment = wo.state === "created" || wo.state === "unassigned";
+
+              // Hitung otomatis di frontend sebagai fallback jika Backend belum menyertakan flag eksplisit
+              const isWarning = (() => {
+                if (!isPendingAssignment) return false; // Sembunyikan jika sudah di-assign / diproses
+
+                if (wo.assignment_sla?.warning_triggered_at) return true;
+                if (!wo.assignment_sla?.due_at || !wo.assignment_sla?.window_minutes) return false;
+
+                const now = new Date().getTime();
+                const dueTime = new Date(wo.assignment_sla.due_at).getTime();
+                const windowMs = wo.assignment_sla.window_minutes * 60 * 1000;
+                const startTime = dueTime - windowMs;
+
+                const elapsedMs = now - startTime;
+                const thresholdMs = windowMs * ((wo.assignment_sla.warning_at_percent || 80) / 100);
+
+                // Aktif jika waktu berjalan sudah melewati 80% tapi belum lewat deadline
+                return elapsedMs >= thresholdMs && now < dueTime;
+              })();
+
+              const isBreached = (() => {
+                if (!isPendingAssignment) return false; // Sembunyikan jika sudah di-assign / diproses
+
+                if (wo.assignment_sla?.breached_at) return true;
+                if (!wo.assignment_sla?.due_at) return false;
+
+                const now = new Date().getTime();
+                const dueTime = new Date(wo.assignment_sla.due_at).getTime();
+
+                return now >= dueTime;
+              })();
 
               return (
                 <div key={wo.id} className="p-4 flex flex-col sm:flex-row sm:items-center gap-3">

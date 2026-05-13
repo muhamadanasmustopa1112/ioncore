@@ -3,6 +3,7 @@ import type {
   TeamLeaderDashboardParams,
   NOCQueueParams,
   ListTechniciansParams,
+  DispatchMapParams,
 } from "../types/technician-api";
 
 export const TECHNICIAN_KEYS = {
@@ -23,11 +24,7 @@ export const TECHNICIAN_KEYS = {
     [...TECHNICIAN_KEYS.all, "work-order", id, "inventory-requirements"] as const,
   repeatIssues: (params: { branch_id?: string; period_days?: number }) =>
     [...TECHNICIAN_KEYS.all, "repeat-issues", params] as const,
-  dispatchMap: (params: {
-    branch_id?: string;
-    area_id?: string;
-    technician_id?: string;
-  }) => [...TECHNICIAN_KEYS.all, "dispatch-map", params] as const,
+  dispatchMap: (params: DispatchMapParams) => [...TECHNICIAN_KEYS.all, "dispatch-map", params] as const,
   technicianPerformance: (params: {
     branch_id?: string;
     period_days?: number;

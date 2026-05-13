@@ -203,7 +203,7 @@ export interface ResolutionLogItem {
   category: string;
   finding: string;
   action_taken: string;
-  resolution_status: ResolutionStatus;
+  resolution_status: ResolutionStatus | "";
   time_spent_minutes: number;
   resolved_by_user_id?: string;
   timestamp?: string;
@@ -282,6 +282,11 @@ export interface WorkOrderRouting {
 
 export interface ONTConfiguration {
   serial_number: string;
+  authentication_status: string;
+  expected_bandwidth_down_mbps: number;
+  expected_bandwidth_up_mbps: number;
+  radius_password: string;
+  radius_username: string;
   model: string;
   ip_address: string;
   vlan_id: string;
@@ -296,6 +301,7 @@ export interface WarehouseDispatch {
   warehouse_branch_id: string;
   dispatched_at: string;
   dispatched_by: string;
+  warehouse_branch: WarehouseBranch;
   devices: WarehouseDevice[];
   note: string;
 }
@@ -306,6 +312,12 @@ export interface WarehouseDevice {
   qr_code: string;
   picked_up: boolean;
   picked_up_at?: string;
+}
+
+export interface WarehouseBranch {
+  code: string;
+  id: string;
+  name: string;
 }
 
 export interface WorkOrderTimelineItem {
@@ -581,30 +593,76 @@ export interface CrossAreaRequest {
   reviewed_role: string;
 }
 
-export interface DispatchMapItem {
-  technician_id: string;
-  technician_name: string;
+export interface LiveLocation {
   latitude: number;
   longitude: number;
-  active_work_order_id?: string;
-  status: TechnicianAvailabilityStatus;
+  recorded_at: string;
+}
+
+export interface DispatchRouteStop {
+  work_order_id: string;
+  work_order_number: string;
+  site_name: string;
+  latitude: number;
+  longitude: number;
+  sequence: number;
+  eta_in_minutes: number;
+  priority: string;
+}
+
+export interface DispatchRoute {
+  technician_id: string;
+  technician_name: string;
+  stops: DispatchRouteStop[];
+}
+
+export interface DispatchMapItem {
+  work_order_id: string;
+  work_order_number: string;
+  title: string;
+  type: string;
+  state: string;
+  priority: string;
+  customer_name: string;
+  site_name: string;
+  latitude: number;
+  longitude: number;
+  live_location: LiveLocation | null;
+  live_source?: string;
+  live_updated_at?: string;
+  assigned_team?: AssignedTechnician[];
+  branch_id: string;
+  area_id: string;
+  cluster_id?: string;
 }
 
 export interface DispatchMapCluster {
+  cluster_id: string;
   area_id: string;
-  latitude: number;
-  longitude: number;
-  count: number;
+  branch_id: string;
+  center_lat: number;
+  center_lng: number;
+  total: number;
+  by_state?: Record<string, number>;
 }
 
 export interface DispatchMapResponse {
   items: DispatchMapItem[];
   clusters: DispatchMapCluster[];
-  filter?: {
+  routes?: DispatchRoute[];
+  filters?: {
     branch_id?: string;
     area_id?: string;
     technician_id?: string;
   };
+}
+
+export interface DispatchMapParams {
+  branch_id?: string;
+  area_id?: string;
+  state?: string;
+  type?: string;
+  technician_id?: string;
 }
 
 export interface TeamLeaderDashboardResponse {

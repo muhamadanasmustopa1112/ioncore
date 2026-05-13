@@ -93,29 +93,50 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
       </SectionCard>
 
       {/* Resolution Log */}
-      {wo.resolution_log && wo.resolution_log.length > 0 && (
-        <SectionCard icon={ClipboardCheck} title="Resolution Log">
+      <SectionCard icon={ClipboardCheck} title="Resolution Log">
+        {wo.resolution_log && wo.resolution_log.length > 0 ? (
           <div className="space-y-3">
             {wo.resolution_log.map((r) => (
               <div key={r.item_id} className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{r.item_label}</p>
-                  <Badge variant={RESOLUTION_VARIANT[r.resolution_status] ?? "info"} appearance="light" size="sm" className="uppercase shrink-0">
-                    {humanize(r.resolution_status)}
-                  </Badge>
+                  {r.resolution_status ? (
+                    <Badge
+                      variant={(RESOLUTION_VARIANT as any)[r.resolution_status] ?? "info"}
+                      appearance="light"
+                      size="sm"
+                      className="uppercase shrink-0"
+                    >
+                      {humanize(r.resolution_status)}
+                    </Badge>
+                  ) : (
+                    <Badge
+                      variant="outline"
+                      appearance="ghost"
+                      size="sm"
+                      className="uppercase shrink-0 text-[9px] text-slate-400 border-dashed bg-transparent border-slate-200 dark:border-slate-700"
+                    >
+                      Pending
+                    </Badge>
+                  )}
                 </div>
                 {r.category && <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-2">{humanize(r.category)}</p>}
                 {r.finding && <p className="text-xs text-slate-600 dark:text-slate-400 mb-1"><span className="font-semibold text-slate-500">Finding:</span> {r.finding}</p>}
                 {r.action_taken && <p className="text-xs text-slate-600 dark:text-slate-400"><span className="font-semibold text-slate-500">Action:</span> {r.action_taken}</p>}
-                <div className="flex flex-wrap gap-x-3 text-[10px] text-slate-400 mt-2">
-                  {r.time_spent_minutes != null && <span>{r.time_spent_minutes} min</span>}
-                  {r.timestamp && <span>· {fmtDate(r.timestamp)}</span>}
-                </div>
+                {((r.time_spent_minutes ?? 0) > 0 || r.timestamp) && (
+                  <div className="flex flex-wrap gap-x-3 text-[10px] text-slate-400 mt-2">
+                    {r.time_spent_minutes != null && r.time_spent_minutes > 0 && <span>{r.time_spent_minutes} min</span>}
+                    {r.time_spent_minutes != null && r.time_spent_minutes > 0 && r.timestamp && <span>·</span>}
+                    {r.timestamp && <span>{fmtDate(r.timestamp)}</span>}
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        </SectionCard>
-      )}
+        ) : (
+          <Empty>No resolution log items yet.</Empty>
+        )}
+      </SectionCard>
 
       {/* Issue Report */}
       {wo.issue_report && (
