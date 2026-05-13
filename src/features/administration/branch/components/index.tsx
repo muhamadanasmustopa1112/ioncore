@@ -15,13 +15,15 @@ import { paths } from "@/config/paths";
 import { BranchList } from "./list/branch-list";
 import { useBranchStore } from "../store/branch";
 import { BranchFormSheet } from "./form/branch-form-sheet";
-import { useRegionalList, useBranchList } from "../api/branch-queries";
+import { useRegionalList, useBranchListPaginated } from "../api/branch-queries";
 
 export function BranchListPage() {
   const openBranchFormSheet = useBranchStore((s) => s.openBranchFormSheet);
   const searchParams = useSearchParams();
   const activeType = searchParams.get("branch_type") ?? "office";
-  const { data: branches = [] } = useBranchList();
+  // Lightweight total-only fetch for the badge — same query key as list will be reused by child
+  const { data: countResult } = useBranchListPaginated({ page: 1, per_page: 1 });
+  const totalBranches = countResult?.total ?? 0;
   // Warm the regional list cache so it's ready when the form sheet opens
   useRegionalList();
 
@@ -44,7 +46,7 @@ export function BranchListPage() {
           <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
             <Badge variant="info" appearance="light" className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs">
               <RiBuilding2Line className="size-3.5" />
-              {branches.length} Branches
+              {totalBranches} Branches
             </Badge>
             <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
             <span className="text-muted-foreground font-normal text-xs sm:text-sm">
