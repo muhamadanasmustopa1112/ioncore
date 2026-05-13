@@ -342,6 +342,22 @@ export interface WorkOrderHistoryItem {
   summary: string;
 }
 
+export interface AuditTrailEntry {
+  id: string;
+  action: string;
+  actor_id: string;
+  actor_role: string;
+  metadata?: {
+    added_technician?: string;
+    new_pair?: string;
+    original_pair?: string;
+    reassignment_mode?: string;
+    removed_technician?: string;
+    [key: string]: any;
+  };
+  created_at: string;
+}
+
 export interface WorkOrderDetailResponse {
   id: string;
   number: string;
@@ -394,6 +410,7 @@ export interface WorkOrderDetailResponse {
   warehouse_dispatch?: WarehouseDispatch;
   previous_customer_jobs?: WorkOrderHistoryItem[];
   previous_site_jobs?: WorkOrderHistoryItem[];
+  audit_trail?: AuditTrailEntry[];
 }
 
 export interface WorkOrderDetailEnvelope {
