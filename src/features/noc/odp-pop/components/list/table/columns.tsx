@@ -5,8 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { ActionsCell } from "./data-table-actions-cell";
 import { ActionsCellOdp } from "./data-table-actions-odp";
-import { Badge, BadgeDot } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,

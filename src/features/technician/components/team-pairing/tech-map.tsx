@@ -205,7 +205,7 @@ export default function TechnicianDispatchMap({ items = [] }: { items?: Dispatch
       </div>
 
       {/* Label indicator */}
-      <div className="absolute top-3 left-3 z-[1000] bg-primary/90 backdrop-blur-md text-white px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+      <div className="absolute bottom-3 left-3 z-[1000] bg-primary/90 backdrop-blur-md text-white px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
         <div className="size-1.5 bg-white rounded-full animate-pulse" />
         Live Tracking
       </div>

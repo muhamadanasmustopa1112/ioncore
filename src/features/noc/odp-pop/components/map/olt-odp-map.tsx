@@ -121,53 +121,8 @@ export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isL
       </CardHeader>
 
       <CardContent className="p-0 flex-1 relative min-h-[400px] overflow-hidden">
-        {/* Floating List Overlay */}
-        <div className="absolute top-6 left-6 z-10 w-52 max-h-[calc(100%-48px)] flex flex-col gap-3">
-          <div className="bg-background/80 backdrop-blur-xl border border-border/40 shadow-2xl rounded-2xl overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-border/10 bg-card/40 flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-foreground/70">
-                ODP Terminal List
-              </span>
-              <div className="bg-primary/10 p-1.5 rounded-md">
-                <RiFocus2Line className="size-3 text-primary" />
-              </div>
-            </div>
-
-            <div className="overflow-y-auto max-h-[400px] p-2 custom-scrollbar">
-              <div className="flex flex-col gap-1">
-                {points.length > 0 ? (
-                  points.map((odp) => (
-                    <button
-                      key={odp.id}
-                      onClick={() => setSelectedOdpId(String(odp.id))}
-                      className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 text-left group ${selectedOdpId === String(odp.id)
-                        ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02]'
-                        : 'hover:bg-primary/5 text-foreground/80'
-                        }`}
-                    >
-                      <div className={`p-1.5 rounded-lg transition-colors ${selectedOdpId === String(odp.id) ? 'bg-primary-foreground/20' : 'bg-muted group-hover:bg-primary/10'
-                        }`}>
-                        <Search className={`size-3 ${selectedOdpId === String(odp.id) ? 'text-white' : 'text-primary'}`} />
-                      </div>
-                      <span className="text-[10px] font-black truncate uppercase tracking-tight">
-                        {odp.name}
-                      </span>
-                    </button>
-                  ))
-                ) : (
-                  <div className="p-8 text-center">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-50">
-                      No Data Available
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Map Container */}
-        <MapContainer center={defaultCenter} zoom={15} className="h-full w-full z-0">
+        <MapContainer center={defaultCenter} zoom={15} className="h-full w-full z-0" scrollWheelZoom={false}>
           <TileLayer
             attribution='&copy; Google Maps'
             url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"

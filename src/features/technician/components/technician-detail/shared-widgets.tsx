@@ -119,19 +119,19 @@ export function HistoryList({
 // ── TimelineEntry ──────────────────────────────────────────────────────────
 
 const ACTION_TONE: Record<string, { dot: string; ring: string }> = {
-  created:        { dot: "bg-slate-400",   ring: "ring-slate-200" },
-  assigned:       { dot: "bg-blue-500",    ring: "ring-blue-200" },
-  accepted:       { dot: "bg-indigo-500",  ring: "ring-indigo-200" },
-  dispatched:     { dot: "bg-violet-500",  ring: "ring-violet-200" },
-  started:        { dot: "bg-blue-500",    ring: "ring-blue-200" },
-  arrived:        { dot: "bg-cyan-500",    ring: "ring-cyan-200" },
-  in_progress:    { dot: "bg-blue-500",    ring: "ring-blue-200" },
-  completed:      { dot: "bg-emerald-500", ring: "ring-emerald-200" },
-  cancelled:      { dot: "bg-rose-500",    ring: "ring-rose-200" },
-  rescheduled:    { dot: "bg-amber-500",   ring: "ring-amber-200" },
-  noc_approved:   { dot: "bg-emerald-500", ring: "ring-emerald-200" },
-  noc_rejected:   { dot: "bg-rose-500",    ring: "ring-rose-200" },
-  bast_submitted: { dot: "bg-purple-500",  ring: "ring-purple-200" },
+  created: { dot: "bg-slate-400", ring: "ring-slate-200" },
+  assigned: { dot: "bg-blue-500", ring: "ring-blue-200" },
+  accepted: { dot: "bg-indigo-500", ring: "ring-indigo-200" },
+  dispatched: { dot: "bg-violet-500", ring: "ring-violet-200" },
+  started: { dot: "bg-blue-500", ring: "ring-blue-200" },
+  arrived: { dot: "bg-cyan-500", ring: "ring-cyan-200" },
+  in_progress: { dot: "bg-blue-500", ring: "ring-blue-200" },
+  completed: { dot: "bg-emerald-500", ring: "ring-emerald-200" },
+  cancelled: { dot: "bg-rose-500", ring: "ring-rose-200" },
+  rescheduled: { dot: "bg-amber-500", ring: "ring-amber-200" },
+  noc_approved: { dot: "bg-emerald-500", ring: "ring-emerald-200" },
+  noc_rejected: { dot: "bg-rose-500", ring: "ring-rose-200" },
+  bast_submitted: { dot: "bg-purple-500", ring: "ring-purple-200" },
 };
 
 function pickActionTone(action: string | null | undefined, toState: WorkOrderState | null | undefined) {
@@ -149,6 +149,8 @@ export function TimelineEntry({
     action?: string;
     actor_id?: string;
     actor_role?: string;
+    cable_excess_meter?: number
+    cable_excess_price?: number
     from_state?: WorkOrderState | null;
     to_state?: WorkOrderState | null;
     note?: string;
@@ -180,6 +182,16 @@ export function TimelineEntry({
       </div>
       <p className="text-[10px] text-slate-400 mb-1">{fmtDate(t?.created_at)}</p>
       {t?.note && <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{t.note}</p>}
+      {(t?.cable_excess_meter ?? 0) > 0 && (
+        <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+          Kabel Berlebih: <span className="font-semibold text-slate-900 dark:text-slate-100">{t.cable_excess_meter}m</span>
+          {(t?.cable_excess_price ?? 0) > 0 && (
+            <span className="ml-1 text-slate-500 font-medium">
+              (Rp {t.cable_excess_price?.toLocaleString("id-ID")})
+            </span>
+          )}
+        </p>
+      )}
       {t?.actor_role && (
         <p className="text-[10px] text-slate-400 italic mt-1">
           by <span className="capitalize font-medium">{humanize(t.actor_role)}</span>

@@ -183,7 +183,7 @@ export default function OdpPopMap({
       </CardHeader>
 
       <CardContent className="p-0 flex-1 relative overflow-hidden">
-        <MapContainer center={defaultCenter} zoom={10} className="h-full w-full z-0">
+        <MapContainer center={defaultCenter} zoom={10} className="h-full w-full z-0" scrollWheelZoom={false}>
           <TileLayer
             attribution='&copy; Google Maps'
             url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"

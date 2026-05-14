@@ -55,7 +55,7 @@ export function OdpPopList({
 
   const columns = useMemo(() => getPopColumns(type), [type]);
   const [columnOrder, setColumnOrder] = useState<string[]>(
-    columns.map((column) => column.id as string),
+    columns.map((column) => (column.id || (column as any).accessorKey) as string),
   );
 
   const table = useReactTable({

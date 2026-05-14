@@ -205,6 +205,23 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
         </SectionCard>
       )}
 
+      {/* Cable Consumption */}
+      {wo.cable_consumption && (
+        <SectionCard icon={Activity} title="Cable Consumption">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field label="Used Meters" value={`${wo.cable_consumption.cable_used_meters} m`} />
+            <Field label="Remnant Meters" value={`${wo.cable_consumption.remnant_meters} m`} />
+            <Field label="Remnant Returned" value={wo.cable_consumption.remnant_returned ? "Yes" : "No"} />
+            <Field label="Recorded At" value={fmtDate(wo.cable_consumption.recorded_at)} />
+            <Field label="Recorded By" value={wo.cable_consumption.recorded_by} />
+            <Field label="Recorded Role" value={wo.cable_consumption.recorded_role} capitalize />
+            {wo.cable_consumption.note && (
+              <Field label="Note" value={wo.cable_consumption.note} className="sm:col-span-2" />
+            )}
+          </div>
+        </SectionCard>
+      )}
+
       {/* Execution Journey */}
       {wo.execution && (
         <SectionCard icon={MapIcon} title="Execution Journey">
@@ -239,7 +256,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
       )}
 
       {/* Temporary Radius Provisioning */}
-      <SectionCard icon={Wifi} title="Temporary Radius Provisioning">
+      {/* <SectionCard icon={Wifi} title="Temporary Radius Provisioning">
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl border border-blue-100 bg-blue-50/50 dark:border-blue-900/20 dark:bg-blue-950/20">
             <div>
@@ -341,7 +358,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
             </Button>
           </div>
         </div>
-      </SectionCard>
+      </SectionCard> */}
     </>
   );
 }
