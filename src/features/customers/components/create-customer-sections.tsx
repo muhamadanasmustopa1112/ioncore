@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useMemo } from "react";
 import { AlertCircle, Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import type { CustomerType } from "../types/customers-api";
 import type { BranchData } from "@/features/administration/branch/types/branch";
+import { BranchCombobox } from "@/features/administration/branch/components/branch-combobox";
 
 const CUSTOMER_TYPES: { value: CustomerType; label: string }[] = [
   { value: "residential", label: "Residential" },
@@ -227,24 +228,26 @@ export interface AssignmentSectionProps {
 }
 
 export function AssignmentSection({ branchId, setBranchId, accountManagerId, setAccountManagerId, activeBranches, branchesLoading }: AssignmentSectionProps) {
+  const [branchType, setBranchType] = useState("all");
+  const filteredBranches = useMemo(
+    () => branchType === "all" ? activeBranches : activeBranches.filter((b) => b.branchType === branchType),
+    [activeBranches, branchType]
+  );
+
   return (
     <Card>
       <CardContent className="p-6">
         <SectionTitle>Assignment</SectionTitle>
         <FieldRow label="Branch" required>
-          <Select value={branchId} onValueChange={setBranchId} disabled={branchesLoading}>
-            <SelectTrigger>
-              <SelectValue placeholder={branchesLoading ? "Loading…" : "Select branch"} />
-            </SelectTrigger>
-            <SelectContent>
-              {activeBranches.map((b) => (
-                <SelectItem key={b.id} value={b.id}>
-                  <span>{b.name}</span>
-                  <span className="ml-2 text-xs text-muted-foreground capitalize">{b.level.replace("_", " ")}</span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <BranchCombobox
+            branches={filteredBranches}
+            value={branchId}
+            onValueChange={setBranchId}
+            branchType={branchType}
+            onTypeChange={setBranchType}
+            isLoading={branchesLoading}
+            className="w-full"
+          />
         </FieldRow>
         <FieldRow label="Account Manager ID" hint="Optional — UUID">
           <Input

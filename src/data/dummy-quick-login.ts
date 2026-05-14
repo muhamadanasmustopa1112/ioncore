@@ -50,4 +50,12 @@ export const QUICK_LOGIN_USERS: QuickLoginAccount[] = [
     role: "Team Leader",
     avatarInitials: "TL",
   },
+  {
+    id: "tech_junior_east1",
+    email: "tech.junior.east1@example.com",
+    password: "Dummy#12345",
+    label: "Tech Junior East 1",
+    role: "Technician Junior",
+    avatarInitials: "TJ",
+  },
 ];

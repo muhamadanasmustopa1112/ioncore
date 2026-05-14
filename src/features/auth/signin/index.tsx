@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RiErrorWarningFill } from "@remixicon/react";
 import { isAxiosError } from "axios";
+import { toast } from "sonner";
 import { AlertCircle, ChevronDown, ChevronUp, Eye, EyeOff, LoaderCircleIcon, Zap } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { QUICK_LOGIN_USERS, QuickLoginAccount } from "@/data/dummy-quick-login";
@@ -37,7 +38,7 @@ export function SigninForm() {
   const redirectTo = searchParams?.get("redirectTo") || null;
 
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
   const [showQuickAccess, setShowQuickAccess] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState<Record<string, number>>({});
   const [lockedUntil, setLockedUntil] = useState<Record<string, number>>({});
@@ -75,13 +76,19 @@ export function SigninForm() {
   const { mutateAsync: login, isPending: isProcessing } = useLogin();
 
   const handleLoginResult = async (email: string, password: string) => {
-    setError(null);
     try {
       const res = await login({ email, password });
       const payload = res?.data;
 
       if (!payload?.tokens?.access_token || !payload?.user) {
-        setError("Invalid login response.");
+        toast.error("Invalid login response.");
+        return false;
+      }
+      const isTechnician = payload.user.roles?.some((r) =>
+        r.name.toUpperCase().includes("TECHNICIAN")
+      );
+      if (isTechnician) {
+        toast.error("Access denied. Technician accounts are not allowed to access this portal.");
         return false;
       }
       setFailedAttempts((prev) => ({ ...prev, [email]: 0 }));
@@ -93,25 +100,28 @@ export function SigninForm() {
       setFailedAttempts((prev) => ({ ...prev, [email]: newCount }));
       if (newCount >= 3) {
         setLockedUntil((prev) => ({ ...prev, [email]: Date.now() + 5 * 60 * 1000 }));
-        setError(null);
       } else {
         if (isAxiosError(err)) {
           const msg =
             err?.response?.data?.message ||
             err?.response?.data?.error ||
             err.message;
-          setError(msg || "Login failed. Please try again.");
+          toast.error(msg || "Login failed. Please try again.");
         } else {
-          setError("Login failed. Please try again.");
+          toast.error("Login failed. Please try again.");
         }
       }
       return false;
     }
   };
 
+  function getPostLoginPath(): string {
+    return paths.dashboard.root.getHref();
+  }
+
   const handleQuickLogin = async (account: QuickLoginAccount) => {
     const ok = await handleLoginResult(account.email, account.password);
-    if (ok) router.push(paths.dashboard.root.getHref());
+    if (ok) router.push(getPostLoginPath());
   };
 
   async function onSubmit(values: ExtendedLoginInput) {
@@ -127,7 +137,7 @@ export function SigninForm() {
     }
 
     const ok = await handleLoginResult(values.username, values.password);
-    if (ok) router.push(paths.dashboard.root.getHref());
+    if (ok) router.push(getPostLoginPath());
   }
 
   useLayoutEffect(() => {
@@ -137,7 +147,7 @@ export function SigninForm() {
         router.push(redirectTo);
         return;
       }
-      router.push(paths.dashboard.root.getHref());
+      router.push(getPostLoginPath());
     }
   }, [redirectTo]);
 
@@ -179,7 +189,7 @@ export function SigninForm() {
             </AlertTitle>
           </Alert> */}
 
-          {isLocked ? (
+          {isLocked && (
             <Alert variant="destructive">
               <AlertIcon><AlertCircle /></AlertIcon>
               <AlertTitle>
@@ -189,12 +199,7 @@ export function SigninForm() {
                 </Link>
               </AlertTitle>
             </Alert>
-          ) : error ? (
-            <Alert variant="destructive">
-              <AlertIcon><AlertCircle /></AlertIcon>
-              <AlertTitle>{error}</AlertTitle>
-            </Alert>
-          ) : null}
+          )}
 
           <FormField
             control={form.control}

@@ -55,6 +55,7 @@ export function CreateCustomer() {
   const [ktpError, setKtpError] = useState<string | null>(null);
 
   const [isUploading, setIsUploading] = useState(false);
+  const [ktpUploadedUrl, setKtpUploadedUrl] = useState<string | null>(null);
 
   const [installLat, setInstallLat] = useState(INSTALL_DEFAULT[0]);
   const [installLng, setInstallLng] = useState(INSTALL_DEFAULT[1]);
@@ -83,6 +84,7 @@ export function CreateCustomer() {
     setKtpError(null);
     setKtpFile(null);
     setKtpPreview(null);
+    setKtpUploadedUrl(null);
     setKtpScanning(true);
 
     const dataUrl = await new Promise<string>((resolve) => {
@@ -123,6 +125,7 @@ export function CreateCustomer() {
     setKtpFile(null);
     setKtpPreview(null);
     setKtpError(null);
+    setKtpUploadedUrl(null);
   }
 
   async function handleSubmit() {
@@ -134,16 +137,21 @@ export function CreateCustomer() {
 
     let ktpPhotoUrl: string | undefined;
     if (ktpEntryMode === "ocr" && ktpFile) {
-      setIsUploading(true);
-      try {
-        const { url } = await uploadImageToS3(ktpFile);
-        ktpPhotoUrl = url;
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : "KTP upload failed");
+      if (ktpUploadedUrl) {
+        ktpPhotoUrl = ktpUploadedUrl;
+      } else {
+        setIsUploading(true);
+        try {
+          const { url } = await uploadImageToS3(ktpFile);
+          ktpPhotoUrl = url;
+          setKtpUploadedUrl(url);
+        } catch (err) {
+          toast.error(err instanceof Error ? err.message : "KTP upload failed");
+          setIsUploading(false);
+          return;
+        }
         setIsUploading(false);
-        return;
       }
-      setIsUploading(false);
     }
 
     try {

@@ -31,6 +31,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
+import { BranchCombobox } from "@/features/administration/branch/components/branch-combobox";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { useCustomerList } from "@/features/customers/api/customers-queries";
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
@@ -109,6 +110,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
   const pinMoved = lat !== INSTALL_DEFAULT[0] || lng !== INSTALL_DEFAULT[1];
   const [customerSearch, setCustomerSearch] = useState("");
   const [customerPickerOpen, setCustomerPickerOpen] = useState(false);
+  const [branchType, setBranchType] = useState("all");
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList();
   const { data: customersData, isLoading: customersLoading } = useCustomerList(
@@ -116,7 +118,14 @@ export function CreateLeadSheet({ open, onClose }: Props) {
   );
   const createLead = useCreateLead();
 
-  const activeBranches = useMemo(() => branches.filter((b) => b.active && b.level === "area"), [branches]);
+  const activeBranches = useMemo(
+    () => branches.filter((b) => {
+      if (!b.active || b.level !== "area") return false;
+      if (branchType !== "all" && b.branchType !== branchType) return false;
+      return true;
+    }),
+    [branches, branchType]
+  );
 
   const customerOptions = useMemo(
     () => (source === "referral" ? (customersData?.items ?? []) : []),
@@ -335,21 +344,15 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                 <Label className="text-xs">
                   Branch <span className="text-destructive">*</span>
                 </Label>
-                <Select value={branchId} onValueChange={setBranchId} disabled={branchesLoading}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={branchesLoading ? "Loading…" : "Select branch"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activeBranches.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>
-                        <span>{b.name}</span>
-                        <span className="ml-2 text-xs text-muted-foreground capitalize">
-                          {b.level.replace("_", " ")}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <BranchCombobox
+                  branches={activeBranches}
+                  value={branchId}
+                  onValueChange={setBranchId}
+                  branchType={branchType}
+                  onTypeChange={setBranchType}
+                  isLoading={branchesLoading}
+                  className="w-full"
+                />
               </div>
             </div>
           </ScrollArea>

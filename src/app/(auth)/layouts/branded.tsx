@@ -10,7 +10,7 @@ export function BrandedLayout({ children }: { children: ReactNode }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = [
     "/media/signin/slide_1.jpg",
-    "/media/signin/slide_2.jpeg",
+    // "/media/signin/slide_2.jpeg",
     "/media/signin/slide_3.jpeg",
   ];
 
