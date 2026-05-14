@@ -192,3 +192,15 @@ export interface CreateAddonPayload {
   is_wo_required: boolean;
   is_active: boolean;
 }
+
+export interface UpdateAddonPayload {
+  name: string;
+  type: AddonType;
+  price: number;
+  one_time_charge: number;
+  profile_change_id?: string;
+  add_broadband_plan_ids?: string[];
+  remove_broadband_plan_ids?: string[];
+  is_wo_required: boolean;
+  is_active: boolean;
+}

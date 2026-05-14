@@ -15,6 +15,7 @@ import type {
   AddonListData,
   AddonListParams,
   CreateAddonPayload,
+  UpdateAddonPayload,
 } from "../types/products";
 import {
   listActiveBroadbandPlans,
@@ -357,7 +358,7 @@ export function useCreateAddon() {
 export function useUpdateAddon() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: CreateAddonPayload }) =>
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateAddonPayload }) =>
       adminUpdateAddon(id, payload),
     onSuccess: (_, { id }) => {
       qc.invalidateQueries({ queryKey: productKeys.addon(id) });

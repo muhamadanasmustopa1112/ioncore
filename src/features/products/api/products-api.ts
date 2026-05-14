@@ -15,6 +15,7 @@ import type {
   AddonListData,
   AddonListParams,
   CreateAddonPayload,
+  UpdateAddonPayload,
 } from "../types/products";
 
 const BASE = services.product;
@@ -179,7 +180,7 @@ export function adminCreateAddon(payload: CreateAddonPayload) {
   );
 }
 
-export function adminUpdateAddon(id: string, payload: CreateAddonPayload) {
+export function adminUpdateAddon(id: string, payload: UpdateAddonPayload) {
   return cast<ProductEnvelope<Addon>>(
     userServiceApi.put(`${BASE}/admin/addons/${id}`, payload)
   );

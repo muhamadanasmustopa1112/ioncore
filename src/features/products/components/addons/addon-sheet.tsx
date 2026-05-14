@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetBody } from "@/components/ui/sheet";
 import { useCreateAddon, useUpdateAddon, useAdminAddon } from "../../api/products-queries";
-import type { Addon, CreateAddonPayload } from "../../types/products";
+import type { Addon, CreateAddonPayload, UpdateAddonPayload } from "../../types/products";
 import { AddonForm } from "./addon-form";
 
 interface AddonSheetProps {
@@ -26,8 +26,21 @@ export function AddonSheet({ open, mode, selected, onClose }: AddonSheetProps) {
   const handleSubmit = (payload: CreateAddonPayload) => {
     if (mode === "new") {
       create.mutate(payload, { onSuccess: onClose });
-    } else if (mode === "edit" && selected) {
-      update.mutate({ id: selected.id, payload }, { onSuccess: onClose });
+    } else if (mode === "edit" && addonData) {
+      const originalIds = addonData.broadband_plans?.map((p) => p.id) ?? [];
+      const newIds = payload.broadband_plan_ids ?? [];
+      const updatePayload: UpdateAddonPayload = {
+        name: payload.name,
+        type: payload.type,
+        price: payload.price,
+        one_time_charge: payload.one_time_charge,
+        profile_change_id: payload.profile_change_id,
+        is_wo_required: payload.is_wo_required,
+        is_active: payload.is_active,
+        add_broadband_plan_ids: newIds.filter((id) => !originalIds.includes(id)),
+        remove_broadband_plan_ids: originalIds.filter((id) => !newIds.includes(id)),
+      };
+      update.mutate({ id: addonData.id, payload: updatePayload }, { onSuccess: onClose });
     }
   };
 
