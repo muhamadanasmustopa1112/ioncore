@@ -145,10 +145,8 @@ export function UserForm() {
         toast.success("User updated");
         closeUserFormSheet();
       } catch (err: unknown) {
-        toast.error(
-          (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-          "Failed to update user",
-        );
+        const data = (err as { response?: { data?: { message?: string; error?: string } } })?.response?.data;
+        toast.error(data?.error || data?.message || "Failed to update user");
       }
       return;
     }
@@ -184,10 +182,8 @@ export function UserForm() {
       toast.success("User created");
       closeUserFormSheet();
     } catch (err: unknown) {
-      toast.error(
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        "Failed to create user",
-      );
+      const data = (err as { response?: { data?: { message?: string; error?: string } } })?.response?.data;
+      toast.error(data?.error || data?.message || "Failed to create user");
     }
   };
 
