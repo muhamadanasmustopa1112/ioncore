@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, RowSelectionState } from "@tanstack/react-table";
+import { getCoreRowModel, getSortedRowModel, useReactTable, RowSelectionState } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
 import { RiAddLine } from "@remixicon/react";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardFooter, CardHeader, CardHeading, CardTable } from "@/components/ui/card";
@@ -11,18 +12,25 @@ import { DataGrid, DataGridContainer } from "@/components/ui/data-grid";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useQueryStates, parseAsString } from "nuqs";
 import { useAdminAddons, useDeleteAddon } from "../../api/products-queries";
 import type { Addon } from "../../types/products";
 import { getAddonColumns } from "./addon-columns";
 import { AddonSheet } from "./addon-sheet";
 
 export function AddonList() {
-  const { data, isLoading } = useAdminAddons();
-  const deleteAddon = useDeleteAddon();
+  const [filter, setFilter] = useQueryStates({
+    search: parseAsString,
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(10),
+  });
 
-  const [pagination, setPagination] = useState({ limit: 10, page: 1 });
-  const [search, setSearch] = useQueryStates({ ao_search: parseAsString });
+  const { data, isLoading } = useAdminAddons({
+    name: filter.search || undefined,
+    page: filter.page,
+    per_page: filter.limit,
+  });
+
+  const deleteAddon = useDeleteAddon();
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -35,12 +43,12 @@ export function AddonList() {
   const handleClose = () => { setSheetOpen(false); setSelected(null); };
 
   const addons = data?.addons ?? [];
+  const total = data?.metadata?.total ?? 0;
 
-  const filtered = useMemo(() => {
-    if (!search.ao_search) return addons;
-    const q = search.ao_search.toLowerCase();
-    return addons.filter((a) => a.name.toLowerCase().includes(q));
-  }, [addons, search.ao_search]);
+  const setPagination = (updater: (prev: { page: number; limit: number }) => { page: number; limit: number }) => {
+    const next = updater({ page: filter.page, limit: filter.limit });
+    setFilter({ page: next.page, limit: next.limit });
+  };
 
   const columns = useMemo(
     () => getAddonColumns(openEdit, openDetail, (id) => deleteAddon.mutate(id)),
@@ -49,26 +57,40 @@ export function AddonList() {
   );
 
   const table = useReactTable({
-    columns, data: filtered,
-    pageCount: Math.ceil(filtered.length / pagination.limit),
+    columns,
+    data: addons,
+    manualPagination: true,
+    pageCount: Math.ceil(total / filter.limit),
     getRowId: (row) => row.id,
-    state: { rowSelection }, enableRowSelection: true, onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(), getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(), getSortedRowModel: getSortedRowModel(),
+    state: {
+      rowSelection,
+      pagination: { pageIndex: filter.page - 1, pageSize: filter.limit },
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
   return (
     <>
-      <DataGrid table={table} recordCount={filtered.length} tableLayout={{ columnsResizable: true, cellBorder: true }} isLoading={isLoading}>
+      <DataGrid table={table} recordCount={total} tableLayout={{ columnsResizable: true, cellBorder: true }} isLoading={isLoading}>
         <Card className="mt-3">
           <CardHeader>
             <CardHeading className="py-3">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative flex-1 min-w-[150px]">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
-                  <Input placeholder="Search add-on..." value={search.ao_search || ""} onChange={(e) => setSearch({ ao_search: e.target.value })} className="ps-9 w-full" />
-                  {search.ao_search && (
-                    <Button mode="icon" variant="ghost" className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2" onClick={() => setSearch({ ao_search: "" })}><X /></Button>
+                  <Input
+                    placeholder="Search add-on..."
+                    value={filter.search || ""}
+                    onChange={(e) => setFilter({ search: e.target.value || null, page: 1 })}
+                    className="ps-9 w-full"
+                  />
+                  {filter.search && (
+                    <Button mode="icon" variant="ghost" className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2" onClick={() => setFilter({ search: null, page: 1 })}>
+                      <X />
+                    </Button>
                   )}
                 </div>
                 <Button variant="primary" className="h-9 px-4 text-sm font-semibold" onClick={openNew}>
@@ -84,7 +106,10 @@ export function AddonList() {
             </ScrollArea>
           </CardTable>
           <CardFooter>
-            <DataGridPagination setFilter={setPagination} filter={pagination} />
+            <DataGridPagination
+              filter={{ page: filter.page, limit: filter.limit }}
+              setFilter={setPagination}
+            />
           </CardFooter>
         </Card>
       </DataGrid>

@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  getCoreRowModel, getFilteredRowModel, getPaginationRowModel,
-  getSortedRowModel, useReactTable, RowSelectionState,
-} from "@tanstack/react-table";
+import { getCoreRowModel, getSortedRowModel, useReactTable, RowSelectionState } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
 import { RiAddLine } from "@remixicon/react";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardFooter, CardHeader, CardHeading, CardTable } from "@/components/ui/card";
@@ -14,7 +12,6 @@ import { DataGrid, DataGridContainer } from "@/components/ui/data-grid";
 import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useQueryStates, parseAsString } from "nuqs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
 import { useAdminBroadbandPlans, useDeleteBroadbandPlan } from "../../api/products-queries";
@@ -23,15 +20,23 @@ import { getPlanColumns } from "./plan-columns";
 import { PlanSheet } from "./plan-sheet";
 
 export function PlanList() {
-  const [pagination, setPagination] = useState({ limit: 10, page: 1 });
-  const [search, setSearch] = useQueryStates({ pl_search: parseAsString, pl_branch: parseAsString });
+  const [filter, setFilter] = useQueryStates({
+    search: parseAsString,
+    branch: parseAsString,
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(10),
+  });
 
   const { data: branchesData } = useBranchList({ per_page: 200 });
   const branches = branchesData ?? [];
 
-  const { data, isLoading } = useAdminBroadbandPlans(
-    search.pl_branch ? { branch_id: search.pl_branch } : {}
-  );
+  const { data, isLoading } = useAdminBroadbandPlans({
+    name: filter.search || undefined,
+    branch_id: filter.branch || undefined,
+    page: filter.page,
+    per_page: filter.limit,
+  });
+
   const deletePlan = useDeleteBroadbandPlan();
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -45,12 +50,12 @@ export function PlanList() {
   const handleClose = () => { setSheetOpen(false); setSelected(null); };
 
   const plans = data?.broadband_plans ?? [];
+  const total = data?.metadata?.total ?? 0;
 
-  const filtered = useMemo(() => {
-    if (!search.pl_search) return plans;
-    const q = search.pl_search.toLowerCase();
-    return plans.filter((p) => p.name.toLowerCase().includes(q));
-  }, [plans, search.pl_search]);
+  const setPagination = (updater: (prev: { page: number; limit: number }) => { page: number; limit: number }) => {
+    const next = updater({ page: filter.page, limit: filter.limit });
+    setFilter({ page: next.page, limit: next.limit });
+  };
 
   const columns = useMemo(
     () => getPlanColumns(openEdit, openDetail, (id) => deletePlan.mutate(id)),
@@ -60,21 +65,23 @@ export function PlanList() {
 
   const table = useReactTable({
     columns,
-    data: filtered,
-    pageCount: Math.ceil(filtered.length / pagination.limit),
+    data: plans,
+    manualPagination: true,
+    pageCount: Math.ceil(total / filter.limit),
     getRowId: (row) => row.id,
-    state: { rowSelection },
+    state: {
+      rowSelection,
+      pagination: { pageIndex: filter.page - 1, pageSize: filter.limit },
+    },
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
   return (
     <>
-      <DataGrid table={table} recordCount={filtered.length} tableLayout={{ columnsResizable: true, cellBorder: true }} isLoading={isLoading}>
+      <DataGrid table={table} recordCount={total} tableLayout={{ columnsResizable: true, cellBorder: true }} isLoading={isLoading}>
         <Card className="mt-3">
           <CardHeader>
             <CardHeading className="py-3">
@@ -83,19 +90,19 @@ export function PlanList() {
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
                     placeholder="Search plan..."
-                    value={search.pl_search || ""}
-                    onChange={(e) => setSearch({ pl_search: e.target.value })}
+                    value={filter.search || ""}
+                    onChange={(e) => setFilter({ search: e.target.value || null, page: 1 })}
                     className="ps-9 w-full"
                   />
-                  {search.pl_search && (
-                    <Button mode="icon" variant="ghost" className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2" onClick={() => setSearch({ pl_search: "" })}>
+                  {filter.search && (
+                    <Button mode="icon" variant="ghost" className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2" onClick={() => setFilter({ search: null, page: 1 })}>
                       <X />
                     </Button>
                   )}
                 </div>
                 <Select
-                  value={search.pl_branch || "all"}
-                  onValueChange={(v) => setSearch({ pl_branch: v === "all" ? null : v })}
+                  value={filter.branch || "all"}
+                  onValueChange={(v) => setFilter({ branch: v === "all" ? null : v, page: 1 })}
                 >
                   <SelectTrigger className="h-9 w-[180px]">
                     <SelectValue placeholder="All branches" />
@@ -120,7 +127,10 @@ export function PlanList() {
             </ScrollArea>
           </CardTable>
           <CardFooter>
-            <DataGridPagination setFilter={setPagination} filter={pagination} />
+            <DataGridPagination
+              filter={{ page: filter.page, limit: filter.limit }}
+              setFilter={setPagination}
+            />
           </CardFooter>
         </Card>
       </DataGrid>

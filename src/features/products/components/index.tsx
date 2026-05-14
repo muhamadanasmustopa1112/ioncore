@@ -1,6 +1,7 @@
 "use client";
 
 import { RiBox3Line } from "@remixicon/react";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -15,6 +16,18 @@ import { AddonList } from "./addons/addon-list";
 import { ServiceList } from "./enterprise-services/service-list";
 
 export function ProductsPage() {
+  const [params, setParams] = useQueryStates({
+    tab: parseAsString.withDefault("broadband-plans"),
+    search: parseAsString,
+    branch: parseAsString,
+    page: parseAsInteger.withDefault(1),
+    limit: parseAsInteger.withDefault(10),
+  });
+
+  function handleTabChange(value: string) {
+    setParams({ tab: value, search: null, branch: null, page: 1, limit: 10 });
+  }
+
   return (
     <div className="relative h-full w-full overflow-hidden">
       <PageBreadcrumb
@@ -41,7 +54,7 @@ export function ProductsPage() {
       </Toolbar>
 
       <div className="mt-4">
-        <Tabs defaultValue="broadband-plans">
+        <Tabs value={params.tab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="broadband-plans">Broadband Plans</TabsTrigger>
             <TabsTrigger value="addons">Add-ons</TabsTrigger>
