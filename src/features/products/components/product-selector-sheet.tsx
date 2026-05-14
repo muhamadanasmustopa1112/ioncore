@@ -238,7 +238,8 @@ export function ProductSelectorSheet({
       : {}
   );
   const { data: addonsData, isLoading: addonsLoading } = useAddons(
-    open && selectedPlanId ? { broadband_plan_id: selectedPlanId, per_page: 50 } : {}
+    { plan_id: selectedPlanId ?? undefined, per_page: 50 },
+    open && !!selectedPlanId
   );
 
   const plans = plansData?.broadband_plans ?? [];

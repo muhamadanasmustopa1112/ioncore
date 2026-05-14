@@ -85,6 +85,7 @@ export function CustomerProfile() {
         customerLon={customer?.lon}
         customerAddress={customer?.location?.address}
         leadId={customer?.lead_id}
+        branchId={customer?.branch_id}
       />
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

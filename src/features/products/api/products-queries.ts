@@ -104,13 +104,14 @@ export function useEnterpriseService(id: string | null) {
   });
 }
 
-export function useAddons(params: AddonListParams = {}) {
+export function useAddons(params: AddonListParams = {}, enabled = true) {
   return useQuery<AddonListData>({
     queryKey: productKeys.addons(params),
     queryFn: async () => {
       const res = await listActiveAddons(params);
       return res.data;
     },
+    enabled,
   });
 }
 

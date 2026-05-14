@@ -58,9 +58,10 @@ interface Props {
   customerLon?: number | null;
   customerAddress?: string | null;
   leadId?: string | null;
+  branchId?: string | null;
 }
 
-export function AddServiceSheet({ open, onOpenChange, customerId, customerLat, customerLon, customerAddress, leadId }: Props) {
+export function AddServiceSheet({ open, onOpenChange, customerId, customerLat, customerLon, customerAddress, leadId, branchId }: Props) {
   const createOrder = useCreateOrder();
 
   const hasExistingLocation = !!(customerLat && customerLon);
@@ -178,7 +179,7 @@ export function AddServiceSheet({ open, onOpenChange, customerId, customerLat, c
         open={open}
         onOpenChange={onOpenChange}
         leadType="broadband"
-        branchId=""
+        branchId={branchId ?? ""}
         onConfirm={handlePlanConfirm}
       />
     );
@@ -336,7 +337,7 @@ export function AddServiceSheet({ open, onOpenChange, customerId, customerLat, c
         open={planSelectorOpen}
         onOpenChange={setPlanSelectorOpen}
         leadType="broadband"
-        branchId=""
+        branchId={branchId ?? ""}
         cableDistanceMeters={coverageArea?.cable_distance_meter}
         onConfirm={handlePlanConfirm}
       />

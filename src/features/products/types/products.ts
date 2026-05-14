@@ -176,7 +176,7 @@ export interface AddonListData {
 export interface AddonListParams {
   name?: string;
   type?: AddonType;
-  broadband_plan_id?: string;
+  plan_id?: string;
   is_active?: boolean;
   page?: number;
   per_page?: number;

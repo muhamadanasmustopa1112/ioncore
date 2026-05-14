@@ -21,6 +21,7 @@ interface PlanSheetProps {
 }
 
 export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
+  const [activeTab, setActiveTab] = useState("details");
   const [pendingBranchIds, setPendingBranchIds] = useState<string[]>([]);
 
   const { data: detail } = useAdminBroadbandPlan(
@@ -36,6 +37,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   const branchPending = addBranch.isPending || removeBranch.isPending;
 
   const handleClose = () => {
+    setActiveTab("details");
     setPendingBranchIds([]);
     onClose();
   };
@@ -82,7 +84,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
         </SheetHeader>
 
         <SheetBody className="flex-1 p-0 overflow-hidden">
-          <Tabs defaultValue="details" className="flex flex-col h-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
             <TabsList className="w-full justify-start rounded-none border-b px-5 h-10 bg-transparent gap-1 shrink-0">
               <TabsTrigger value="details" className="rounded-sm text-xs">Details</TabsTrigger>
               <TabsTrigger value="branches" className="rounded-sm text-xs">
@@ -121,12 +123,22 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
         </SheetBody>
 
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
-          <Button variant="ghost" onClick={handleClose}>Close</Button>
-          <div className="flex-1" />
-          <Button variant="outline" onClick={handleClose} className="mr-3" disabled={isPending}>Cancel</Button>
-          <Button variant="primary" onClick={handleSave} disabled={mode === "details" || isPending} className="font-semibold">
-            {isPending ? "Saving..." : mode === "new" ? "Create Plan" : "Save Changes"}
-          </Button>
+          {activeTab === "branches" && mode !== "new" ? (
+            <>
+              <p className="text-xs text-muted-foreground self-center">Changes are saved automatically</p>
+              <div className="flex-1" />
+              <Button variant="outline" onClick={handleClose}>Close</Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" onClick={handleClose}>Close</Button>
+              <div className="flex-1" />
+              <Button variant="outline" onClick={handleClose} className="mr-3" disabled={isPending}>Cancel</Button>
+              <Button variant="primary" onClick={handleSave} disabled={mode === "details" || isPending} className="font-semibold">
+                {isPending ? "Saving..." : mode === "new" ? "Create Plan" : "Save Changes"}
+              </Button>
+            </>
+          )}
         </SheetFooter>
       </SheetContent>
     </Sheet>
