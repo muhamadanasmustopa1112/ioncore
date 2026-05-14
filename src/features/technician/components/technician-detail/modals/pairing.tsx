@@ -11,6 +11,7 @@ import {
   usePairingRecommendation,
 } from "../../../api/team-leader";
 import { useTechnicianList } from "../../../api/dashboard";
+import { useAuthStore } from "@/store/auth-store";
 import type {
   AssignedTechnician,
   DispatchCandidate,
@@ -131,12 +132,13 @@ export function PairingModal({
   const recommendMutation = usePairingRecommendation();
   const mutation = isReassign ? updateMutation : assignMutation;
 
-  // Load all technicians dynamically from the newly implemented POST /technicians/list endpoint
+  const { rawUser } = useAuthStore();
+  const isLeader = rawUser?.roles?.some((r) => (r.name || "").toLowerCase() === "team_leader");
+
   const { data: allTechnicians = [], isLoading: isTechListLoading } = useTechnicianList({
-    // params: {
-    //   branch_id: branchId,
-    //   team_leader_id: teamLeaderId,
-    // },
+    params: {
+      ...(isLeader ? { branch_id: branchId, team_leader_id: teamLeaderId } : {}),
+    },
   });
 
   function handleRecommend() {
@@ -155,14 +157,13 @@ export function PairingModal({
   }
 
   function toggleCandidate(id: string) {
-    setValidationError(false); // Reset error message if user changes candidate
+    setValidationError(false);
     setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
   function handleSubmit() {
     if (!useAuto && selectedIds.length < 1) return;
 
-    // 1. Calculate level distribution at the moment of click
     const currentSelectedLevels = selectedIds.map(id => {
       const source = [
         ...allTechnicians.map(t => ({ id: t.technician_id, level: t.level })),
@@ -174,18 +175,16 @@ export function PairingModal({
       return found?.level?.toString().toLowerCase().trim();
     });
 
-    // 2. Perform validation check here
     const hasSenior = currentSelectedLevels.some(lvl => lvl === "senior" || lvl === "lead");
     const isViolated = !useAuto && selectedIds.length > 0 && !hasSenior;
 
     if (isViolated) {
-      setValidationError(true); // Show alert only on click fail
+      setValidationError(true);
       return;
     }
 
-    setValidationError(false); // Clear error if valid
+    setValidationError(false);
 
-    // 3. Prep audit mapping before mutation executes
     const map: Record<string, string> = {};
     currentTeam.forEach((t) => { if (t.technician_id) map[t.technician_id] = t.technician_name; });
     (recommendation?.suggested_team ?? []).forEach((t) => { if (t.technician_id) map[t.technician_id] = t.technician_name; });
@@ -199,18 +198,17 @@ export function PairingModal({
       { id: workOrderId, data: { technician_ids: selectedIds, use_auto_pairing: useAuto, override_current: override, note: note || undefined } },
       {
         onSuccess: () => {
-          // Record the Audit Trail asynchronously
-          createAuditLog({
-            action_type: "override",
-            module: "technician_pairing",
-            record_type: "work_order_assignment",
-            record_id: workOrderId,
-            record_identifier: workOrderNumber,
-            before: { team: beforeTeam } as unknown as Record<string, unknown>,
-            after: { team: afterTeam, use_auto: useAuto } as unknown as Record<string, unknown>,
-            change_reason: note || "Pairing update executed",
-            status: "success"
-          }).catch(() => console.warn("⚠️ Silent failure recording audit trace for pairing event"));
+          // createAuditLog({
+          //   action_type: "override",
+          //   module: "technician_pairing",
+          //   record_type: "work_order_assignment",
+          //   record_id: workOrderId,
+          //   record_identifier: workOrderNumber,
+          //   before: { team: beforeTeam } as unknown as Record<string, unknown>,
+          //   after: { team: afterTeam, use_auto: useAuto } as unknown as Record<string, unknown>,
+          //   change_reason: note || "Pairing update executed",
+          //   status: "success"
+          // }).catch(() => console.warn("⚠️ Silent failure recording audit trace for pairing event"));
 
           onClose();
         }
@@ -245,11 +243,12 @@ export function PairingModal({
 
   const filteredAllCandidates = mappedAllCandidates.filter((c) => {
     const q = searchTerm.toLowerCase();
-    return (
+    const matchesSearch =
       c.technician_name.toLowerCase().includes(q) ||
       c.level.toLowerCase().includes(q) ||
-      (c.area_id ?? "").toLowerCase().includes(q)
-    );
+      (c.area_id ?? "").toLowerCase().includes(q);
+
+    return matchesSearch && (c as any).availability_status === "available";
   });
 
   return (
