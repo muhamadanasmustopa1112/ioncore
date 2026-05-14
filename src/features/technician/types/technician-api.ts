@@ -306,6 +306,16 @@ export interface WarehouseDispatch {
   note: string;
 }
 
+export interface CableConsumption {
+  cable_used_meters: number;
+  remnant_meters: number;
+  recorded_by: string;
+  recorded_role: string;
+  recorded_at: string;
+  remnant_returned: boolean;
+  note: string;
+}
+
 export interface WarehouseDevice {
   device_serial: string;
   device_type: string;
@@ -328,6 +338,8 @@ export interface WorkOrderTimelineItem {
   from_state: WorkOrderState | null;
   to_state: WorkOrderState | null;
   note: string;
+  cable_excess_meter?: number;
+  cable_excess_price?: number;
   created_at: string;
 }
 
@@ -408,6 +420,7 @@ export interface WorkOrderDetailResponse {
   device_disposition?: DeviceDisposition;
   reschedule?: Reschedule;
   warehouse_dispatch?: WarehouseDispatch;
+  cable_consumption?: CableConsumption | null;
   previous_customer_jobs?: WorkOrderHistoryItem[];
   previous_site_jobs?: WorkOrderHistoryItem[];
   audit_trail?: AuditTrailEntry[];
