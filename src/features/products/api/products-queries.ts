@@ -241,6 +241,17 @@ export function useAdminEnterpriseServices(params: EnterpriseServiceListParams =
   });
 }
 
+export function useAdminEnterpriseService(id: string | null) {
+  return useQuery<EnterpriseService | null>({
+    queryKey: [...productKeys.enterpriseService(id!), "admin"],
+    queryFn: async () => {
+      const res = await adminGetEnterpriseService(id!);
+      return res.data ?? null;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useCreateEnterpriseService() {
   const qc = useQueryClient();
   return useMutation({

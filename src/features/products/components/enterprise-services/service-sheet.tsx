@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetBody } 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useCreateEnterpriseService, useUpdateEnterpriseService,
+  useAdminEnterpriseService,
   useAddBranchToEnterpriseService, useRemoveBranchFromEnterpriseService,
 } from "../../api/products-queries";
 import type { EnterpriseService, CreateEnterpriseServicePayload } from "../../types/products";
@@ -19,6 +20,11 @@ interface ServiceSheetProps {
 }
 
 export function ServiceSheet({ open, mode, selected, onClose }: ServiceSheetProps) {
+  const { data: detail } = useAdminEnterpriseService(
+    open && mode !== "new" && selected ? selected.id : null
+  );
+  const serviceData = mode === "new" ? null : (detail ?? selected);
+
   const create = useCreateEnterpriseService();
   const update = useUpdateEnterpriseService();
   const addBranch = useAddBranchToEnterpriseService();
@@ -29,8 +35,8 @@ export function ServiceSheet({ open, mode, selected, onClose }: ServiceSheetProp
   const handleSubmit = (payload: CreateEnterpriseServicePayload) => {
     if (mode === "new") {
       create.mutate(payload, { onSuccess: onClose });
-    } else if (mode === "edit" && selected) {
-      update.mutate({ id: selected.id, payload }, { onSuccess: onClose });
+    } else if (mode === "edit" && serviceData) {
+      update.mutate({ id: serviceData.id, payload }, { onSuccess: onClose });
     }
   };
 
@@ -40,7 +46,7 @@ export function ServiceSheet({ open, mode, selected, onClose }: ServiceSheetProp
   };
 
   const title = mode === "new" ? "Add Enterprise Service" : mode === "edit" ? "Edit Enterprise Service" : "Enterprise Service Detail";
-  const showBranches = mode !== "new" && selected;
+  const showBranches = mode !== "new" && serviceData;
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -59,28 +65,28 @@ export function ServiceSheet({ open, mode, selected, onClose }: ServiceSheetProp
                 <TabsTrigger value="details" className="rounded-sm text-xs">Details</TabsTrigger>
                 <TabsTrigger value="branches" className="rounded-sm text-xs">
                   Branch Availability
-                  {selected.branches && selected.branches.length > 0 && (
+                  {serviceData.branches && serviceData.branches.length > 0 && (
                     <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold px-1.5 min-w-[18px]">
-                      {selected.branches.length}
+                      {serviceData.branches.length}
                     </span>
                   )}
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="details" className="flex-1 overflow-hidden mt-0">
-                <ServiceForm selected={selected} mode={mode} onSubmit={handleSubmit} />
+                <ServiceForm selected={serviceData} mode={mode} onSubmit={handleSubmit} />
               </TabsContent>
               <TabsContent value="branches" className="flex-1 overflow-hidden mt-0">
                 <BranchAvailability
-                  assignedBranchIds={selected.branches ?? []}
-                  onAdd={(branchId) => addBranch.mutate({ serviceId: selected.id, branchId })}
-                  onRemove={(branchId) => removeBranch.mutate({ serviceId: selected.id, branchId })}
+                  assignedBranchIds={serviceData.branches ?? []}
+                  onAdd={(branchId) => addBranch.mutate({ serviceId: serviceData.id, branchId })}
+                  onRemove={(branchId) => removeBranch.mutate({ serviceId: serviceData.id, branchId })}
                   isPending={branchPending}
                   readOnly={mode === "details"}
                 />
               </TabsContent>
             </Tabs>
           ) : (
-            <ServiceForm selected={selected} mode={mode} onSubmit={handleSubmit} />
+            <ServiceForm selected={serviceData} mode={mode} onSubmit={handleSubmit} />
           )}
         </SheetBody>
 

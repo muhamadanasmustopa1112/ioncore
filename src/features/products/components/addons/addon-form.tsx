@@ -18,7 +18,7 @@ const schema = z.object({
   price: z.number({ error: "Required" }).min(0, "Required"),
   one_time_charge: z.number({ error: "Required" }).min(0, "Required"),
   profile_change_id: z.string().optional(),
-  compatible_plans: z.array(z.string()).optional(),
+  broadband_plan_ids: z.array(z.string()).optional(),
   is_wo_required: z.boolean(),
   is_active: z.boolean(),
 });
@@ -38,7 +38,7 @@ export function AddonForm({ selected, mode, onSubmit }: AddonFormProps) {
 
   const { register, handleSubmit, control, reset, watch, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: "", type: "digital", price: 0, one_time_charge: 0, profile_change_id: "", compatible_plans: [], is_wo_required: false, is_active: true },
+    defaultValues: { name: "", type: "digital", price: 0, one_time_charge: 0, profile_change_id: "", broadband_plan_ids: [], is_wo_required: false, is_active: true },
   });
 
   useEffect(() => {
@@ -46,11 +46,11 @@ export function AddonForm({ selected, mode, onSubmit }: AddonFormProps) {
       reset({
         name: selected.name, type: selected.type, price: selected.price,
         one_time_charge: selected.one_time_charge, profile_change_id: selected.profile_change_id ?? "",
-        compatible_plans: selected.compatible_plans ?? [],
+        broadband_plan_ids: selected.broadband_plans?.map((p) => p.id) ?? [],
         is_wo_required: selected.is_wo_required, is_active: selected.is_active,
       });
     } else if (!selected && mode === "new") {
-      reset({ name: "", type: "digital", price: 0, one_time_charge: 0, profile_change_id: "", compatible_plans: [], is_wo_required: false, is_active: true });
+      reset({ name: "", type: "digital", price: 0, one_time_charge: 0, profile_change_id: "", broadband_plan_ids: [], is_wo_required: false, is_active: true });
     }
   }, [selected, mode, reset]);
 
@@ -58,7 +58,7 @@ export function AddonForm({ selected, mode, onSubmit }: AddonFormProps) {
   submitRef.current = handleSubmit((v) => onSubmit({
     ...v,
     profile_change_id: v.profile_change_id || undefined,
-    compatible_plans: v.compatible_plans?.length ? v.compatible_plans : undefined,
+    broadband_plan_ids: v.broadband_plan_ids?.length ? v.broadband_plan_ids : undefined,
   }));
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export function AddonForm({ selected, mode, onSubmit }: AddonFormProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const compatiblePlans = watch("compatible_plans") ?? [];
+  const broadbandPlanIds = watch("broadband_plan_ids") ?? [];
 
   const Field = ({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) => (
     <div className="space-y-1.5">
@@ -142,7 +142,7 @@ export function AddonForm({ selected, mode, onSubmit }: AddonFormProps) {
             <p className="text-xs text-muted-foreground">No plans available</p>
           ) : (
             <Controller
-              name="compatible_plans"
+              name="broadband_plan_ids"
               control={control}
               render={({ field }) => (
                 <div className="rounded-md border divide-y max-h-48 overflow-y-auto">
@@ -179,8 +179,8 @@ export function AddonForm({ selected, mode, onSubmit }: AddonFormProps) {
               )}
             />
           )}
-          {compatiblePlans.length > 0 && (
-            <p className="text-xs text-muted-foreground">{compatiblePlans.length} plan{compatiblePlans.length > 1 ? "s" : ""} selected</p>
+          {broadbandPlanIds.length > 0 && (
+            <p className="text-xs text-muted-foreground">{broadbandPlanIds.length} plan{broadbandPlanIds.length > 1 ? "s" : ""} selected</p>
           )}
         </div>
       </div>

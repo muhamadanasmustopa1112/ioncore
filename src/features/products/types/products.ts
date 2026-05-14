@@ -147,6 +147,13 @@ export interface CreateEnterpriseServicePayload {
 
 export type AddonType = "digital" | "physical" | "service";
 
+export interface AddonBroadbandPlan {
+  id: string;
+  name: string;
+  speed_download_mbps: number;
+  speed_upload_mbps: number;
+}
+
 export interface Addon {
   id: string;
   name: string;
@@ -154,7 +161,7 @@ export interface Addon {
   price: number;
   one_time_charge: number;
   profile_change_id: string;
-  compatible_plans?: string[];
+  broadband_plans?: AddonBroadbandPlan[];
   is_wo_required: boolean;
   is_active: boolean;
   created_at: string;
@@ -169,6 +176,7 @@ export interface AddonListData {
 export interface AddonListParams {
   name?: string;
   type?: AddonType;
+  broadband_plan_id?: string;
   is_active?: boolean;
   page?: number;
   per_page?: number;
@@ -180,7 +188,7 @@ export interface CreateAddonPayload {
   price: number;
   one_time_charge: number;
   profile_change_id?: string;
-  compatible_plans?: string[];
+  broadband_plan_ids?: string[];
   is_wo_required: boolean;
   is_active: boolean;
 }

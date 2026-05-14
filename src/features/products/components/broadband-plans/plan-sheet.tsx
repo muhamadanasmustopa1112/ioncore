@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetBody } 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useCreateBroadbandPlan, useUpdateBroadbandPlan,
+  useAdminBroadbandPlan,
   useAddBranchToBroadbandPlan, useRemoveBranchFromBroadbandPlan,
 } from "../../api/products-queries";
 import type { BroadbandPlan, CreateBroadbandPlanPayload, ProductEnvelope } from "../../types/products";
@@ -21,6 +22,11 @@ interface PlanSheetProps {
 
 export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   const [pendingBranchIds, setPendingBranchIds] = useState<string[]>([]);
+
+  const { data: detail } = useAdminBroadbandPlan(
+    open && mode !== "new" && selected ? selected.id : null
+  );
+  const planData = mode === "new" ? null : (detail ?? selected);
 
   const create = useCreateBroadbandPlan();
   const update = useUpdateBroadbandPlan();
@@ -49,8 +55,8 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
           }
         },
       });
-    } else if (mode === "edit" && selected) {
-      update.mutate({ id: selected.id, payload }, { onSuccess: handleClose });
+    } else if (mode === "edit" && planData) {
+      update.mutate({ id: planData.id, payload }, { onSuccess: handleClose });
     }
   };
 
@@ -63,7 +69,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
 
   const branchBadgeCount = mode === "new"
     ? pendingBranchIds.length
-    : (selected?.branches?.length ?? 0);
+    : (planData?.branches?.length ?? 0);
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && handleClose()}>
@@ -90,7 +96,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
             </TabsList>
 
             <TabsContent value="details" className="flex-1 overflow-hidden mt-0">
-              <PlanForm selected={selected} mode={mode} onSubmit={handleSubmit} />
+              <PlanForm selected={planData} mode={mode} onSubmit={handleSubmit} />
             </TabsContent>
 
             <TabsContent value="branches" className="flex-1 overflow-hidden mt-0">
@@ -101,11 +107,11 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
                   onRemove={(branchId) => setPendingBranchIds((prev) => prev.filter((id) => id !== branchId))}
                   isPending={false}
                 />
-              ) : selected ? (
+              ) : planData ? (
                 <BranchAvailability
-                  assignedBranchIds={(selected.branches ?? []).map((b) => b.id)}
-                  onAdd={(branchId) => addBranch.mutate({ planId: selected.id, branchIds: [branchId] })}
-                  onRemove={(branchId) => removeBranch.mutate({ planId: selected.id, branchId })}
+                  assignedBranchIds={(planData.branches ?? []).map((b) => b.id)}
+                  onAdd={(branchId) => addBranch.mutate({ planId: planData.id, branchIds: [branchId] })}
+                  onRemove={(branchId) => removeBranch.mutate({ planId: planData.id, branchId })}
                   isPending={branchPending}
                   readOnly={mode === "details"}
                 />

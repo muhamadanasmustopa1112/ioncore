@@ -238,7 +238,7 @@ export function ProductSelectorSheet({
       : {}
   );
   const { data: addonsData, isLoading: addonsLoading } = useAddons(
-    open ? { per_page: 50 } : {}
+    open && selectedPlanId ? { broadband_plan_id: selectedPlanId, per_page: 50 } : {}
   );
 
   const plans = plansData?.broadband_plans ?? [];
@@ -250,6 +250,11 @@ export function ProductSelectorSheet({
 
   const selectedPlan = plans.find((p) => p.id === selectedPlanId) ?? null;
   const selectedAddons = addons.filter((a) => selectedAddonIds.has(a.id));
+
+  function selectPlan(planId: string) {
+    if (selectedPlanId !== planId) setSelectedAddonIds(new Set());
+    setSelectedPlanId(planId);
+  }
 
   function toggleAddon(id: string) {
     setSelectedAddonIds((prev) => {
@@ -327,7 +332,7 @@ export function ProductSelectorSheet({
                     key={plan.id}
                     plan={plan}
                     selected={selectedPlanId === plan.id}
-                    onSelect={() => setSelectedPlanId(plan.id)}
+                    onSelect={() => selectPlan(plan.id)}
                   />
                 ))}
               </div>

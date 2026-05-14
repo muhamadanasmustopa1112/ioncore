@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetBody } from "@/components/ui/sheet";
-import { useCreateAddon, useUpdateAddon } from "../../api/products-queries";
+import { useCreateAddon, useUpdateAddon, useAdminAddon } from "../../api/products-queries";
 import type { Addon, CreateAddonPayload } from "../../types/products";
 import { AddonForm } from "./addon-form";
 
@@ -17,6 +17,11 @@ export function AddonSheet({ open, mode, selected, onClose }: AddonSheetProps) {
   const create = useCreateAddon();
   const update = useUpdateAddon();
   const isPending = create.isPending || update.isPending;
+
+  const { data: detail } = useAdminAddon(
+    open && mode !== "new" && selected ? selected.id : null
+  );
+  const addonData = mode === "new" ? null : (detail ?? selected);
 
   const handleSubmit = (payload: CreateAddonPayload) => {
     if (mode === "new") {
@@ -43,7 +48,7 @@ export function AddonSheet({ open, mode, selected, onClose }: AddonSheetProps) {
           <SheetTitle className="font-medium text-xl">{title}</SheetTitle>
         </SheetHeader>
         <SheetBody className="flex-1 p-0 overflow-hidden">
-          <AddonForm selected={selected} mode={mode} onSubmit={handleSubmit} />
+          <AddonForm selected={addonData} mode={mode} onSubmit={handleSubmit} />
         </SheetBody>
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
           <Button variant="ghost" onClick={onClose}>Close</Button>
