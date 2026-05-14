@@ -146,7 +146,7 @@ function mapBranchDetailToData(dto: BranchDetailDto): BranchData {
 // ─── Queries ──────────────────────────────────────────────────────────────────
 
 export function useBranchList(
-  params: { page?: number; per_page?: number; search?: string; branch_type?: string } = {}
+  params: { page?: number; per_page?: number; search?: string; branch_type?: string; level?: string } = {}
 ) {
   return useQuery({
     queryKey: [...branchKeys.list(), params] as const,

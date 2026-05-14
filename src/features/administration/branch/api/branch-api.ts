@@ -39,6 +39,7 @@ export function getBranchList(params: BranchListParams = {}) {
         branch_type: params.branch_type
           ? params.branch_type.toUpperCase()
           : undefined,
+        level: params.level ?? undefined,
       },
     })
   );

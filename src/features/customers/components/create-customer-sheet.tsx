@@ -53,7 +53,7 @@ const EMPTY = {
 export function CreateCustomerSheet({ open, onClose }: Props) {
   const [form, setForm] = useState(EMPTY);
 
-  const { data: branches = [], isLoading: branchesLoading } = useBranchList();
+  const { data: branches = [], isLoading: branchesLoading } = useBranchList({ level: "sub_area" });
   const createCustomer = useCreateCustomer();
 
   const set = (key: keyof typeof EMPTY) => (value: string) =>

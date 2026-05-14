@@ -150,4 +150,5 @@ export interface BranchListParams {
   type?: string;
   search?: string;
   branch_type?: string;
+  level?: string;
 }

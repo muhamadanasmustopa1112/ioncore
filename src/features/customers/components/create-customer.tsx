@@ -62,7 +62,7 @@ export function CreateCustomer() {
   const installMoved =
     installLat !== INSTALL_DEFAULT[0] || installLng !== INSTALL_DEFAULT[1];
 
-  const { data: branches = [], isLoading: branchesLoading } = useBranchList();
+  const { data: branches = [], isLoading: branchesLoading } = useBranchList({ level: "sub_area" });
   const createCustomer = useCreateCustomer();
 
   const activeBranches = branches.filter((b) => b.active);

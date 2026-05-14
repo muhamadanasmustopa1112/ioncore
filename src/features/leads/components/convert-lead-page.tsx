@@ -40,7 +40,7 @@ export function ConvertLeadPage() {
   const router = useRouter();
 
   const { data: lead, isLoading: leadLoading } = useLead(leadId);
-  const { data: branches = [], isLoading: branchesLoading } = useBranchList();
+  const { data: branches = [], isLoading: branchesLoading } = useBranchList({ level: "sub_area" });
   const createCustomerFromLead = useCreateCustomerFromLead();
 
   const [customerType, setCustomerType] = useState<CustomerType>("residential");
