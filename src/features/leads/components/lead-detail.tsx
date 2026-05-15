@@ -141,7 +141,7 @@ export function LeadDetail() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <Card>
           <CardHeader><CardTitle>Status</CardTitle></CardHeader>
           <CardContent className="flex flex-col gap-3">
@@ -209,7 +209,7 @@ export function LeadDetail() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader><CardTitle>Cable Distance</CardTitle></CardHeader>
           <CardContent className="flex flex-col gap-3">
             <p className="text-sm text-muted-foreground">
@@ -228,10 +228,10 @@ export function LeadDetail() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
-      <Card>
+      {/* <Card>
         <CardHeader><CardTitle>Add Activity</CardTitle></CardHeader>
         <CardContent className="flex flex-col gap-3">
           <Select value={activityType} onValueChange={(v) => setActivityType(v as LeadActivityType)}>
@@ -252,7 +252,7 @@ export function LeadDetail() {
             Add Activity
           </Button>
         </CardContent>
-      </Card>
+      </Card> */}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>

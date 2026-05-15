@@ -49,7 +49,7 @@ export function getLeadTimeline(id: string) {
 
 export function updateLeadStatus(id: string, payload: UpdateLeadStatusPayload) {
   return cast<SalesEnvelope<LeadDto>>(
-    userServiceApi.patch(`${SALES}/${id}/status`, payload)
+    userServiceApi.patch(`${ADMIN}/${id}/status`, payload)
   );
 }
 
