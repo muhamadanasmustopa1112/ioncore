@@ -389,7 +389,7 @@ export const DASHBOARD_MENU: MenuConfig = [
 
 // Menu khusus untuk technician role
 export const TECHNICIAN_MENU: MenuConfig = [
-  DASHBOARD_ITEM,
+  // DASHBOARD_ITEM,
   TECHNICIAN_FIELD_ITEM,
 ];
 
