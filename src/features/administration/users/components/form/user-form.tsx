@@ -124,21 +124,27 @@ export function UserForm() {
       })
     ),
     defaultValues: {
-      fullName: "",
-      email: "",
+      fullName: selectedUser?.fullName ?? "",
+      email: selectedUser?.email ?? "",
       password: "",
-      phone: "",
-      employeeId: "",
-      functionName: "",
-      department: "",
-      position: "",
-      workingScope: "",
-      salesType: "",
-      technicianId: "",
-      homeBranchId: "",
-      activeBranchId: "",
-      reportsToUserId: "",
-      roleAssignments: [{ roleId: "", branchId: "" }],
+      phone: selectedUser?.phone ?? "",
+      employeeId: selectedUser?.employeeId ?? "",
+      functionName: selectedUser?.functionName ?? "",
+      department: selectedUser?.department ?? "",
+      position: selectedUser?.position ?? "",
+      workingScope: selectedUser?.workingScope ?? "",
+      salesType: selectedUser?.salesType ?? "",
+      technicianId: selectedUser?.technicianId ?? "",
+      homeBranchId: selectedUser?.homeBranchId ?? "",
+      activeBranchId: selectedUser?.activeBranchId ?? "",
+      reportsToUserId: selectedUser?.reportsToUserId ?? "",
+      roleAssignments:
+        selectedUser && selectedUser.roleAssignments.length > 0
+          ? selectedUser.roleAssignments.map((r) => ({
+              roleId: r.roleId,
+              branchId: r.branchId,
+            }))
+          : [{ roleId: "", branchId: "" }],
     },
   });
 
@@ -148,31 +154,7 @@ export function UserForm() {
   });
 
   useEffect(() => {
-    if (selectedUser) {
-      form.reset({
-        fullName: selectedUser.fullName,
-        email: selectedUser.email,
-        phone: selectedUser.phone ?? "",
-        employeeId: selectedUser.employeeId ?? "",
-        functionName: selectedUser.functionName ?? "",
-        department: selectedUser.department ?? "",
-        position: selectedUser.position ?? "",
-        workingScope: selectedUser.workingScope ?? "",
-        salesType: selectedUser.salesType ?? "",
-        technicianId: selectedUser.technicianId ?? "",
-        homeBranchId: selectedUser.homeBranchId ?? "",
-        activeBranchId: selectedUser.activeBranchId ?? "",
-        reportsToUserId: selectedUser.reportsToUserId ?? "",
-        password: "",
-        roleAssignments:
-          selectedUser.roleAssignments.length > 0
-            ? selectedUser.roleAssignments.map((r) => ({
-              roleId: r.roleId,
-              branchId: r.branchId,
-            }))
-            : [{ roleId: "", branchId: "" }],
-      });
-    } else {
+    if (!selectedUser) {
       form.reset({
         fullName: "",
         email: "",
@@ -498,7 +480,7 @@ export function UserForm() {
                     </FormItem>
                   )}
                 />
-                {/* <FormField
+                <FormField
                   control={form.control}
                   name="functionName"
                   render={({ field }) => (
@@ -514,7 +496,7 @@ export function UserForm() {
                       <FormMessage className="text-[11px]" />
                     </FormItem>
                   )}
-                /> */}
+                />
               </div>
             </div>
 
@@ -524,7 +506,7 @@ export function UserForm() {
                 <h3 className="text-sm font-semibold">Organization</h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* <FormField
+                <FormField
                   control={form.control}
                   name="department"
                   render={({ field }) => (
@@ -540,7 +522,7 @@ export function UserForm() {
                       <FormMessage className="text-[11px]" />
                     </FormItem>
                   )}
-                /> */}
+                />
                 <FormField
                   control={form.control}
                   name="position"

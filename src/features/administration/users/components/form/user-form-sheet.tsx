@@ -2,6 +2,7 @@ import {
   Sheet,
   SheetBody,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -9,7 +10,7 @@ import { useUserStore } from "../../store/user";
 import { UserForm } from "./user-form";
 
 export function UserFormSheet() {
-  const { userSheetOpen, closeUserFormSheet, form } = useUserStore();
+  const { userSheetOpen, closeUserFormSheet, form, selectedUser } = useUserStore();
   const isNewMode = form === "new";
 
   return (
@@ -19,9 +20,12 @@ export function UserFormSheet() {
           <SheetTitle className="font-medium text-xl">
             {isNewMode ? "Add New User" : form === "edit" ? "Edit User" : "User Details"}
           </SheetTitle>
+          <SheetDescription className="sr-only">
+            {isNewMode ? "Create a new user account" : form === "edit" ? "Edit user account details" : "View user account details"}
+          </SheetDescription>
         </SheetHeader>
         <SheetBody className="flex-1 p-0 overflow-hidden">
-          <UserForm />
+          <UserForm key={selectedUser?.id ?? "new"} />
         </SheetBody>
       </SheetContent>
     </Sheet>
