@@ -18,6 +18,7 @@ import { ServiceOverview } from "./service-overview";
 import { PaymentHistoryTable } from "./payment-history-table";
 import { CustomerWidgets } from "./customer-widgets";
 import { AddServiceSheet } from "./add-service-sheet";
+import { CustomerSchemasSection } from "./customer-schemas-section";
 
 function DetailRow({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -121,6 +122,8 @@ export function CustomerProfile() {
               <DetailRow label="Suspension Schema" value={customer?.suspension_schema_version_id} />
             </CardContent>
           </Card>
+
+          <CustomerSchemasSection customerId={id} />
 
           {/* Timestamps */}
           <Card>

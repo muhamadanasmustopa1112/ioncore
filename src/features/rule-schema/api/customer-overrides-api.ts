@@ -3,6 +3,7 @@ import { services } from "@/config/constants";
 import { userServiceApi } from "@/features/user-service/api/client";
 import { ruleSchemaKeys } from "./keys";
 import type {
+  ContentDiff,
   CreateCustomerSchemaRequest,
   CustomerSchema,
   ListCustomerSchemasParams,
@@ -12,55 +13,80 @@ import type {
 const base = services.customer;
 const path = `${base}/customer-schemas`;
 
-// ── Response envelope (customer-service uses same shape as branch-service) ──
+// ── Response envelopes ──────────────────────────────────
 
-interface CustomerServiceEnvelope<T> {
+interface CustomerEnvelope<T> {
   data: T;
   error: string;
   message: string;
   metadata: null | { page: string; size: string; total: string };
 }
 
+interface CustomerListEnvelope {
+  data: CustomerSchema[];
+  message: string;
+}
+
+interface DiffEnvelope {
+  data: ContentDiff;
+  message: string;
+}
+
 // ── API functions ───────────────────────────────────────
 
+/** GET /customers/{customerId}/schemas — customer-scoped, returns array */
+export const listCustomerSchemasByCustomer = (customerId: string) =>
+  userServiceApi.get<unknown, CustomerListEnvelope>(
+    `${base}/customers/${customerId}/schemas`,
+  );
+
 export const listCustomerSchemas = (params?: ListCustomerSchemasParams) =>
-  userServiceApi.get<unknown, CustomerServiceEnvelope<{ customer_schemas: CustomerSchema[]; metadata: { page: string; size: string; total: string } }>>(
+  userServiceApi.get<unknown, CustomerEnvelope<{ customer_schemas: CustomerSchema[]; metadata: { page: string; size: string; total: string } }>>(
     path,
     { params },
   );
 
 export const getCustomerSchema = (id: string) =>
-  userServiceApi.get<unknown, CustomerServiceEnvelope<CustomerSchema>>(
+  userServiceApi.get<unknown, CustomerEnvelope<CustomerSchema>>(
     `${path}/${id}`,
   );
 
 export const createCustomerSchema = (payload: CreateCustomerSchemaRequest) =>
-  userServiceApi.post<unknown, CustomerServiceEnvelope<CustomerSchema>>(
+  userServiceApi.post<unknown, CustomerEnvelope<CustomerSchema>>(
     path,
     payload,
   );
 
 export const updateCustomerSchema = (id: string, payload: UpdateCustomerSchemaRequest) =>
-  userServiceApi.put<unknown, CustomerServiceEnvelope<CustomerSchema>>(
+  userServiceApi.put<unknown, CustomerEnvelope<CustomerSchema>>(
     `${path}/${id}`,
     payload,
   );
 
 export const deleteCustomerSchema = (id: string) =>
-  userServiceApi.delete<unknown, CustomerServiceEnvelope<null>>(`${path}/${id}`);
+  userServiceApi.delete<unknown, CustomerEnvelope<null>>(`${path}/${id}`);
 
-// ── Empty placeholders ──────────────────────────────────
-
-const EMPTY_META_RAW = { page: "1", size: "10", total: "0" };
-
-const EMPTY_CS_LIST: CustomerServiceEnvelope<{ customer_schemas: CustomerSchema[]; metadata: { page: string; size: string; total: string } }> = {
-  data: { customer_schemas: [], metadata: EMPTY_META_RAW },
-  error: "",
-  message: "",
-  metadata: null,
-};
+export const getCustomerSchemaDiff = (id: string) =>
+  userServiceApi.get<unknown, DiffEnvelope>(`${path}/${id}/content-diff`);
 
 // ── Hooks ───────────────────────────────────────────────
+
+const EMPTY_LIST: CustomerListEnvelope = { data: [], message: "" };
+
+export const useCustomerSchemasByCustomer = (customerId: string) =>
+  useQuery({
+    queryKey: ruleSchemaKeys.customerSchemas({ customerId }),
+    queryFn: async () => {
+      try {
+        return await listCustomerSchemasByCustomer(customerId);
+      } catch {
+        return EMPTY_LIST;
+      }
+    },
+    enabled: !!customerId,
+    placeholderData: EMPTY_LIST,
+    retry: false,
+  });
 
 export const useCustomerSchemas = (params?: ListCustomerSchemasParams) =>
   useQuery({
@@ -69,10 +95,9 @@ export const useCustomerSchemas = (params?: ListCustomerSchemasParams) =>
       try {
         return await listCustomerSchemas(params);
       } catch {
-        return EMPTY_CS_LIST;
+        return null;
       }
     },
-    placeholderData: EMPTY_CS_LIST,
     retry: false,
   });
 
@@ -87,6 +112,20 @@ export const useCustomerSchema = (id: string) =>
       }
     },
     enabled: !!id,
+    retry: false,
+  });
+
+export const useCustomerSchemaDiff = (id: string, enabled = true) =>
+  useQuery({
+    queryKey: [...ruleSchemaKeys.customerSchema(id), "diff"],
+    queryFn: async () => {
+      try {
+        return await getCustomerSchemaDiff(id);
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!id && enabled,
     retry: false,
   });
 
@@ -120,8 +159,7 @@ export const useDeleteCustomerSchema = () => {
   });
 };
 
-// ── Legacy aliases — remove after components fully migrated ──
-
+// ── Legacy aliases ──────────────────────────────────────
 /** @deprecated use useCustomerSchemas */
 export const useCustomerOverrides = useCustomerSchemas;
 /** @deprecated use useCustomerSchema */

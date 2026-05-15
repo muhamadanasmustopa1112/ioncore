@@ -26,7 +26,7 @@ function cast<T>(p: unknown): Promise<T> {
 // ─── Public (sales user) ─────────────────────────────────────────────────────
 
 export function createLead(payload: CreateLeadPayload) {
-  return cast<SalesEnvelope<LeadDto>>(userServiceApi.post(SALES, payload));
+  return cast<SalesEnvelope<LeadDto>>(userServiceApi.post(ADMIN, payload));
 }
 
 export function listMyLeads(params: Pick<LeadListParams, "page" | "per_page"> = {}) {
@@ -38,7 +38,7 @@ export function listMyLeads(params: Pick<LeadListParams, "page" | "per_page"> = 
 }
 
 export function getLead(id: string) {
-  return cast<SalesEnvelope<LeadDetail>>(userServiceApi.get(`${SALES}/${id}`));
+  return cast<SalesEnvelope<LeadDetail>>(userServiceApi.get(`${ADMIN}/${id}`));
 }
 
 export function getLeadTimeline(id: string) {

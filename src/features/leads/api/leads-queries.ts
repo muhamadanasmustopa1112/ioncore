@@ -33,8 +33,16 @@ export const salesKeys = {
 export function useSalesList(params: SalesListParams = {}) {
   return useQuery({
     queryKey: salesKeys.list(params),
-    queryFn: async () => (await listSales({ ...params, per_page: 100 })).data?.saleses ?? [],
+    queryFn: async () => {
+      try {
+        return (await listSales({ ...params, per_page: 100 })).data?.saleses ?? [];
+      } catch {
+        return [];
+      }
+    },
     placeholderData: [],
+    retry: false,
+    meta: { suppressGlobalError: true },
   });
 }
 

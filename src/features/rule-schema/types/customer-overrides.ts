@@ -3,11 +3,11 @@ import type { SchemaPaginationMeta } from "./index";
 export interface CustomerSchema {
   id: string;
   customer_id: string;
-  schema_id: string;
   schema_type: string;
+  schema_id: string;
   schema_version_id: string;
-  original_content: string;
-  overridden_content: string;
+  original_content: Record<string, unknown>;
+  overridden_content: Record<string, unknown>;
   rule: string;
   created_at: string;
   created_by: string;
@@ -33,18 +33,26 @@ export interface CreateCustomerSchemaRequest {
   schema_id: string;
   schema_type: string;
   schema_version_id: string;
-  original_content?: number[];
+  original_content?: Record<string, unknown>;
 }
 
 export interface UpdateCustomerSchemaRequest {
-  schema_id?: string;
-  schema_type?: string;
-  schema_version_id?: string;
-  overridden_content?: number[];
-  rule?: string;
+  overridden_content: Record<string, unknown>;
 }
 
-// Legacy aliases — remove after components fully migrated
+export interface ContentDiffOp {
+  op: "replace" | "add" | "remove" | string;
+  path: string;
+  value: unknown;
+  old_value?: unknown;
+}
+
+export interface ContentDiff {
+  customer_schema_id: string;
+  diff: ContentDiffOp[];
+}
+
+// Legacy aliases
 /** @deprecated use CustomerSchema */
 export type CustomerOverrideSchema = CustomerSchema;
 /** @deprecated use CustomerSchemaListData */

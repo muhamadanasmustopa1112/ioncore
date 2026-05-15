@@ -127,11 +127,6 @@ userServiceApi.interceptors.response.use(
       }
     }
 
-    // Optional: Also handle 403 if your backend uses it for deactivated users
-    if (status === 403) {
-      redirectToSignin();
-    }
-
     return Promise.reject(error);
   },
 );

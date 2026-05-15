@@ -139,7 +139,7 @@ export function CreateLeadPage() {
         source,
         branch_id: branchId,
         referrer_customer_id: source === "referral" && referrerCustomerId ? referrerCustomerId : null,
-        status: "converted",
+        status: "potential",
         ...(nik.trim() ? { nik: nik.trim() } : {}),
         ...(pinMoved ? { latitude: lat, longitude: lng } : {}),
       });

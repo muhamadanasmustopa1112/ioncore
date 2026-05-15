@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
-  RiAddLine,
   RiLoader4Line,
   RiSearchLine,
   RiUserLine,
@@ -21,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import { useCustomerSchemas } from "@/features/rule-schema";
 import type { CustomerSchema } from "@/features/rule-schema";
-import { CustomerOverrideFormSheet } from "./customer-override-form-sheet";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
@@ -88,8 +86,6 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
 }
 
 export function CustomerOverridePanel() {
-  const [createOpen, setCreateOpen] = useState(false);
-
   const [params, setParams] = useQueryStates({
     co_page:   parseAsInteger.withDefault(1),
     co_size:   parseAsInteger.withDefault(10),
@@ -136,10 +132,6 @@ export function CustomerOverridePanel() {
           <Input placeholder="Search customer, schema, type..." className="pl-9 h-9"
             value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
-        <Button variant="primary" size="sm" className="h-9 px-4 font-medium w-full sm:w-auto"
-          onClick={() => setCreateOpen(true)}>
-          <RiAddLine className="size-4 mr-1.5" />New Schema
-        </Button>
       </div>
 
       {isLoading ? (
@@ -207,7 +199,6 @@ export function CustomerOverridePanel() {
         </div>
       )}
 
-      <CustomerOverrideFormSheet open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   );
 }

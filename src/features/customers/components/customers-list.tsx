@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Plus, Search, Settings2, X } from "lucide-react";
 import {
   getCoreRowModel,
@@ -62,9 +63,9 @@ const STATUS_VARIANT: Record<CustomerStatus, "primary" | "success" | "warning" |
 const PAGE_SIZE = 25;
 
 export function CustomersList() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
+  const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
+  const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
+  const [searchInput, setSearchInput] = useState(search);
   const router = useRouter();
 
   const { data, isLoading } = useCustomerList({
@@ -180,15 +181,15 @@ export function CustomersList() {
       const next = typeof updater === "function"
         ? updater({ pageIndex: page - 1, pageSize: PAGE_SIZE })
         : updater;
-      setPage(next.pageIndex + 1);
+      void setPage(next.pageIndex + 1);
     },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
   const applySearch = () => {
-    setSearch(searchInput.trim());
-    setPage(1);
+    void setSearch(searchInput.trim());
+    void setPage(1);
   };
 
   return (
@@ -206,12 +207,12 @@ export function CustomersList() {
             Customers
           </ToolbarTitle>
         </ToolbarHeading>
-        <ToolbarActions>
+        {/* <ToolbarActions>
           <Button variant="primary" onClick={() => router.push(paths.dashboard.crmAndSales.customer.create.getHref())} className="font-semibold">
             <Plus className="size-4" />
             Create Customer
           </Button>
-        </ToolbarActions>
+        </ToolbarActions> */}
       </Toolbar>
 
       <DataGrid table={table} isLoading={isLoading} recordCount={total}>
@@ -233,7 +234,7 @@ export function CustomersList() {
                       mode="icon"
                       variant="ghost"
                       className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-                      onClick={() => { setSearchInput(""); setSearch(""); setPage(1); }}
+                      onClick={() => { setSearchInput(""); void setSearch(""); void setPage(1); }}
                     >
                       <X />
                     </Button>
