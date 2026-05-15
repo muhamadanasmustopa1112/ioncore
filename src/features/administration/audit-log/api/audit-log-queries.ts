@@ -14,24 +14,24 @@ export const auditLogKeys = {
 function mapActivityLog(log: ActivityLog): AuditLog {
   return {
     id: log.id,
-    timestamp: log.created_at || new Date().toISOString(),
+    timestamp: log.occurred_at || log.created_at || new Date().toISOString(),
     userId: log.user_id,
-    userName: log.user_id,
-    userEmail: "",
-    userRole: "",
+    userName: log.email || log.user_id, // Use email as name if name is missing
+    userEmail: log.email || "",
+    userRole: log.severity || "", // Use severity as a role placeholder or just hide it
     actionType: (log.action || "update") as AuditLog["actionType"],
     module: (log.category || "user") as AuditLog["module"],
-    section: "",
+    section: log.method || "",
     recordType: log.resource || "",
     recordId: log.resource_id || "",
-    recordIdentifier: [log.resource, log.resource_id].filter(Boolean).join("/"),
+    recordIdentifier: log.path || [log.resource, log.resource_id].filter(Boolean).join("/"),
     before: null,
     after: log.metadata ?? null,
-    changeReason: null,
+    changeReason: log.details || null,
     ipAddress: log.ip_address || null,
-    sessionId: null,
-    status: log.is_suspicious ? "partial" : "success",
-    errorMessage: null,
+    sessionId: log.session_id || null,
+    status: log.status_code === 200 || !log.is_suspicious ? "success" : "failed",
+    errorMessage: log.status_code ? `Status: ${log.status_code}` : null,
   };
 }
 

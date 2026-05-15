@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   RiInformationLine,
   RiOrganizationChart,
@@ -12,7 +12,7 @@ import {
 import { Check, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -141,9 +141,9 @@ export function UserForm() {
       roleAssignments:
         selectedUser && selectedUser.roleAssignments.length > 0
           ? selectedUser.roleAssignments.map((r) => ({
-              roleId: r.roleId,
-              branchId: r.branchId,
-            }))
+            roleId: r.roleId,
+            branchId: r.branchId,
+          }))
           : [{ roleId: "", branchId: "" }],
     },
   });
@@ -176,6 +176,39 @@ export function UserForm() {
   }, [selectedUser, form]);
 
   const password = form.watch("password");
+
+  const roleAssignments = useWatch({
+    control: form.control,
+    name: "roleAssignments",
+  });
+
+  const { isSalesRole, lockedSalesType } = useMemo(() => {
+    const assignedRoleNames = (roleAssignments || []).map((ra) => {
+      const role = roles.find((r) => r.id === ra.roleId);
+      return role?.name.toLowerCase() || "";
+    });
+
+    const hasSales = assignedRoleNames.some((n) => n.includes("sales"));
+    const isBoth = assignedRoleNames.some((n) => n.includes("both") && n.includes("sales"));
+    const isEnt = assignedRoleNames.some((n) => n.includes("enterprise") && n.includes("sales"));
+    const isBb = assignedRoleNames.some((n) => n.includes("broadband") && n.includes("sales"));
+
+    let locked: "both" | "enterprise" | "broadband" | null = null;
+    if (isBoth) locked = "both";
+    else if (isEnt) locked = "enterprise";
+    else if (isBb) locked = "broadband";
+
+    return { isSalesRole: hasSales, lockedSalesType: locked };
+  }, [roleAssignments, roles]);
+
+  useEffect(() => {
+    if (lockedSalesType) {
+      form.setValue("salesType", lockedSalesType, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
+    }
+  }, [lockedSalesType, form]);
 
   const { mutateAsync: createUser, isPending: isCreating } = useCreateUser();
   const { mutateAsync: updateUser, isPending: isUpdating } = useUpdateUser();
@@ -373,7 +406,7 @@ export function UserForm() {
       >
         <ScrollArea className="flex-1 px-6 py-6">
           <div className="space-y-8 pb-6">
-            <div className="space-y-4">
+            <div className="space-y-4 pt-2">
               <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                 <RiInformationLine className="size-4 text-blue-500" />
                 <h3 className="text-sm font-semibold">Identity</h3>
@@ -500,6 +533,123 @@ export function UserForm() {
               </div>
             </div>
 
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 pb-1 border-b border-border/50">
+                <RiShieldLine className="size-4 text-purple-500" />
+                <h3 className="text-sm font-semibold">Role Assignments</h3>
+              </div>
+              <div className="space-y-3">
+                {fields.map((row, index) => {
+                  const roleId = form.watch(`roleAssignments.${index}.roleId`);
+                  const roleName = roles.find((r) => r.id === roleId)?.name ?? "";
+                  const isTechRole = /technician|technical/i.test(roleName);
+                  const filteredBranches = isTechRole
+                    ? branches.filter((b) => b.branchType === "noc")
+                    : branches;
+                  return (
+                    <div key={row.id} className="flex items-start gap-2">
+                      <div className="flex-1">
+                        <FormField
+                          control={form.control}
+                          name={`roleAssignments.${index}.roleId`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <Select
+                                onValueChange={(val) => {
+                                  field.onChange(val);
+                                  const role = roles.find((r) => r.id === val);
+                                  const name = role?.name.toLowerCase() || "";
+                                  if (name.includes("sales")) {
+                                    if (name.includes("both")) form.setValue("salesType", "both");
+                                    else if (name.includes("enterprise")) form.setValue("salesType", "enterprise");
+                                    else if (name.includes("broadband")) form.setValue("salesType", "broadband");
+                                  }
+                                }}
+                                value={field.value}
+                                disabled={isDetailMode}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select role" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {roles.map((r) => (
+                                    <SelectItem key={r.id} value={r.id}>
+                                      {r.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage className="text-[11px]" />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <FormField
+                          control={form.control}
+                          name={`roleAssignments.${index}.branchId`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value}
+                                disabled={isDetailMode}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select branch" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {filteredBranches.map((b) => (
+                                    <SelectItem key={b.id} value={b.id}>
+                                      {b.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage className="text-[11px]" />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      {!isDetailMode && (
+                        <Button
+                          type="button"
+                          mode="icon"
+                          variant="ghost"
+                          className="size-8 shrink-0 text-muted-foreground hover:text-destructive mt-1"
+                          onClick={() => remove(index)}
+                          disabled={fields.length <= 1}
+                        >
+                          <RiDeleteBinLine />
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+                {!isDetailMode && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => append({ roleId: "", branchId: "" })}
+                    className="mt-1"
+                  >
+                    <RiAddLine />
+                    Add Role Assignment
+                  </Button>
+                )}
+                {form.formState.errors.roleAssignments?.message && (
+                  <p className="text-destructive text-[11px]">
+                    {form.formState.errors.roleAssignments.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-4 pt-2">
               <div className="flex items-center gap-2 pb-1 border-b border-border/50">
                 <RiOrganizationChart className="size-4 text-emerald-500" />
@@ -557,35 +707,37 @@ export function UserForm() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="salesType"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel className="text-xs font-medium text-muted-foreground">Sales Type</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                        disabled={isDetailMode}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select sales type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="broadband">Broadband</SelectItem>
-                          <SelectItem value="enterprise">Enterprise</SelectItem>
-                          <SelectItem value="both">Both (Broadband & Enterprise)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription className="text-[10px] leading-tight">
-                        Changes will take effect on the next login (updates pipeline visibility).
-                      </FormDescription>
-                      <FormMessage className="text-[11px]" />
-                    </FormItem>
-                  )}
-                />
+                {isSalesRole && (
+                  <FormField
+                    control={form.control}
+                    name="salesType"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-xs font-medium text-muted-foreground">Sales Type</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                          disabled={isDetailMode || !!lockedSalesType}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select sales type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="broadband">Broadband</SelectItem>
+                            <SelectItem value="enterprise">Enterprise</SelectItem>
+                            <SelectItem value="both">Both (Broadband & Enterprise)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription className="text-[10px] leading-tight">
+                          Changes will take effect on the next login (updates pipeline visibility).
+                        </FormDescription>
+                        <FormMessage className="text-[11px]" />
+                      </FormItem>
+                    )}
+                  />
+                )}
                 {/* <FormField
                   control={form.control}
                   name="technicianId"
@@ -697,113 +849,6 @@ export function UserForm() {
               </div>
             </div>
 
-            <div className="space-y-4 pt-2">
-              <div className="flex items-center gap-2 pb-1 border-b border-border/50">
-                <RiShieldLine className="size-4 text-purple-500" />
-                <h3 className="text-sm font-semibold">Role Assignments</h3>
-              </div>
-              <div className="space-y-3">
-                {fields.map((row, index) => {
-                  const roleId = form.watch(`roleAssignments.${index}.roleId`);
-                  const roleName = roles.find((r) => r.id === roleId)?.name ?? "";
-                  const isTechRole = /technician|technical/i.test(roleName);
-                  const filteredBranches = isTechRole
-                    ? branches.filter((b) => b.branchType === "noc")
-                    : branches;
-                  return (
-                    <div key={row.id} className="flex items-start gap-2">
-                      <div className="flex-1">
-                        <FormField
-                          control={form.control}
-                          name={`roleAssignments.${index}.roleId`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <Select
-                                onValueChange={field.onChange}
-                                value={field.value}
-                                disabled={isDetailMode}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select role" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {roles.map((r) => (
-                                    <SelectItem key={r.id} value={r.id}>
-                                      {r.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage className="text-[11px]" />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <FormField
-                          control={form.control}
-                          name={`roleAssignments.${index}.branchId`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <Select
-                                onValueChange={field.onChange}
-                                value={field.value}
-                                disabled={isDetailMode}
-                              >
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select branch" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  {filteredBranches.map((b) => (
-                                    <SelectItem key={b.id} value={b.id}>
-                                      {b.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <FormMessage className="text-[11px]" />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      {!isDetailMode && (
-                        <Button
-                          type="button"
-                          mode="icon"
-                          variant="ghost"
-                          className="size-8 shrink-0 text-muted-foreground hover:text-destructive mt-1"
-                          onClick={() => remove(index)}
-                          disabled={fields.length <= 1}
-                        >
-                          <RiDeleteBinLine />
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-                {!isDetailMode && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => append({ roleId: "", branchId: "" })}
-                    className="mt-1"
-                  >
-                    <RiAddLine />
-                    Add Role Assignment
-                  </Button>
-                )}
-                {form.formState.errors.roleAssignments?.message && (
-                  <p className="text-destructive text-[11px]">
-                    {form.formState.errors.roleAssignments.message}
-                  </p>
-                )}
-              </div>
-            </div>
 
             <div className="space-y-4 pt-2">
               <div className="flex items-center gap-2 pb-1 border-b border-border/50">

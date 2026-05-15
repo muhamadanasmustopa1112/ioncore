@@ -105,7 +105,7 @@ export function AuditList({ filters, onViewDetail }: AuditListProps) {
             <div className="relative w-full sm:w-72">
               <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
               <Input
-                placeholder="Search records, users, reasons..."
+                placeholder="Search by activity, user, or email..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full ps-9"

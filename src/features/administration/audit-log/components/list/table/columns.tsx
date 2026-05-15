@@ -47,16 +47,16 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
     {
       id: "timestamp",
       accessorFn: (row) => row.timestamp,
-      header: "Timestamp",
+      header: "Time",
       cell: ({ row }) => (
-        <span className="text-xs font-mono text-muted-foreground whitespace-nowrap">
+        <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
           {new Date(row.original.timestamp).toLocaleString("id-ID", {
-            dateStyle: "short",
-            timeStyle: "medium",
+            dateStyle: "medium",
+            timeStyle: "short",
           })}
         </span>
       ),
-      size: 150,
+      size: 160,
     },
     {
       id: "user",
@@ -65,58 +65,40 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="text-sm font-medium">{row.original.userName}</span>
-          <span className="text-xs text-muted-foreground">{row.original.userRole}</span>
+          {row.original.userEmail && row.original.userEmail !== row.original.userName && (
+            <span className="text-[10px] text-muted-foreground">{row.original.userEmail}</span>
+          )}
         </div>
       ),
-      size: 160,
-    },
-    {
-      id: "action",
-      accessorFn: (row) => row.actionType,
-      header: "Action",
-      cell: ({ row }) => (
-        <Badge
-          variant={ACTION_VARIANTS[row.original.actionType] ?? "secondary"}
-          appearance="light"
-          className="capitalize text-xs whitespace-nowrap"
-        >
-          {row.original.actionType}
-        </Badge>
-      ),
       size: 200,
-      minSize: 110,
     },
     {
-      id: "module",
-      accessorFn: (row) => row.module,
-      header: "Module",
+      id: "activity",
+      accessorFn: (row) => row.actionType,
+      header: "Activity",
       cell: ({ row }) => (
-        <span className="text-sm capitalize whitespace-nowrap">{row.original.module.replace(/_/g, " ")}</span>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">{row.original.actionType}</span>
+          {row.original.changeReason && (
+            <span className="text-[11px] text-muted-foreground truncate max-w-[300px]">
+              {row.original.changeReason}
+            </span>
+          )}
+        </div>
       ),
-      size: 150,
-      minSize: 120,
+      size: 300,
+      minSize: 200,
     },
     {
-      id: "recordType",
-      accessorFn: (row) => row.recordType,
-      header: "Record Type",
+      id: "ipAddress",
+      accessorFn: (row) => row.ipAddress,
+      header: "IP Address",
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground whitespace-nowrap">{row.original.recordType}</span>
-      ),
-      size: 160,
-      minSize: 130,
-    },
-    {
-      id: "record",
-      accessorFn: (row) => row.recordIdentifier,
-      header: "Record",
-      cell: ({ row }) => (
-        <span className="text-sm font-medium truncate max-w-[220px] block">
-          {row.original.recordIdentifier}
+        <span className="text-xs font-mono text-muted-foreground">
+          {row.original.ipAddress || "—"}
         </span>
       ),
-      size: 220,
-      minSize: 160,
+      size: 120,
     },
     {
       id: "status",
@@ -126,7 +108,7 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
         <Badge
           variant={STATUS_VARIANTS[row.original.status] ?? "secondary"}
           appearance="light"
-          className="capitalize text-xs"
+          className="capitalize text-[10px] px-1.5 h-5"
         >
           {row.original.status}
         </Badge>

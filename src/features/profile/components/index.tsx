@@ -381,9 +381,9 @@ export function ProfilePage() {
                           <div className="min-w-0 flex-1 text-sm">
                             <div className="flex items-center gap-2">
                               <span className="font-medium">{a.action || "—"}</span>
-                              {a.resource && (
-                                <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
-                                  {a.resource}{a.resource_id ? `:${a.resource_id.slice(0, 8)}` : ""}
+                              {a.details && (
+                                <span className="text-[11px] text-muted-foreground ml-2 truncate">
+                                  ({a.details})
                                 </span>
                               )}
                               {a.is_suspicious && (
