@@ -288,14 +288,22 @@ export interface LoginHistory {
 export interface ActivityLog {
   id: string;
   user_id: string;
+  session_id?: string;
+  email?: string;
   category?: string;
   action?: string;
   resource?: string;
   resource_id?: string;
+  method?: string;
+  path?: string;
+  status_code?: number;
+  severity?: string;
+  is_suspicious?: boolean;
+  details?: string;
   ip_address?: string;
   user_agent?: string;
-  is_suspicious?: boolean;
   metadata?: Record<string, unknown>;
+  occurred_at?: string;
   created_at?: string;
 }
 
