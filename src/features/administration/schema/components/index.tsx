@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import {
   RiAddLine,
+  RiArrowLeftRightLine,
   RiDownloadLine,
   RiFileTextLine,
   RiUserSettingsLine,
@@ -26,7 +27,7 @@ import { SchemaList } from "./list/schema-list";
 import { SchemaFormSheet } from "./schema-form-sheet";
 import { ApprovalPanel } from "./workflow/approval-panel";
 import { HistoryPanel } from "./history/history-panel";
-import { MigrationPanel } from "./history/migration-panel";
+import { SchemaMigrationView } from "./history/migration-view";
 import { AssignmentRulesPanel } from "./policy/assignment-rules-panel";
 import { CustomerOverridePanel } from "./policy/customer-override-panel";
 import { ServiceChangePolicyPanel } from "./policy/service-change-policy-panel";
@@ -36,12 +37,9 @@ import { BroadbandPlanSchemasPanel } from "./policy/broadband-plan-schemas-panel
 
 const VIEWS: { value: SchemaView; label: string; icon: React.ReactNode }[] = [
   { value: "schemas", label: "Schema Library", icon: <RiFileTextLine className="size-3.5" /> },
-  // { value: "assignment-rules", label: "Assignment Rules", icon: <RiGroupLine className="size-3.5" /> },
   { value: "customer-overrides", label: "Customer Overrides", icon: <RiUserSettingsLine className="size-3.5" /> },
   { value: "broadband-plan-schemas", label: "Broadband Plan Schemas", icon: <RiWifiLine className="size-3.5" /> },
-  // { value: "change-policies", label: "Change Policies", icon: <RiRefreshLine className="size-3.5" /> },
-  // { value: "upgrade-rules", label: "Upgrade Eligibility", icon: <RiArrowUpLine className="size-3.5" /> },
-  // { value: "change-matrix", label: "Change Matrix", icon: <RiGridLine className="size-3.5" /> },
+  { value: "schema-migration", label: "Schema Migration", icon: <RiArrowLeftRightLine className="size-3.5" /> },
 ];
 
 const VIEW_TITLES: Record<SchemaView, string> = {
@@ -52,6 +50,7 @@ const VIEW_TITLES: Record<SchemaView, string> = {
   "change-policies": "Service Change Policy",
   "upgrade-rules": "Package Upgrade Eligibility",
   "change-matrix": "Instant vs WO-based Change Matrix",
+  "schema-migration": "Bulk Schema Migration",
 };
 
 function ViewContent({ view }: { view: SchemaView }) {
@@ -63,6 +62,7 @@ function ViewContent({ view }: { view: SchemaView }) {
     case "change-policies": return <ServiceChangePolicyPanel />;
     case "upgrade-rules": return <UpgradeEligibilityPanel />;
     case "change-matrix": return <ChangeMatrixPanel />;
+    case "schema-migration": return <SchemaMigrationView />;
   }
 }
 
@@ -80,10 +80,8 @@ export function SchemaManagementPage() {
   const { openSchemaSheet, setView, activeSchemaType } = useSchemaStore();
   const [urlParams, setPanelParams] = useQueryStates(ALL_PANEL_PARAMS);
 
-  // URL is source of truth for the active view
   const view = (urlParams.sc_view as SchemaView | null) ?? "schemas";
 
-  // Keep Zustand in sync (used by SchemaFormSheet & toolbar)
   useEffect(() => { setView(view); }, [view, setView]);
 
   function handleSetView(v: SchemaView) {
@@ -145,13 +143,8 @@ export function SchemaManagementPage() {
         </ToolbarActions>
       </Toolbar>
 
-      {/* View switcher */}
       <Tabs value={view} onValueChange={(v) => handleSetView(v as SchemaView)} className="mt-4">
-        <TabsList
-          variant="line"
-          size="sm"
-          className="w-full justify-start"
-        >
+        <TabsList variant="line" size="sm" className="w-full justify-start">
           {VIEWS.map((v) => (
             <TabsTrigger key={v.value} value={v.value}>
               {v.icon}
@@ -168,7 +161,6 @@ export function SchemaManagementPage() {
       <SchemaFormSheet />
       <ApprovalPanel />
       <HistoryPanel />
-      <MigrationPanel />
     </div>
   );
 }

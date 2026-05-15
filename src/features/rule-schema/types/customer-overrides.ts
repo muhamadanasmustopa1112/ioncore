@@ -9,6 +9,7 @@ export interface CustomerSchema {
   original_content: Record<string, unknown>;
   overridden_content: Record<string, unknown>;
   rule: string;
+  is_overridden: boolean;
   created_at: string;
   created_by: string;
   updated_at: string;
@@ -23,9 +24,15 @@ export interface CustomerSchemaListData {
 export interface ListCustomerSchemasParams {
   customer_id?: string;
   schema_type?: string;
+  schema_version_id?: string;
   page?: number;
   size?: number;
   orderBy?: string;
+}
+
+export interface MigrateCustomerSchemasRequest {
+  original_schema_version_id: string;
+  new_schema_version_id: string;
 }
 
 export interface CreateCustomerSchemaRequest {

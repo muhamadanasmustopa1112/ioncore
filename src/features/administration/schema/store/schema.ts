@@ -8,7 +8,8 @@ export type SchemaView =
   | "change-policies"
   | "upgrade-rules"
   | "change-matrix"
-  | "broadband-plan-schemas";
+  | "broadband-plan-schemas"
+  | "schema-migration";
 
 interface SchemaStore {
   activeSchemaType: SchemaType;

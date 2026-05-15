@@ -53,9 +53,14 @@ export function ApprovalPanel() {
     approvalPanelOpen ? latestDraftVersion?.id ?? null : null
   );
   const versionStatus = (liveVersion?.status ?? latestDraftVersion?.status)?.toUpperCase();
-const { data: approval } = useVersionApproval(
+const { data: approvalRaw } = useVersionApproval(
     approvalPanelOpen ? latestDraftVersion?.id ?? null : null
   );
+
+  // Guard: only trust approval if it belongs to the current version.
+  // placeholderData keeps stale published-version approval alive when a new draft
+  // is created, which falsely pushes workflowStatus to "REVIEW".
+  const approval = approvalRaw?.schema_version_id === latestDraftVersion?.id ? approvalRaw : null;
 
   // Stable refs — prevent decisions query from going disabled during refetch.
   // Reset both when schema OR version changes so stale approval data from a previous

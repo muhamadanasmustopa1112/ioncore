@@ -39,11 +39,21 @@ export const columns: ColumnDef<SchemaRecord>[] = [
         <p className="font-semibold text-foreground text-sm">
           {row.original.name}
         </p>
-        {row.original.latest_version && (
-          <p className="text-[11px] text-muted-foreground font-mono">
-            {row.original.latest_version}
-          </p>
-        )}
+        <div className="flex items-center gap-1.5 mt-0.5">
+          {row.original.latest_version && (
+            <span className="text-[11px] text-muted-foreground font-mono">
+              {row.original.latest_version}
+            </span>
+          )}
+          {row.original.latest_published_version && (
+            <>
+              <span className="text-muted-foreground/40 text-[10px]">·</span>
+              <span className="text-[10px] font-medium px-1.5 py-px rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                {row.original.latest_published_version}
+              </span>
+            </>
+          )}
+        </div>
       </div>
     ),
     enableSorting: true,

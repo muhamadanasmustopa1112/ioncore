@@ -31,6 +31,8 @@ export interface Schema {
   customer_type: string;
   schema_mode_type: string;
   latest_version: string;
+  latest_published_version: string | null;
+  latest_published_version_id: string | null;
   created_by: string;
   updated_by: string;
 }
@@ -85,6 +87,7 @@ export interface ListSchemasParams {
   orderBy?: string;
   orderDirection?: "asc" | "desc";
   schemaType?: SchemaType;
+  hasSchemaPublished?: boolean;
 }
 
 export interface ListSchemaVersionsParams {

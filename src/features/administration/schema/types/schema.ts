@@ -32,6 +32,8 @@ export interface SchemaRecord {
   customer_type: CustomerType;
   schema_mode_type?: string;
   latest_version: string;
+  latest_published_version: string | null;
+  latest_published_version_id: string | null;
   schema_status: SchemaStatus;
   created_by: string;
   updated_by: string;

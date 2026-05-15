@@ -7,6 +7,7 @@ import type {
   CreateCustomerSchemaRequest,
   CustomerSchema,
   ListCustomerSchemasParams,
+  MigrateCustomerSchemasRequest,
   UpdateCustomerSchemaRequest,
 } from "../types";
 
@@ -68,6 +69,9 @@ export const deleteCustomerSchema = (id: string) =>
 
 export const getCustomerSchemaDiff = (id: string) =>
   userServiceApi.get<unknown, DiffEnvelope>(`${path}/${id}/content-diff`);
+
+export const migrateCustomerSchemas = (payload: MigrateCustomerSchemasRequest) =>
+  userServiceApi.post<unknown, CustomerEnvelope<null>>(`${path}/migrate`, payload);
 
 // ── Hooks ───────────────────────────────────────────────
 
@@ -155,6 +159,28 @@ export const useDeleteCustomerSchema = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteCustomerSchema(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CS_PREFIX }),
+  });
+};
+
+export const useCustomerSchemasByVersion = (schemaVersionId: string, size = 100) =>
+  useQuery({
+    queryKey: ruleSchemaKeys.customerSchemas({ schema_version_id: schemaVersionId, size }),
+    queryFn: async () => {
+      try {
+        return await listCustomerSchemas({ schema_version_id: schemaVersionId, size });
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!schemaVersionId,
+    retry: false,
+  });
+
+export const useMigrateCustomerSchemas = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: MigrateCustomerSchemasRequest) => migrateCustomerSchemas(payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: CS_PREFIX }),
   });
 };
