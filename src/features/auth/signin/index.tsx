@@ -84,6 +84,10 @@ export function SigninForm() {
         toast.error("Invalid login response.");
         return false;
       }
+      if (payload.user.is_active === false) {
+        toast.error("Access denied. Your account has been deactivated. Please contact your administrator.");
+        return false;
+      }
       const isTechnician = payload.user.roles?.some((r) =>
         r.name.toUpperCase().includes("TECHNICIAN")
       );
