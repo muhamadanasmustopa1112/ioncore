@@ -9,6 +9,7 @@ import {
   useAdminBroadbandPlan,
   useAddBranchToBroadbandPlan, useRemoveBranchFromBroadbandPlan,
 } from "../../api/products-queries";
+import { toast } from "sonner";
 import type { BroadbandPlan, CreateBroadbandPlanPayload, ProductEnvelope } from "../../types/products";
 import { PlanForm } from "./plan-form";
 import { BranchAvailability } from "../branch-availability";
@@ -63,6 +64,11 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   };
 
   const handleSave = () => {
+    if (mode === "new" && pendingBranchIds.length === 0) {
+      setActiveTab("branches");
+      toast.error("At least 1 branch must be assigned before creating a plan.");
+      return;
+    }
     const fn = (window as unknown as Record<string, unknown>).__productFormSubmit;
     if (typeof fn === "function") (fn as () => void)();
   };
