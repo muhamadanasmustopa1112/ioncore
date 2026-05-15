@@ -264,6 +264,11 @@ const TECHNICIAN_FIELD_ITEM = {
   icon: UserCog,
   children: [
     {
+      title: "Dashboard",
+      path: paths.dashboard.technician.dashboard.getHref(),
+      icon: Gauge,
+    },
+    {
       title: "Work Orders",
       path: paths.dashboard.technician.root.getHref(),
       icon: ClipboardList,
@@ -375,7 +380,6 @@ const ADMINISTRATION_ITEMS = [
 
 // Menu untuk halaman dashboard (production/main app)
 export const DASHBOARD_MENU: MenuConfig = [
-  DASHBOARD_ITEM,
   CRM_SALES_ITEM,
   NETWORK_ORCHESTRATION_ITEM,
   TECHNICIAN_FIELD_ITEM,
@@ -385,7 +389,7 @@ export const DASHBOARD_MENU: MenuConfig = [
 
 // Menu khusus untuk technician role
 export const TECHNICIAN_MENU: MenuConfig = [
-  DASHBOARD_ITEM,
+  // DASHBOARD_ITEM,
   TECHNICIAN_FIELD_ITEM,
 ];
 

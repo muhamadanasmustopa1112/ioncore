@@ -69,6 +69,8 @@ export interface WorkOrderFilters {
   status?: WoStatus;
   type?: WoType;
   branch_id?: string;
+  area_id?: string;
+  sub_area_id?: string;
   page?: number;
   per_page?: number;
 }

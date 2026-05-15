@@ -34,6 +34,8 @@ import {
 } from "@/components/ui/select";
 import { useWorkOrderList } from "../api/work-order-queries";
 import { useWorkOrderStore } from "../store/work-order";
+import { useAuthStore } from "@/store/auth-store";
+import { useRegionalList, useAreaList } from "@/features/administration/branch/api/branch-queries";
 import type { WorkOrder, WoType, WoStatus } from "../types/work-order";
 import {
   WO_TYPE_LABELS,
@@ -48,13 +50,30 @@ export function WorkOrderList() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [areaFilter, setAreaFilter] = useState<string>("all");
+  const [subAreaFilter, setSubAreaFilter] = useState<string>("all");
+
+  const { data: regionals } = useRegionalList();
+  const { data: areas } = useAreaList(areaFilter !== "all" ? areaFilter : "");
+
+  const { rawUser } = useAuthStore();
+  const isLeader = useMemo(() =>
+    rawUser?.roles?.some((r: any) => {
+      const name = typeof r === "object" ? r.name : r;
+      return name?.toUpperCase().includes("LEADER");
+    }),
+    [rawUser?.roles]
+  );
 
   const filters = useMemo(
     () => ({
       status: statusFilter !== "all" ? (statusFilter as WoStatus) : undefined,
       type: typeFilter !== "all" ? (typeFilter as WoType) : undefined,
+      branch_id: isLeader ? (rawUser?.active_branch_id ?? undefined) : undefined,
+      area_id: areaFilter !== "all" ? areaFilter : undefined,
+      sub_area_id: subAreaFilter !== "all" ? subAreaFilter : undefined,
     }),
-    [statusFilter, typeFilter]
+    [statusFilter, typeFilter, isLeader, rawUser?.active_branch_id, areaFilter, subAreaFilter]
   );
 
   const { data, isLoading, isError, refetch } = useWorkOrderList(filters);
@@ -226,6 +245,41 @@ export function WorkOrderList() {
                         </SelectItem>
                       )
                     )}
+                  </SelectContent>
+                </Select>
+
+                <Select value={areaFilter} onValueChange={(v) => {
+                  setAreaFilter(v);
+                  setSubAreaFilter("all");
+                }}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="All Areas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Areas</SelectItem>
+                    {regionals?.map((r: any) => (
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select 
+                  value={subAreaFilter} 
+                  onValueChange={setSubAreaFilter}
+                  disabled={areaFilter === "all"}
+                >
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="All Sub Areas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Sub Areas</SelectItem>
+                    {areas?.map((a: any) => (
+                      <SelectItem key={a.id} value={a.id}>
+                        {a.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
 

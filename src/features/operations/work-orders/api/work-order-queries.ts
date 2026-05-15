@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/auth-store";
 import type { WorkOrder, Checklist, ChecklistItem } from "../types/work-order";
 import type {
   WorkOrderDto,
@@ -85,10 +86,22 @@ function mapWorkOrder(dto: WorkOrderDto): WorkOrder {
 }
 
 export function useWorkOrderList(filters?: WorkOrderFilters) {
+  const { rawUser } = useAuthStore();
+
+  const isLeader = rawUser?.roles?.some((r: any) => {
+    const name = typeof r === "object" ? r.name : r;
+    return name?.toUpperCase().includes("LEADER");
+  });
+
+  const finalFilters: WorkOrderFilters = {
+    ...filters,
+    branch_id: filters?.branch_id ?? (isLeader ? (rawUser?.active_branch_id ?? undefined) : undefined),
+  };
+
   return useQuery({
-    queryKey: workOrderKeys.list(filters),
+    queryKey: workOrderKeys.list(finalFilters),
     queryFn: async () => {
-      const res = await listWorkOrders(filters);
+      const res = await listWorkOrders(finalFilters);
       return {
         workOrders: (res.data?.work_orders ?? []).map(mapWorkOrder),
         total: res.data?.metadata.total ?? 0,

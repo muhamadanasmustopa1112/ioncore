@@ -177,6 +177,8 @@ export interface WorkOrderListParams {
   per_page?: number;
   order?: "asc" | "desc";
   sort_by?: string;
+  branch_id?: string;
+  date?: string;
 }
 
 // ── Work order detail ──────────────────────────────────────────────────────
@@ -327,6 +329,12 @@ export interface WarehouseDispatch {
   note: string;
 }
 
+export interface Branch {
+  code: string;
+  id: string;
+  name: string;
+}
+
 export interface CableConsumption {
   cable_used_meters: number;
   remnant_meters: number;
@@ -420,6 +428,7 @@ export interface WorkOrderDetailResponse {
   sub_area_name: string;
   branch_id: string;
   branch_name: string;
+  branch: Branch;
   requested_installation: string;
   requested_at: string;
   created_at: string;
@@ -450,6 +459,8 @@ export interface WorkOrderDetailResponse {
 export interface WorkOrderDetailEnvelope {
   data: WorkOrderDetailResponse;
 }
+
+
 
 // ── Work order: create / update / cancel ───────────────────────────────────
 

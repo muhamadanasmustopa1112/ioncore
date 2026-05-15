@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Loader2, AlertCircle, RefreshCw, Zap } from "lucide-react";
 
@@ -39,8 +39,12 @@ export function TeamPairingDashboard() {
   const { rawUser } = useAuthStore();
   const branchId = rawUser?.active_branch_id || "";
 
-  const isLeader = rawUser?.roles?.some((r) =>
-    (r.name).toLowerCase().includes("leader"),
+  const isLeader = useMemo(() =>
+    rawUser?.roles?.some((r: any) => {
+      const roleName = (r?.name || r || "").toString().toLowerCase();
+      return roleName.includes("leader");
+    }),
+    [rawUser?.roles]
   );
 
   const { data, isLoading, isError, refetch, isFetching } = useTeamLeaderDashboard({
@@ -48,13 +52,13 @@ export function TeamPairingDashboard() {
       date,
       ...(selectedState ? { state: selectedState } : {}),
       ...(selectedType ? { type: selectedType } : {}),
-      ...(isLeader && branchId ? { area_id: branchId } : {}),
+      ...(isLeader && branchId ? { branch_id: branchId } : {}),
     },
     queryConfig: { enabled: !!rawUser },
   });
 
   const { data: latestLocations, refetch: refetchMap } = useTechnicianLatestLocations(
-    isLeader && branchId ? branchId : undefined,
+    isLeader ? branchId : undefined,
     { enabled: !!rawUser }
   );
 
@@ -145,7 +149,7 @@ export function TeamPairingDashboard() {
             variant="primary"
             size="sm"
             onClick={() => setShowAutoAssign(true)}
-            disabled={!data?.auto_assign_enabled}
+            disabled={isLeader && !data?.auto_assign_enabled}
             className="text-[10px] uppercase font-bold"
           >
             <Zap className="size-3 mr-1" />

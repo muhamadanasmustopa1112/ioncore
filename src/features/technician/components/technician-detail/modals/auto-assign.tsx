@@ -25,7 +25,6 @@ export function AutoAssignModal({
   const mutation = useAutoAssignWorkOrders();
 
   function handleSubmit() {
-    // API expects RFC3339 (Go time.Time); date picker gives YYYY-MM-DD
     const dateRFC = new Date(`${date}T00:00:00Z`).toISOString();
     mutation.mutate(
       {

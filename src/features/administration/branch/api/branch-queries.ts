@@ -219,6 +219,18 @@ export function useAreaList(regionalId: string, type?: string) {
   });
 }
 
+export function useSubAreaList(regionalId: string, areaId: string) {
+  return useQuery({
+    queryKey: [...branchKeys.all, "sub-area", regionalId, areaId] as const,
+    queryFn: async () => {
+      const res = await listSubArea(regionalId, areaId, { per_page: 100 });
+      return res.data?.branches ?? [];
+    },
+    enabled: !!regionalId && !!areaId,
+    placeholderData: [],
+  });
+}
+
 export function useBranchDetail(branch: BranchData | null) {
   return useQuery({
     queryKey: [...branchKeys.all, "detail", branch?.id] as const,

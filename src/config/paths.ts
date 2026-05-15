@@ -151,6 +151,10 @@ export const paths = {
         path: "/technician",
         getHref: () => "/technician",
       },
+      dashboard: {
+        path: "/technician/dashboard",
+        getHref: () => "/technician/dashboard",
+      },
       detail: {
         path: "/technician/:id",
         getHref: (id: string) => `/technician/${id}`,
