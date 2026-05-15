@@ -28,9 +28,10 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import {
-  useCreateCustomerOverride,
+  useCreateCustomerSchema,
   useSchemas,
 } from "@/features/rule-schema";
+import type { Schema } from "@/features/rule-schema";
 import { useCustomerList } from "@/features/customers/api/customers-queries";
 
 interface Props {
@@ -43,6 +44,7 @@ interface PickerOption {
   primary: string;
   secondary?: string;
   keywords: string[];
+  meta?: Record<string, string>;
 }
 
 interface IdPickerProps {
@@ -132,24 +134,20 @@ function IdPicker({
 }
 
 export function CustomerOverrideFormSheet({ open, onOpenChange }: Props) {
-  const [schemaId, setSchemaId] = useState("");
+  const [selectedSchema, setSelectedSchema] = useState<Schema | null>(null);
   const [customerId, setCustomerId] = useState("");
-  const [customerName, setCustomerName] = useState("");
 
-  const { data: schemasEnv, isLoading: schemasLoading } = useSchemas({
-    size: 100,
-  });
-  const { data: customersData, isLoading: customersLoading } = useCustomerList({
-    size: 100,
-  });
+  const { data: schemasEnv, isLoading: schemasLoading } = useSchemas({ size: 100 });
+  const { data: customersData, isLoading: customersLoading } = useCustomerList({ size: 100 });
 
   const schemaOptions = useMemo<PickerOption[]>(
     () =>
       (schemasEnv?.data.schemas ?? []).map((s) => ({
         id: s.id,
         primary: s.name,
-        secondary: s.id,
+        secondary: s.schema_type ?? s.id,
         keywords: [s.name, s.id, s.schema_type ?? ""],
+        meta: { schema_type: s.schema_type ?? "", latest_version: s.latest_version ?? "" },
       })),
     [schemasEnv],
   );
@@ -165,13 +163,12 @@ export function CustomerOverrideFormSheet({ open, onOpenChange }: Props) {
     [customersData],
   );
 
-  const create = useCreateCustomerOverride();
-  const canSubmit = !!schemaId && !!customerId && !!customerName;
+  const create = useCreateCustomerSchema();
+  const canSubmit = !!selectedSchema && !!customerId;
 
   const reset = () => {
-    setSchemaId("");
+    setSelectedSchema(null);
     setCustomerId("");
-    setCustomerName("");
   };
 
   const handleClose = (next: boolean) => {
@@ -180,17 +177,21 @@ export function CustomerOverrideFormSheet({ open, onOpenChange }: Props) {
   };
 
   const handleSubmit = () => {
-    if (!canSubmit) return;
+    if (!canSubmit || !selectedSchema) return;
     create.mutate(
-      { schema_id: schemaId, customer_id: customerId, customer_name: customerName },
+      {
+        customer_id: customerId,
+        schema_id: selectedSchema.id,
+        schema_type: selectedSchema.schema_type ?? "",
+        schema_version_id: selectedSchema.latest_version ?? "",
+      },
       {
         onSuccess: () => {
-          toast.success("Customer override created");
+          toast.success("Customer schema created");
           handleClose(false);
         },
         onError: (err: unknown) => {
-          const msg =
-            err instanceof Error ? err.message : "Failed to create override";
+          const msg = err instanceof Error ? err.message : "Failed to create customer schema";
           toast.error(msg);
         },
       },
@@ -202,26 +203,32 @@ export function CustomerOverrideFormSheet({ open, onOpenChange }: Props) {
       <SheetContent className="inset-y-0 sm:inset-y-8 lg:end-10 start-auto h-full sm:max-h-[calc(100vh-64px)] gap-0 sm:rounded-lg border p-0 sm:max-w-none w-full md:w-[520px] flex flex-col [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5 shadow-2xl">
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl">
-            New Customer Override
+            New Customer Schema
           </SheetTitle>
         </SheetHeader>
         <SheetBody className="flex-1 overflow-auto px-5 py-5 space-y-5">
           <div className="space-y-2">
             <Label>Base Schema</Label>
             <IdPicker
-              value={schemaId}
+              value={selectedSchema?.id ?? ""}
               options={schemaOptions}
-              onSelect={(opt) => setSchemaId(opt.id)}
-              placeholder={
-                schemasLoading ? "Loading schemas..." : "Select a schema"
-              }
-              searchPlaceholder="Search by name or id..."
+              onSelect={(opt) => {
+                const found = (schemasEnv?.data.schemas ?? []).find((s) => s.id === opt.id) ?? null;
+                setSelectedSchema(found);
+              }}
+              placeholder={schemasLoading ? "Loading schemas..." : "Select a schema"}
+              searchPlaceholder="Search by name or type..."
               emptyText="No schemas found."
               disabled={schemasLoading}
             />
-            <p className="text-xs text-muted-foreground">
-              The override will be derived from this schema&apos;s latest published version.
-            </p>
+            {selectedSchema && (
+              <p className="text-xs text-muted-foreground">
+                Type: <span className="font-medium capitalize">{selectedSchema.schema_type}</span>
+                {selectedSchema.latest_version && (
+                  <> · Version: <span className="font-mono">{selectedSchema.latest_version}</span></>
+                )}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -229,13 +236,8 @@ export function CustomerOverrideFormSheet({ open, onOpenChange }: Props) {
             <IdPicker
               value={customerId}
               options={customerOptions}
-              onSelect={(opt) => {
-                setCustomerId(opt.id);
-                setCustomerName(opt.primary);
-              }}
-              placeholder={
-                customersLoading ? "Loading customers..." : "Select a customer"
-              }
+              onSelect={(opt) => setCustomerId(opt.id)}
+              placeholder={customersLoading ? "Loading customers..." : "Select a customer"}
               searchPlaceholder="Search by name or id..."
               emptyText="No customers found."
               disabled={customersLoading}
@@ -253,7 +255,7 @@ export function CustomerOverrideFormSheet({ open, onOpenChange }: Props) {
             onClick={handleSubmit}
             disabled={!canSubmit || create.isPending}
           >
-            {create.isPending ? "Creating..." : "Create Override"}
+            {create.isPending ? "Creating..." : "Create Schema"}
           </Button>
         </SheetFooter>
       </SheetContent>

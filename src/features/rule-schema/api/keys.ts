@@ -16,12 +16,18 @@ export const ruleSchemaKeys = {
   version: (versionId: string) =>
     [...ruleSchemaKeys.all, "versions", versionId] as const,
 
+  customerSchemas: (params?: unknown) =>
+    [...ruleSchemaKeys.all, "customer-schemas", params] as const,
+  customerSchema: (id: string) =>
+    [...ruleSchemaKeys.all, "customer-schemas", id] as const,
+
+  // Legacy aliases
   customerOverrides: (params?: unknown) =>
-    [...ruleSchemaKeys.all, "customer-overrides", params] as const,
+    [...ruleSchemaKeys.all, "customer-schemas", params] as const,
   customerOverride: (id: string) =>
-    [...ruleSchemaKeys.all, "customer-overrides", id] as const,
+    [...ruleSchemaKeys.all, "customer-schemas", id] as const,
   customerOverrideDiff: (id: string) =>
-    [...ruleSchemaKeys.all, "customer-overrides", id, "content-diff"] as const,
+    [...ruleSchemaKeys.all, "customer-schemas", id, "content-diff"] as const,
 
   broadbandPlanSchemas: (params?: unknown) =>
     [...ruleSchemaKeys.all, "broadband-plan-schemas", params] as const,

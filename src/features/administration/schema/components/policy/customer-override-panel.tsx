@@ -4,7 +4,6 @@ import { useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
   RiAddLine,
-  RiArrowRightLine,
   RiLoader4Line,
   RiSearchLine,
   RiUserLine,
@@ -20,45 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useCustomerOverrideDiff,
-  useCustomerOverrides,
-} from "@/features/rule-schema";
-import type {
-  CustomerOverrideSchema,
-  OverriddenField,
-  OverrideDiffStatus,
-} from "@/features/rule-schema";
+import { useCustomerSchemas } from "@/features/rule-schema";
+import type { CustomerSchema } from "@/features/rule-schema";
 import { CustomerOverrideFormSheet } from "./customer-override-form-sheet";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
-const DIFF_BADGE: Record<
-  OverrideDiffStatus,
-  { variant: "info" | "success" | "destructive" | "warning"; label: string }
-> = {
-  Changed: { variant: "info", label: "Changed" },
-  Added: { variant: "success", label: "Added" },
-  Removed: { variant: "destructive", label: "Removed" },
-};
-
-function DiffRow({ field }: { field: OverriddenField }) {
-  const cfg = DIFF_BADGE[field.status] ?? { variant: "warning" as const, label: String(field.status) };
-  return (
-    <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 rounded-lg bg-muted/40 px-3 py-2">
-      <span className="text-xs font-mono text-muted-foreground truncate">{field.path}</span>
-      <span className="text-xs line-through text-muted-foreground">{field.from ?? "—"}</span>
-      <span className="text-xs font-medium text-foreground">{field.to ?? "—"}</span>
-      <Badge variant={cfg.variant} appearance="light" className="text-[11px] px-2">{cfg.label}</Badge>
-    </div>
-  );
-}
-
-function OverrideCard({ override }: { override: CustomerOverrideSchema }) {
+function SchemaCard({ item }: { item: CustomerSchema }) {
   const [expanded, setExpanded] = useState(false);
-  const { data: diffEnv, isFetching: diffLoading } = useCustomerOverrideDiff(override.id, expanded);
-  const diff = diffEnv?.data;
-  const fieldCount = diff?.overridden_fields.length ?? 0;
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
@@ -69,26 +37,24 @@ function OverrideCard({ override }: { override: CustomerOverrideSchema }) {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-sm">{override.customer_name}</span>
+              <span className="font-semibold text-sm font-mono truncate">{item.customer_id}</span>
+              {item.schema_type && (
+                <Badge variant="info" appearance="light" className="text-[11px] px-2 capitalize">
+                  {item.schema_type}
+                </Badge>
+              )}
             </div>
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span>{override.schema_name}</span>
-              <RiArrowRightLine className="size-3" />
-              <span className="font-medium text-foreground">{override.baseline_schema_name}</span>
-            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground font-mono truncate">
+              Schema: {item.schema_id}
+            </p>
             <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
-              Created by {override.created_by}
-              {override.updated_by && override.updated_by !== override.created_by
-                ? ` · Updated by ${override.updated_by}` : ""}
+              Created by {item.created_by}
+              {item.updated_by && item.updated_by !== item.created_by
+                ? ` · Updated by ${item.updated_by}` : ""}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {expanded && (
-            <Badge variant="info" appearance="light" className="text-xs">
-              {fieldCount} field{fieldCount !== 1 ? "s" : ""}
-            </Badge>
-          )}
           <Button variant="ghost" size="sm" className="h-7 text-xs px-3" onClick={() => setExpanded((v) => !v)}>
             {expanded ? "Collapse" : "View"}
           </Button>
@@ -97,28 +63,23 @@ function OverrideCard({ override }: { override: CustomerOverrideSchema }) {
 
       {expanded && (
         <div className="border-t border-border/60 px-4 pb-4 pt-3 space-y-3">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Overridden Fields</p>
-          {diffLoading && !diff ? (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <RiLoader4Line className="size-4 animate-spin" />Loading diff...
+          <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
+            <span className="text-muted-foreground font-medium">Version ID</span>
+            <span className="font-mono truncate">{item.schema_version_id || "—"}</span>
+            <span className="text-muted-foreground font-medium">Rule</span>
+            <span className="truncate">{item.rule || "—"}</span>
+            <span className="text-muted-foreground font-medium">Created</span>
+            <span>{item.created_at ? new Date(item.created_at).toLocaleString() : "—"}</span>
+            <span className="text-muted-foreground font-medium">Updated</span>
+            <span>{item.updated_at ? new Date(item.updated_at).toLocaleString() : "—"}</span>
+          </div>
+          {item.overridden_content && (
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Overridden Content</p>
+              <pre className="text-xs bg-muted/40 rounded-lg px-3 py-2 overflow-auto max-h-48 whitespace-pre-wrap break-all">
+                {item.overridden_content}
+              </pre>
             </div>
-          ) : !diff || diff.overridden_fields.length === 0 ? (
-            <p className="text-xs text-muted-foreground">No differences.</p>
-          ) : (
-            <>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{diff.baseline_label}</span>
-                <span className="font-medium text-foreground">{diff.baseline_version_name}</span>
-                <RiArrowRightLine className="size-3" />
-                <span>{diff.override_label}</span>
-                <span className="font-medium text-foreground">{diff.override_version_name}</span>
-              </div>
-              <div className="space-y-2">
-                {diff.overridden_fields.map((field, idx) => (
-                  <DiffRow key={`${field.path}-${idx}`} field={field} />
-                ))}
-              </div>
-            </>
           )}
         </div>
       )}
@@ -143,17 +104,18 @@ export function CustomerOverridePanel() {
   function setSize(s: number) { setParams({ co_size: s, co_page: 1 }); }
   function setSearch(v: string) { setParams({ co_search: v || null, co_page: 1 }); }
 
-  const { data, isLoading, isError } = useCustomerOverrides({ page, size });
-  const rows  = data?.data.customer_override_schemas ?? [];
-  const total = data?.data.metadata?.total ?? 0;
+  const { data, isLoading, isError } = useCustomerSchemas({ page, size });
+  const rows  = data?.data.customer_schemas ?? [];
+  const rawMeta = data?.data.metadata;
+  const total = rawMeta ? Number(rawMeta.total) || 0 : 0;
   const totalPages = Math.max(1, Math.ceil(total / size));
 
   const filtered = search
     ? rows.filter((o) => {
         const q = search.toLowerCase();
-        return o.customer_name.toLowerCase().includes(q) ||
-          o.schema_name.toLowerCase().includes(q) ||
-          o.baseline_schema_name.toLowerCase().includes(q);
+        return o.customer_id.toLowerCase().includes(q) ||
+          o.schema_id.toLowerCase().includes(q) ||
+          o.schema_type.toLowerCase().includes(q);
       })
     : rows;
 
@@ -164,39 +126,38 @@ export function CustomerOverridePanel() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Individual schema attribute overrides for customers with negotiated or special contract terms.
-        Overrides are applied on top of the customer&apos;s assigned base schema at runtime.
+        Customer-specific schema overrides. Applied on top of the base schema at runtime for
+        customers with negotiated or special contract terms.
       </p>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="relative w-full sm:w-64">
           <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input placeholder="Search customer or schema..." className="pl-9 h-9"
+          <Input placeholder="Search customer, schema, type..." className="pl-9 h-9"
             value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Button variant="primary" size="sm" className="h-9 px-4 font-medium w-full sm:w-auto"
           onClick={() => setCreateOpen(true)}>
-          <RiAddLine className="size-4 mr-1.5" />New Override
+          <RiAddLine className="size-4 mr-1.5" />New Schema
         </Button>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
-          <RiLoader4Line className="size-4 animate-spin" />Loading overrides...
+          <RiLoader4Line className="size-4 animate-spin" />Loading customer schemas...
         </div>
       ) : isError ? (
-        <p className="py-12 text-center text-sm text-destructive">Failed to load overrides.</p>
+        <p className="py-12 text-center text-sm text-destructive">Failed to load customer schemas.</p>
       ) : filtered.length === 0 ? (
-        <p className="py-12 text-center text-sm text-muted-foreground">No overrides found.</p>
+        <p className="py-12 text-center text-sm text-muted-foreground">No customer schemas found.</p>
       ) : (
         <div className="space-y-3">
-          {filtered.map((override) => (
-            <OverrideCard key={override.id} override={override} />
+          {filtered.map((item) => (
+            <SchemaCard key={item.id} item={item} />
           ))}
         </div>
       )}
 
-      {/* Pagination */}
       {!isLoading && !isError && total > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-2 border-t border-border">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">

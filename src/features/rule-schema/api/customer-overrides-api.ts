@@ -3,60 +3,58 @@ import { services } from "@/config/constants";
 import { userServiceApi } from "@/features/user-service/api/client";
 import { ruleSchemaKeys } from "./keys";
 import type {
-  CreateCustomerOverrideRequest,
-  CustomerOverrideListData,
-  CustomerOverrideSchema,
-  ListCustomerOverridesParams,
-  OverrideContentDiff,
-  RuleSchemaEnvelope,
-  UpdateCustomerOverrideRequest,
+  CreateCustomerSchemaRequest,
+  CustomerSchema,
+  ListCustomerSchemasParams,
+  UpdateCustomerSchemaRequest,
 } from "../types";
 
-const base = services.ruleScheme;
-const path = `${base}/customer-override-schemas`;
+const base = services.customer;
+const path = `${base}/customer-schemas`;
+
+// ── Response envelope (customer-service uses same shape as branch-service) ──
+
+interface CustomerServiceEnvelope<T> {
+  data: T;
+  error: string;
+  message: string;
+  metadata: null | { page: string; size: string; total: string };
+}
 
 // ── API functions ───────────────────────────────────────
 
-export const listCustomerOverrides = (params?: ListCustomerOverridesParams) =>
-  userServiceApi.get<unknown, RuleSchemaEnvelope<CustomerOverrideListData>>(
+export const listCustomerSchemas = (params?: ListCustomerSchemasParams) =>
+  userServiceApi.get<unknown, CustomerServiceEnvelope<{ customer_schemas: CustomerSchema[]; metadata: { page: string; size: string; total: string } }>>(
     path,
     { params },
   );
 
-export const getCustomerOverride = (id: string) =>
-  userServiceApi.get<unknown, RuleSchemaEnvelope<CustomerOverrideSchema>>(
+export const getCustomerSchema = (id: string) =>
+  userServiceApi.get<unknown, CustomerServiceEnvelope<CustomerSchema>>(
     `${path}/${id}`,
   );
 
-export const createCustomerOverride = (payload: CreateCustomerOverrideRequest) =>
-  userServiceApi.post<unknown, RuleSchemaEnvelope<CustomerOverrideSchema>>(
+export const createCustomerSchema = (payload: CreateCustomerSchemaRequest) =>
+  userServiceApi.post<unknown, CustomerServiceEnvelope<CustomerSchema>>(
     path,
     payload,
   );
 
-export const updateCustomerOverride = (
-  id: string,
-  payload: UpdateCustomerOverrideRequest,
-) =>
-  userServiceApi.put<unknown, RuleSchemaEnvelope<CustomerOverrideSchema>>(
+export const updateCustomerSchema = (id: string, payload: UpdateCustomerSchemaRequest) =>
+  userServiceApi.put<unknown, CustomerServiceEnvelope<CustomerSchema>>(
     `${path}/${id}`,
     payload,
   );
 
-export const deleteCustomerOverride = (id: string) =>
-  userServiceApi.delete<unknown, RuleSchemaEnvelope<null>>(`${path}/${id}`);
-
-export const getCustomerOverrideDiff = (id: string) =>
-  userServiceApi.get<unknown, RuleSchemaEnvelope<OverrideContentDiff>>(
-    `${path}/${id}/content-diff`,
-  );
+export const deleteCustomerSchema = (id: string) =>
+  userServiceApi.delete<unknown, CustomerServiceEnvelope<null>>(`${path}/${id}`);
 
 // ── Empty placeholders ──────────────────────────────────
 
-const EMPTY_META = { page: 1, size: 10, total: 0 };
+const EMPTY_META_RAW = { page: "1", size: "10", total: "0" };
 
-const EMPTY_CO_LIST: RuleSchemaEnvelope<CustomerOverrideListData> = {
-  data: { customer_override_schemas: [], metadata: EMPTY_META },
+const EMPTY_CS_LIST: CustomerServiceEnvelope<{ customer_schemas: CustomerSchema[]; metadata: { page: string; size: string; total: string } }> = {
+  data: { customer_schemas: [], metadata: EMPTY_META_RAW },
   error: "",
   message: "",
   metadata: null,
@@ -64,26 +62,26 @@ const EMPTY_CO_LIST: RuleSchemaEnvelope<CustomerOverrideListData> = {
 
 // ── Hooks ───────────────────────────────────────────────
 
-export const useCustomerOverrides = (params?: ListCustomerOverridesParams) =>
+export const useCustomerSchemas = (params?: ListCustomerSchemasParams) =>
   useQuery({
-    queryKey: ruleSchemaKeys.customerOverrides(params),
+    queryKey: ruleSchemaKeys.customerSchemas(params),
     queryFn: async () => {
       try {
-        return await listCustomerOverrides(params);
+        return await listCustomerSchemas(params);
       } catch {
-        return EMPTY_CO_LIST;
+        return EMPTY_CS_LIST;
       }
     },
-    placeholderData: EMPTY_CO_LIST,
+    placeholderData: EMPTY_CS_LIST,
     retry: false,
   });
 
-export const useCustomerOverride = (id: string) =>
+export const useCustomerSchema = (id: string) =>
   useQuery({
-    queryKey: ruleSchemaKeys.customerOverride(id),
+    queryKey: ruleSchemaKeys.customerSchema(id),
     queryFn: async () => {
       try {
-        return await getCustomerOverride(id);
+        return await getCustomerSchema(id);
       } catch {
         return null;
       }
@@ -92,47 +90,45 @@ export const useCustomerOverride = (id: string) =>
     retry: false,
   });
 
-export const useCustomerOverrideDiff = (id: string, enabled = true) =>
-  useQuery({
-    queryKey: ruleSchemaKeys.customerOverrideDiff(id),
-    queryFn: async () => {
-      try {
-        return await getCustomerOverrideDiff(id);
-      } catch {
-        return null;
-      }
-    },
-    enabled: !!id && enabled,
-    retry: false,
-  });
+const CS_PREFIX = [...ruleSchemaKeys.all, "customer-schemas"] as const;
 
-const CO_PREFIX = [...ruleSchemaKeys.all, "customer-overrides"] as const;
-
-export const useCreateCustomerOverride = () => {
+export const useCreateCustomerSchema = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: CreateCustomerOverrideRequest) =>
-      createCustomerOverride(payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: CO_PREFIX }),
+    mutationFn: (payload: CreateCustomerSchemaRequest) => createCustomerSchema(payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CS_PREFIX }),
   });
 };
 
-export const useUpdateCustomerOverride = () => {
+export const useUpdateCustomerSchema = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateCustomerOverrideRequest }) =>
-      updateCustomerOverride(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateCustomerSchemaRequest }) =>
+      updateCustomerSchema(id, payload),
     onSuccess: (_, { id }) => {
-      qc.invalidateQueries({ queryKey: ruleSchemaKeys.customerOverride(id) });
-      qc.invalidateQueries({ queryKey: CO_PREFIX });
+      qc.invalidateQueries({ queryKey: ruleSchemaKeys.customerSchema(id) });
+      qc.invalidateQueries({ queryKey: CS_PREFIX });
     },
   });
 };
 
-export const useDeleteCustomerOverride = () => {
+export const useDeleteCustomerSchema = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => deleteCustomerOverride(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: CO_PREFIX }),
+    mutationFn: (id: string) => deleteCustomerSchema(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: CS_PREFIX }),
   });
 };
+
+// ── Legacy aliases — remove after components fully migrated ──
+
+/** @deprecated use useCustomerSchemas */
+export const useCustomerOverrides = useCustomerSchemas;
+/** @deprecated use useCustomerSchema */
+export const useCustomerOverride = useCustomerSchema;
+/** @deprecated use useCreateCustomerSchema */
+export const useCreateCustomerOverride = useCreateCustomerSchema;
+/** @deprecated use useUpdateCustomerSchema */
+export const useUpdateCustomerOverride = useUpdateCustomerSchema;
+/** @deprecated use useDeleteCustomerSchema */
+export const useDeleteCustomerOverride = useDeleteCustomerSchema;

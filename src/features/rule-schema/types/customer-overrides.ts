@@ -1,58 +1,57 @@
 import type { SchemaPaginationMeta } from "./index";
 
-export interface CustomerOverrideSchema {
+export interface CustomerSchema {
   id: string;
-  schema_id: string;
-  schema_name: string;
   customer_id: string;
-  customer_name: string;
-  baseline_schema_id: string;
-  baseline_schema_name: string;
+  schema_id: string;
+  schema_type: string;
+  schema_version_id: string;
+  original_content: string;
+  overridden_content: string;
+  rule: string;
+  created_at: string;
   created_by: string;
+  updated_at: string;
   updated_by: string;
 }
 
-export interface CustomerOverrideListData {
-  customer_override_schemas: CustomerOverrideSchema[];
+export interface CustomerSchemaListData {
+  customer_schemas: CustomerSchema[];
   metadata: SchemaPaginationMeta;
 }
 
-export interface ListCustomerOverridesParams {
-  schema_id?: string;
+export interface ListCustomerSchemasParams {
   customer_id?: string;
+  schema_type?: string;
   page?: number;
   size?: number;
   orderBy?: string;
-  orderDirection?: "asc" | "desc";
 }
 
-export interface CreateCustomerOverrideRequest {
+export interface CreateCustomerSchemaRequest {
+  customer_id: string;
   schema_id: string;
-  customer_id: string;
-  customer_name: string;
-}
-
-export type UpdateCustomerOverrideRequest = CreateCustomerOverrideRequest;
-
-export type OverrideDiffStatus = "Added" | "Removed" | "Changed" | string;
-
-export interface OverriddenField {
-  path: string;
-  from?: string;
-  to?: string;
-  status: OverrideDiffStatus;
-}
-
-export interface OverrideContentDiff {
   schema_type: string;
-  customer_id: string;
-  baseline_label: string;
-  override_label: string;
-  baseline_schema_id: string;
-  override_schema_id: string;
-  baseline_version_name: string;
-  override_version_name: string;
-  baseline_schema_version_id: string;
-  override_schema_version_id: string;
-  overridden_fields: OverriddenField[];
+  schema_version_id: string;
+  original_content?: number[];
 }
+
+export interface UpdateCustomerSchemaRequest {
+  schema_id?: string;
+  schema_type?: string;
+  schema_version_id?: string;
+  overridden_content?: number[];
+  rule?: string;
+}
+
+// Legacy aliases — remove after components fully migrated
+/** @deprecated use CustomerSchema */
+export type CustomerOverrideSchema = CustomerSchema;
+/** @deprecated use CustomerSchemaListData */
+export type CustomerOverrideListData = CustomerSchemaListData;
+/** @deprecated use ListCustomerSchemasParams */
+export type ListCustomerOverridesParams = ListCustomerSchemasParams;
+/** @deprecated use CreateCustomerSchemaRequest */
+export type CreateCustomerOverrideRequest = CreateCustomerSchemaRequest;
+/** @deprecated use UpdateCustomerSchemaRequest */
+export type UpdateCustomerOverrideRequest = UpdateCustomerSchemaRequest;
