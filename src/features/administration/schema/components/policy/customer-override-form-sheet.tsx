@@ -182,7 +182,7 @@ export function CustomerOverrideFormSheet({ open, onOpenChange }: Props) {
       {
         customer_id: customerId,
         schema_id: selectedSchema.id,
-        schema_type: selectedSchema.schema_type ?? "",
+        schema_type: (selectedSchema.schema_type ?? "").trim().toUpperCase().replace(/[\s-]+/g, "_"),
         schema_version_id: selectedSchema.latest_version ?? "",
       },
       {
