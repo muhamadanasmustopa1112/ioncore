@@ -10,13 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useUpdateUserStatus } from "@/features/user-service/api/users";
+import { useUpdateUserStatus, useRevokeUserSessions } from "@/features/user-service/api/users";
 import { UserData } from "../../../types";
 import { useUserStore } from "../../../store/user";
 
 export function ActionsCell({ row }: { row: Row<UserData> }) {
   const { openUserFormSheet } = useUserStore();
   const { mutate: updateStatus, isPending } = useUpdateUserStatus();
+  const { mutate: revokeSessions } = useRevokeUserSessions();
 
   const { id, status } = row.original;
   const isLocked = status === "locked";
@@ -26,7 +27,15 @@ export function ActionsCell({ row }: { row: Row<UserData> }) {
     updateStatus(
       { id, payload },
       {
-        onSuccess: () => toast.success("User status updated"),
+        onSuccess: () => {
+          toast.success("User status updated");
+          // If deactivated, automatically revoke all sessions
+          if (payload.is_active === false) {
+            revokeSessions(id, {
+              onSuccess: () => toast.info("All active sessions revoked"),
+            });
+          }
+        },
         onError: (err: unknown) =>
           toast.error(
             (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||

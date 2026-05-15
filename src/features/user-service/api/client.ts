@@ -108,6 +108,7 @@ userServiceApi.interceptors.response.use(
     const status = error?.response?.status;
     const originalRequest = error.config;
 
+    // If it's a 401 and we haven't retried yet
     if (status === 401 && !originalRequest?._retry) {
       originalRequest._retry = true;
 
@@ -120,10 +121,15 @@ userServiceApi.interceptors.response.use(
         const newToken = await refreshPromise;
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return userServiceApi(originalRequest);
-      } catch {
+      } catch (refreshError) {
         redirectToSignin();
-        return Promise.reject(error);
+        return Promise.reject(refreshError);
       }
+    }
+
+    // Optional: Also handle 403 if your backend uses it for deactivated users
+    if (status === 403) {
+      redirectToSignin();
     }
 
     return Promise.reject(error);

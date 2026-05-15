@@ -155,7 +155,12 @@ export interface UpdateUserRequest {
   function_name?: string;
   unit_kerja?: string;
   working_scope?: string;
+  sales_type?: string;
+  employee_id?: string;
+  technician_id?: string;
+  reports_to_user_id?: string;
   home_branch_id?: string;
+  active_branch_id?: string;
   branch_ids?: string[];
 }
 
