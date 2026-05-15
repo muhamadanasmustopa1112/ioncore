@@ -55,11 +55,12 @@ function CandidateCard({
 
   return (
     <button
+      disabled={candidate.availability_status !== "available"}
       onClick={onToggle}
       className={`w-full text-left p-3 rounded-lg border-2 transition-all ${selected
         ? "border-primary bg-primary/5 dark:bg-primary/10"
         : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary/40"
-        }`}
+        } ${candidate.availability_status !== "available" ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       <div className="flex items-start gap-3">
         <div className={`size-9 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ring-2 ${lc.bg} ${lc.text} ${lc.ring}`}>
@@ -71,14 +72,14 @@ function CandidateCard({
             <Badge variant={candidate.level === "senior" ? "primary" : "info"} appearance="light" size="sm" className="uppercase shrink-0">
               {candidate.level}
             </Badge>
-            {(candidate as any).availability_status && (
+            {candidate.availability_status && (
               <Badge
-                variant={(candidate as any).availability_status === "available" ? "success" : "warning"}
+                variant={candidate.availability_status === "available" ? "success" : "warning"}
                 appearance="light"
                 size="sm"
                 className="shrink-0 uppercase"
               >
-                {(candidate as any).availability_status}
+                {candidate.availability_status}
               </Badge>
             )}
           </div>
@@ -248,7 +249,7 @@ export function PairingModal({
       c.level.toLowerCase().includes(q) ||
       (c.area_id ?? "").toLowerCase().includes(q);
 
-    return matchesSearch && (c as any).availability_status === "available";
+    return matchesSearch;
   });
 
   return (
@@ -470,9 +471,10 @@ export function PairingModal({
                             <button
                               key={c.technician_id}
                               type="button"
+                              disabled={c.availability_status !== "available"}
                               onClick={() => toggleCandidate(c.technician_id)}
                               className={`w-full flex items-center justify-between p-2.5 text-left text-xs transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40 ${isSelected ? "bg-primary/5 dark:bg-primary/10" : ""
-                                }`}
+                                } ${c.availability_status !== "available" ? "opacity-50 cursor-not-allowed" : ""}`}
                             >
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className={`size-7 rounded-full flex items-center justify-center shrink-0 text-[10px] font-black ring-1 ${lc.bg} ${lc.text} ${lc.ring}`}>
@@ -484,12 +486,12 @@ export function PairingModal({
                                     <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${lc.bg} ${lc.text}`}>
                                       {c.level}
                                     </span>
-                                    {(c as any).availability_status && (
-                                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${(c as any).availability_status === "available"
+                                    {c.availability_status && (
+                                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${c.availability_status === "available"
                                         ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400"
                                         : "bg-amber-100 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400"
                                         }`}>
-                                        {(c as any).availability_status.replace(/_/g, " ")}
+                                        {c.availability_status.replace(/_/g, " ")}
                                       </span>
                                     )}
                                   </div>

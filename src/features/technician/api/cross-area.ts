@@ -101,6 +101,7 @@ export const useApproveCrossAreaRequest = ({
     mutationFn: approveCrossAreaRequest,
     onSuccess: (data, variables, context) => {
       toast.success("Cross-area request approved");
+      invalidateWO();
       onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {
@@ -123,6 +124,7 @@ export const useRejectCrossAreaRequest = ({
     mutationFn: rejectCrossAreaRequest,
     onSuccess: (data, variables, context) => {
       toast.success("Cross-area request rejected");
+      invalidateWO();
       onSuccess?.(data, variables, context);
     },
     onError: (error, variables, context) => {

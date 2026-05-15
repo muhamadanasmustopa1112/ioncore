@@ -13,6 +13,8 @@ import type {
   WorkOrderDetailEnvelope,
   WorkOrderListParams,
   WorkOrderTimelineEnvelope,
+  TechnicianLatestLocation,
+  TechnicianLatestLocationsResponse,
 } from "../types/technician-api";
 import { TECHNICIAN_KEYS } from "./keys";
 
@@ -57,6 +59,14 @@ export const getTechnicians = (
     `${BASE}/technicians/list`,
     body,
   ) as unknown as Promise<ResponseEnvelope<{ items: any[] }>>;
+};
+
+export const getTechnicianLatestLocations = (
+  branch_id?: string,
+): Promise<ResponseEnvelope<TechnicianLatestLocationsResponse>> => {
+  return userServiceApi.get(`${BASE}/technicians/latest-locations`, {
+    params: { branch_id },
+  }) as unknown as Promise<ResponseEnvelope<TechnicianLatestLocationsResponse>>;
 };
 
 export const getWorkOrder = (id: string): Promise<WorkOrderDetailEnvelope> => {
@@ -124,6 +134,19 @@ export const useTechnicianList = ({
   return useQuery({
     queryKey: TECHNICIAN_KEYS.list(params),
     queryFn: async () => (await getTechnicians(params)).data?.items ?? [],
+    retry: false,
+    meta: { suppressGlobalError: true },
+    ...queryConfig,
+  });
+};
+
+export const useTechnicianLatestLocations = (
+  branch_id?: string,
+  queryConfig?: any,
+) => {
+  return useQuery<TechnicianLatestLocation[]>({
+    queryKey: TECHNICIAN_KEYS.latestLocations(branch_id),
+    queryFn: async () => (await getTechnicianLatestLocations(branch_id)).data.items ?? [],
     retry: false,
     meta: { suppressGlobalError: true },
     ...queryConfig,
