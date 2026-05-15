@@ -11,7 +11,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DUMMY_CHANGE_POLICIES } from "../../data/dummy-policies";
 import { ServiceChangePolicy, ChangeType } from "../../types/policy-types";
 import { CustomerType } from "../../types";
 
@@ -48,7 +47,7 @@ const CUSTOMER_TYPE_LABELS: Record<CustomerType, string> = {
 };
 
 export function ServiceChangePolicyPanel() {
-  const [policies] = useState(DUMMY_CHANGE_POLICIES);
+  const [policies] = useState<ServiceChangePolicy[]>([]);
   const [filterType, setFilterType] = useState<ChangeType | "all">("all");
 
   const filtered = filterType === "all"

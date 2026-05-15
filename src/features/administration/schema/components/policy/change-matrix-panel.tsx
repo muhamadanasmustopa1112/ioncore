@@ -9,7 +9,6 @@ import {
 } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DUMMY_CHANGE_MATRIX } from "../../data/dummy-policies";
 import { ChangeMatrixEntry, ChangeAction, ChangeType } from "../../types/policy-types";
 import { CustomerType } from "../../types";
 
@@ -46,9 +45,9 @@ const ACTION_CONFIG: Record<ChangeAction, { label: string; icon: React.ReactNode
 const ACTION_CYCLE: ChangeAction[] = ["instant", "wo_required", "not_allowed"];
 
 export function ChangeMatrixPanel() {
-  const [matrix, setMatrix] = useState(DUMMY_CHANGE_MATRIX);
+  const [matrix, setMatrix] = useState<ChangeMatrixEntry[]>([]);
   const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(DUMMY_CHANGE_MATRIX);
+  const [draft, setDraft] = useState<ChangeMatrixEntry[]>([]);
 
   const cycleAction = (id: string, col: CustomerType) => {
     setDraft((prev) =>

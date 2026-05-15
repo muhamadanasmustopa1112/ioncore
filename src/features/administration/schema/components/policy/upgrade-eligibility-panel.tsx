@@ -11,7 +11,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { DUMMY_UPGRADE_RULES } from "../../data/dummy-policies";
 import { UpgradeEligibilityRule, PaymentHistoryRequirement } from "../../types/policy-types";
 import { CustomerType } from "../../types";
 
@@ -37,7 +36,7 @@ const CUSTOMER_TYPE_VARIANTS = {
 } as const;
 
 export function UpgradeEligibilityPanel() {
-  const [rules, setRules] = useState(DUMMY_UPGRADE_RULES);
+  const [rules, setRules] = useState<UpgradeEligibilityRule[]>([]);
 
   const toggleActive = (id: string) => {
     setRules((prev) =>

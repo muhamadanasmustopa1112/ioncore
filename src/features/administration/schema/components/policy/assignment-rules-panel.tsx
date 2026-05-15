@@ -9,7 +9,6 @@ import {
 } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DUMMY_ASSIGNMENT_RULES } from "../../data/dummy-policies";
 import { SchemaAssignmentRule } from "../../types/policy-types";
 import { CustomerType, SchemaType } from "../../types";
 
@@ -36,7 +35,7 @@ const SCHEMA_FIELDS: { key: keyof SchemaAssignmentRule; label: string; type: Sch
 ];
 
 export function AssignmentRulesPanel() {
-  const [rules, setRules] = useState(DUMMY_ASSIGNMENT_RULES);
+  const [rules, setRules] = useState<SchemaAssignmentRule[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<SchemaAssignmentRule | null>(null);
 
