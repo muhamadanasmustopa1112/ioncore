@@ -121,7 +121,7 @@ function OrderDetailSheet({
               </div>
               <div>
                 <p className="text-muted-foreground text-xs font-medium mb-1">Type</p>
-                <p>{ORDER_TYPE_LABELS[order.order_type]}</p>
+                <p>{ORDER_TYPE_LABELS[order.order_type] ?? order.order_type}</p>
               </div>
               <div>
                 <p className="text-muted-foreground text-xs font-medium mb-1">Channel</p>
@@ -261,7 +261,7 @@ export function OrdersPage() {
       id: "order_type",
       accessorKey: "order_type",
       header: ({ column }) => <DataGridColumnHeader column={column} title="Type" className="font-semibold" />,
-      cell: ({ row }) => <span className="text-sm">{ORDER_TYPE_LABELS[row.original.order_type]}</span>,
+      cell: ({ row }) => <span className="text-sm">{ORDER_TYPE_LABELS[row.original.order_type] ?? row.original.order_type}</span>,
       size: 150,
     },
     {

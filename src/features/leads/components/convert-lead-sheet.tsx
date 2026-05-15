@@ -37,6 +37,7 @@ export function ConvertLeadSheet({ lead, selectedPlan, selectedAddons, open, onC
 
   const [fullName, setFullName] = useState(lead.lead_name);
   const [companyName, setCompanyName] = useState("");
+  const [totalRunCableMeters, setTotalRunCableMeters] = useState<number>(lead.cable_distance_meters ?? 0);
   const [ktpFile, setKtpFile] = useState<File | null>(null);
   const [ktpPreview, setKtpPreview] = useState<string | null>(null);
   const [step, setStep] = useState<"form" | "converting" | "done">("form");
@@ -101,6 +102,7 @@ export function ConvertLeadSheet({ lead, selectedPlan, selectedAddons, open, onC
           longitude: lead.installation_point_lng ?? 0,
           channel: "DIRECT",
           lead_id: lead.id,
+          ...(totalRunCableMeters > 0 && { total_run_cable_meters: totalRunCableMeters }),
           ...(selectedAddons.length > 0 && {
             addon_orders: selectedAddons.map((a) => ({ addon_id: a.id, addon_attribute: {} })),
           }),
@@ -202,6 +204,22 @@ export function ConvertLeadSheet({ lead, selectedPlan, selectedAddons, open, onC
                         No installation coordinates on this lead. Order will use (0, 0) — set the pin on the lead before converting.
                       </AlertDescription>
                     </Alert>
+                  )}
+
+                  {/* Cable run */}
+                  {selectedPlan && (
+                    <div className="flex flex-col gap-1.5">
+                      <Label htmlFor="conv-cable">Total run cable (meters)</Label>
+                      <Input
+                        id="conv-cable"
+                        type="number"
+                        min={0}
+                        value={totalRunCableMeters}
+                        onChange={(e) => setTotalRunCableMeters(Math.max(0, Number(e.target.value)))}
+                        placeholder="0"
+                        disabled={isBusy}
+                      />
+                    </div>
                   )}
 
                   {/* Customer fields */}

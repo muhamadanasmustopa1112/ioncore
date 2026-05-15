@@ -1,9 +1,10 @@
 export type OrderType =
   | "NEW_CONNECTION"
-  // | "RELOCATION" // just dummy
-  // | "TERMINATION" // just dummy
-  // | "UPGRADE" // just dummy 
-  // | "DOWNGRADE"; // just dummy
+  | "ADDON"
+  | "RELOCATION"
+  | "TERMINATION"
+  | "UPGRADE"
+  | "DOWNGRADE";
 
 export type OrderStatus =
   | "PENDING"
@@ -14,10 +15,11 @@ export type OrderStatus =
 
 export const ORDER_TYPE_LABELS: Record<OrderType, string> = {
   NEW_CONNECTION: "New Connection",
-  // RELOCATION: "Relocation", // just dummy
-  // TERMINATION: "Termination", // just dummy
-  // UPGRADE: "Upgrade", // just dummy
-  // DOWNGRADE: "Downgrade", // just dummy
+  ADDON: "Add-on",
+  RELOCATION: "Relocation",
+  TERMINATION: "Termination",
+  UPGRADE: "Upgrade",
+  DOWNGRADE: "Downgrade",
 };
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
@@ -107,6 +109,7 @@ export interface CreateOrderPayload {
   lead_id?: string;
   channel?: string;
   excess_cable_meters?: number;
+  total_run_cable_meters?: number;
 }
 
 export interface UpdateOrderStatusPayload {
