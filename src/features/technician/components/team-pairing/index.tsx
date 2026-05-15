@@ -6,18 +6,18 @@ import { Loader2, AlertCircle, RefreshCw, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useTeamLeaderDashboard } from "../../api/team-leader";
-import { useDispatchMap } from "../../api/analytics";
+import { useTechnicianLatestLocations } from "../../api/dashboard";
 import { useAuthStore } from "@/store/auth-store";
 import { AutoAssignModal } from "../technician-detail/modals";
 import { PairingModal } from "../technician-detail/modals";
-import type { WorkOrderDashboardItem } from "../../types/technician-api";
+import type { WorkOrderDashboardItem, TechnicianLatestLocation } from "../../types/technician-api";
 import { TeamPairingSummary } from "./summary";
 import { QueueList } from "./queue-list";
 import { AvailabilityBoard } from "./availability-board";
 import { CrossAreaPanel } from "./cross-area-panel";
 import dynamic from "next/dynamic";
 
-const TechnicianDispatchMap = dynamic(() => import("./tech-map"), {
+const TechnicianDispatchMap = dynamic<{ technicians?: TechnicianLatestLocation[] }>(() => import("./tech-map"), {
   ssr: false,
   loading: () => (
     <div className="h-[320px] sm:h-[380px] w-full bg-slate-100 dark:bg-slate-800/50 animate-pulse rounded-xl flex items-center justify-center border border-dashed border-slate-200 dark:border-slate-700">
@@ -53,14 +53,10 @@ export function TeamPairingDashboard() {
     queryConfig: { enabled: !!rawUser },
   });
 
-  const { data: mapData, refetch: refetchMap } = useDispatchMap({
-    params: {
-      ...(selectedState ? { state: selectedState } : {}),
-      ...(selectedType ? { type: selectedType } : {}),
-      ...(isLeader && branchId ? { branch_id: branchId } : {}),
-    },
-    queryConfig: { enabled: !!rawUser },
-  });
+  const { data: latestLocations, refetch: refetchMap } = useTechnicianLatestLocations(
+    isLeader && branchId ? branchId : undefined,
+    { enabled: !!rawUser }
+  );
 
 
 
@@ -149,6 +145,7 @@ export function TeamPairingDashboard() {
             variant="primary"
             size="sm"
             onClick={() => setShowAutoAssign(true)}
+            disabled={!data?.auto_assign_enabled}
             className="text-[10px] uppercase font-bold"
           >
             <Zap className="size-3 mr-1" />
@@ -167,7 +164,7 @@ export function TeamPairingDashboard() {
 
       {/* Live Map Integration */}
       <div className="mb-6 lg:mb-8">
-        <TechnicianDispatchMap items={mapData?.items ?? []} />
+        <TechnicianDispatchMap technicians={latestLocations ?? []} />
       </div>
 
       {/* Main Grid */}

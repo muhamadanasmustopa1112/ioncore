@@ -39,4 +39,6 @@ export const TECHNICIAN_KEYS = {
     [...TECHNICIAN_KEYS.all, "site", id, "history"] as const,
   list: (params: ListTechniciansParams) =>
     [...TECHNICIAN_KEYS.all, "list", params] as const,
+  latestLocations: (branch_id?: string) =>
+    [...TECHNICIAN_KEYS.all, "latest-locations", { branch_id }] as const,
 };

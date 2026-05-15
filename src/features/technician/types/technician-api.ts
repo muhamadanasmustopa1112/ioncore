@@ -94,6 +94,27 @@ export interface AssignedTechnician {
   skills: string[];
 }
 
+export interface TechnicianLatestLocation {
+  active_workload: number;
+  area_id: string;
+  availability_status: TechnicianAvailabilityStatus;
+  branch_id: string;
+  latest_location: {
+    latitude: number;
+    longitude: number;
+    recorded_at: string;
+  } | null;
+  role: string;
+  sub_area_id: string;
+  technician_id: string;
+  technician_name: string;
+}
+
+export interface TechnicianLatestLocationsResponse {
+  items: TechnicianLatestLocation[];
+}
+
+
 export interface AssignmentSLA {
   due_at: string;
   warning_at_percent: number;
@@ -703,6 +724,7 @@ export interface TeamLeaderDashboardResponse {
   cross_area_requests: CrossAreaRequest[];
   alerts: DashboardAlert[];
   map: DispatchMapResponse;
+  auto_assign_enabled: boolean;
 }
 
 export interface TeamLeaderDashboardEnvelope {
@@ -773,6 +795,7 @@ export interface DispatchCandidate {
   cross_area: boolean;
   match_score: number;
   reasons: string[];
+  availability_status: TechnicianAvailabilityStatus;
 }
 
 export interface PairingRecommendationResponse {
