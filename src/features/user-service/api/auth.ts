@@ -35,7 +35,7 @@ export const register = (payload: RegisterRequest) =>
 export const login = (payload: LoginRequest) =>
   userServiceApi.post<unknown, UserServiceEnvelope<AuthPayload>>(
     `${base}/auth/login`,
-    payload,
+    { ...payload, platform: "web" },
   );
 
 export const refreshSession = (payload: RefreshRequest) =>
