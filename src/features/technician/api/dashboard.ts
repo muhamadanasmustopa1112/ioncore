@@ -44,6 +44,8 @@ export const getWorkOrders = (
       ...(params.technician_id && { technician_id: params.technician_id }),
       ...(params.order && { order: params.order }),
       ...(params.sort_by && { sort_by: params.sort_by }),
+      ...(params.branch_id && { branch_id: params.branch_id }),
+      ...(params.date && { date: params.date }),
     },
   }) as unknown as Promise<WorkOrderDashboardEnvelope>;
 };
@@ -65,7 +67,9 @@ export const getTechnicianLatestLocations = (
   branch_id?: string,
 ): Promise<ResponseEnvelope<TechnicianLatestLocationsResponse>> => {
   return userServiceApi.get(`${BASE}/technicians/latest-locations`, {
-    params: { branch_id },
+    params: {
+      ...(branch_id ? { branch_id } : {}),
+    },
   }) as unknown as Promise<ResponseEnvelope<TechnicianLatestLocationsResponse>>;
 };
 

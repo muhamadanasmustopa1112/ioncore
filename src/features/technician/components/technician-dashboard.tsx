@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -28,6 +28,8 @@ export function TechnicianDashboard() {
   const perPage = Number(searchParams.get("per_page") ?? 10);
   const stateParam = (searchParams.get("state") ?? "") as WorkOrderState | "";
   const typeParam = (searchParams.get("type") ?? "") as WorkOrderType | "";
+  const branchParam = searchParams.get("branch_id") ?? "";
+  const dateParam = searchParams.get("date") ?? "";
 
   const appliedFilters: WorkOrderListParams = {
     page,
@@ -36,6 +38,8 @@ export function TechnicianDashboard() {
     sort_by: "created_at",
     ...(stateParam ? { state: stateParam } : {}),
     ...(typeParam ? { type: typeParam } : {}),
+    ...(branchParam ? { branch_id: branchParam } : {}),
+    ...(dateParam ? { date: dateParam } : {}),
   };
 
   const [pendingFilters, setPendingFilters] = useState<WorkOrderListParams>({
@@ -45,19 +49,25 @@ export function TechnicianDashboard() {
     sort_by: "created_at",
     ...(stateParam ? { state: stateParam } : {}),
     ...(typeParam ? { type: typeParam } : {}),
+    ...(branchParam ? { branch_id: branchParam } : {}),
+    ...(dateParam ? { date: dateParam } : {}),
   });
 
   const { rawUser } = useAuthStore();
-  const isTechnicalRole = rawUser?.roles?.some((r) => {
-    const n = (r.name || "").toLowerCase();
-    return n === "team_leader";
-  });
-  const branchId = isTechnicalRole ? (rawUser?.active_branch_id || "") : "";
+  const isLeader = useMemo(() =>
+    rawUser?.roles?.some((r: any) => {
+      const roleName = (r?.name || r || "").toString().toLowerCase();
+      return roleName.includes("team_leader");
+    }),
+    [rawUser?.roles]
+  );
+
+  const currentBranchId = isLeader ? (rawUser?.active_branch_id || undefined) : undefined;
 
   const { data, isLoading } = useWorkOrderList({
     params: {
       ...appliedFilters,
-      area_id: appliedFilters.area_id || branchId,
+      branch_id: appliedFilters.branch_id || currentBranchId,
     },
     queryConfig: { enabled: !!rawUser }
   });
@@ -77,6 +87,8 @@ export function TechnicianDashboard() {
       per_page: pendingFilters.per_page,
       state: pendingFilters.state ?? "",
       type: pendingFilters.type ?? "",
+      branch_id: pendingFilters.branch_id ?? "",
+      date: pendingFilters.date ?? "",
     });
   }
 
@@ -117,6 +129,7 @@ export function TechnicianDashboard() {
         filters={pendingFilters}
         onChange={setPendingFilters}
         onApply={handleApply}
+        hideSubArea={!!isLeader}
       />
 
       <WorkOrdersTable

@@ -111,7 +111,7 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
       {/* Branch & Area */}
       <SectionCard icon={Building} title="Branch & Area">
         <div className="space-y-2 text-sm">
-          <Row label="Branch" value={wo.branch_name || wo.branch_id} />
+          <Row label="Branch" value={wo.branch.name} />
           <Row label="Area" value={wo.area_name || wo.area_id} />
           <Row label="Sub Area" value={wo.sub_area_name || wo.sub_area_id} />
         </div>

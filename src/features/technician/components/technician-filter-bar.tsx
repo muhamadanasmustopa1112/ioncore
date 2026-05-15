@@ -2,11 +2,15 @@
 
 import { Filter } from "lucide-react";
 import type { WorkOrderListParams, WorkOrderState, WorkOrderType } from "../types/technician-api";
+import { useBranchList } from "@/features/administration/branch/api/branch-queries";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { useMemo } from "react";
 
 interface Props {
   filters: WorkOrderListParams;
   onChange: (filters: WorkOrderListParams) => void;
   onApply: () => void;
+  hideSubArea?: boolean;
 }
 
 const WO_STATES: { label: string; value: WorkOrderState | "" }[] = [
@@ -33,10 +37,34 @@ const WO_TYPES: { label: string; value: WorkOrderType | "" }[] = [
 const selectClass =
   "w-full bg-surface-variant dark:bg-slate-800 border border-outline text-slate-600 dark:text-slate-300 rounded text-sm py-2 px-3 focus:ring-1 focus:ring-primary outline-none appearance-none cursor-pointer";
 
-export function TechnicianFilterBar({ filters, onChange, onApply }: Props) {
+export function TechnicianFilterBar({ filters, onChange, onApply, hideSubArea }: Props) {
+  const { data: branches } = useBranchList({ per_page: 500 });
+
+  const branchOptions = useMemo(() => {
+    const opts = (branches ?? []).map((b: any) => ({
+      value: b.id,
+      label: b.name,
+    }));
+    return [{ value: "", label: "All Sub Areas" }, ...opts];
+  }, [branches]);
+
   return (
     <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded shadow-sm border border-outline mb-4 sm:mb-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 items-end">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${hideSubArea ? 'lg:grid-cols-4' : 'lg:grid-cols-5'} gap-3 sm:gap-4 items-end`}>
+        <div className="space-y-1">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+            Date
+          </label>
+          <input
+            type="date"
+            className={selectClass}
+            value={filters.date ?? ""}
+            onChange={(e) =>
+              onChange({ ...filters, date: e.target.value, page: 1 })
+            }
+          />
+        </div>
+
         <div className="space-y-1">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
             Status
@@ -75,7 +103,24 @@ export function TechnicianFilterBar({ filters, onChange, onApply }: Props) {
           </select>
         </div>
 
-        <div className="sm:col-span-2 lg:col-span-1">
+        {!hideSubArea && (
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+              Sub Area
+            </label>
+            <SearchableSelect
+              value={filters.branch_id ?? ""}
+              options={branchOptions}
+              placeholder="All Sub Areas"
+              onSelect={(val) =>
+                onChange({ ...filters, branch_id: val, page: 1 })
+              }
+              triggerClassName="bg-surface-variant dark:bg-slate-800 border-outline h-9"
+            />
+          </div>
+        )}
+
+        <div className={hideSubArea ? "sm:col-span-2 lg:col-span-1" : "lg:col-span-1"}>
           <button
             onClick={onApply}
             className="w-full bg-primary text-white font-semibold py-2 rounded text-sm flex items-center justify-center gap-2 hover:bg-blue-800 transition-colors shadow-sm"

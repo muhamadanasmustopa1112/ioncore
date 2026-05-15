@@ -56,7 +56,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
       {wo.routing && (
         <SectionCard icon={Network} title="Routing">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <Field label="Branch" value={wo.branch_name || wo.routing.resolved_branch_id} />
+            <Field label="Branch" value={wo.branch.name} />
             <Field label="Area" value={wo.area_name || wo.routing.resolved_area_id} />
             <Field label="Sub Area" value={wo.sub_area_name || wo.routing.resolved_sub_area_id} />
             <Field label="Routed To" value={wo.routing.routed_to_role} />
