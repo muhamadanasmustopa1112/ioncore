@@ -8,6 +8,7 @@ import {
   getBranchById,
   listRegional,
   listArea,
+  listSubArea,
   createRegional,
   updateRegional,
   deleteRegional,
