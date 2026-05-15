@@ -13,6 +13,12 @@ export interface UserData {
   position: string;
   homeBranchId: string;
   homeBranchName: string;
+  activeBranchId?: string;
+  functionName?: string;
+  workingScope?: string;
+  salesType?: "broadband" | "enterprise" | "both" | "";
+  technicianId?: string;
+  reportsToUserId?: string;
   avatarInitials: string;
   status: UserStatus;
   forcePasswordChange: boolean;
