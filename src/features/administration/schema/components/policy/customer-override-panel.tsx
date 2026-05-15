@@ -75,7 +75,7 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
             <div className="space-y-1">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Overridden Content</p>
               <pre className="text-xs bg-muted/40 rounded-lg px-3 py-2 overflow-auto max-h-48 whitespace-pre-wrap break-all">
-                {item.overridden_content}
+                {JSON.stringify(item.overridden_content, null, 2)}
               </pre>
             </div>
           )}
