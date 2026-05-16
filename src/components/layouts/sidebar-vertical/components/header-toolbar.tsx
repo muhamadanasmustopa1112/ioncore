@@ -38,6 +38,7 @@ import { Input, InputWrapper } from "@/components/ui/input";
 import { useLayout } from "./context";
 import { Badge } from "@/components/ui/badge";
 import { ConfigSelector } from "@/components/shared/dialogs/config-selector";
+import { NotificationPopover } from "@/features/administration/notification/components/notification-popover";
 
 export function HeaderToolbar() {
   const { isMobile } = useLayout();
@@ -122,12 +123,7 @@ export function HeaderToolbar() {
 
         {/* Notif / Messages */}
         <div className="flex items-center gap-1">
-          <Button mode="icon" variant="ghost" className="relative size-10 rounded-lg text-muted-foreground hover:text-primary">
-            <Bell className="size-5" />
-            <Badge className="absolute top-1.5 right-1.5 size-4 p-0 flex items-center justify-center bg-destructive text-white border-white border-2 text-[10px] font-bold">
-              4
-            </Badge>
-          </Button>
+          <NotificationPopover />
         </div>
 
         <div className="hidden sm:flex items-center gap-2">

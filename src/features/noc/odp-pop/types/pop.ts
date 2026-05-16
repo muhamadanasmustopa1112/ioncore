@@ -3,11 +3,11 @@ import { z } from "zod";
 export const popSchema = z.object({
   branch_id: z.string().min(1, "Branch is required"),
   code: z.string().min(1, "Code is required"),
-  gps_lat: z.string().min(1, "Latitude is required"),
-  gps_lng: z.string().min(1, "Longitude is required"),
+  gps_lat: z.string().min(1, "Latitude is required (please pick a point on the map)"),
+  gps_lng: z.string().min(1, "Longitude is required (please pick a point on the map)"),
   name: z.string().min(1, "POP Name is required"),
+  address: z.string().min(1, "Address is required"),
   status: z.enum(["UP", "DOWN", "DEGRADED", "UNKNOWN"]),
-  address: z.string().optional(),
 });
 
 export type PopFormValues = z.infer<typeof popSchema>;

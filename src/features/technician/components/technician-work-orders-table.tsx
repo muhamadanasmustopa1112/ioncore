@@ -26,36 +26,36 @@ import { paths } from "@/config/paths";
 import type { WorkOrderDashboardItem, WorkOrderState, WorkOrderType } from "../types/technician-api";
 
 const STATE_VARIANT: Record<WorkOrderState, "primary" | "success" | "warning" | "destructive" | "secondary" | "info"> = {
-  created:                    "secondary",
-  unassigned:                 "warning",
-  assigned:                   "info",
-  accepted:                   "primary",
-  dispatched:                 "primary",
-  in_progress:                "info",
-  pending_noc_verification:   "warning",
-  completed:                  "success",
-  rescheduled:                "warning",
-  cancelled:                  "destructive",
+  created: "secondary",
+  unassigned: "warning",
+  assigned: "info",
+  accepted: "primary",
+  dispatched: "primary",
+  in_progress: "info",
+  pending_noc_verification: "warning",
+  completed: "success",
+  rescheduled: "warning",
+  cancelled: "destructive",
 };
 
 const STATE_LABELS: Record<WorkOrderState, string> = {
-  created:                  "Created",
-  unassigned:               "Unassigned",
-  assigned:                 "Assigned",
-  accepted:                 "Accepted",
-  dispatched:               "Dispatched",
-  in_progress:              "In Progress",
+  created: "Created",
+  unassigned: "Unassigned",
+  assigned: "Assigned",
+  accepted: "Accepted",
+  dispatched: "Dispatched",
+  in_progress: "In Progress",
   pending_noc_verification: "Pending NOC",
-  completed:                "Completed",
-  rescheduled:              "Rescheduled",
-  cancelled:                "Cancelled",
+  completed: "Completed",
+  rescheduled: "Rescheduled",
+  cancelled: "Cancelled",
 };
 
 const TYPE_LABELS: Record<WorkOrderType, string> = {
-  new_installation_broadband:  "New Install (Broadband)",
+  new_installation_broadband: "New Install (Broadband)",
   new_installation_enterprise: "New Install (Enterprise)",
-  maintenance:                 "Maintenance",
-  termination:                 "Termination",
+  maintenance: "Maintenance",
+  termination: "Termination",
 };
 
 function ViewToggle() {
@@ -105,7 +105,7 @@ export function TechnicianWorkOrdersTable({
           </Link>
         </Button>
       ),
-      size: 160,
+      size: 200,
     },
     {
       id: "title",
@@ -203,7 +203,7 @@ export function TechnicianWorkOrdersTable({
       table={table}
       isLoading={isLoading}
       recordCount={total}
-      >
+    >
       <DataGridContainer>
         <Card>
           <CardHeader>

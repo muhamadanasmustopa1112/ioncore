@@ -99,6 +99,39 @@ export function UserForm() {
   const branches: BranchData[] = branchList ?? [];
   const allUsers = usersResp?.data || [];
 
+  const userOptions = useMemo(() => {
+    if (!allUsers.length) return [];
+
+    const nodes = allUsers.map((u) => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      reportsToUserId: (u as any).reports_to_user_id || "",
+      children: [] as any[],
+    }));
+
+    const map = new Map(nodes.map((n) => [n.id, n]));
+    const roots: any[] = [];
+
+    nodes.forEach((n) => {
+      const parent = n.reportsToUserId ? map.get(n.reportsToUserId) : null;
+      if (parent) {
+        parent.children.push(n);
+      } else {
+        roots.push(n);
+      }
+    });
+
+    const flattened: any[] = [];
+    const walk = (n: any, level: number) => {
+      flattened.push({ ...n, level });
+      n.children.forEach((c: any) => walk(c, level + 1));
+    };
+    roots.forEach((r) => walk(r, 0));
+
+    return flattened;
+  }, [allUsers]);
+
   const form = useForm<UserFormValues>({
     resolver: zodResolver(
       userFormSchema.superRefine((data, ctx) => {
@@ -887,9 +920,17 @@ export function UserForm() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">None</SelectItem>
-                          {allUsers.map((u) => (
+                          {userOptions.map((u) => (
                             <SelectItem key={u.id} value={u.id}>
-                              {u.name} ({u.email})
+                              <div className="flex items-center gap-1">
+                                {u.level > 0 && (
+                                  <span className="text-muted-foreground/50 font-mono">
+                                    {"\u00A0".repeat(u.level * 2)}└─
+                                  </span>
+                                )}
+                                <span className={u.level === 0 ? "font-semibold" : ""}>{u.name}</span>
+                                <span className="text-[10px] text-muted-foreground ml-1">({u.email})</span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>

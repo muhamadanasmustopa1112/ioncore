@@ -181,26 +181,28 @@ function StaticMap({ rings, pinLat, pinLng }: { rings: LngLat[][]; pinLat?: numb
   const center: LatLng | undefined = !bounds && pinPos ? pinPos : undefined;
 
   return (
-    <MapContainer
-      key={allPositions.map((p) => p.join()).join("|")}
-      bounds={bounds}
-      center={center}
-      zoom={center ? 15 : undefined}
-      boundsOptions={{ padding: [24, 24] }}
-      style={{ height: "100%", width: "100%" }}
-      scrollWheelZoom={false}
-      attributionControl={false}
-    >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {rings.map((ring, i) => (
-        <Polygon
-          key={i}
-          positions={toLeaflet(ring)}
-          pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.15, weight: 2 }}
-        />
-      ))}
-      {pinPos && <Marker position={pinPos} icon={pinIcon} />}
-    </MapContainer>
+    <div className="rounded-md overflow-hidden border border-border" style={{ height: 240 }}>
+      <MapContainer
+        key={allPositions.map((p) => p.join()).join("|") || "empty"}
+        bounds={bounds}
+        center={center ?? [-6.2088, 106.8456]}
+        zoom={center ? 15 : 12}
+        boundsOptions={{ padding: [24, 24] }}
+        style={{ height: "100%", width: "100%" }}
+        scrollWheelZoom={false}
+        attributionControl={false}
+      >
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {rings.map((ring, i) => (
+          <Polygon
+            key={i}
+            positions={toLeaflet(ring)}
+            pathOptions={{ color: "#10b981", fillColor: "#10b981", fillOpacity: 0.15, weight: 2 }}
+          />
+        ))}
+        {pinPos && <Marker position={pinPos} icon={pinIcon} />}
+      </MapContainer>
+    </div>
   );
 }
 
@@ -228,7 +230,7 @@ function PointPicker({
   }, []);
 
   const pinPos: LatLng | null = lat != null && lng != null ? [lat, lng] : null;
-  const center: LatLng = pinPos ?? [-6.2, 106.816];
+  const center: LatLng = pinPos ?? [-6.2088, 106.8456];
 
   return (
     <div className="flex flex-col gap-2 h-full">
@@ -244,7 +246,7 @@ function PointPicker({
           <CheckCheck className="size-3" /> Save
         </Button>
       </div>
-      <div className="rounded-md overflow-hidden border border-border h-[240px] md:h-[300px]">
+      <div className="rounded-md overflow-hidden border border-border h-[320px]">
         <MapContainer center={center} zoom={13} className="h-full w-full cursor-crosshair" scrollWheelZoom attributionControl={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapResizeController />
@@ -388,9 +390,7 @@ export function PolygonPreview({
       )}
 
       {hasGeo && (
-        <div className="rounded-md overflow-hidden border border-border" style={{ height: 220 }}>
-          <StaticMap rings={rings} pinLat={pinLat} pinLng={pinLng} />
-        </div>
+        <StaticMap rings={rings} pinLat={pinLat} pinLng={pinLng} />
       )}
 
       {!readOnly && (onPinChange || onPolygonChange) && (

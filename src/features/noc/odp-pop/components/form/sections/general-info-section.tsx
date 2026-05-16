@@ -22,6 +22,7 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { BranchData } from "@/features/administration/branch/types";
 import { PopFormValues } from "../../../types/pop";
 
@@ -55,27 +56,20 @@ export function GeneralInfoSection({
                         <FormItem>
                             <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                                 <RiNodeTree className="size-3" />
-                                Branch
+                                Branch (NOC)
                             </FormLabel>
-                            <Select
-                                key={branches?.length + (getValues("branch_id") || "empty")}
-                                onValueChange={field.onChange}
-                                value={field.value}
-                                disabled={isLoadingBranches || readOnly || isPending}
-                            >
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder={isLoadingBranches ? "Loading branches..." : "Select Branch"} />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {branches?.map((branch) => (
-                                        <SelectItem key={branch.id} value={branch.id}>
-                                            {branch.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <FormControl>
+                                <SearchableSelect
+                                    options={branches?.map((b) => ({
+                                        value: b.id,
+                                        label: `${b.name} (${b.level.replace("_", " ")})`,
+                                    })) || []}
+                                    value={field.value}
+                                    onSelect={(val) => field.onChange(val)}
+                                    placeholder={isLoadingBranches ? "Loading branches..." : "Select Branch"}
+                                    disabled={isLoadingBranches || readOnly || isPending}
+                                />
+                            </FormControl>
                             <FormMessage />
                         </FormItem>
                     )}
