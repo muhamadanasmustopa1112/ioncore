@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
 import type { BroadbandPlan, CreateBroadbandPlanPayload } from "../../types/products";
 
 const schema = z.object({
@@ -16,7 +17,7 @@ const schema = z.object({
   speed_upload_mbps: z.number({ error: "Required" }).min(1, "Required"),
   price: z.number({ error: "Required" }).min(0, "Required"),
   one_time_charge: z.number({ error: "Required" }).min(0, "Required"),
-  customer_type: z.enum(["broadband", "business", "both"]),
+  customer_type: z.string().min(1, "Customer type is required"),
   temporary_activation_window_hours: z.number({ error: "Required" }).min(0, "Required"),
   is_active: z.boolean(),
 });
@@ -31,12 +32,13 @@ interface PlanFormProps {
 
 export function PlanForm({ selected, mode, onSubmit }: PlanFormProps) {
   const isDetail = mode === "details";
+  const { data: customerTypes = [] } = useActiveCustomerTypes();
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "", speed_download_mbps: 0, speed_upload_mbps: 0,
-      price: 0, one_time_charge: 0, customer_type: "broadband",
+      price: 0, one_time_charge: 0, customer_type: "",
       temporary_activation_window_hours: 24, is_active: true,
     },
   });
@@ -104,11 +106,13 @@ export function PlanForm({ selected, mode, onSubmit }: PlanFormProps) {
           <Field label="Customer Type" required error={errors.customer_type?.message}>
             <Controller name="customer_type" control={control} render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange} disabled={isDetail}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select type…" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="broadband">Broadband</SelectItem>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="both">Both</SelectItem>
+                  {customerTypes.map((ct) => (
+                    <SelectItem key={ct.id} value={ct.name}>
+                      {ct.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             )} />

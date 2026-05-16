@@ -356,6 +356,13 @@ const ADMINISTRATION_ITEMS = [
     permission: "master.manage",
   },
   {
+    title: "Customer Types",
+    path: paths.dashboard.administration.customerTypes.getHref(),
+    heading: 'Administration',
+    icon: Users2,
+    permission: "master.manage",
+  },
+  {
     title: "Products",
     path: paths.dashboard.administration.products.root.getHref(),
     heading: 'Administration',

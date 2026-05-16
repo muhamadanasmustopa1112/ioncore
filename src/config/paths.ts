@@ -333,6 +333,10 @@ export const paths = {
         path: "/administration/platform-config",
         getHref: () => "/administration/platform-config",
       },
+      customerTypes: {
+        path: "/administration/customer-types",
+        getHref: () => "/administration/customer-types",
+      },
       masterData: {
         path: "/administration/master-data",
         getHref: () => "/administration/master-data",

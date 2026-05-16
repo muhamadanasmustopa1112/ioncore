@@ -12,7 +12,7 @@ export interface PaginationMeta {
 
 // ─── Broadband Plans ─────────────────────────────────────────────────────────
 
-export type BroadbandCustomerType = "broadband" | "business" | "both";
+export type BroadbandCustomerType = string;
 
 export interface BranchInfo {
   id: string;
