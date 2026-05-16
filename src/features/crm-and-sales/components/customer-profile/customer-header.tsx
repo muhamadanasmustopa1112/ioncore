@@ -19,6 +19,7 @@ function initials(name: string) {
 
 interface Props {
   customer?: CustomerDetail;
+  onAddService?: () => void;
   onDeactivate?: () => void;
   isDeactivating?: boolean;
 }
