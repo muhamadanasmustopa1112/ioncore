@@ -1,6 +1,7 @@
 import { UserRoleAssignment } from "@/store/auth-store";
 
 export type UserStatus = "active" | "inactive" | "locked";
+export type WorkingScope = "regional" | "area" | "sub_area" | "";
 export type UserFormMode = "new" | "edit" | "details" | null;
 
 export interface UserData {
@@ -15,7 +16,7 @@ export interface UserData {
   homeBranchName: string;
   activeBranchId?: string;
   functionName?: string;
-  workingScope?: string;
+  workingScope?: WorkingScope;
   salesType?: "broadband" | "enterprise" | "both" | "";
   technicianId?: string;
   reportsToUserId?: string;

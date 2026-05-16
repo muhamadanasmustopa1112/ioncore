@@ -32,6 +32,12 @@ function mapActivityLog(log: ActivityLog): AuditLog {
     sessionId: log.session_id || null,
     status: log.status_code === 200 || !log.is_suspicious ? "success" : "failed",
     errorMessage: log.status_code ? `Status: ${log.status_code}` : null,
+    user: log.user ? {
+      id: log.user.id,
+      name: log.user.name,
+      email: log.user.email,
+      employee_id: log.user.employee_id || "",
+    } : undefined,
   };
 }
 

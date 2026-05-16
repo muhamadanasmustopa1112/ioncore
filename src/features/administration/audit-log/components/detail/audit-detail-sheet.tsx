@@ -78,8 +78,8 @@ export function AuditDetailSheet({ log, open, onClose }: AuditDetailSheetProps) 
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">User</p>
-                    <p className="font-medium">{log.userName}</p>
-                    <p className="text-xs text-muted-foreground">{log.userEmail} · {log.userRole}</p>
+                    <p className="font-medium">{log.user?.name}</p>
+                    <p className="text-xs text-muted-foreground">{log.user?.email} · {log.user?.employee_id}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Action</p>
@@ -116,16 +116,6 @@ export function AuditDetailSheet({ log, open, onClose }: AuditDetailSheetProps) 
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Change Reason</p>
                     <p className="text-sm bg-muted/40 rounded-md px-3 py-2">{log.changeReason}</p>
-                  </div>
-                )}
-
-                {/* Error message */}
-                {log.errorMessage && (
-                  <div>
-                    <p className="text-xs text-destructive mb-1">Error</p>
-                    <p className="text-sm bg-destructive/10 text-destructive rounded-md px-3 py-2">
-                      {log.errorMessage}
-                    </p>
                   </div>
                 )}
 

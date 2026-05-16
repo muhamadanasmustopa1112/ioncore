@@ -22,6 +22,13 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   useMyProfile,
   useUpdateMyProfile,
   useChangeMyPassword,
@@ -244,7 +251,16 @@ export function ProfilePage() {
                     </div>
                     <div className="space-y-2">
                       <Label className="text-xs font-medium text-muted-foreground">Working Scope</Label>
-                      <Input value={workingScope} onChange={(e) => setWorkingScope(e.target.value)} placeholder="e.g. National" />
+                      <Select value={workingScope} onValueChange={setWorkingScope}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select working scope" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="regional">Regional</SelectItem>
+                          <SelectItem value="area">Area</SelectItem>
+                          <SelectItem value="sub_area">Sub Area</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                   <div className="flex justify-end pt-2">
