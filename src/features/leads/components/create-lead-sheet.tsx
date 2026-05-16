@@ -128,8 +128,13 @@ export function CreateLeadSheet({ open, onClose }: Props) {
   );
 
   const customerOptions = useMemo(
-    () => (source === "referral" ? (customersData?.items ?? []) : []),
-    [source, customersData]
+    () =>
+      source === "referral"
+        ? (customersData?.items ?? []).filter(
+            (c) => c.status?.toLowerCase() !== "suspended",
+          )
+        : [],
+    [source, customersData],
   );
 
   const selectedCustomer = useMemo(

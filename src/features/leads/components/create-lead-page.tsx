@@ -110,8 +110,13 @@ export function CreateLeadPage() {
   const activeBranches = useMemo(() => branches.filter((b) => b.active && b.level === "area"), [branches]);
 
   const customerOptions = useMemo(
-    () => (source === "referral" ? (customersData?.items ?? []) : []),
-    [source, customersData]
+    () =>
+      source === "referral"
+        ? (customersData?.items ?? []).filter(
+            (c) => c.status?.toLowerCase() !== "suspended",
+          )
+        : [],
+    [source, customersData],
   );
 
   const selectedCustomer = useMemo(
