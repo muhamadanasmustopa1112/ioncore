@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RiLoader4Line } from "@remixicon/react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -75,10 +75,16 @@ interface OverrideSheetProps {
 }
 
 function OverrideSheet({ schema, onOpenChange, customerId }: OverrideSheetProps) {
-  const [json, setJson] = useState(
-    schema ? JSON.stringify(schema.overridden_content, null, 2) : "",
-  );
+  const [json, setJson] = useState("");
   const [jsonError, setJsonError] = useState("");
+
+  useEffect(() => {
+    if (schema) {
+      setJson(JSON.stringify(schema.overridden_content, null, 2));
+      setJsonError("");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schema?.id]); // intentionally only schema.id — re-populate only when a different schema is opened
   const update = useUpdateCustomerSchema();
 
   const handleJsonChange = (val: string) => {

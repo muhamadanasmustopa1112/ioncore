@@ -3,6 +3,7 @@ import type { SchemaPaginationMeta } from "./index";
 export interface CustomerSchema {
   id: string;
   customer_id: string;
+  customer_name?: string;
   schema_type: string;
   schema_id: string;
   schema_version_id: string;

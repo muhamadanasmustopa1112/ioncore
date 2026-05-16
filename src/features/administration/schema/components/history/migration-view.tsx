@@ -25,9 +25,9 @@ function CustomerRow({ item }: { item: CustomerSchema }) {
   return (
     <div className="flex items-center justify-between px-4 py-3 gap-4">
       <div className="min-w-0">
-        <span className="font-mono text-xs font-medium block truncate">{item.customer_id}</span>
-        <span className="text-xs text-muted-foreground">
-          {item.schema_type} · {item.schema_id.slice(0, 8)}…
+        <span className="text-sm font-medium block truncate">{item.customer_name ?? item.customer_id}</span>
+        <span className="text-xs text-muted-foreground font-mono">
+          {item.customer_id.slice(0, 8)}… · {item.schema_type}
         </span>
       </div>
       <div className="flex items-center gap-2 shrink-0">
@@ -95,7 +95,7 @@ export function SchemaMigrationView() {
     migrate.mutate(
       { original_schema_version_id: fromVersionId, new_schema_version_id: toVersionId },
       {
-        onSuccess: () => toast.success(`Migration queued for ${rows.length} customer(s)`),
+        onSuccess: () => toast.success(`Migration successful for ${rows.length} customer(s)`),
         onError: (err: unknown) =>
           toast.error(err instanceof Error ? err.message : "Migration failed"),
       },
