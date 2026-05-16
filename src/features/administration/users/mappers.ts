@@ -1,4 +1,5 @@
 import type { AuthUser } from "@/features/user-service/types";
+import type { WorkingScope } from "./types/user";
 import type { UserData, UserStatus } from "./types";
 
 function initials(name: string): string {
@@ -33,7 +34,7 @@ export function mapAuthUserToUserData(u: AuthUser): UserData {
     department: u.unit_kerja || "",
     position: u.job_title || "",
     functionName: u.function_name || "",
-    workingScope: u.working_scope || "",
+    workingScope: (u.working_scope || "") as WorkingScope,
     salesType: (u as any).sales_type || "",
     technicianId: (u as any).technician_id || "",
     reportsToUserId: (u as any).reports_to_user_id || "",
