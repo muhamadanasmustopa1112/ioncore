@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   RiInformationLine,
   RiPercentLine,
 } from "@remixicon/react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,8 +22,11 @@ import { commissionFormSchema, type CommissionFormValues } from "../../../types/
 import { useSchemaStore } from "../../../store/schema";
 import { useCreateSchema, useEditSchema, useSchema, useSchemaVersions } from "../../../api/schema-queries";
 import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
+import { useUpdateCustomerSchema } from "@/features/rule-schema";
 import { CommissionSplitsSection } from "./commission-splits-section";
 import { ReferralSection } from "./referral-section";
+import { DiffWrap, OverrideDiffProvider } from "../override-diff";
+import { computeOverrideChanges } from "../../../utils/override-changes";
 
 const DEFAULT_COMMISSION: CommissionFormValues = {
   name: "",
@@ -45,10 +49,12 @@ const DEFAULT_COMMISSION: CommissionFormValues = {
 };
 
 export function CommissionForm() {
-  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter } = useSchemaStore();
+  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter, overrideCustomerSchema, closeSchemaSheet, openOverrideConfirm, overrideConfirmTrigger } = useSchemaStore();
   const isDetailMode = form === "details";
+  const isOverride = form === "override";
   const createSchema = useCreateSchema();
   const editSchema = useEditSchema();
+  const updateCustomerSchema = useUpdateCustomerSchema();
 
   const rhfForm = useForm<CommissionFormValues>({
     resolver: zodResolver(commissionFormSchema),
@@ -61,6 +67,7 @@ export function CommissionForm() {
     setValue,
     handleSubmit,
     reset,
+    getValues,
     formState: { errors },
   } = rhfForm;
 
@@ -118,6 +125,21 @@ export function CommissionForm() {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, schemaDetail, schemaVersions]);
+
+  const [overrideSnapshot, setOverrideSnapshot] = useState<CommissionFormValues>(DEFAULT_COMMISSION);
+  const pendingOverrideContent = useRef<Record<string, unknown> | null>(null);
+
+  useEffect(() => {
+    if (!isOverride || !overrideCustomerSchema) return;
+    const partial = fromApiContent(overrideCustomerSchema.overridden_content);
+    const cleaned = Object.fromEntries(
+      Object.entries(partial).filter(([, v]) => v !== undefined),
+    ) as Partial<CommissionFormValues>;
+    const vals: CommissionFormValues = { ...DEFAULT_COMMISSION, ...cleaned, name: overrideCustomerSchema.schema_name ?? "_override" };
+    reset(vals);
+    setOverrideSnapshot(vals);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOverride, overrideCustomerSchema?.id]);
 
   function toApiContent(values: CommissionFormValues) {
     const commissionAssignment = {
@@ -192,14 +214,48 @@ export function CommissionForm() {
         originalCustomerType: schemaDetail?.customer_type ?? "",
         content,
       });
+    } else if (isOverride && overrideCustomerSchema) {
+      updateCustomerSchema.mutate(
+        { id: overrideCustomerSchema.id, payload: { overridden_content: content as unknown as Record<string, unknown> } },
+        {
+          onSuccess: () => {
+            toast.success("Schema override saved");
+            closeSchemaSheet();
+          },
+          onError: (err: unknown) => {
+            toast.error(err instanceof Error ? err.message : "Failed to save override");
+          },
+        },
+      );
     }
   }
 
   useEffect(() => {
-    setFormSubmitter(handleSubmit(onSubmit));
+    if (isOverride) {
+      setFormSubmitter(() => {
+        const current = getValues();
+        const changes = computeOverrideChanges(overrideSnapshot, current);
+        pendingOverrideContent.current = toApiContent(current) as unknown as Record<string, unknown>;
+        openOverrideConfirm(changes);
+      });
+    } else {
+      setFormSubmitter(handleSubmit(onSubmit));
+    }
     return () => setFormSubmitter(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, selectedSchemaId]);
+  }, [form, selectedSchemaId, isOverride, overrideSnapshot]);
+
+  useEffect(() => {
+    if (!isOverride || overrideConfirmTrigger === 0 || !pendingOverrideContent.current || !overrideCustomerSchema) return;
+    updateCustomerSchema.mutate(
+      { id: overrideCustomerSchema.id, payload: { overridden_content: pendingOverrideContent.current } },
+      {
+        onSuccess: () => { toast.success("Schema override saved"); closeSchemaSheet(); },
+        onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to save override"),
+      },
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overrideConfirmTrigger]);
 
   const commissionValueLabel =
     commissionType === "percentage"
@@ -208,140 +264,156 @@ export function CommissionForm() {
       ? "Fixed Amount (IDR)"
       : "Commission Value";
 
+  const allValues = watch();
+
   return (
-    <div className="flex h-full flex-col overflow-hidden">
-      <ScrollArea className="flex-1 px-6 py-6">
-        <div className="space-y-8 pb-6">
+    <OverrideDiffProvider
+      enabled={isOverride}
+      originalValues={overrideSnapshot as unknown as Record<string, unknown>}
+      currentValues={allValues as unknown as Record<string, unknown>}
+    >
+      <div className="flex h-full flex-col overflow-hidden">
+        <ScrollArea className="flex-1 px-6 py-6">
+          <div className="space-y-8 pb-6">
 
-          {/* Section 1: Basic Info */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b border-border/50">
-              <RiInformationLine className="size-4 text-blue-500" />
-              <h3 className="text-sm font-semibold">Basic Info</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Schema Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="e.g. Residential Commission Schema"
-                  disabled={isDetailMode}
-                  {...register("name")}
-                />
-                {errors.name && (
-                  <p className="text-xs text-red-500">{errors.name.message}</p>
-                )}
+            {!isOverride && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                  <RiInformationLine className="size-4 text-blue-500" />
+                  <h3 className="text-sm font-semibold">Basic Info</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                      Schema Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      placeholder="e.g. Residential Commission Schema"
+                      disabled={isDetailMode}
+                      {...register("name")}
+                    />
+                    {errors.name && (
+                      <p className="text-xs text-red-500">{errors.name.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Customer Type</Label>
+                    <Select
+                      value={watch("customer_type")}
+                      onValueChange={(v) =>
+                        setValue("customer_type", v as CommissionFormValues["customer_type"])
+                      }
+                      disabled={isDetailMode}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customerTypes.map((ct) => (
+                          <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Customer Type</Label>
-                <Select
-                  value={watch("customer_type")}
-                  onValueChange={(v) =>
-                    setValue("customer_type", v as CommissionFormValues["customer_type"])
-                  }
-                  disabled={isDetailMode}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {customerTypes.map((ct) => (
-                      <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            )}
+
+            <div className="space-y-4 pt-2">
+              <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                <RiPercentLine className="size-4 text-blue-500" />
+                <h3 className="text-sm font-semibold">Commission Rule</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <DiffWrap name="commission_type">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Commission Type</Label>
+                    <Select
+                      value={commissionType}
+                      onValueChange={(v) =>
+                        setValue("commission_type", v as CommissionFormValues["commission_type"])
+                      }
+                      disabled={isDetailMode}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="percentage">Percentage</SelectItem>
+                        <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
+                        <SelectItem value="tiered">Tiered</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </DiffWrap>
+                <DiffWrap name="commission_value">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">{commissionValueLabel}</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      disabled={isDetailMode}
+                      {...register("commission_value", { valueAsNumber: true })}
+                    />
+                    {errors.commission_value && (
+                      <p className="text-xs text-red-500">{errors.commission_value.message}</p>
+                    )}
+                  </div>
+                </DiffWrap>
+                <DiffWrap name="calculation_base">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Calculation Base</Label>
+                    <Select
+                      value={watch("calculation_base")}
+                      onValueChange={(v) =>
+                        setValue("calculation_base", v as CommissionFormValues["calculation_base"])
+                      }
+                      disabled={isDetailMode}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="first_invoice_amount">First Invoice Amount</SelectItem>
+                        <SelectItem value="annual_contract_value">Annual Contract Value</SelectItem>
+                        <SelectItem value="recurring_invoice_amount">Recurring Invoice Amount</SelectItem>
+                        <SelectItem value="fixed">Fixed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </DiffWrap>
+                <DiffWrap name="payment_timing">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Payment Timing</Label>
+                    <Select
+                      value={watch("payment_timing")}
+                      onValueChange={(v) =>
+                        setValue("payment_timing", v as CommissionFormValues["payment_timing"])
+                      }
+                      disabled={isDetailMode}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="on_first_payment">On First Payment</SelectItem>
+                        <SelectItem value="on_contract_signing">On Contract Signing</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                        <SelectItem value="quarterly">Quarterly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </DiffWrap>
               </div>
             </div>
+
+            <CommissionSplitsSection form={rhfForm} disabled={isDetailMode} />
+
+            <ReferralSection form={rhfForm} disabled={isDetailMode} />
+
           </div>
-
-          {/* Section 2: Commission Rule */}
-          <div className="space-y-4 pt-2">
-            <div className="flex items-center gap-2 pb-2 border-b border-border/50">
-              <RiPercentLine className="size-4 text-blue-500" />
-              <h3 className="text-sm font-semibold">Commission Rule</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Commission Type</Label>
-                <Select
-                  value={commissionType}
-                  onValueChange={(v) =>
-                    setValue("commission_type", v as CommissionFormValues["commission_type"])
-                  }
-                  disabled={isDetailMode}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Percentage</SelectItem>
-                    <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
-                    <SelectItem value="tiered">Tiered</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">{commissionValueLabel}</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  disabled={isDetailMode}
-                  {...register("commission_value", { valueAsNumber: true })}
-                />
-                {errors.commission_value && (
-                  <p className="text-xs text-red-500">{errors.commission_value.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Calculation Base</Label>
-                <Select
-                  value={watch("calculation_base")}
-                  onValueChange={(v) =>
-                    setValue("calculation_base", v as CommissionFormValues["calculation_base"])
-                  }
-                  disabled={isDetailMode}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="first_invoice_amount">First Invoice Amount</SelectItem>
-                    <SelectItem value="annual_contract_value">Annual Contract Value</SelectItem>
-                    <SelectItem value="recurring_invoice_amount">Recurring Invoice Amount</SelectItem>
-                    <SelectItem value="fixed">Fixed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Payment Timing</Label>
-                <Select
-                  value={watch("payment_timing")}
-                  onValueChange={(v) =>
-                    setValue("payment_timing", v as CommissionFormValues["payment_timing"])
-                  }
-                  disabled={isDetailMode}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="on_first_payment">On First Payment</SelectItem>
-                    <SelectItem value="on_contract_signing">On Contract Signing</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="quarterly">Quarterly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <CommissionSplitsSection form={rhfForm} disabled={isDetailMode} />
-
-          <ReferralSection form={rhfForm} disabled={isDetailMode} />
-
-        </div>
-      </ScrollArea>
-    </div>
+        </ScrollArea>
+      </div>
+    </OverrideDiffProvider>
   );
 }

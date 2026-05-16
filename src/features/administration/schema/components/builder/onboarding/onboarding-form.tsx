@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RiInformationLine } from "@remixicon/react";
+import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -18,6 +19,9 @@ import { onboardingFormSchema, type OnboardingFormValues } from "../../../types/
 import { useSchemaStore } from "../../../store/schema";
 import { useCreateSchema, useEditSchema, useSchema, useSchemaVersions } from "../../../api/schema-queries";
 import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
+import { useUpdateCustomerSchema } from "@/features/rule-schema";
+import { DiffWrap, OverrideDiffProvider } from "../override-diff";
+import { computeOverrideChanges } from "../../../utils/override-changes";
 import { StepsSection } from "./steps-section";
 import { DocumentsSection } from "./documents-section";
 
@@ -53,17 +57,19 @@ const DEFAULT_ONBOARDING: OnboardingFormValues = {
 };
 
 export function OnboardingForm() {
-  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter } = useSchemaStore();
+  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter, overrideCustomerSchema, closeSchemaSheet, openOverrideConfirm, overrideConfirmTrigger } = useSchemaStore();
   const isDetailMode = form === "details";
+  const isOverride = form === "override";
   const createSchema = useCreateSchema();
   const editSchema = useEditSchema();
+  const updateCustomerSchema = useUpdateCustomerSchema();
 
   const rhfForm = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingFormSchema),
     defaultValues: DEFAULT_ONBOARDING,
   });
 
-  const { register, watch, setValue, handleSubmit, reset, formState: { errors } } = rhfForm;
+  const { register, watch, setValue, handleSubmit, reset, getValues, formState: { errors } } = rhfForm;
 
   const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
   const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
@@ -92,6 +98,19 @@ export function OnboardingForm() {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, schemaDetail, schemaVersions]);
+
+  const [overrideSnapshot, setOverrideSnapshot] = useState<OnboardingFormValues>(DEFAULT_ONBOARDING);
+  const pendingOverrideContent = useRef<Record<string, unknown> | null>(null);
+
+  useEffect(() => {
+    if (!isOverride || !overrideCustomerSchema) return;
+    const partial = fromApiContent(overrideCustomerSchema.overridden_content);
+    const cleaned = Object.fromEntries(Object.entries(partial).filter(([, v]) => v !== undefined)) as Partial<OnboardingFormValues>;
+    const vals: OnboardingFormValues = { ...DEFAULT_ONBOARDING, ...cleaned, name: overrideCustomerSchema.schema_name ?? "_override" };
+    reset(vals);
+    setOverrideSnapshot(vals);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOverride, overrideCustomerSchema?.id]);
 
   function toApiContent(values: OnboardingFormValues) {
     return {
@@ -142,94 +161,136 @@ export function OnboardingForm() {
         originalCustomerType: schemaDetail?.customer_type ?? "",
         content,
       });
+    } else if (isOverride && overrideCustomerSchema) {
+      updateCustomerSchema.mutate(
+        { id: overrideCustomerSchema.id, payload: { overridden_content: content as unknown as Record<string, unknown> } },
+        {
+          onSuccess: () => { toast.success("Schema override saved"); closeSchemaSheet(); },
+          onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to save override"),
+        },
+      );
     }
   }
 
   useEffect(() => {
-    setFormSubmitter(handleSubmit(onSubmit));
+    if (isOverride) {
+      setFormSubmitter(() => {
+        const current = getValues();
+        const changes = computeOverrideChanges(overrideSnapshot, current);
+        pendingOverrideContent.current = toApiContent(current) as unknown as Record<string, unknown>;
+        openOverrideConfirm(changes);
+      });
+    } else {
+      setFormSubmitter(handleSubmit(onSubmit));
+    }
     return () => setFormSubmitter(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, selectedSchemaId]);
+  }, [form, selectedSchemaId, isOverride, overrideSnapshot]);
+
+  useEffect(() => {
+    if (!isOverride || overrideConfirmTrigger === 0 || !pendingOverrideContent.current || !overrideCustomerSchema) return;
+    updateCustomerSchema.mutate(
+      { id: overrideCustomerSchema.id, payload: { overridden_content: pendingOverrideContent.current } },
+      {
+        onSuccess: () => { toast.success("Schema override saved"); closeSchemaSheet(); },
+        onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to save override"),
+      },
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overrideConfirmTrigger]);
+
+  const allValues = watch();
 
   return (
+    <OverrideDiffProvider
+      enabled={isOverride}
+      originalValues={overrideSnapshot as unknown as Record<string, unknown>}
+      currentValues={allValues as unknown as Record<string, unknown>}
+    >
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
 
-          {/* Section 1: Basic Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
               <RiInformationLine className="size-4 text-blue-500" />
-              <h3 className="text-sm font-semibold">Basic Info</h3>
+              <h3 className="text-sm font-semibold">{isOverride ? "Timing" : "Basic Info"}</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Schema Name <span className="text-red-500">*</span>
-                </Label>
-                <Input
-                  placeholder="e.g. Residential Onboarding Schema"
-                  disabled={isDetailMode}
-                  {...register("name")}
-                />
-                {errors.name && (
-                  <p className="text-xs text-red-500">{errors.name.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Customer Type</Label>
-                <Select
-                  value={watch("customer_type")}
-                  onValueChange={(v) =>
-                    setValue("customer_type", v as OnboardingFormValues["customer_type"])
-                  }
-                  disabled={isDetailMode}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {customerTypes.map((ct) => (
-                      <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Expected Duration (Hours)</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  disabled={isDetailMode}
-                  {...register("expected_duration_hours", { valueAsNumber: true })}
-                />
-                {errors.expected_duration_hours && (
-                  <p className="text-xs text-red-500">{errors.expected_duration_hours.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">SLA Hours</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  disabled={isDetailMode}
-                  {...register("sla_hours", { valueAsNumber: true })}
-                />
-                {errors.sla_hours && (
-                  <p className="text-xs text-red-500">{errors.sla_hours.message}</p>
-                )}
-              </div>
+              {!isOverride && (
+                <>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">
+                      Schema Name <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      placeholder="e.g. Residential Onboarding Schema"
+                      disabled={isDetailMode}
+                      {...register("name")}
+                    />
+                    {errors.name && (
+                      <p className="text-xs text-red-500">{errors.name.message}</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Customer Type</Label>
+                    <Select
+                      value={watch("customer_type")}
+                      onValueChange={(v) =>
+                        setValue("customer_type", v as OnboardingFormValues["customer_type"])
+                      }
+                      disabled={isDetailMode}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {customerTypes.map((ct) => (
+                          <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+              <DiffWrap name="expected_duration_hours">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">Expected Duration (Hours)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    disabled={isDetailMode}
+                    {...register("expected_duration_hours", { valueAsNumber: true })}
+                  />
+                  {errors.expected_duration_hours && (
+                    <p className="text-xs text-red-500">{errors.expected_duration_hours.message}</p>
+                  )}
+                </div>
+              </DiffWrap>
+              <DiffWrap name="sla_hours">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">SLA Hours</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    disabled={isDetailMode}
+                    {...register("sla_hours", { valueAsNumber: true })}
+                  />
+                  {errors.sla_hours && (
+                    <p className="text-xs text-red-500">{errors.sla_hours.message}</p>
+                  )}
+                </div>
+              </DiffWrap>
             </div>
           </div>
 
-          {/* Section 2: Onboarding Steps */}
           <StepsSection form={rhfForm} disabled={isDetailMode} />
 
-          {/* Section 3: Required Documents */}
           <DocumentsSection form={rhfForm} disabled={isDetailMode} />
 
         </div>
       </ScrollArea>
     </div>
+    </OverrideDiffProvider>
   );
 }

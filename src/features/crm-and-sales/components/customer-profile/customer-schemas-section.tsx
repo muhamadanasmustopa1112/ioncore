@@ -1,29 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { RiLoader4Line } from "@remixicon/react";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import {
   useCustomerSchemasByCustomer,
   useCustomerSchemaDiff,
-  useUpdateCustomerSchema,
 } from "@/features/rule-schema";
 import type { ContentDiffOp, CustomerSchema } from "@/features/rule-schema";
-
-// ── Diff row ─────────────────────────────────────────────
+import { useSchemaStore } from "@/features/administration/schema/store/schema";
+import { SchemaFormSheet } from "@/features/administration/schema/components/schema-form-sheet";
 
 const OP_STYLE: Record<string, { label: string; class: string }> = {
   replace: { label: "Changed", class: "bg-blue-500/10 text-blue-600" },
@@ -47,8 +35,6 @@ function DiffRow({ op }: { op: ContentDiffOp }) {
   );
 }
 
-// ── Diff panel (lazy-loaded) ─────────────────────────────
-
 function DiffPanel({ schemaId }: { schemaId: string }) {
   const { data, isFetching } = useCustomerSchemaDiff(schemaId, true);
   const ops = data?.data.diff ?? [];
@@ -65,109 +51,6 @@ function DiffPanel({ schemaId }: { schemaId: string }) {
     </div>
   );
 }
-
-// ── Override sheet ───────────────────────────────────────
-
-interface OverrideSheetProps {
-  schema: CustomerSchema | null;
-  onOpenChange: (v: boolean) => void;
-  customerId: string;
-}
-
-function OverrideSheet({ schema, onOpenChange, customerId }: OverrideSheetProps) {
-  const [json, setJson] = useState("");
-  const [jsonError, setJsonError] = useState("");
-
-  useEffect(() => {
-    if (schema) {
-      setJson(JSON.stringify(schema.overridden_content, null, 2));
-      setJsonError("");
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schema?.id]); // intentionally only schema.id — re-populate only when a different schema is opened
-  const update = useUpdateCustomerSchema();
-
-  const handleJsonChange = (val: string) => {
-    setJson(val);
-    try { JSON.parse(val); setJsonError(""); }
-    catch { setJsonError("Invalid JSON"); }
-  };
-
-  const handleSubmit = () => {
-    if (!schema || jsonError) return;
-    let parsed: Record<string, unknown>;
-    try { parsed = JSON.parse(json); }
-    catch { setJsonError("Invalid JSON"); return; }
-
-    update.mutate(
-      { id: schema.id, payload: { overridden_content: parsed } },
-      {
-        onSuccess: () => {
-          toast.success("Schema override saved");
-          onOpenChange(false);
-        },
-        onError: (err: unknown) => {
-          toast.error(err instanceof Error ? err.message : "Failed to save override");
-        },
-      },
-    );
-  };
-
-  return (
-    <Sheet open={!!schema} onOpenChange={onOpenChange}>
-      <SheetContent className="inset-y-0 sm:inset-y-8 lg:end-10 start-auto h-full sm:max-h-[calc(100vh-64px)] gap-0 sm:rounded-lg border p-0 sm:max-w-none w-full md:w-[560px] flex flex-col [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5 shadow-2xl">
-        <SheetHeader className="border-b px-5 py-4">
-          <SheetTitle className="font-medium text-xl">Override Schema</SheetTitle>
-        </SheetHeader>
-        <SheetBody className="flex-1 overflow-auto px-5 py-5 space-y-4">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="info" appearance="light" className="capitalize text-xs">
-              {schema?.schema_type?.replace(/_/g, " ").toLowerCase()}
-            </Badge>
-            <span className="text-xs text-muted-foreground truncate">{schema?.schema_name ?? schema?.schema_id}</span>
-            {schema?.schema_version && (
-              <span className="font-mono text-[10px] text-muted-foreground/70">{schema.schema_version}</span>
-            )}
-          </div>
-
-          <div className="space-y-1.5">
-            <Label>Original Content</Label>
-            <pre className="text-xs bg-muted/40 rounded-lg px-3 py-2.5 overflow-auto max-h-48 whitespace-pre-wrap break-all font-mono">
-              {schema ? JSON.stringify(schema.original_content, null, 2) : ""}
-            </pre>
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <Label>Overridden Content</Label>
-              {jsonError && <span className="text-xs text-destructive">{jsonError}</span>}
-            </div>
-            <Textarea
-              className="font-mono text-xs min-h-44 resize-y"
-              value={json}
-              onChange={(e) => handleJsonChange(e.target.value)}
-              spellCheck={false}
-            />
-          </div>
-        </SheetBody>
-        <SheetFooter className="border-t flex-row gap-2.5 p-5 pb-4 lg:gap-0 mt-auto">
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <div className="flex-1" />
-          <Button
-            variant="primary"
-            className="font-semibold"
-            onClick={handleSubmit}
-            disabled={!!jsonError || update.isPending}
-          >
-            {update.isPending ? "Saving…" : "Save Override"}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  );
-}
-
-// ── Schema row ───────────────────────────────────────────
 
 function SchemaRow({ item, onOverride }: { item: CustomerSchema; onOverride: (item: CustomerSchema) => void }) {
   const [expanded, setExpanded] = useState(false);
@@ -203,10 +86,8 @@ function SchemaRow({ item, onOverride }: { item: CustomerSchema; onOverride: (it
   );
 }
 
-// ── Section card ─────────────────────────────────────────
-
 export function CustomerSchemasSection({ customerId }: { customerId: string }) {
-  const [overrideTarget, setOverrideTarget] = useState<CustomerSchema | null>(null);
+  const { openOverrideSheet } = useSchemaStore();
   const { data, isLoading, isError } = useCustomerSchemasByCustomer(customerId);
   const items = data?.data ?? [];
 
@@ -227,17 +108,13 @@ export function CustomerSchemasSection({ customerId }: { customerId: string }) {
             <p className="py-6 text-sm text-muted-foreground">No schema overrides.</p>
           ) : (
             items.map((item) => (
-              <SchemaRow key={item.id} item={item} onOverride={setOverrideTarget} />
+              <SchemaRow key={item.id} item={item} onOverride={openOverrideSheet} />
             ))
           )}
         </CardContent>
       </Card>
 
-      <OverrideSheet
-        schema={overrideTarget}
-        customerId={customerId}
-        onOpenChange={(open) => { if (!open) setOverrideTarget(null); }}
-      />
+      <SchemaFormSheet />
     </>
   );
 }

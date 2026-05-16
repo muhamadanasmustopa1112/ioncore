@@ -21,11 +21,13 @@ import {
 } from "@/components/ui/select";
 import { useCustomerSchemas } from "@/features/rule-schema";
 import type { CustomerSchema } from "@/features/rule-schema";
+import { useSchemaStore } from "../../store/schema";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 function SchemaCard({ item }: { item: CustomerSchema }) {
   const [expanded, setExpanded] = useState(false);
+  const { openOverrideSheet } = useSchemaStore();
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
@@ -61,6 +63,9 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
         <div className="flex items-center gap-2 shrink-0">
           <Button variant="ghost" size="sm" className="h-7 text-xs px-3" onClick={() => setExpanded((v) => !v)}>
             {expanded ? "Collapse" : "View"}
+          </Button>
+          <Button variant="outline" size="sm" className="h-7 text-xs px-3" onClick={() => openOverrideSheet(item)}>
+            Override
           </Button>
         </div>
       </div>

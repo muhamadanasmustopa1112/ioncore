@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import {
   workOrderFormSchema,
   type WorkOrderFormValues,
@@ -46,6 +47,9 @@ import {
   useSchema,
   useSchemaVersions,
 } from "../../../api/schema-queries";
+import { useUpdateCustomerSchema } from "@/features/rule-schema";
+import { DiffWrap, OverrideDiffProvider } from "../override-diff";
+import { computeOverrideChanges } from "../../../utils/override-changes";
 import { PowItemRow } from "./pow-item-row";
 
 const DEFAULT_ITEM: ProofOfWorkItemFormValues = {
@@ -92,11 +96,13 @@ function fromApiContent(raw: Record<string, unknown>): Partial<WorkOrderFormValu
 }
 
 export function WorkOrderForm() {
-  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter } = useSchemaStore();
+  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter, overrideCustomerSchema, closeSchemaSheet, openOverrideConfirm, overrideConfirmTrigger } = useSchemaStore();
   const isDetailMode = form === "details";
+  const isOverride = form === "override";
 
   const createSchema = useCreateSchema();
   const editSchema = useEditSchema();
+  const updateCustomerSchema = useUpdateCustomerSchema();
 
   const { data: customerTypes = [] } = useActiveCustomerTypes();
   const sensors = useSensors(useSensor(PointerSensor));
@@ -105,7 +111,7 @@ export function WorkOrderForm() {
     resolver: zodResolver(workOrderFormSchema),
     defaultValues: DEFAULT_VALUES,
   });
-  const { register, watch, setValue, handleSubmit, reset, control, formState: { errors } } = rhf;
+  const { register, watch, setValue, handleSubmit, reset, getValues, control, formState: { errors } } = rhf;
 
   const { fields, append, remove, move } = useFieldArray({ control, name: "proof_of_work" });
 
@@ -128,6 +134,19 @@ export function WorkOrderForm() {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, schemaDetail, schemaVersions]);
+
+  const [overrideSnapshot, setOverrideSnapshot] = useState<WorkOrderFormValues>(DEFAULT_VALUES);
+  const pendingOverrideContent = useRef<Record<string, unknown> | null>(null);
+
+  useEffect(() => {
+    if (!isOverride || !overrideCustomerSchema) return;
+    const partial = fromApiContent(overrideCustomerSchema.overridden_content);
+    const cleaned = Object.fromEntries(Object.entries(partial).filter(([, v]) => v !== undefined)) as Partial<WorkOrderFormValues>;
+    const vals: WorkOrderFormValues = { ...DEFAULT_VALUES, ...cleaned, name: overrideCustomerSchema.schema_name ?? "_override" };
+    reset(vals);
+    setOverrideSnapshot(vals);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOverride, overrideCustomerSchema?.id]);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -187,69 +206,111 @@ export function WorkOrderForm() {
         originalCustomerType: schemaDetail?.customer_type ?? "",
         content,
       });
+    } else if (isOverride && overrideCustomerSchema) {
+      updateCustomerSchema.mutate(
+        { id: overrideCustomerSchema.id, payload: { overridden_content: content as unknown as Record<string, unknown> } },
+        {
+          onSuccess: () => { toast.success("Schema override saved"); closeSchemaSheet(); },
+          onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to save override"),
+        },
+      );
     }
   }
 
   useEffect(() => {
-    setFormSubmitter(handleSubmit(onSubmit));
+    if (isOverride) {
+      setFormSubmitter(() => {
+        const current = getValues();
+        const changes = computeOverrideChanges(overrideSnapshot, current);
+        pendingOverrideContent.current = toApiContent(current) as unknown as Record<string, unknown>;
+        openOverrideConfirm(changes);
+      });
+    } else {
+      setFormSubmitter(handleSubmit(onSubmit));
+    }
     return () => setFormSubmitter(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form, selectedSchemaId]);
+  }, [form, selectedSchemaId, isOverride, overrideSnapshot]);
+
+  useEffect(() => {
+    if (!isOverride || overrideConfirmTrigger === 0 || !pendingOverrideContent.current || !overrideCustomerSchema) return;
+    updateCustomerSchema.mutate(
+      { id: overrideCustomerSchema.id, payload: { overridden_content: pendingOverrideContent.current } },
+      {
+        onSuccess: () => { toast.success("Schema override saved"); closeSchemaSheet(); },
+        onError: (err: unknown) => toast.error(err instanceof Error ? err.message : "Failed to save override"),
+      },
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [overrideConfirmTrigger]);
 
   const rules = watch("completion_rules");
+  const allValues = watch();
 
   return (
+    <OverrideDiffProvider
+      enabled={isOverride}
+      originalValues={overrideSnapshot as unknown as Record<string, unknown>}
+      currentValues={allValues as unknown as Record<string, unknown>}
+    >
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
 
-          {/* Basic Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
               <RiInformationLine className="size-4 text-blue-500" />
-              <h3 className="text-sm font-semibold">Basic Info</h3>
+              <h3 className="text-sm font-semibold">{isOverride ? "Type" : "Basic Info"}</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-xs font-medium text-muted-foreground">Schema Name <span className="text-red-500">*</span></Label>
-                <Input placeholder="e.g. Installation WO Schema" disabled={isDetailMode} {...register("name")} />
-                {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Customer Type</Label>
-                <Select value={watch("customer_type")} onValueChange={(v) => setValue("customer_type", v as WorkOrderFormValues["customer_type"])} disabled={isDetailMode}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {customerTypes.map((ct) => (
-                      <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Product Type <span className="text-red-500">*</span></Label>
-                <Select value={watch("product_type")} onValueChange={(v) => setValue("product_type", v as WorkOrderFormValues["product_type"])} disabled={isDetailMode}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="residential">Residential</SelectItem>
-                    <SelectItem value="business">Business</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
-                    <SelectItem value="corporate">Corporate</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-xs font-medium text-muted-foreground">WO Type <span className="text-red-500">*</span></Label>
-                <Select value={watch("wo_type")} onValueChange={(v) => setValue("wo_type", v as WorkOrderFormValues["wo_type"])} disabled={isDetailMode}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="new_installation">New Installation</SelectItem>
-                    <SelectItem value="maintenance">Maintenance</SelectItem>
-                    <SelectItem value="termination">Termination</SelectItem>
-                    <SelectItem value="infrastructure_deployment">Infrastructure Deployment</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {!isOverride && (
+                <>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Schema Name <span className="text-red-500">*</span></Label>
+                    <Input placeholder="e.g. Installation WO Schema" disabled={isDetailMode} {...register("name")} />
+                    {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Customer Type</Label>
+                    <Select value={watch("customer_type")} onValueChange={(v) => setValue("customer_type", v as WorkOrderFormValues["customer_type"])} disabled={isDetailMode}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {customerTypes.map((ct) => (
+                          <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+              <DiffWrap name="product_type">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">Product Type <span className="text-red-500">*</span></Label>
+                  <Select value={watch("product_type")} onValueChange={(v) => setValue("product_type", v as WorkOrderFormValues["product_type"])} disabled={isDetailMode}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="residential">Residential</SelectItem>
+                      <SelectItem value="business">Business</SelectItem>
+                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                      <SelectItem value="corporate">Corporate</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </DiffWrap>
+              <DiffWrap name="wo_type">
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="text-xs font-medium text-muted-foreground">WO Type <span className="text-red-500">*</span></Label>
+                  <Select value={watch("wo_type")} onValueChange={(v) => setValue("wo_type", v as WorkOrderFormValues["wo_type"])} disabled={isDetailMode}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new_installation">New Installation</SelectItem>
+                      <SelectItem value="maintenance">Maintenance</SelectItem>
+                      <SelectItem value="termination">Termination</SelectItem>
+                      <SelectItem value="infrastructure_deployment">Infrastructure Deployment</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </DiffWrap>
             </div>
           </div>
 
@@ -381,5 +442,6 @@ export function WorkOrderForm() {
         </div>
       </ScrollArea>
     </div>
+    </OverrideDiffProvider>
   );
 }
