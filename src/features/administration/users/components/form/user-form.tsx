@@ -279,7 +279,7 @@ export function UserForm() {
         const newBranchIds = branch_ids.sort().join(",");
         const hasBranchesChanged = oldBranchIds !== newBranchIds;
 
-        let message = "User updated";
+        const message = "User updated";
         let description = undefined;
 
         if (hasScopeChanged || hasRolesChanged || hasBranchesChanged) {
