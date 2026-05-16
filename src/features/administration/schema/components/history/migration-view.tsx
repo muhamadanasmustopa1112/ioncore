@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ChevronsUpDown } from "lucide-react";
 import { RiExchangeLine, RiLoader4Line, RiRefreshLine } from "@remixicon/react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   useSchemas,
   useSchemaVersions,
@@ -47,6 +57,7 @@ function CustomerRow({ item }: { item: CustomerSchema }) {
 
 export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?: string }) {
   const [schemaId, setSchemaId] = useState(initialSchemaId);
+  const [schemaOpen, setSchemaOpen] = useState(false);
   const [fromVersionId, setFromVersionId] = useState("");
   const [toVersionId, setToVersionId] = useState("");
 
@@ -58,7 +69,7 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSchemaId]);
 
-  const { data: schemasEnvelope } = useSchemas({ hasSchemaPublished: true });
+  const { data: schemasEnvelope } = useSchemas({ hasSchemaPublished: true, size: 100 });
   const schemas = schemasEnvelope?.data?.schemas ?? [];
 
   const { data: versionsEnvelope } = useSchemaVersions(schemaId);
@@ -129,26 +140,45 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1 space-y-1.5">
           <Label className="text-xs text-muted-foreground">Schema</Label>
-          <Select value={schemaId} onValueChange={handleSchemaChange}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select schema…" />
-            </SelectTrigger>
-            <SelectContent>
-              {schemas.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.name}
-                  <span className="ml-1.5 text-[10px] text-muted-foreground uppercase">
-                    {s.schema_type}
-                  </span>
-                  {s.latest_published_version && (
-                    <span className="ml-1 text-[10px] text-muted-foreground">
-                      · {s.latest_published_version}
-                    </span>
-                  )}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={schemaOpen} onOpenChange={setSchemaOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                <span className="truncate">
+                  {schemaId
+                    ? schemas.find((s) => s.id === schemaId)?.name ?? "Select schema…"
+                    : "Select schema…"}
+                </span>
+                <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="p-0 w-[300px]" align="start">
+              <Command>
+                <CommandInput placeholder="Search schema…" />
+                <CommandList>
+                  <CommandEmpty>No schemas found.</CommandEmpty>
+                  <CommandGroup>
+                    {schemas.map((s) => (
+                      <CommandItem
+                        key={s.id}
+                        value={s.name}
+                        onSelect={() => { handleSchemaChange(s.id); setSchemaOpen(false); }}
+                      >
+                        <span className="truncate flex-1">{s.name}</span>
+                        <span className="ml-1.5 text-[10px] text-muted-foreground uppercase shrink-0">
+                          {s.schema_type}
+                        </span>
+                        {s.latest_published_version && (
+                          <span className="ml-1 text-[10px] text-muted-foreground shrink-0">
+                            · {s.latest_published_version}
+                          </span>
+                        )}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="flex-1 space-y-1.5">

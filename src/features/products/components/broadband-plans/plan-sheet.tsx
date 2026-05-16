@@ -11,6 +11,7 @@ import {
   useAddBranchToBroadbandPlan, useRemoveBranchFromBroadbandPlan,
 } from "../../api/products-queries";
 import { useCreateBroadbandPlanSchema } from "@/features/rule-schema";
+import { SCHEMA_TYPE_OPTIONS } from "@/features/administration/schema/types/schema-type-constants";
 import type { BroadbandPlan, CreateBroadbandPlanPayload, ProductEnvelope } from "../../types/products";
 import { PlanForm } from "./plan-form";
 import { BranchAvailability } from "../branch-availability";
@@ -53,16 +54,6 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
 
   const handleSubmit = (payload: CreateBroadbandPlanPayload) => {
     if (mode === "new") {
-      if (pendingBranchIds.length === 0) {
-        setActiveTab("branches");
-        toast.error("At least 1 branch must be assigned before creating a plan.");
-        return;
-      }
-      if (pendingSchemas.length === 0) {
-        setActiveTab("schemas");
-        toast.error("At least 1 schema must be assigned before creating a plan.");
-        return;
-      }
       create.mutate(payload, {
         onSuccess: (res: ProductEnvelope<BroadbandPlan>) => {
           const planId = res.data?.id;
@@ -88,8 +79,24 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   };
 
   const handleSave = () => {
+    if (mode === "new") {
+      if (pendingBranchIds.length === 0) {
+        setActiveTab("branches");
+        toast.error("At least 1 branch must be assigned before creating a plan.");
+        return;
+      }
+      if (pendingSchemas.length < SCHEMA_TYPE_OPTIONS.length) {
+        setActiveTab("schemas");
+        toast.error(`All ${SCHEMA_TYPE_OPTIONS.length} schema types must be assigned before creating a plan.`);
+        return;
+      }
+    }
     const fn = (window as unknown as Record<string, unknown>).__productFormSubmit;
-    if (typeof fn === "function") (fn as () => void)();
+    if (typeof fn === "function") {
+      (fn as () => void)();
+    } else {
+      setActiveTab("details");
+    }
   };
 
   const title = mode === "new" ? "Add Broadband Plan" : mode === "edit" ? "Edit Broadband Plan" : "Broadband Plan Detail";
@@ -99,6 +106,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
     : (planData?.branches?.length ?? 0);
 
   const schemaBadgeCount = mode === "new" ? pendingSchemas.length : 0;
+  const allSchemasAssigned = pendingSchemas.length >= SCHEMA_TYPE_OPTIONS.length;
 
 
   return (
@@ -125,17 +133,18 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
               </TabsTrigger>
               <TabsTrigger value="schemas" className="rounded-sm text-xs">
                 Schemas
-                {schemaBadgeCount > 0 && (
-                  <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold px-1.5 min-w-[18px]">
-                    {schemaBadgeCount}
+                {mode === "new" && (
+                  <span className={`ml-1.5 inline-flex items-center justify-center rounded-full text-[10px] font-semibold px-1.5 min-w-[18px] ${allSchemasAssigned ? "bg-green-100 text-green-700" : "bg-destructive/10 text-destructive"}`}>
+                    {schemaBadgeCount}/{SCHEMA_TYPE_OPTIONS.length}
                   </span>
                 )}
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="details" className="flex-1 overflow-hidden mt-0">
+            {/* Keep PlanForm always mounted — unmounting resets react-hook-form state */}
+            <div className={`flex-1 overflow-hidden ${activeTab !== "details" ? "hidden" : ""}`}>
               <PlanForm selected={planData} mode={mode} onSubmit={handleSubmit} onCustomerTypeChange={setCustomerType} onDirtyChange={setIsFormDirty} />
-            </TabsContent>
+            </div>
 
             <TabsContent value="branches" className="flex-1 overflow-hidden mt-0">
               {mode === "new" ? (

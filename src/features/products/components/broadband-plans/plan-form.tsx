@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,6 +11,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
 import type { BroadbandPlan, CreateBroadbandPlanPayload } from "../../types/products";
+
+function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</Label>
+      {children}
+      {error && <p className="text-xs text-destructive">{error}</p>}
+    </div>
+  );
+}
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -66,21 +77,16 @@ export function PlanForm({ selected, mode, onSubmit, onCustomerTypeChange, onDir
   useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
   const submitRef = useRef<(() => void) | undefined>(undefined);
-  submitRef.current = handleSubmit((v) => onSubmit(v));
+  submitRef.current = handleSubmit(
+    (v) => onSubmit(v),
+    () => toast.error("Please fill in all required fields before submitting."),
+  );
 
   useEffect(() => {
     (window as unknown as Record<string, unknown>).__productFormSubmit = () => submitRef.current?.();
     return () => { delete (window as unknown as Record<string, unknown>).__productFormSubmit; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const Field = ({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) => (
-    <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}{required && <span className="text-red-500 ml-0.5">*</span>}</Label>
-      {children}
-      {error && <p className="text-xs text-destructive">{error}</p>}
-    </div>
-  );
 
   return (
     <ScrollArea className="h-full px-6 py-5">

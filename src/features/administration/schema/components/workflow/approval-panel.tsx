@@ -264,6 +264,16 @@ const { data: approvalRaw } = useVersionApproval(
 
           {/* Your Decision */}
           {(isInReview || addDecision.isPending) && latestDraftVersion && (
+            <Can
+              permission="schema.approve"
+              fallback={
+                <div className="border-t pt-5">
+                  <p className="text-sm text-muted-foreground">
+                    Awaiting approver. You don&apos;t have permission to approve or reject this schema.
+                  </p>
+                </div>
+              }
+            >
             <div className="space-y-3 border-t pt-5">
               <h3 className="text-sm font-semibold text-foreground">Your Decision</h3>
               <Textarea
@@ -312,6 +322,7 @@ const { data: approvalRaw } = useVersionApproval(
                 </Button>
               </div>
             </div>
+            </Can>
           )}
 
           {/* Rejected state */}

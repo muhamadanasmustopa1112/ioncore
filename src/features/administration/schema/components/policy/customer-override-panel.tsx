@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
   RiLoader4Line,
@@ -35,7 +36,12 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-semibold text-sm font-mono truncate">{item.customer_id}</span>
+              <Link
+                href={`/crm-and-sales/${item.customer_id}`}
+                className="font-semibold text-sm font-mono truncate hover:underline text-primary"
+              >
+                {item.customer_id}
+              </Link>
               {item.schema_type && (
                 <Badge variant="info" appearance="light" className="text-[11px] px-2 capitalize">
                   {item.schema_type}

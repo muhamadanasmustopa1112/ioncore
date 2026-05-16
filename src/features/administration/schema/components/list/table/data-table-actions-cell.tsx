@@ -17,12 +17,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useCan } from "@/lib/permissions";
 import { SchemaRecord } from "../../../types";
 import { useSchemaStore } from "../../../store/schema";
 
 export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
   const { setSelectedSchemaId, openSchemaSheet, openApprovalPanel, openHistoryPanel } =
     useSchemaStore();
+  const canApprove = useCan("schema.approve");
 
   const schema = row.original;
   const status = schema.schema_status?.toUpperCase();
@@ -86,7 +88,7 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
 
         <DropdownMenuSeparator />
 
-        {canSubmitOrPublish && (
+        {canSubmitOrPublish && (!isReview || canApprove) && (
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={() => openApprovalPanel(schema.id)}
