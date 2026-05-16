@@ -12,6 +12,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 import { PopData } from "../../../types/pop";
 
 
@@ -22,16 +23,20 @@ export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[]
     header: ({ column }) => (
       <DataGridColumnHeader title="Name" column={column} className="text-foreground" />
     ),
-    cell: ({ row, table }) => (
-      <div
-        className="flex flex-col gap-1 cursor-pointer hover:opacity-70 transition-opacity"
-        onClick={() => (table.options.meta as any)?.onPopSelect(row.original.id)}
-      >
-        <span className="font-medium underline underline-offset-4 decoration-primary/30 hover:decoration-primary">
-          {row.original.name}
-        </span>
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const isLoading = (table.options.meta as any)?.isLoading;
+      if (isLoading) return <Skeleton className="h-4 w-32" />;
+      return (
+        <div
+          className="flex flex-col gap-1 cursor-pointer hover:opacity-70 transition-opacity"
+          onClick={() => (table.options.meta as any)?.onPopSelect(row.original.id)}
+        >
+          <span className="font-medium underline underline-offset-4 decoration-primary/30 hover:decoration-primary">
+            {row.original.name}
+          </span>
+        </div>
+      );
+    },
     enableSorting: true,
     size: 200,
   },
@@ -40,11 +45,15 @@ export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[]
     header: ({ column }) => (
       <DataGridColumnHeader title="Code" column={column} className="text-foreground" />
     ),
-    cell: ({ getValue }) => (
-      <div className="text-foreground/80">
-        {getValue() as string || "-"}
-      </div>
-    ),
+    cell: ({ getValue, table }) => {
+      const isLoading = (table.options.meta as any)?.isLoading;
+      if (isLoading) return <Skeleton className="h-4 w-20" />;
+      return (
+        <div className="text-foreground/80">
+          {getValue() as string || "-"}
+        </div>
+      );
+    },
     enableSorting: true,
     size: 120,
   },
@@ -53,11 +62,15 @@ export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[]
     header: ({ column }) => (
       <DataGridColumnHeader title="Area" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => (
-      <div className="text-foreground/80">
-        {row.original.area}
-      </div>
-    ),
+    cell: ({ row, table }) => {
+      const isLoading = (table.options.meta as any)?.isLoading;
+      if (isLoading) return <Skeleton className="h-4 w-24" />;
+      return (
+        <div className="text-foreground/80">
+          {row.original.area}
+        </div>
+      );
+    },
     enableSorting: true,
     size: 150,
   },
@@ -66,20 +79,24 @@ export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[]
     header: ({ column }) => (
       <DataGridColumnHeader title="Address" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ row }) => (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="text-foreground/80 truncate max-w-[200px] cursor-help">
-              {row.original.address || "-"}
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-[300px] break-words">
-            {row.original.address}
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    ),
+    cell: ({ row, table }) => {
+      const isLoading = (table.options.meta as any)?.isLoading;
+      if (isLoading) return <Skeleton className="h-4 w-40" />;
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-foreground/80 truncate max-w-[200px] cursor-help">
+                {row.original.address || "-"}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-[300px] break-words">
+              {row.original.address}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
+    },
     enableSorting: true,
     size: 200,
   },
@@ -88,11 +105,15 @@ export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[]
     header: ({ column }) => (
       <DataGridColumnHeader title="Latitude" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
-      <div className="text-foreground/80 font-mono text-xs">
-        {getValue() as number}
-      </div>
-    ),
+    cell: ({ getValue, table }) => {
+      const isLoading = (table.options.meta as any)?.isLoading;
+      if (isLoading) return <Skeleton className="h-4 w-16" />;
+      return (
+        <div className="text-foreground/80 font-mono text-xs">
+          {getValue() as number}
+        </div>
+      );
+    },
     enableSorting: true,
     size: 100,
   },
@@ -101,11 +122,15 @@ export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[]
     header: ({ column }) => (
       <DataGridColumnHeader title="Longitude" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => (
-      <div className="text-foreground/80 font-mono text-xs">
-        {getValue() as number}
-      </div>
-    ),
+    cell: ({ getValue, table }) => {
+      const isLoading = (table.options.meta as any)?.isLoading;
+      if (isLoading) return <Skeleton className="h-4 w-16" />;
+      return (
+        <div className="text-foreground/80 font-mono text-xs">
+          {getValue() as number}
+        </div>
+      );
+    },
     enableSorting: true,
     size: 100,
   },
@@ -114,7 +139,9 @@ export const getPopColumns = (type: 'pop' | 'odp' = 'pop'): ColumnDef<PopData>[]
     header: ({ column }) => (
       <DataGridColumnHeader title="Status" column={column} className="text-foreground font-semibold" />
     ),
-    cell: ({ getValue }) => {
+    cell: ({ getValue, table }) => {
+      const isLoading = (table.options.meta as any)?.isLoading;
+      if (isLoading) return <Skeleton className="h-6 w-16 rounded-full" />;
       const status = (getValue() as string || "UNKNOWN").toUpperCase();
       let variant: any = "secondary";
 

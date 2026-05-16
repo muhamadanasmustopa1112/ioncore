@@ -2,13 +2,13 @@ import { z } from "zod";
 
 export const odpSchema = z.object({
   code: z.string().min(1, "Code is required"),
-  gps_lat: z.string().optional().nullable(),
-  gps_lng: z.string().optional().nullable(),
+  gps_lat: z.string().min(1, "Latitude is required (please pick a point on the map)"),
+  gps_lng: z.string().min(1, "Longitude is required (please pick a point on the map)"),
   name: z.string().min(1, "Name is required"),
   olt_id: z.string().min(1, "OLT ID is required"),
   parent_id: z.string().optional().nullable(),
   status: z.string().min(1, "Status is required"),
-  address: z.string().min(1, "Status is required"),
+  address: z.string().min(1, "Address is required"),
   total_port: z.number().min(1, "Total port must be at least 1"),
 });
 
@@ -21,8 +21,8 @@ export type OdpPayload = Omit<OdpFormValues, "gps_lat" | "gps_lng"> & {
 
 export const DEFAULT_ODP_VALUES: OdpFormValues = {
   code: "",
-  gps_lat: "0",
-  gps_lng: "0",
+  gps_lat: "",
+  gps_lng: "",
   name: "",
   olt_id: "",
   parent_id: null,

@@ -50,10 +50,7 @@ export const OdpForm = forwardRef<OdpFormRef, OdpFormProps>(
       resolver: zodResolver(odpSchema),
       values: (data && mode !== "new") ? mapOdpToFormValues(data) : {
         ...DEFAULT_ODP_VALUES,
-        gps_lat: "0",
-        gps_lng: "0",
         olt_id: urlOltId || "",
-        address: "",
       },
     });
 
@@ -102,9 +99,9 @@ export const OdpForm = forwardRef<OdpFormRef, OdpFormProps>(
 
     return (
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full flex-col overflow-hidden">
-          <ScrollArea className="flex-1 px-6 py-6">
-            <div className="space-y-8 pb-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-[75vh]">
+          <ScrollArea className="flex-1 w-full rounded-md border-t">
+            <div className="px-6 py-6 space-y-8 pb-10">
               <OdpGeneralInfoSection
                 readOnly={readOnly}
                 isPending={isPending}
@@ -121,7 +118,5 @@ export const OdpForm = forwardRef<OdpFormRef, OdpFormProps>(
     );
   }
 );
-
-OdpForm.displayName = "OdpForm";
 
 OdpForm.displayName = "OdpForm";

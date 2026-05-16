@@ -29,20 +29,20 @@ export const PopForm = forwardRef<PopFormRef, PopFormProps>(
     ({ onSuccess, popId, readOnly = false, mode }, ref) => {
         const { closePopFormSheet, selectedPop } = usePopStore();
 
-        const { data: branches, isLoading: isLoadingBranches } = useBranchList();
+        const { data: branches, isLoading: isLoadingBranches } = useBranchList({ branch_type: "noc" });
 
         const data = selectedPop;
 
         const mapPopToFormValues = (pop: PopData): PopFormValues => {
-            const branchId = pop.branch?.id || (pop as any).branchId || pop.branch?.id || "";
+            const branchId = pop.branch?.id || (pop as any).branch_id || "";
 
-            let finalBranchId = branchId;
+            let finalBranchId = branchId.toString();
             if (!finalBranchId && pop.area && branches) {
                 const matchingBranch = branches.find(
-                    (b) => b.name === pop.area
+                    (b) => b.name.toLowerCase() === pop.area.toLowerCase()
                 );
                 if (matchingBranch) {
-                    finalBranchId = matchingBranch.id;
+                    finalBranchId = matchingBranch.id.toString();
                 }
             }
 
@@ -99,9 +99,9 @@ export const PopForm = forwardRef<PopFormRef, PopFormProps>(
 
         return (
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex h-full flex-col overflow-hidden">
-                    <ScrollArea className="flex-1 px-6 py-6">
-                        <div className="space-y-8 pb-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-[75vh]">
+                    <ScrollArea className="flex-1 w-full rounded-md border-t">
+                        <div className="px-6 py-6 space-y-8 pb-10">
                             <GeneralInfoSection
                                 branches={branches}
                                 isLoadingBranches={isLoadingBranches}
