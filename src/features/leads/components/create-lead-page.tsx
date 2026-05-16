@@ -31,7 +31,7 @@ import {
   ToolbarTitle,
 } from "@/components/common/toolbar";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
-import { useCustomerList } from "@/features/customers/api/customers-queries";
+import { useReferrerCustomers } from "@/features/customers/api/customers-queries";
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { paths } from "@/config/paths";
@@ -102,7 +102,7 @@ export function CreateLeadPage() {
   const pinMoved = lat !== INSTALL_DEFAULT[0] || lng !== INSTALL_DEFAULT[1];
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList();
-  const { data: customersData, isLoading: customersLoading } = useCustomerList(
+  const { data: customersData, isLoading: customersLoading } = useReferrerCustomers(
     source === "referral" ? { search: customerSearch || undefined, size: 20 } : {}
   );
   const createLead = useCreateLead();
@@ -110,12 +110,7 @@ export function CreateLeadPage() {
   const activeBranches = useMemo(() => branches.filter((b) => b.active && b.level === "area"), [branches]);
 
   const customerOptions = useMemo(
-    () =>
-      source === "referral"
-        ? (customersData?.items ?? []).filter(
-            (c) => c.status?.toLowerCase() !== "suspended",
-          )
-        : [],
+    () => (source === "referral" ? (customersData?.items ?? []) : []),
     [source, customersData],
   );
 

@@ -38,6 +38,18 @@ export function listCustomers(params: CustomerListParams = {}) {
   );
 }
 
+export function listReferrerCustomers(params: { search?: string; page?: number; size?: number } = {}) {
+  return cast<CustomerListEnvelope<CustomerDto>>(
+    userServiceApi.get(`${BASE}/referrer`, {
+      params: {
+        page: params.page ?? 1,
+        size: params.size ?? 20,
+        search: params.search,
+      },
+    })
+  );
+}
+
 export function getCustomer(id: string) {
   return cast<CustomerEnvelope<CustomerDetail>>(userServiceApi.get(`${BASE}/${id}`));
 }

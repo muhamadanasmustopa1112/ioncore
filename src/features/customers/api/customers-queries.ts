@@ -6,6 +6,7 @@ import {
   deleteCustomer,
   getCustomer,
   listCustomers,
+  listReferrerCustomers,
   scanKtpPhoto,
   updateCustomer,
   updateCustomerAttribute,
@@ -39,6 +40,17 @@ export function useCustomerList(params: CustomerListParams = {}) {
     queryKey: customerKeys.list(params),
     queryFn: async () => {
       const res = await listCustomers(params);
+      return { items: res.data.customers ?? [], meta: res.data.metadata };
+    },
+    placeholderData: (prev) => prev,
+  });
+}
+
+export function useReferrerCustomers(params: { search?: string; page?: number; size?: number } = {}) {
+  return useQuery({
+    queryKey: ["customers", "referrer", params],
+    queryFn: async () => {
+      const res = await listReferrerCustomers(params);
       return { items: res.data.customers ?? [], meta: res.data.metadata };
     },
     placeholderData: (prev) => prev,

@@ -33,7 +33,7 @@ import {
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
 import { BranchCombobox } from "@/features/administration/branch/components/branch-combobox";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
-import { useCustomerList } from "@/features/customers/api/customers-queries";
+import { useReferrerCustomers } from "@/features/customers/api/customers-queries";
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
 import { useCreateLead } from "../api/leads-queries";
 import type {
@@ -113,7 +113,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
   const [branchType, setBranchType] = useState("all");
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList();
-  const { data: customersData, isLoading: customersLoading } = useCustomerList(
+  const { data: customersData, isLoading: customersLoading } = useReferrerCustomers(
     source === "referral" ? { search: customerSearch || undefined, size: 20 } : {}
   );
   const createLead = useCreateLead();
@@ -128,12 +128,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
   );
 
   const customerOptions = useMemo(
-    () =>
-      source === "referral"
-        ? (customersData?.items ?? []).filter(
-            (c) => c.status?.toLowerCase() !== "suspended",
-          )
-        : [],
+    () => (source === "referral" ? (customersData?.items ?? []) : []),
     [source, customersData],
   );
 
