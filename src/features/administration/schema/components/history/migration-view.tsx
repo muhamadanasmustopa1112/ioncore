@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { RiExchangeLine, RiLoader4Line } from "@remixicon/react";
+import { RiExchangeLine, RiLoader4Line, RiRefreshLine } from "@remixicon/react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -60,10 +61,8 @@ export function SchemaMigrationView() {
     return bDate.localeCompare(aDate);
   });
 
-  // From: skip index 0 (latest); To: only versions newer than selected From (index < fromIndex)
-  const fromOptions = allVersions.slice(1);
-  const fromIndex = allVersions.findIndex((v) => v.id === fromVersionId);
-  const toOptions = fromIndex > 0 ? allVersions.slice(0, fromIndex) : [];
+  const fromOptions = allVersions;
+  const toOptions = allVersions.filter((v) => v.id !== fromVersionId);
 
   const { data: customersEnvelope, isLoading: customersLoading } =
     useCustomerSchemasByVersion(fromVersionId);
@@ -73,12 +72,17 @@ export function SchemaMigrationView() {
     : 0;
 
   const migrate = useMigrateCustomerSchemas();
+  const qc = useQueryClient();
 
-  // Auto-select the first fromOption once versions load
+  function refetchCustomers() {
+    qc.invalidateQueries({ queryKey: ["rule-schema"] });
+  }
+
   useEffect(() => {
     if (!schemaId || fromVersionId) return;
-    if (fromOptions.length > 0) setFromVersionId(fromOptions[0].id);
-  }, [schemaId, fromOptions, fromVersionId]);
+    if (allVersions.length > 0) setFromVersionId(allVersions[0].id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schemaId, allVersions.length]);
 
   function handleSchemaChange(id: string) {
     setSchemaId(id);
@@ -95,7 +99,10 @@ export function SchemaMigrationView() {
     migrate.mutate(
       { original_schema_version_id: fromVersionId, new_schema_version_id: toVersionId },
       {
-        onSuccess: () => toast.success(`Migration successful for ${rows.length} customer(s)`),
+        onSuccess: () => {
+          toast.success(`Migration triggered for ${rows.length} customer(s).`);
+          setTimeout(() => refetchCustomers(), 2000);
+        },
         onError: (err: unknown) =>
           toast.error(err instanceof Error ? err.message : "Migration failed"),
       },
@@ -180,6 +187,17 @@ export function SchemaMigrationView() {
                 {total}
               </Badge>
             )}
+            <div className="flex-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs text-muted-foreground gap-1"
+              disabled={customersLoading}
+              onClick={refetchCustomers}
+            >
+              <RiRefreshLine className={`size-3.5 ${customersLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
           </div>
 
           {customersLoading ? (

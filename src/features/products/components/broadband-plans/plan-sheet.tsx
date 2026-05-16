@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetBody } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,10 +10,11 @@ import {
   useAdminBroadbandPlan,
   useAddBranchToBroadbandPlan, useRemoveBranchFromBroadbandPlan,
 } from "../../api/products-queries";
-import { toast } from "sonner";
+import { useCreateBroadbandPlanSchema } from "@/features/rule-schema";
 import type { BroadbandPlan, CreateBroadbandPlanPayload, ProductEnvelope } from "../../types/products";
 import { PlanForm } from "./plan-form";
 import { BranchAvailability } from "../branch-availability";
+import { PlanSchemaTab, type PendingSchema } from "./plan-schema-tab";
 
 interface PlanSheetProps {
   open: boolean;
@@ -24,6 +26,7 @@ interface PlanSheetProps {
 export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   const [activeTab, setActiveTab] = useState("details");
   const [pendingBranchIds, setPendingBranchIds] = useState<string[]>([]);
+  const [pendingSchemas, setPendingSchemas] = useState<PendingSchema[]>([]);
 
   const { data: detail } = useAdminBroadbandPlan(
     open && mode !== "new" && selected ? selected.id : null
@@ -34,27 +37,49 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   const update = useUpdateBroadbandPlan();
   const addBranch = useAddBranchToBroadbandPlan();
   const removeBranch = useRemoveBranchFromBroadbandPlan();
+  const assignSchema = useCreateBroadbandPlanSchema();
   const isPending = create.isPending || update.isPending;
   const branchPending = addBranch.isPending || removeBranch.isPending;
 
   const handleClose = () => {
     setActiveTab("details");
     setPendingBranchIds([]);
+    setPendingSchemas([]);
     onClose();
   };
 
   const handleSubmit = (payload: CreateBroadbandPlanPayload) => {
     if (mode === "new") {
+      if (pendingBranchIds.length === 0) {
+        setActiveTab("branches");
+        toast.error("At least 1 branch must be assigned before creating a plan.");
+        return;
+      }
+      if (pendingSchemas.length === 0) {
+        setActiveTab("schemas");
+        toast.error("At least 1 schema must be assigned before creating a plan.");
+        return;
+      }
       create.mutate(payload, {
         onSuccess: (res: ProductEnvelope<BroadbandPlan>) => {
           const planId = res.data?.id;
-          if (planId && pendingBranchIds.length > 0) {
-            addBranch.mutate(
-              { planId, branchIds: pendingBranchIds },
-              { onSuccess: handleClose },
-            );
+          if (!planId) { handleClose(); return; }
+
+          const afterBranches = () => {
+            if (pendingSchemas.length === 0) { handleClose(); return; }
+            let remaining = pendingSchemas.length;
+            pendingSchemas.forEach((s) => {
+              assignSchema.mutate(
+                { broadband_plan_id: planId, schema_id: s.schemaId, schema_type: s.schemaType },
+                { onSettled: () => { remaining--; if (remaining === 0) handleClose(); } },
+              );
+            });
+          };
+
+          if (pendingBranchIds.length > 0) {
+            addBranch.mutate({ planId, branchIds: pendingBranchIds }, { onSuccess: afterBranches });
           } else {
-            handleClose();
+            afterBranches();
           }
         },
       });
@@ -64,11 +89,6 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   };
 
   const handleSave = () => {
-    if (mode === "new" && pendingBranchIds.length === 0) {
-      setActiveTab("branches");
-      toast.error("At least 1 branch must be assigned before creating a plan.");
-      return;
-    }
     const fn = (window as unknown as Record<string, unknown>).__productFormSubmit;
     if (typeof fn === "function") (fn as () => void)();
   };
@@ -78,6 +98,9 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   const branchBadgeCount = mode === "new"
     ? pendingBranchIds.length
     : (planData?.branches?.length ?? 0);
+
+  const schemaBadgeCount = mode === "new" ? pendingSchemas.length : 0;
+
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && handleClose()}>
@@ -98,6 +121,14 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
                 {branchBadgeCount > 0 && (
                   <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold px-1.5 min-w-[18px]">
                     {branchBadgeCount}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="schemas" className="rounded-sm text-xs">
+                Schemas
+                {schemaBadgeCount > 0 && (
+                  <span className="ml-1.5 inline-flex items-center justify-center rounded-full bg-primary/10 text-primary text-[10px] font-semibold px-1.5 min-w-[18px]">
+                    {schemaBadgeCount}
                   </span>
                 )}
               </TabsTrigger>
@@ -125,26 +156,36 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
                 />
               ) : null}
             </TabsContent>
+
+            <TabsContent value="schemas" className="flex-1 overflow-hidden mt-0">
+              {mode === "new" ? (
+                <PlanSchemaTab
+                  planId={null}
+                  pending={pendingSchemas}
+                  onAddPending={(s) => setPendingSchemas((prev) => [...prev, s])}
+                  onRemovePending={(schemaId) =>
+                    setPendingSchemas((prev) => prev.filter((s) => s.schemaId !== schemaId))
+                  }
+                />
+              ) : planData ? (
+                <PlanSchemaTab
+                  planId={planData.id}
+                  readOnly={mode === "details"}
+                />
+              ) : null}
+            </TabsContent>
           </Tabs>
         </SheetBody>
 
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
-          {activeTab === "branches" && mode !== "new" ? (
-            <>
-              <p className="text-xs text-muted-foreground self-center">Changes are saved automatically</p>
-              <div className="flex-1" />
-              <Button variant="outline" onClick={handleClose}>Close</Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" onClick={handleClose}>Close</Button>
-              <div className="flex-1" />
-              <Button variant="outline" onClick={handleClose} className="mr-3" disabled={isPending}>Cancel</Button>
-              <Button variant="primary" onClick={handleSave} disabled={mode === "details" || isPending} className="font-semibold">
-                {isPending ? "Saving..." : mode === "new" ? "Create Plan" : "Save Changes"}
-              </Button>
-            </>
-          )}
+          <>
+            <Button variant="ghost" onClick={handleClose}>Close</Button>
+            <div className="flex-1" />
+            <Button variant="outline" onClick={handleClose} className="mr-3" disabled={isPending}>Cancel</Button>
+            <Button variant="primary" onClick={handleSave} disabled={mode === "details" || isPending} className="font-semibold">
+              {isPending ? "Saving..." : mode === "new" ? "Create Plan" : "Save Changes"}
+            </Button>
+          </>
         </SheetFooter>
       </SheetContent>
     </Sheet>

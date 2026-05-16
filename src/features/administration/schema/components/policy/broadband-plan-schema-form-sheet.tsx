@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { useAdminBroadbandPlans } from "@/features/products/api/products-queries";
 import { useSchemaList } from "../../api/schema-queries";
-import { useCreateBroadbandPlanSchema } from "@/features/rule-schema";
+import { useCreateBroadbandPlanSchema, useBroadbandPlanSchemas } from "@/features/rule-schema";
 import { SCHEMA_TYPE_OPTIONS } from "../../types/schema-type-constants";
 
 interface Props {
@@ -37,11 +37,18 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
 
   const { data: plansData } = useAdminBroadbandPlans({ per_page: 100 });
   const { data: schemasData } = useSchemaList(
-    schemaType ? { schemaType } : {}
+    schemaType ? { schemaType, hasSchemaPublished: true } : {}
+  );
+  const { data: assignedEnv } = useBroadbandPlanSchemas(
+    planId ? { broadband_plan_id: planId, size: 100 } : undefined
   );
 
   const plans = plansData?.broadband_plans ?? [];
   const schemas = schemasData?.schemas ?? [];
+  const usedTypes = new Set(
+    (assignedEnv?.data?.broadband_plan_schemas ?? []).map((s) => s.schema_type.toUpperCase())
+  );
+  const availableTypes = SCHEMA_TYPE_OPTIONS.filter((t) => !usedTypes.has(t.value.toUpperCase()));
 
   const create = useCreateBroadbandPlanSchema();
 
@@ -84,7 +91,7 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
             <Label className="text-xs font-medium text-muted-foreground">
               Broadband Plan <span className="text-red-500">*</span>
             </Label>
-            <Select value={planId} onValueChange={setPlanId}>
+            <Select value={planId} onValueChange={(v) => { setPlanId(v); setSchemaType(""); setSchemaId(""); }}>
               <SelectTrigger>
                 <SelectValue placeholder="Select plan..." />
               </SelectTrigger>
@@ -102,21 +109,28 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
             <Label className="text-xs font-medium text-muted-foreground">
               Schema Type <span className="text-red-500">*</span>
             </Label>
-            <Select
-              value={schemaType}
-              onValueChange={(v) => { setSchemaType(v); setSchemaId(""); }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select type..." />
-              </SelectTrigger>
-              <SelectContent>
-                {SCHEMA_TYPE_OPTIONS.map((t) => (
-                  <SelectItem key={t.value} value={t.value}>
-                    {t.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {planId && availableTypes.length === 0 ? (
+              <p className="text-xs text-muted-foreground rounded-md border border-dashed px-3 py-2.5">
+                All schema types have already been assigned to this plan.
+              </p>
+            ) : (
+              <Select
+                value={schemaType}
+                onValueChange={(v) => { setSchemaType(v); setSchemaId(""); }}
+                disabled={!!planId && availableTypes.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableTypes.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>
+                      {t.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div className="space-y-1.5">

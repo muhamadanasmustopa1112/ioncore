@@ -34,6 +34,7 @@ export interface SchemaListParams {
   orderBy?: string;
   orderDirection?: "asc" | "desc";
   schemaType?: string;
+  hasSchemaPublished?: boolean;
 }
 
 export interface CreateSchemaPayload {
