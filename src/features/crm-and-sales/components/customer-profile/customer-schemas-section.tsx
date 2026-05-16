@@ -124,7 +124,10 @@ function OverrideSheet({ schema, onOpenChange, customerId }: OverrideSheetProps)
             <Badge variant="info" appearance="light" className="capitalize text-xs">
               {schema?.schema_type?.replace(/_/g, " ").toLowerCase()}
             </Badge>
-            <span className="font-mono text-xs text-muted-foreground truncate">{schema?.schema_id}</span>
+            <span className="text-xs text-muted-foreground truncate">{schema?.schema_name ?? schema?.schema_id}</span>
+            {schema?.schema_version && (
+              <span className="font-mono text-[10px] text-muted-foreground/70">{schema.schema_version}</span>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -175,7 +178,10 @@ function SchemaRow({ item, onOverride }: { item: CustomerSchema; onOverride: (it
           <Badge variant="info" appearance="light" className="text-[11px] px-2 capitalize shrink-0">
             {item.schema_type.replace(/_/g, " ").toLowerCase()}
           </Badge>
-          <span className="font-mono text-xs text-muted-foreground truncate">{item.schema_id}</span>
+          <span className="text-xs text-muted-foreground truncate">{item.schema_name ?? item.schema_id}</span>
+          {item.schema_version && (
+            <span className="font-mono text-[10px] text-muted-foreground/70 shrink-0">{item.schema_version}</span>
+          )}
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <Button variant="ghost" size="sm" className="h-6 text-xs px-2" onClick={() => setExpanded((v) => !v)}>

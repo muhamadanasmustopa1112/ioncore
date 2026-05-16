@@ -6,6 +6,8 @@ export interface CustomerSchema {
   customer_name?: string;
   schema_type: string;
   schema_id: string;
+  schema_name?: string;
+  schema_version?: string;
   schema_version_id: string;
   original_content: Record<string, unknown>;
   overridden_content: Record<string, unknown>;
