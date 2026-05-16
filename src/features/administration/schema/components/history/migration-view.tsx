@@ -50,6 +50,14 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
   const [fromVersionId, setFromVersionId] = useState("");
   const [toVersionId, setToVersionId] = useState("");
 
+  // nuqs hydrates URL params after mount — sync once the value becomes available
+  useEffect(() => {
+    if (initialSchemaId && !schemaId) {
+      setSchemaId(initialSchemaId);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialSchemaId]);
+
   const { data: schemasEnvelope } = useSchemas({ hasSchemaPublished: true });
   const schemas = schemasEnvelope?.data?.schemas ?? [];
 
