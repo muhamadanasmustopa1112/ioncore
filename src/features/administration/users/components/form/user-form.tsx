@@ -42,6 +42,7 @@ import { useCreateUser, useUpdateUser, useAssignUserRoles, useAssignUserBranches
 import { getPasswordRules, passwordZodSchema } from "@/lib/password";
 import { Monitor, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { WorkingScope } from "../../types/user";
 
 const roleAssignmentSchema = z.object({
   roleId: z.string().min(1, "Role is required"),
@@ -57,7 +58,7 @@ const userFormSchema = z.object({
   functionName: z.string().optional(),
   department: z.string().optional(),
   position: z.string().min(1, "Position is required"),
-  workingScope: z.string().optional(),
+  workingScope: z.enum(["regional", "area", "sub_area", ""]).optional(),
   salesType: z.enum(["broadband", "enterprise", "both", ""]).optional(),
   technicianId: z.string().optional(),
   homeBranchId: z.string().min(1, "Home branch is required"),
@@ -132,7 +133,7 @@ export function UserForm() {
       functionName: selectedUser?.functionName ?? "",
       department: selectedUser?.department ?? "",
       position: selectedUser?.position ?? "",
-      workingScope: selectedUser?.workingScope ?? "",
+      workingScope: (selectedUser?.workingScope as WorkingScope) ?? "",
       salesType: selectedUser?.salesType ?? "",
       technicianId: selectedUser?.technicianId ?? "",
       homeBranchId: selectedUser?.homeBranchId ?? "",
@@ -260,13 +261,37 @@ export function UserForm() {
           ),
         );
 
-        // Synchronize roles and branches
         await Promise.all([
           assignRoles({ id: selectedUser.id, payload: { role_ids } }),
           assignBranches({ id: selectedUser.id, payload: { branch_ids } }),
         ]);
 
-        toast.success("User updated");
+        const hasScopeChanged = values.workingScope !== selectedUser.workingScope;
+
+        const oldRoleIds = selectedUser.roleAssignments.map((r) => r.roleId).sort().join(",");
+        const newRoleIds = role_ids.sort().join(",");
+        const hasRolesChanged = oldRoleIds !== newRoleIds;
+
+        const oldBranchIds = Array.from(new Set([
+          ...selectedUser.roleAssignments.map((r) => r.branchId),
+          selectedUser.homeBranchId,
+        ])).filter(Boolean).sort().join(",");
+        const newBranchIds = branch_ids.sort().join(",");
+        const hasBranchesChanged = oldBranchIds !== newBranchIds;
+
+        let message = "User updated";
+        let description = undefined;
+
+        if (hasScopeChanged || hasRolesChanged || hasBranchesChanged) {
+          try {
+            await revokeSessions(selectedUser.id);
+            description = "Active sessions have been revoked to ensure security.";
+          } catch (e) {
+            console.error("Failed to revoke sessions:", e);
+          }
+        }
+
+        toast.success(message, { description });
         closeUserFormSheet();
       } catch (error: any) {
         const errorData = error?.response?.data;
@@ -605,7 +630,12 @@ export function UserForm() {
                                 <SelectContent>
                                   {filteredBranches.map((b) => (
                                     <SelectItem key={b.id} value={b.id}>
-                                      {b.name}
+                                      <div className="flex flex-col">
+                                        <span>{b.name}</span>
+                                        <span className="text-[10px] text-muted-foreground uppercase">
+                                          {b.level?.replace("_", " ")} • {b.branchType}
+                                        </span>
+                                      </div>
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -696,13 +726,25 @@ export function UserForm() {
                   render={({ field }) => (
                     <FormItem className="space-y-2">
                       <FormLabel className="text-xs font-medium text-muted-foreground">Working Scope</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. National"
-                          {...field}
-                          disabled={isDetailMode}
-                        />
-                      </FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isDetailMode}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select working scope" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="regional">Regional</SelectItem>
+                          <SelectItem value="area">Area</SelectItem>
+                          <SelectItem value="sub_area">Sub Area</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription className="text-[10px] leading-tight">
+                        Determines the breadth of record access.
+                      </FormDescription>
                       <FormMessage className="text-[11px]" />
                     </FormItem>
                   )}
@@ -776,7 +818,12 @@ export function UserForm() {
                         <SelectContent>
                           {branches.map((b) => (
                             <SelectItem key={b.id} value={b.id}>
-                              {b.name}
+                              <div className="flex flex-col text-left">
+                                <span className="font-medium">{b.name}</span>
+                                <span className="text-[10px] text-muted-foreground uppercase">
+                                  {b.level?.replace("_", " ")} • {b.branchType}
+                                </span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -806,7 +853,12 @@ export function UserForm() {
                         <SelectContent>
                           {branches.map((b) => (
                             <SelectItem key={b.id} value={b.id}>
-                              {b.name}
+                              <div className="flex flex-col text-left">
+                                <span className="font-medium">{b.name}</span>
+                                <span className="text-[10px] text-muted-foreground uppercase">
+                                  {b.level?.replace("_", " ")} • {b.branchType}
+                                </span>
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>

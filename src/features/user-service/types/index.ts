@@ -303,6 +303,12 @@ export interface ActivityLog {
   ip_address?: string;
   user_agent?: string;
   metadata?: Record<string, unknown>;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+    employee_id?: string;
+  };
   occurred_at?: string;
   created_at?: string;
 }

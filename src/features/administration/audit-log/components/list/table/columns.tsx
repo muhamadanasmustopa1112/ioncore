@@ -60,16 +60,22 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
     },
     {
       id: "user",
-      accessorFn: (row) => row.userName,
+      accessorFn: (row) => row.user?.name,
       header: "User",
-      cell: ({ row }) => (
-        <div className="flex flex-col">
-          <span className="text-sm font-medium">{row.original.userName}</span>
-          {row.original.userEmail && row.original.userEmail !== row.original.userName && (
-            <span className="text-[10px] text-muted-foreground">{row.original.userEmail}</span>
-          )}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const user = row.original.user;
+        const name = user?.name || row.original.userName || "—";
+        const email = user?.email || row.original.userEmail;
+
+        return (
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">{name}</span>
+            {email && email !== name && (
+              <span className="text-[10px] text-muted-foreground">{email}</span>
+            )}
+          </div>
+        );
+      },
       size: 200,
     },
     {

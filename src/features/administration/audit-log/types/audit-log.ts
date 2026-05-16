@@ -22,6 +22,7 @@ export interface AuditLog {
   sessionId: string | null;
   status: AuditStatus;
   errorMessage: string | null;
+  user?: AuditUser;
 }
 
 export interface AuditLogFilters {
@@ -34,4 +35,11 @@ export interface AuditLogFilters {
   modules: AuditModule[];
   recordType: string;
   search: string;
+}
+
+export interface AuditUser {
+  id: string;
+  name: string;
+  email: string;
+  employee_id?: string;
 }
