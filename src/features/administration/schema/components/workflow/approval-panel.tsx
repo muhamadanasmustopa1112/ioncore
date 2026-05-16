@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { schemaKeys } from "../../api/schema-queries";
 import { format } from "date-fns";
 import { RiCheckLine, RiCheckboxCircleLine, RiCloseLine, RiTimeLine, RiSendPlaneLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +39,16 @@ export function ApprovalPanel() {
   const submitForReview = useSubmitForReview();
   const addDecision = useAddApprovalDecision();
 
+  const qc = useQueryClient();
+
+  // Force fresh versions every time the panel opens so stale cache
+  // (e.g. list without the new draft created after a rejection) never bleeds in.
+  useEffect(() => {
+    if (approvalPanelOpen && selectedSchemaId) {
+      qc.invalidateQueries({ queryKey: schemaKeys.versions(selectedSchemaId) });
+    }
+  }, [approvalPanelOpen, selectedSchemaId, qc]);
+
   const { data: schema } = useSchema(approvalPanelOpen ? selectedSchemaId : null);
   const { data: versions } = useSchemaVersions(approvalPanelOpen ? selectedSchemaId : null);
 
@@ -47,12 +59,18 @@ export function ApprovalPanel() {
 
   // Newest version is always index 0 — use it directly
   const latestDraftVersion = versions?.[0] ?? null;
+  // Rollback version: the one matching schema.latest_version (e.g. "v1.1"), not versions[0]
+  const rollbackVersion = schema?.latest_version
+    ? (versions?.find((v) => v.version === schema.latest_version) ?? null)
+    : null;
 
-  // Fetch the single version directly — authoritative status, avoids list staleness
+  // Fetch v1.3 (latest) for status detection — it carries "ROLLBACK" status.
+  // rollbackVersion (v1.1) is the target to publish, NOT what we use for status.
   const { data: liveVersion } = useSchemaVersion(
     approvalPanelOpen ? latestDraftVersion?.id ?? null : null
   );
   const versionStatus = (liveVersion?.status ?? latestDraftVersion?.status)?.toUpperCase();
+  const isRollback = versionStatus === "ROLLBACK";
 const { data: approvalRaw } = useVersionApproval(
     approvalPanelOpen ? latestDraftVersion?.id ?? null : null
   );
@@ -122,13 +140,13 @@ const { data: approvalRaw } = useVersionApproval(
       <SheetContent className="inset-y-8 lg:end-10 start-auto h-full max-h-[calc(100vh-64px)] gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[560px] flex flex-col [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5 shadow-2xl">
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl">
-            {isDraft ? "Draft" : isInReview ? "In Review" : isRejected ? "Rejected" : "Approval"} — {schema?.name ?? "Schema"}
+            {isRollback ? "Rollback" : isDraft ? "Draft" : isInReview ? "In Review" : isRejected ? "Rejected" : "Approval"} — {schema?.name ?? "Schema"}
           </SheetTitle>
         </SheetHeader>
 
         <SheetBody className="flex-1 overflow-y-auto p-5 space-y-6">
           {/* Progress — only shown when there are final decisions */}
-          {(isApproved || isRejected) && (
+          {!isRollback && (isApproved || isRejected) && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Approval Progress</span>
@@ -141,7 +159,7 @@ const { data: approvalRaw } = useVersionApproval(
           )}
 
           {/* Approver decisions list — only shown when there are final decisions */}
-          {(isApproved || isRejected) && (
+          {!isRollback && (isApproved || isRejected) && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">Approval Decisions</h3>
               {decisions.length > 0 ? decisions.map((d) => {
@@ -308,9 +326,29 @@ const { data: approvalRaw } = useVersionApproval(
             </div>
           )}
 
+          {/* Rollback — direct publish, no approval needed */}
+          {isRollback && rollbackVersion && (
+            <Can permission="master.manage">
+              <div className="space-y-3 border-t border-border/50 pt-4">
+                <p className="text-sm font-semibold">Publish Rollback</p>
+                <p className="text-xs text-muted-foreground">
+                  This version was restored via rollback. It can be published directly without approval.
+                </p>
+                <Button
+                  variant="primary"
+                  className="w-full font-semibold"
+                  disabled={publishVersion.isPending}
+                  onClick={() => publishVersion.mutate(rollbackVersion.id)}
+                >
+                  <RiCheckboxCircleLine className="mr-2 size-4" /> Publish Rollback Version
+                </Button>
+              </div>
+            </Can>
+          )}
+
           {/* Publish */}
           <Can permission="master.manage">
-            {canPublish && (
+            {!isRollback && canPublish && (
               <div className="space-y-3 border-t border-border/50 pt-4">
                 <p className="text-sm font-semibold">Publish Schema</p>
                 <p className="text-xs text-muted-foreground">

@@ -12,8 +12,10 @@ function SchemaStatusBadge({ status }: { status: string }) {
     REVIEW:    { label: "In Review", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" },
     APPROVED:  { label: "Approved",  className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" },
     REJECTED:  { label: "Rejected",  className: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" },
-    PUBLISHED: { label: "Published", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
-    ARCHIVED:  { label: "Archived",  className: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" },
+    PUBLISHED:  { label: "Published",  className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" },
+    ARCHIVED:   { label: "Archived",   className: "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400" },
+    DEPRECATED: { label: "Deprecated", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400" },
+    ROLLBACK:   { label: "Rollback",   className: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400" },
   };
   const cfg = map[s] ?? { label: status ?? "—", className: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400" };
   return (
@@ -40,19 +42,33 @@ export const columns: ColumnDef<SchemaRecord>[] = [
           {row.original.name}
         </p>
         <div className="flex items-center gap-1.5 mt-0.5">
-          {row.original.latest_version && (
-            <span className="text-[11px] text-muted-foreground font-mono">
-              {row.original.latest_version}
-            </span>
-          )}
-          {row.original.latest_published_version && (
-            <>
-              <span className="text-muted-foreground/40 text-[10px]">·</span>
-              <span className="text-[10px] font-medium px-1.5 py-px rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                {row.original.latest_published_version}
-              </span>
-            </>
-          )}
+          {(() => {
+            const ver = row.original.latest_version;
+            const pub = row.original.latest_published_version;
+            const sameVersion = ver && pub && ver === pub;
+            if (sameVersion) {
+              return (
+                <span className="text-[10px] font-medium px-1.5 py-px rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                  {pub}
+                </span>
+              );
+            }
+            return (
+              <>
+                {ver && (
+                  <span className="text-[11px] text-muted-foreground font-mono">{ver}</span>
+                )}
+                {pub && (
+                  <>
+                    <span className="text-muted-foreground/40 text-[10px]">·</span>
+                    <span className="text-[10px] font-medium px-1.5 py-px rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                      {pub}
+                    </span>
+                  </>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
     ),

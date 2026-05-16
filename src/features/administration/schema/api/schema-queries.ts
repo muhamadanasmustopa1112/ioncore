@@ -99,7 +99,6 @@ export function useSchemaVersion(versionId: string | null) {
       return res.data ?? null;
     },
     enabled: !!versionId,
-    placeholderData: (prev) => prev,
   });
 }
 

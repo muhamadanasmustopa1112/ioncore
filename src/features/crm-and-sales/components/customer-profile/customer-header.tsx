@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Loader2, PlusCircle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -19,13 +19,11 @@ function initials(name: string) {
 
 interface Props {
   customer?: CustomerDetail;
-  onAddService?: () => void;
-  onChangePlan?: () => void;
   onDeactivate?: () => void;
   isDeactivating?: boolean;
 }
 
-export function CustomerHeader({ customer, onAddService, onChangePlan, onDeactivate, isDeactivating }: Props) {
+export function CustomerHeader({ customer, onDeactivate, isDeactivating }: Props) {
   const name = customer?.full_name ?? "—";
   const display = customer?.company_name
     ? `${customer.full_name} (${customer.company_name})`
@@ -70,10 +68,10 @@ export function CustomerHeader({ customer, onAddService, onChangePlan, onDeactiv
       <div className="flex flex-wrap gap-3">
         {!isInactive && (
           <>
-            <Button variant="primary" onClick={onAddService}>
+            {/* <Button variant="primary" onClick={onAddService}>
               <PlusCircle className="size-4" />
               Add Service
-            </Button>
+            </Button> */}
             <Button
               variant="outline"
               className="border-destructive/40 text-destructive hover:bg-destructive/5"

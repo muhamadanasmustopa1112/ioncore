@@ -53,7 +53,7 @@ const VIEW_TITLES: Record<SchemaView, string> = {
   "schema-migration": "Bulk Schema Migration",
 };
 
-function ViewContent({ view }: { view: SchemaView }) {
+function ViewContent({ view, migrationSchemaId }: { view: SchemaView; migrationSchemaId?: string }) {
   switch (view) {
     case "schemas": return <SchemaList />;
     case "assignment-rules": return <AssignmentRulesPanel />;
@@ -62,7 +62,7 @@ function ViewContent({ view }: { view: SchemaView }) {
     case "change-policies": return <ServiceChangePolicyPanel />;
     case "upgrade-rules": return <UpgradeEligibilityPanel />;
     case "change-matrix": return <ChangeMatrixPanel />;
-    case "schema-migration": return <SchemaMigrationView />;
+    case "schema-migration": return <SchemaMigrationView initialSchemaId={migrationSchemaId ?? ""} />;
   }
 }
 
@@ -74,6 +74,7 @@ const ALL_PANEL_PARAMS = {
   bps_plan: parseAsString,  bps_search: parseAsString,
   co_page:  parseAsInteger, co_size:  parseAsInteger,
   co_search: parseAsString,
+  sc_migration_schema: parseAsString,
 };
 
 export function SchemaManagementPage() {
@@ -155,7 +156,7 @@ export function SchemaManagementPage() {
       </Tabs>
 
       <div className="mt-4 flex-1 overflow-auto">
-        <ViewContent view={view} />
+        <ViewContent view={view} migrationSchemaId={urlParams.sc_migration_schema ?? ""} />
       </div>
 
       <SchemaFormSheet />

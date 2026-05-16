@@ -45,8 +45,8 @@ function CustomerRow({ item }: { item: CustomerSchema }) {
   );
 }
 
-export function SchemaMigrationView() {
-  const [schemaId, setSchemaId] = useState("");
+export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?: string }) {
+  const [schemaId, setSchemaId] = useState(initialSchemaId);
   const [fromVersionId, setFromVersionId] = useState("");
   const [toVersionId, setToVersionId] = useState("");
 

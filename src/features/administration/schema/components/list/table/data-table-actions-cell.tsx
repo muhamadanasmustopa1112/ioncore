@@ -33,9 +33,10 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
   const isRejected = status === "REJECTED";
   const isPublished = status === "PUBLISHED";
   const isArchived = status === "ARCHIVED";
+  const isRollback = status === "ROLLBACK";
 
-  const canEdit = isDraft || isPublished;
-  const canSubmitOrPublish = isDraft || isReview || isApproved || isRejected;
+  const canEdit = isDraft || isPublished || isRollback || isRejected;
+  const canSubmitOrPublish = isDraft || isReview || isApproved || isRejected || isRollback;
   const canClone = !isArchived;
 
   return (
