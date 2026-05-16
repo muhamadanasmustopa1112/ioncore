@@ -149,7 +149,13 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
                 <BranchAvailability
                   assignedBranchIds={(planData.branches ?? []).map((b) => b.id)}
                   onAdd={(branchId) => addBranch.mutate({ planId: planData.id, branchIds: [branchId] })}
-                  onRemove={(branchId) => removeBranch.mutate({ planId: planData.id, branchId })}
+                  onRemove={(branchId) => {
+                    if ((planData.branches ?? []).length <= 1) {
+                      toast.error("At least 1 branch must remain assigned to this plan.");
+                      return;
+                    }
+                    removeBranch.mutate({ planId: planData.id, branchId });
+                  }}
                   isPending={branchPending}
                   readOnly={mode === "details"}
                 />

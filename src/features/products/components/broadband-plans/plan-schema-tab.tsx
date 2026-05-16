@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import { RiAddLine, RiLoader4Line } from "@remixicon/react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -208,6 +209,10 @@ export function PlanSchemaTab({
                       className="h-6 w-6 shrink-0 text-muted-foreground hover:text-destructive"
                       onClick={() => {
                         if (planId) {
+                          if (rows.length <= 1) {
+                            toast.error("At least 1 schema must remain assigned to this plan.");
+                            return;
+                          }
                           setDeleteTarget({ id, name });
                         } else {
                           onRemovePending?.(id);
