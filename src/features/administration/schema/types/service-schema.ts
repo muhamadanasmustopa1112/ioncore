@@ -21,7 +21,7 @@ export interface ServiceContent {
 
 export const serviceFormSchema = z.object({
   name: z.string().min(3, "Schema name min 3 characters"),
-  customer_type: z.enum(["residential", "business", "enterprise", "corporate"]),
+  customer_type: z.string().min(1, "Customer type is required"),
   sla_uptime: z.number().min(90).max(100),
   sla_response_hours: z.number().int().min(1),
   sla_resolution_hours: z.number().int().min(1),

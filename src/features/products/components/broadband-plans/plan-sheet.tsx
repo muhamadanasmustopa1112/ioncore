@@ -27,6 +27,8 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   const [activeTab, setActiveTab] = useState("details");
   const [pendingBranchIds, setPendingBranchIds] = useState<string[]>([]);
   const [pendingSchemas, setPendingSchemas] = useState<PendingSchema[]>([]);
+  const [customerType, setCustomerType] = useState(selected?.customer_type ?? "broadband");
+  const [isFormDirty, setIsFormDirty] = useState(false);
 
   const { data: detail } = useAdminBroadbandPlan(
     open && mode !== "new" && selected ? selected.id : null
@@ -45,6 +47,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
     setActiveTab("details");
     setPendingBranchIds([]);
     setPendingSchemas([]);
+    setCustomerType("broadband");
     onClose();
   };
 
@@ -65,26 +68,22 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
           const planId = res.data?.id;
           if (!planId) { handleClose(); return; }
 
-          const afterBranches = () => {
-            if (pendingSchemas.length === 0) { handleClose(); return; }
-            let remaining = pendingSchemas.length;
-            pendingSchemas.forEach((s) => {
-              assignSchema.mutate(
-                { broadband_plan_id: planId, schema_id: s.schemaId, schema_type: s.schemaType },
-                { onSettled: () => { remaining--; if (remaining === 0) handleClose(); } },
-              );
-            });
-          };
+          handleClose();
 
           if (pendingBranchIds.length > 0) {
-            addBranch.mutate({ planId, branchIds: pendingBranchIds }, { onSuccess: afterBranches });
-          } else {
-            afterBranches();
+            addBranch.mutate({ planId, branchIds: pendingBranchIds });
           }
+          pendingSchemas.forEach((s) => {
+            assignSchema.mutate({
+              broadband_plan_id: planId,
+              schema_id: s.schemaId,
+              schema_type: s.schemaType,
+            });
+          });
         },
       });
     } else if (mode === "edit" && planData) {
-      update.mutate({ id: planData.id, payload }, { onSuccess: handleClose });
+      update.mutate({ id: planData.id, payload });
     }
   };
 
@@ -135,7 +134,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
             </TabsList>
 
             <TabsContent value="details" className="flex-1 overflow-hidden mt-0">
-              <PlanForm selected={planData} mode={mode} onSubmit={handleSubmit} />
+              <PlanForm selected={planData} mode={mode} onSubmit={handleSubmit} onCustomerTypeChange={setCustomerType} onDirtyChange={setIsFormDirty} />
             </TabsContent>
 
             <TabsContent value="branches" className="flex-1 overflow-hidden mt-0">
@@ -161,6 +160,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
               {mode === "new" ? (
                 <PlanSchemaTab
                   planId={null}
+                  customerType={customerType}
                   pending={pendingSchemas}
                   onAddPending={(s) => setPendingSchemas((prev) => [...prev, s])}
                   onRemovePending={(schemaId) =>
@@ -170,6 +170,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
               ) : planData ? (
                 <PlanSchemaTab
                   planId={planData.id}
+                  customerType={planData.customer_type}
                   readOnly={mode === "details"}
                 />
               ) : null}
@@ -181,10 +182,21 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
           <>
             <Button variant="ghost" onClick={handleClose}>Close</Button>
             <div className="flex-1" />
-            <Button variant="outline" onClick={handleClose} className="mr-3" disabled={isPending}>Cancel</Button>
-            <Button variant="primary" onClick={handleSave} disabled={mode === "details" || isPending} className="font-semibold">
-              {isPending ? "Saving..." : mode === "new" ? "Create Plan" : "Save Changes"}
-            </Button>
+            {(mode === "new" || activeTab === "details") && (
+              <>
+                {mode === "new" && (
+                  <Button variant="outline" onClick={handleClose} className="mr-3" disabled={isPending}>Cancel</Button>
+                )}
+                <Button
+                  variant="primary"
+                  onClick={handleSave}
+                  disabled={mode === "details" || isPending || (mode === "edit" && !isFormDirty)}
+                  className="font-semibold"
+                >
+                  {isPending ? "Saving..." : mode === "new" ? "Create Plan" : "Save Changes"}
+                </Button>
+              </>
+            )}
           </>
         </SheetFooter>
       </SheetContent>

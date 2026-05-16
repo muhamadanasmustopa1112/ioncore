@@ -3,11 +3,28 @@
 import { useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { RiAddLine, RiInformationLine, RiFileListLine, RiUserStarLine } from "@remixicon/react";
+import {
+  DndContext,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  RiAddLine,
+  RiInformationLine,
+  RiFileListLine,
+  RiUserStarLine,
+  RiCheckboxMultipleLine,
+} from "@remixicon/react";
 import { nanoid } from "nanoid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -21,10 +38,11 @@ import {
   type WorkOrderFormValues,
   type ProofOfWorkItemFormValues,
 } from "../../../types/work-order-schema";
+import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
 import { useSchemaStore } from "../../../store/schema";
 import {
   useCreateSchema,
-  useUpdateSchemaContent,
+  useEditSchema,
   useSchema,
   useSchemaVersions,
 } from "../../../api/schema-queries";
@@ -36,29 +54,40 @@ const DEFAULT_ITEM: ProofOfWorkItemFormValues = {
   category: "photo",
   field_type: "photo",
   required: true,
+  instruction_markdown: "",
 };
 
 const DEFAULT_VALUES: WorkOrderFormValues = {
   name: "",
-  customer_type: "residential",
-  wo_type: "installation",
+  customer_type: "broadband",
+  wo_type: "new_installation",
+  product_type: "residential",
   proof_of_work: [{ ...DEFAULT_ITEM, item_id: "pow-1", item_label: "Before photo" }],
   sign_off_mode: "onsite",
+  completion_rules: {
+    block_bast_until_all_required: true,
+    allow_skip_optional_with_note: true,
+    resolution_log_from_steps: false,
+  },
 };
 
 function fromApiContent(raw: Record<string, unknown>): Partial<WorkOrderFormValues> {
   const pows = raw.proof_of_work as ProofOfWorkItemFormValues[] | undefined;
   const signOff = raw.customer_sign_off as { mode?: string } | undefined;
+  const rules = raw.completion_rules as WorkOrderFormValues["completion_rules"] | undefined;
   return {
-    wo_type: (raw.wo_type as WorkOrderFormValues["wo_type"]) ?? "installation",
+    wo_type: (raw.wo_type as WorkOrderFormValues["wo_type"]) ?? "new_installation",
+    product_type: (raw.product_type as WorkOrderFormValues["product_type"]) ?? "broadband",
     proof_of_work: pows?.map((p) => ({
       item_id: p.item_id,
       item_label: p.item_label,
       category: p.category,
       field_type: p.field_type,
       required: p.required,
+      instruction_markdown: p.instruction_markdown ?? "",
     })) ?? DEFAULT_VALUES.proof_of_work,
     sign_off_mode: (signOff?.mode as WorkOrderFormValues["sign_off_mode"]) ?? "onsite",
+    completion_rules: rules ?? DEFAULT_VALUES.completion_rules,
   };
 }
 
@@ -67,7 +96,10 @@ export function WorkOrderForm() {
   const isDetailMode = form === "details";
 
   const createSchema = useCreateSchema();
-  const updateSchema = useUpdateSchemaContent();
+  const editSchema = useEditSchema();
+
+  const { data: customerTypes = [] } = useActiveCustomerTypes();
+  const sensors = useSensors(useSensor(PointerSensor));
 
   const rhf = useForm<WorkOrderFormValues>({
     resolver: zodResolver(workOrderFormSchema),
@@ -75,7 +107,7 @@ export function WorkOrderForm() {
   });
   const { register, watch, setValue, handleSubmit, reset, control, formState: { errors } } = rhf;
 
-  const { fields, append, remove } = useFieldArray({ control, name: "proof_of_work" });
+  const { fields, append, remove, move } = useFieldArray({ control, name: "proof_of_work" });
 
   const { data: schemaDetail } = useSchema(
     form === "edit" || form === "details" || form === "clone" ? selectedSchemaId : null
@@ -97,15 +129,26 @@ export function WorkOrderForm() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, schemaDetail, schemaVersions]);
 
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const from = fields.findIndex((f) => f.id === active.id);
+    const to = fields.findIndex((f) => f.id === over.id);
+    if (from !== -1 && to !== -1) move(from, to);
+  }
+
   function toApiContent(values: WorkOrderFormValues) {
     return {
       wo_type: values.wo_type,
-      proof_of_work: values.proof_of_work.map((p) => ({
+      product_type: values.product_type,
+      proof_of_work: values.proof_of_work.map((p, i) => ({
         item_id: p.item_id,
         item_label: p.item_label,
         category: p.category,
         field_type: p.field_type,
         required: p.required,
+        instruction_markdown: p.instruction_markdown,
+        order: i + 1,
         completed: false,
         value: null,
         checked: false,
@@ -122,6 +165,7 @@ export function WorkOrderForm() {
         signature_url: null,
         gps_stamp: null,
       },
+      completion_rules: values.completion_rules,
     };
   }
 
@@ -135,7 +179,14 @@ export function WorkOrderForm() {
         content,
       });
     } else if (form === "edit" && selectedSchemaId) {
-      updateSchema.mutate({ id: selectedSchemaId, payload: { content } });
+      editSchema.mutate({
+        id: selectedSchemaId,
+        name: values.name,
+        customer_type: values.customer_type,
+        originalName: schemaDetail?.name ?? "",
+        originalCustomerType: schemaDetail?.customer_type ?? "",
+        content,
+      });
     }
   }
 
@@ -144,6 +195,8 @@ export function WorkOrderForm() {
     return () => setFormSubmitter(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, selectedSchemaId]);
+
+  const rules = watch("completion_rules");
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -156,8 +209,8 @@ export function WorkOrderForm() {
               <RiInformationLine className="size-4 text-blue-500" />
               <h3 className="text-sm font-semibold">Basic Info</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2 md:col-span-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 md:col-span-2">
                 <Label className="text-xs font-medium text-muted-foreground">Schema Name <span className="text-red-500">*</span></Label>
                 <Input placeholder="e.g. Installation WO Schema" disabled={isDetailMode} {...register("name")} />
                 {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
@@ -167,6 +220,17 @@ export function WorkOrderForm() {
                 <Select value={watch("customer_type")} onValueChange={(v) => setValue("customer_type", v as WorkOrderFormValues["customer_type"])} disabled={isDetailMode}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
+                    {customerTypes.map((ct) => (
+                      <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">Product Type <span className="text-red-500">*</span></Label>
+                <Select value={watch("product_type")} onValueChange={(v) => setValue("product_type", v as WorkOrderFormValues["product_type"])} disabled={isDetailMode}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
                     <SelectItem value="residential">Residential</SelectItem>
                     <SelectItem value="business">Business</SelectItem>
                     <SelectItem value="enterprise">Enterprise</SelectItem>
@@ -174,16 +238,15 @@ export function WorkOrderForm() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 md:col-span-2">
                 <Label className="text-xs font-medium text-muted-foreground">WO Type <span className="text-red-500">*</span></Label>
                 <Select value={watch("wo_type")} onValueChange={(v) => setValue("wo_type", v as WorkOrderFormValues["wo_type"])} disabled={isDetailMode}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="installation">Installation</SelectItem>
+                    <SelectItem value="new_installation">New Installation</SelectItem>
                     <SelectItem value="maintenance">Maintenance</SelectItem>
-                    <SelectItem value="repair">Repair</SelectItem>
-                    <SelectItem value="relocation">Relocation</SelectItem>
-                    <SelectItem value="deactivation">Deactivation</SelectItem>
+                    <SelectItem value="termination">Termination</SelectItem>
+                    <SelectItem value="infrastructure_deployment">Infrastructure Deployment</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -212,17 +275,27 @@ export function WorkOrderForm() {
             {errors.proof_of_work?.root && (
               <p className="text-xs text-red-500">{errors.proof_of_work.root.message}</p>
             )}
-            <div className="space-y-3">
-              {fields.map((field, index) => (
-                <PowItemRow
-                  key={field.id}
-                  index={index}
-                  form={rhf}
-                  isDetailMode={isDetailMode}
-                  onRemove={() => remove(index)}
-                />
-              ))}
-            </div>
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-3">
+                  {fields.map((field, index) => (
+                    <PowItemRow
+                      key={field.id}
+                      id={field.id}
+                      index={index}
+                      form={rhf}
+                      isDetailMode={isDetailMode}
+                      onRemove={() => remove(index)}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
 
           {/* Customer Sign-Off */}
@@ -231,7 +304,6 @@ export function WorkOrderForm() {
               <RiUserStarLine className="size-4 text-emerald-500" />
               <h3 className="text-sm font-semibold">Customer Sign-Off</h3>
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {(["onsite", "otp"] as const).map((mode) => {
                 const active = watch("sign_off_mode") === mode;
@@ -258,6 +330,51 @@ export function WorkOrderForm() {
                   </button>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Completion Rules */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+              <RiCheckboxMultipleLine className="size-4 text-orange-500" />
+              <h3 className="text-sm font-semibold">Completion Rules</h3>
+            </div>
+            <div className="space-y-2">
+              {(
+                [
+                  {
+                    key: "block_bast_until_all_required" as const,
+                    label: "Block BAST until all required items done",
+                    desc: "Technician cannot submit BAST while required proof items are incomplete.",
+                  },
+                  {
+                    key: "allow_skip_optional_with_note" as const,
+                    label: "Allow skip optional items with note",
+                    desc: "Optional captures can be skipped if technician provides a reason.",
+                  },
+                  {
+                    key: "resolution_log_from_steps" as const,
+                    label: "Log resolution from steps",
+                    desc: "Step completion data is written to the work order resolution log.",
+                  },
+                ]
+              ).map(({ key, label, desc }) => (
+                <div
+                  key={key}
+                  className="flex items-start justify-between gap-4 rounded-md border border-border/40 px-3 py-3"
+                >
+                  <div>
+                    <p className="text-xs font-medium">{label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
+                  </div>
+                  <Switch
+                    size="sm"
+                    checked={rules[key]}
+                    onCheckedChange={(v) => setValue(`completion_rules.${key}`, v)}
+                    disabled={isDetailMode}
+                  />
+                </div>
+              ))}
             </div>
           </div>
 

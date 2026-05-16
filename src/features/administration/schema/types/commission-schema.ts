@@ -88,7 +88,7 @@ export const commissionAssignmentSchema = z.object({
 
 export const commissionFormSchema = z.object({
   name: z.string().min(3),
-  customer_type: z.enum(["residential", "business", "enterprise", "corporate"]),
+  customer_type: z.string().min(1, "Customer type is required"),
   commission_type: z.enum(["percentage", "fixed_amount", "tiered"]),
   commission_value: z.number().min(0),
   calculation_base: z.enum(["first_invoice_amount", "annual_contract_value", "recurring_invoice_amount", "fixed"]),

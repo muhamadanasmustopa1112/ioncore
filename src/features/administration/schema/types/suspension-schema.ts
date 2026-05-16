@@ -34,7 +34,7 @@ export interface SuspensionContent {
 
 export const suspensionFormSchema = z.object({
   name: z.string().min(3, "Schema name min 3 characters"),
-  customer_type: z.enum(["residential", "business", "enterprise", "corporate"]),
+  customer_type: z.string().min(1, "Customer type is required"),
   // Suspension block
   suspension_automatic: z.boolean(),
   suspension_trigger: z.enum(["after_grace_period", "manual"]),

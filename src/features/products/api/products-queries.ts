@@ -210,7 +210,7 @@ export function useAddBranchToBroadbandPlan() {
       adminAddBranchToBroadbandPlan(planId, branchIds),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: productKeys.all });
-      toast.success("Branch assigned.");
+      toast.success("Branch assigned.", { id: "branch-assigned" });
     },
     onError: (err) => toast.error(getApiError(err, "Failed to assign branch.")),
   });
@@ -299,7 +299,7 @@ export function useAddBranchToEnterpriseService() {
       adminAddBranchToEnterpriseService(serviceId, branchId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: productKeys.all });
-      toast.success("Branch assigned.");
+      toast.success("Branch assigned.", { id: "branch-assigned" });
     },
     onError: (err) => toast.error(getApiError(err, "Failed to assign branch.")),
   });

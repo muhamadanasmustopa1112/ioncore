@@ -67,7 +67,7 @@ export const documentSchema = z.object({
 
 export const onboardingFormSchema = z.object({
   name: z.string().min(3, "Schema name min 3 characters"),
-  customer_type: z.enum(["residential", "business", "enterprise", "corporate"]),
+  customer_type: z.string().min(1, "Customer type is required"),
   steps: z.array(onboardingStepSchema).min(1, "At least 1 step required"),
   expected_duration_hours: z.number().int().min(1),
   sla_hours: z.number().int().min(1),

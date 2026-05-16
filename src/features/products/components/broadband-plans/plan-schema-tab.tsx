@@ -39,6 +39,7 @@ export interface PendingSchema {
 interface PlanSchemaTabProps {
   planId: string | null;
   readOnly?: boolean;
+  customerType?: string;
   // new-plan mode
   pending?: PendingSchema[];
   onAddPending?: (s: PendingSchema) => void;
@@ -63,15 +64,16 @@ function typeColor(t: string) {
 interface AddRowProps {
   planId: string | null;
   usedTypes: string[];
+  customerType?: string;
   onAddPending?: (s: PendingSchema) => void;
 }
 
-function AddRow({ planId, usedTypes, onAddPending }: AddRowProps) {
+function AddRow({ planId, usedTypes, customerType, onAddPending }: AddRowProps) {
   const [schemaType, setSchemaType] = useState("");
   const [schemaId, setSchemaId]     = useState("");
 
   const { data: schemasData } = useSchemaList(
-    schemaType ? { schemaType, hasSchemaPublished: true } : {}
+    schemaType ? { schemaType, hasSchemaPublished: true, ...(customerType ? { customerType } : {}) } : {}
   );
   const schemas = schemasData?.schemas ?? [];
   const availableTypes = SCHEMA_TYPE_OPTIONS.filter((t) => !usedTypes.includes(t.value));
@@ -154,6 +156,7 @@ function AddRow({ planId, usedTypes, onAddPending }: AddRowProps) {
 export function PlanSchemaTab({
   planId,
   readOnly,
+  customerType,
   pending = [],
   onAddPending,
   onRemovePending,
@@ -174,7 +177,7 @@ export function PlanSchemaTab({
   return (
     <div className="flex flex-col h-full px-6 py-5 gap-4">
       {!readOnly && (
-        <AddRow planId={planId} usedTypes={usedTypes} onAddPending={onAddPending} />
+        <AddRow planId={planId} usedTypes={usedTypes} customerType={customerType} onAddPending={onAddPending} />
       )}
 
       {isLoading && planId ? (

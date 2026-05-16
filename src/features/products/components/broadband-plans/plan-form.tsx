@@ -28,13 +28,16 @@ interface PlanFormProps {
   selected: BroadbandPlan | null;
   mode: "new" | "edit" | "details";
   onSubmit: (payload: CreateBroadbandPlanPayload) => void;
+  onCustomerTypeChange?: (type: string) => void;
+  onDirtyChange?: (isDirty: boolean) => void;
 }
 
-export function PlanForm({ selected, mode, onSubmit }: PlanFormProps) {
+export function PlanForm({ selected, mode, onSubmit, onCustomerTypeChange, onDirtyChange }: PlanFormProps) {
   const isDetail = mode === "details";
+  const isCustomerTypeReadonly = mode === "edit" || mode === "details";
   const { data: customerTypes = [] } = useActiveCustomerTypes();
 
-  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormValues>({
+  const { register, handleSubmit, control, reset, formState: { errors, isDirty } } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "", speed_download_mbps: 0, speed_upload_mbps: 0,
@@ -59,6 +62,8 @@ export function PlanForm({ selected, mode, onSubmit }: PlanFormProps) {
       reset({ name: "", speed_download_mbps: 0, speed_upload_mbps: 0, price: 0, one_time_charge: 0, customer_type: "broadband", temporary_activation_window_hours: 24, is_active: true });
     }
   }, [selected, mode, reset]);
+
+  useEffect(() => { onDirtyChange?.(isDirty); }, [isDirty, onDirtyChange]);
 
   const submitRef = useRef<(() => void) | undefined>(undefined);
   submitRef.current = handleSubmit((v) => onSubmit(v));
@@ -105,7 +110,7 @@ export function PlanForm({ selected, mode, onSubmit }: PlanFormProps) {
         <div className="grid grid-cols-2 gap-4">
           <Field label="Customer Type" required error={errors.customer_type?.message}>
             <Controller name="customer_type" control={control} render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange} disabled={isDetail}>
+              <Select value={field.value} onValueChange={(v) => { field.onChange(v); onCustomerTypeChange?.(v); }} disabled={isCustomerTypeReadonly}>
                 <SelectTrigger><SelectValue placeholder="Select type…" /></SelectTrigger>
                 <SelectContent>
                   {customerTypes.map((ct) => (

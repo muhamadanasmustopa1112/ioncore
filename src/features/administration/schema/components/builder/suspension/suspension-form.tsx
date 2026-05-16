@@ -16,13 +16,14 @@ import {
 } from "@/components/ui/select";
 import { suspensionFormSchema, type SuspensionFormValues } from "../../../types/suspension-schema";
 import { useSchemaStore } from "../../../store/schema";
-import { useCreateSchema, useUpdateSchemaContent, useSchema, useSchemaVersions } from "../../../api/schema-queries";
+import { useCreateSchema, useEditSchema, useSchema, useSchemaVersions } from "../../../api/schema-queries";
+import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
 import { SuspensionRulesSection } from "./suspension-rules-section";
 import { RestorationTerminationSection } from "./restoration-termination-section";
 
 const DEFAULT_SUSPENSION: SuspensionFormValues = {
   name: "",
-  customer_type: "residential",
+  customer_type: "broadband",
   suspension_automatic: true,
   suspension_trigger: "after_grace_period",
   suspension_requires_manual_approval: false,
@@ -47,7 +48,7 @@ export function SuspensionForm() {
   const { form, activeSchemaType, selectedSchemaId, setFormSubmitter } = useSchemaStore();
   const isDetailMode = form === "details";
   const createSchema = useCreateSchema();
-  const updateSchema = useUpdateSchemaContent();
+  const editSchema = useEditSchema();
 
   const rhfForm = useForm<SuspensionFormValues>({
     resolver: zodResolver(suspensionFormSchema),
@@ -58,6 +59,7 @@ export function SuspensionForm() {
 
   const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
   const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
+  const { data: customerTypes = [] } = useActiveCustomerTypes();
 
   function fromApiContent(c: Record<string, unknown>): Partial<SuspensionFormValues> {
     const s = (c.suspension ?? {}) as Record<string, unknown>;
@@ -137,7 +139,14 @@ export function SuspensionForm() {
     if (form === "new" || form === "clone") {
       createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
     } else if (form === "edit" && selectedSchemaId) {
-      updateSchema.mutate({ id: selectedSchemaId, payload: { content } });
+      editSchema.mutate({
+        id: selectedSchemaId,
+        name,
+        customer_type,
+        originalName: schemaDetail?.name ?? "",
+        originalCustomerType: schemaDetail?.customer_type ?? "",
+        content,
+      });
     }
   }
 
@@ -185,10 +194,9 @@ export function SuspensionForm() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="residential">Residential</SelectItem>
-                    <SelectItem value="business">Business</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
-                    <SelectItem value="corporate">Corporate</SelectItem>
+                    {customerTypes.map((ct) => (
+                      <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

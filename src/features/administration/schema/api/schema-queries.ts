@@ -5,6 +5,7 @@ import {
   listSchemas,
   getSchema,
   createSchema,
+  updateSchemaMeta,
   updateSchemaContent,
   listSchemaVersions,
   getSchemaVersion,
@@ -153,6 +154,43 @@ export function useUpdateSchemaContent() {
       } else {
         store.closeSchemaSheet();
         toast.success("Schema draft saved.");
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(getApiError(err, "Failed to save schema."));
+    },
+  });
+}
+
+interface EditSchemaPayload {
+  id: string;
+  name: string;
+  customer_type: string;
+  originalName: string;
+  originalCustomerType: string;
+  content: object;
+  change_reason?: string;
+}
+
+export function useEditSchema() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, name, customer_type, originalName, originalCustomerType, content, change_reason }: EditSchemaPayload) => {
+      const metaChanged = name !== originalName || customer_type !== originalCustomerType;
+      if (metaChanged) await updateSchemaMeta(id, { name, customer_type });
+      return updateSchemaContent(id, { content, change_reason });
+    },
+    onSuccess: (_, { id }) => {
+      invalidateSchemaDetail(qc, id);
+      qc.invalidateQueries({ queryKey: schemaKeys.all });
+      const store = useSchemaStore.getState();
+      if (store.pendingApproval) {
+        store.closeSchemaSheet();
+        store.openApprovalPanel(id);
+        toast.success("Draft saved. Opening approval panel...");
+      } else {
+        store.closeSchemaSheet();
+        toast.success("Schema updated.");
       }
     },
     onError: (err: Error) => {

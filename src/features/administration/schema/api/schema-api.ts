@@ -34,6 +34,7 @@ export interface SchemaListParams {
   orderBy?: string;
   orderDirection?: "asc" | "desc";
   schemaType?: string;
+  customerType?: string;
   hasSchemaPublished?: boolean;
 }
 
@@ -44,6 +45,11 @@ export interface CreateSchemaPayload {
   schema_mode_type?: string;
   change_reason?: string;
   content: object;
+}
+
+export interface UpdateSchemaMetaPayload {
+  name: string;
+  customer_type: string;
 }
 
 export interface UpdateSchemaContentPayload {
@@ -124,6 +130,7 @@ export function listSchemas(params: SchemaListParams = {}) {
       params: {
         ...params,
         ...(params.schemaType ? { schemaType: toApiSchemaType(params.schemaType) } : {}),
+        ...(params.customerType ? { customerType: params.customerType } : {}),
       },
     })
   );
@@ -142,6 +149,12 @@ export function createSchema(payload: CreateSchemaPayload) {
       schema_type: toApiSchemaType(payload.schema_type),
       schema_mode_type: payload.schema_mode_type ?? "default",
     })
+  );
+}
+
+export function updateSchemaMeta(id: string, payload: UpdateSchemaMetaPayload) {
+  return cast<RuleSchemaEnvelope<SchemaRecord>>(
+    userServiceApi.put(`${BASE}/${id}`, payload)
   );
 }
 

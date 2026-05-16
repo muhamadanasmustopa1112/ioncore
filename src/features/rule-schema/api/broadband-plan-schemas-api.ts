@@ -87,7 +87,7 @@ export const useCreateBroadbandPlanSchema = () => {
       createBroadbandPlanSchema(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: BP_SCHEMAS_PREFIX });
-      toast.success("Schema assigned to plan.");
+      toast.success("Schema assigned to plan.", { id: "schema-assigned" });
     },
     onError: (err) => toast.error(getApiError(err, "Failed to assign schema.")),
   });

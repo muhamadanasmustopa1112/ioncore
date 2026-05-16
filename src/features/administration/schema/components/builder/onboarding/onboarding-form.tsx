@@ -16,13 +16,14 @@ import {
 } from "@/components/ui/select";
 import { onboardingFormSchema, type OnboardingFormValues } from "../../../types/onboarding-schema";
 import { useSchemaStore } from "../../../store/schema";
-import { useCreateSchema, useUpdateSchemaContent, useSchema, useSchemaVersions } from "../../../api/schema-queries";
+import { useCreateSchema, useEditSchema, useSchema, useSchemaVersions } from "../../../api/schema-queries";
+import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
 import { StepsSection } from "./steps-section";
 import { DocumentsSection } from "./documents-section";
 
 const DEFAULT_ONBOARDING: OnboardingFormValues = {
   name: "",
-  customer_type: "residential",
+  customer_type: "broadband",
   steps: [
     {
       step_id: 1,
@@ -55,7 +56,7 @@ export function OnboardingForm() {
   const { form, activeSchemaType, selectedSchemaId, setFormSubmitter } = useSchemaStore();
   const isDetailMode = form === "details";
   const createSchema = useCreateSchema();
-  const updateSchema = useUpdateSchemaContent();
+  const editSchema = useEditSchema();
 
   const rhfForm = useForm<OnboardingFormValues>({
     resolver: zodResolver(onboardingFormSchema),
@@ -66,6 +67,7 @@ export function OnboardingForm() {
 
   const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
   const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
+  const { data: customerTypes = [] } = useActiveCustomerTypes();
 
   function fromApiContent(c: Record<string, unknown>): Partial<OnboardingFormValues> {
     const timeline = (c.timeline ?? {}) as Record<string, unknown>;
@@ -132,7 +134,14 @@ export function OnboardingForm() {
     if (form === "new" || form === "clone") {
       createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
     } else if (form === "edit" && selectedSchemaId) {
-      updateSchema.mutate({ id: selectedSchemaId, payload: { content } });
+      editSchema.mutate({
+        id: selectedSchemaId,
+        name,
+        customer_type,
+        originalName: schemaDetail?.name ?? "",
+        originalCustomerType: schemaDetail?.customer_type ?? "",
+        content,
+      });
     }
   }
 
@@ -180,10 +189,9 @@ export function OnboardingForm() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="residential">Residential</SelectItem>
-                    <SelectItem value="business">Business</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
-                    <SelectItem value="corporate">Corporate</SelectItem>
+                    {customerTypes.map((ct) => (
+                      <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

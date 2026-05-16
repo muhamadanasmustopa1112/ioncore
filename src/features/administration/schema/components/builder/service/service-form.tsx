@@ -21,11 +21,12 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { serviceFormSchema, type ServiceFormValues } from "../../../types/service-schema";
 import { useSchemaStore } from "../../../store/schema";
-import { useCreateSchema, useUpdateSchemaContent, useSchema, useSchemaVersions } from "../../../api/schema-queries";
+import { useCreateSchema, useEditSchema, useSchema, useSchemaVersions } from "../../../api/schema-queries";
+import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
 
 const DEFAULT_SERVICE: ServiceFormValues = {
   name: "",
-  customer_type: "residential",
+  customer_type: "broadband",
   sla_uptime: 99.0,
   sla_response_hours: 8,
   sla_resolution_hours: 24,
@@ -40,7 +41,7 @@ export function ServiceForm() {
   const { form, activeSchemaType, selectedSchemaId, setFormSubmitter } = useSchemaStore();
   const isDetailMode = form === "details";
   const createSchema = useCreateSchema();
-  const updateSchema = useUpdateSchemaContent();
+  const editSchema = useEditSchema();
 
   const {
     register,
@@ -59,6 +60,7 @@ export function ServiceForm() {
 
   const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
   const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
+  const { data: customerTypes = [] } = useActiveCustomerTypes();
 
   function fromApiContent(c: Record<string, unknown>): Partial<ServiceFormValues> {
     const sla = (c.sla ?? {}) as Record<string, unknown>;
@@ -115,7 +117,14 @@ export function ServiceForm() {
     if (form === "new" || form === "clone") {
       createSchema.mutate({ schema_type: activeSchemaType, name, customer_type, content });
     } else if (form === "edit" && selectedSchemaId) {
-      updateSchema.mutate({ id: selectedSchemaId, payload: { content } });
+      editSchema.mutate({
+        id: selectedSchemaId,
+        name,
+        customer_type,
+        originalName: schemaDetail?.name ?? "",
+        originalCustomerType: schemaDetail?.customer_type ?? "",
+        content,
+      });
     }
   }
 
@@ -163,10 +172,9 @@ export function ServiceForm() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="residential">Residential</SelectItem>
-                    <SelectItem value="business">Business</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
-                    <SelectItem value="corporate">Corporate</SelectItem>
+                    {customerTypes.map((ct) => (
+                      <SelectItem key={ct.id} value={ct.name}>{ct.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
