@@ -63,7 +63,7 @@ export const proofOfWorkItemSchema = z.object({
     "signature",
   ]),
   required: z.boolean(),
-  instruction_markdown: z.string().default(""),
+  instruction_markdown: z.string(),
 });
 
 export const completionRulesSchema = z.object({
