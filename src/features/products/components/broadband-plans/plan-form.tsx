@@ -38,7 +38,7 @@ export function PlanForm({ selected, mode, onSubmit }: PlanFormProps) {
     resolver: zodResolver(schema),
     defaultValues: {
       name: "", speed_download_mbps: 0, speed_upload_mbps: 0,
-      price: 0, one_time_charge: 0, customer_type: "",
+      price: 0, one_time_charge: 0, customer_type: "broadband",
       temporary_activation_window_hours: 24, is_active: true,
     },
   });

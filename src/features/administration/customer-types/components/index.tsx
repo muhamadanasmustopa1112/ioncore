@@ -30,19 +30,24 @@ export function CustomerTypesPage() {
   const [filter, setFilter] = useQueryStates({
     search: parseAsString,
     page: parseAsInteger.withDefault(1),
-    size: parseAsInteger.withDefault(20),
+    limit: parseAsInteger.withDefault(20),
   });
 
   const { data, isLoading } = useCustomerTypeList({
     search: filter.search || undefined,
     page: filter.page,
-    size: filter.size,
+    size: filter.limit,
   });
 
   const deleteType = useDeleteCustomerType();
 
   const items = data?.items ?? [];
   const total = data?.meta?.total ?? 0;
+
+  const setPagination = (updater: (prev: { page: number; limit: number }) => { page: number; limit: number }) => {
+    const next = updater({ page: filter.page, limit: filter.limit });
+    setFilter({ page: next.page, limit: next.limit });
+  };
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [mode, setMode] = useState<"new" | "edit">("new");
@@ -62,9 +67,9 @@ export function CustomerTypesPage() {
     columns,
     data: items,
     manualPagination: true,
-    pageCount: Math.ceil(total / filter.size),
+    pageCount: Math.ceil(total / filter.limit),
     getRowId: (row) => row.id,
-    state: { pagination: { pageIndex: filter.page - 1, pageSize: filter.size } },
+    state: { pagination: { pageIndex: filter.page - 1, pageSize: filter.limit } },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
@@ -114,7 +119,7 @@ export function CustomerTypesPage() {
                     placeholder="Search by name or label…"
                     value={filter.search ?? ""}
                     onChange={(e) =>
-                      setFilter({ search: e.target.value || null, page: 1 })
+                      setFilter({ search: e.target.value || null, page: 1, limit: filter.limit })
                     }
                   />
                 </div>
@@ -130,7 +135,8 @@ export function CustomerTypesPage() {
             </CardTable>
             <CardFooter>
               <DataGridPagination
-                onPageChange={(p) => setFilter({ page: p.pageIndex + 1, size: p.pageSize })}
+                filter={{ page: filter.page, limit: filter.limit }}
+                setFilter={setPagination}
               />
             </CardFooter>
           </Card>
