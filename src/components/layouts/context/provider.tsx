@@ -8,7 +8,7 @@ const queryClient = getQueryClient();
 
 const Provider = ({ children }: { children: React.ReactNode }) => {
 
-  // useFcm(); // Aktifkan kembali jika sudah siap menggunakan notifikasi
+  const { token } = useFcm();
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

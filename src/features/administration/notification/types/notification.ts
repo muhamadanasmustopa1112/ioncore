@@ -32,3 +32,15 @@ export type NotificationParams = {
   page?: number;
   per_page?: number;
 };
+
+export type RegisterDeviceTokenParams = {
+  device_token: string;
+  platform: string;
+  user_id: string;
+};
+
+export type RegisterDeviceTokenResponse = {
+  data: any;
+  message: string;
+  error?: string;
+};

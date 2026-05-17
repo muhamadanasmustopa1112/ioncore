@@ -99,9 +99,9 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
 
       {wo.assignment_sla && (wo.assignment_sla.warning_triggered_at || wo.assignment_sla.breached_at) && (
         <div className={`mb-6 p-4 rounded-xl border-2 flex items-start gap-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300 ${false /* Temporarily forced FALSE */
-            ? "bg-rose-50/80 border-rose-200 dark:bg-rose-950/20 dark:border-rose-900 text-rose-900 dark:text-rose-100"
-            : "bg-amber-50/80 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900 text-amber-900 dark:text-amber-100"
-        }`}>
+          ? "bg-rose-50/80 border-rose-200 dark:bg-rose-950/20 dark:border-rose-900 text-rose-900 dark:text-rose-100"
+          : "bg-amber-50/80 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900 text-amber-900 dark:text-amber-100"
+          }`}>
           <div className={`p-2 rounded-full shrink-0 ${false /* Temporarily forced FALSE */ ? "bg-rose-100 text-rose-600 dark:bg-rose-900" : "bg-amber-100 text-amber-600 dark:bg-amber-900"
             }`}>
             <AlertCircle className="size-6" />
@@ -169,11 +169,10 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
                   <Button variant="outline" size="sm" onClick={() => setShowPairing(true)} className="text-[10px] uppercase font-bold">
                     {hasTeam ? "Reassign" : "Assign"} Pairing
                   </Button>
-                  {!hasTeam && (
-                    <Button variant="outline" size="sm" onClick={() => setShowCrossArea(true)} className="text-[10px] uppercase font-bold">
-                      Cross-Area
-                    </Button>
-                  )}
+
+                  <Button variant="outline" size="sm" onClick={() => setShowCrossArea(true)} className="text-[10px] uppercase font-bold">
+                    Cross-Area
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => setShowReschedule(true)} className="text-[10px] uppercase font-bold">
                     Reschedule
                   </Button>
