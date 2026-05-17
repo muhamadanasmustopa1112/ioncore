@@ -1,11 +1,22 @@
 export type Notification = {
-  id: string;
-  title: string;
-  message: string;
-  type: string;
-  is_read: boolean;
-  created_at: string;
-  data?: Record<string, any>;
+  ID: string;
+  UserID: string;
+  DeviceToken: string;
+  Title: string;
+  Body: string;
+  Data: Record<string, any>;
+  FCMMessageID: string;
+  FCMStatus: string;
+  ErrorMessage: string | null;
+  OutboxID: string;
+  CreatedAt: string;
+  CreatedBy: string;
+  UpdatedAt: string;
+  UpdatedBy: string;
+  DeletedAt: string | null;
+  DeletedBy: string | null;
+  // TODO: Add IsRead if backend supports it
+  IsRead?: boolean;
 };
 
 export type NotificationResponse = {
