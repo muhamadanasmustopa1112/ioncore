@@ -60,10 +60,16 @@ const STATUSES: { value: LeadStatus; label: string }[] = [
 
 const SOURCES: { value: LeadSource; label: string }[] = [
   { value: "referral", label: "Referral" },
-  { value: "website", label: "Website" },
   { value: "cold_call", label: "Cold Call" },
-  { value: "cs", label: "Customer Service" },
-  { value: "other", label: "Other" },
+  { value: "website", label: "Website" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "social_media_dm", label: "Social Media DM" },
+  { value: "voip_call", label: "VoIP Call" },
+  { value: "line_call", label: "Line Call" },
+  { value: "walk_in", label: "Walk In" },
+  { value: "event", label: "Event" },
+  { value: "partner", label: "Partner" },
+  { value: "cs_referral", label: "CS Referral" },
 ];
 
 const STATUS_STYLES: Record<CustomerStatus, string> = {

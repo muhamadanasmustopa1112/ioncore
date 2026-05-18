@@ -12,7 +12,18 @@ export interface PaginationMeta {
 
 export type LeadType = "broadband" | "enterprise";
 export type CustomerSubType = "residential" | "business";
-export type LeadSource = "referral" | "website" | "cold_call" | "cs" | "other";
+export type LeadSource =
+  | "referral"
+  | "cold_call"
+  | "website"
+  | "whatsapp"
+  | "social_media_dm"
+  | "voip_call"
+  | "line_call"
+  | "walk_in"
+  | "event"
+  | "partner"
+  | "cs_referral";
 export type LeadStatus =
   | "new"
   | "active"
