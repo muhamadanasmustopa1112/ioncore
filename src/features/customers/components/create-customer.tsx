@@ -1,11 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import {
   Toolbar,
@@ -15,10 +32,25 @@ import {
 } from "@/components/common/toolbar";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
 import { createLead } from "@/features/leads/api/leads-api";
+import type { LeadSource } from "@/features/leads/types/leads-api";
 import { uploadImageToS3 } from "@/lib/s3-upload";
 import { paths } from "@/config/paths";
-import { useCreateCustomer } from "../api/customers-queries";
+import { useCreateCustomer, useReferrerCustomers } from "../api/customers-queries";
 import type { CreateCustomerPayload, CustomerType } from "../types/customers-api";
+
+const SOURCES: { value: LeadSource; label: string }[] = [
+  { value: "referral", label: "Referral" },
+  { value: "cold_call", label: "Cold Call" },
+  { value: "website", label: "Website" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "social_media_dm", label: "Social Media DM" },
+  { value: "voip_call", label: "VoIP Call" },
+  { value: "line_call", label: "Line Call" },
+  { value: "walk_in", label: "Walk In" },
+  { value: "event", label: "Event" },
+  { value: "partner", label: "Partner" },
+  { value: "cs_referral", label: "CS Referral" },
+];
 import {
   AssignmentSection,
   ContactSection,
@@ -46,6 +78,10 @@ export function CreateCustomer() {
   const [companyName, setCompanyName] = useState("");
   const [branchId, setBranchId] = useState("");
   const [accountManagerId, setAccountManagerId] = useState("");
+  const [source, setSource] = useState<LeadSource>("walk_in");
+  const [referrerOpen, setReferrerOpen] = useState(false);
+  const [referrerSearch, setReferrerSearch] = useState("");
+  const [referrerCustomerId, setReferrerCustomerId] = useState<string | null>(null);
 
   const ktpEntryMode = "ocr" as const;
   const [ktpAddress, setKtpAddress] = useState("");
@@ -64,6 +100,13 @@ export function CreateCustomer() {
     installLat !== INSTALL_DEFAULT[0] || installLng !== INSTALL_DEFAULT[1];
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList({ level: "sub_area" });
+  const { data: referrerData } = useReferrerCustomers(
+    source === "referral" ? { search: referrerSearch || undefined, size: 20 } : {}
+  );
+  const referrerOptions = useMemo(
+    () => (source === "referral" ? (referrerData?.items ?? []) : []),
+    [source, referrerData]
+  );
   const createCustomer = useCreateCustomer();
 
   const activeBranches = branches.filter((b) => b.active);
@@ -163,9 +206,9 @@ export function CreateCustomer() {
             lead_type: "broadband",
             customer_sub_type: customerType === "residential" ? "residential" : "business",
             lead_name: fullName.trim(),
-            source: "other",
+            source,
             branch_id: branchId,
-            referrer_customer_id: null,
+            referrer_customer_id: source === "referral" && referrerCustomerId ? referrerCustomerId : null,
             status: "converted",
             ...(nik.trim() ? { nik: nik.trim() } : {}),
             ...(installMoved ? { latitude: installLat, longitude: installLng } : {}),
@@ -255,6 +298,57 @@ export function CreateCustomer() {
             accountManagerId={accountManagerId} setAccountManagerId={setAccountManagerId}
             activeBranches={activeBranches} branchesLoading={branchesLoading}
           />
+
+          <Card>
+            <CardContent className="p-5 space-y-4">
+              <p className="text-sm font-semibold">Lead Source</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium text-muted-foreground">Source</Label>
+                  <Select value={source} onValueChange={(v) => { setSource(v as LeadSource); setReferrerCustomerId(null); }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {SOURCES.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {source === "referral" && (
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-muted-foreground">Referrer Customer</Label>
+                    <Popover open={referrerOpen} onOpenChange={setReferrerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
+                          {referrerCustomerId
+                            ? referrerOptions.find((c) => c.id === referrerCustomerId)?.full_name ?? "Select customer"
+                            : "Select customer"}
+                          <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[300px] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Search customer…" value={referrerSearch} onValueChange={setReferrerSearch} />
+                          <CommandList>
+                            <CommandEmpty>No customer found.</CommandEmpty>
+                            <CommandGroup>
+                              {referrerOptions.map((c) => (
+                                <CommandItem key={c.id} value={c.id} onSelect={() => { setReferrerCustomerId(c.id); setReferrerOpen(false); }}>
+                                  <Check className={`mr-2 size-4 ${referrerCustomerId === c.id ? "opacity-100" : "opacity-0"}`} />
+                                  {c.full_name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           <InstallationSection
             lat={installLat}
             lng={installLng}
