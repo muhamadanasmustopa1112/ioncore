@@ -193,6 +193,7 @@ function StaticMap({ rings, pinLat, pinLng }: { rings: LngLat[][]; pinLat?: numb
         attributionControl={false}
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <MapResizeController />
         {rings.map((ring, i) => (
           <Polygon
             key={i}

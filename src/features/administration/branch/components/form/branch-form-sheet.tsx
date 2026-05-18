@@ -54,7 +54,7 @@ export function BranchFormSheet() {
       address: formData.address,
       geographic_polygon: formData.geographic_polygon,
       lat: formData.lat,
-      long: formData.long,
+      lon: formData.long,
     };
 
     if (isNewMode) {

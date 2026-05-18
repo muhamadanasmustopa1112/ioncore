@@ -133,6 +133,7 @@ export interface BranchDetailDto {
   cable_route_factor?: number;
   geographic_polygon?: GeographicPolygon | string | null;
   lat?: number | null;
+  lon?: number | null;
   long?: number | null;
   branch_regional?: { id: string; branch_name: string } | null;
   branch_area?: { id: string; branch_name: string } | null;
