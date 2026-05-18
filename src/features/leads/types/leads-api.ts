@@ -43,6 +43,7 @@ export interface LeadDto {
   referrer_customer_id: string | null;
   assigned_sales_id: string;
   branch_id: string;
+  branch_name?: string | null;
   status: LeadStatus;
   cable_distance_meters: number;
   is_excess_cable_accepted: boolean;
