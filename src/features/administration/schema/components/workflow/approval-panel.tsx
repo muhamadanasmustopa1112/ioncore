@@ -64,17 +64,19 @@ export function ApprovalPanel() {
     ? (versions?.find((v) => v.version === schema.latest_version) ?? null)
     : null;
 
-  // Fetch v1.3 (latest) for status detection — it carries "ROLLBACK" status.
-  // rollbackVersion (v1.1) is the target to publish, NOT what we use for status.
   const { data: liveVersion } = useSchemaVersion(
     approvalPanelOpen ? latestDraftVersion?.id ?? null : null
   );
   const versionStatus = (liveVersion?.status ?? latestDraftVersion?.status)?.toUpperCase();
-  const isRollback = versionStatus === "ROLLBACK";
-const { data: approvalRaw } = useVersionApproval(
+  // latestDraftVersion.status (versions list) is more reliable than liveVersion (single endpoint can lag).
+  // schema.schema_status is empty on single-schema endpoint, so use all three signals.
+  const isRollback =
+    versionStatus === "ROLLBACK" ||
+    latestDraftVersion?.status?.toUpperCase() === "ROLLBACK" ||
+    schema?.schema_status?.toUpperCase() === "ROLLBACK";
+  const { data: approvalRaw } = useVersionApproval(
     approvalPanelOpen ? latestDraftVersion?.id ?? null : null
   );
-
   // Guard: only trust approval if it belongs to the current version.
   // placeholderData keeps stale published-version approval alive when a new draft
   // is created, which falsely pushes workflowStatus to "REVIEW".

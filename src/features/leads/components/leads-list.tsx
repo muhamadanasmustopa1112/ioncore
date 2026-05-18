@@ -126,15 +126,15 @@ export function LeadsList() {
       size: 110,
     },
     {
-      id: "branch_id",
-      accessorKey: "branch_id",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Branch ID" className="font-semibold" />,
+      id: "branch_name",
+      accessorKey: "branch_name",
+      header: ({ column }) => <DataGridColumnHeader column={column} title="Branch" className="font-semibold" />,
       cell: ({ row }) => (
-        <span className="font-mono text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded">
-          {row.original.branch_id}
+        <span className="text-sm font-medium">
+          {row.original.branch_name ?? "-"}
         </span>
       ),
-      size: 240,
+      size: 200,
     },
     {
       id: "cable_distance_meters",
