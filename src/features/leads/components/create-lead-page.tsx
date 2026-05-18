@@ -36,7 +36,7 @@ import type { CustomerStatus } from "@/features/customers/types/customers-api";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { paths } from "@/config/paths";
 import { useCreateLead } from "../api/leads-queries";
-import type { CustomerSubType, LeadSource, LeadType } from "../types/leads-api";
+import type { CustomerSubType, LeadSource, LeadStatus, LeadType } from "../types/leads-api";
 
 const LEAD_TYPES: { value: LeadType; label: string }[] = [
   { value: "broadband", label: "Broadband" },
@@ -46,6 +46,16 @@ const LEAD_TYPES: { value: LeadType; label: string }[] = [
 const SUB_TYPES: { value: CustomerSubType; label: string }[] = [
   { value: "residential", label: "Residential" },
   { value: "business", label: "Business" },
+];
+
+const STATUSES: { value: LeadStatus; label: string }[] = [
+  { value: "new", label: "New" },
+  { value: "potential", label: "Potential" },
+  { value: "warm", label: "Warm" },
+  { value: "hot", label: "Hot" },
+  { value: "active", label: "Active" },
+  { value: "converted", label: "Converted" },
+  { value: "lost", label: "Lost" },
 ];
 
 const SOURCES: { value: LeadSource; label: string }[] = [
@@ -90,6 +100,7 @@ export function CreateLeadPage() {
   const [leadType, setLeadType] = useState<LeadType>("broadband");
   const [subType, setSubType] = useState<CustomerSubType>("residential");
   const [source, setSource] = useState<LeadSource>("referral");
+  const [status, setStatus] = useState<LeadStatus>("new");
   const [referrerCustomerId, setReferrerCustomerId] = useState("");
   const [branchId, setBranchId] = useState("");
   const [nik, setNik] = useState("");
@@ -139,7 +150,7 @@ export function CreateLeadPage() {
         source,
         branch_id: branchId,
         referrer_customer_id: source === "referral" && referrerCustomerId ? referrerCustomerId : null,
-        status: "potential",
+        status,
         ...(nik.trim() ? { nik: nik.trim() } : {}),
         ...(pinMoved ? { latitude: lat, longitude: lng } : {}),
       });
@@ -316,6 +327,17 @@ export function CreateLeadPage() {
                 </Select>
               </FieldRow>
 
+              <FieldRow label="Status" required>
+                <Select value={status} onValueChange={(v) => setStatus(v as LeadStatus)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {STATUSES.map((s) => (
+                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FieldRow>
+
               <FieldRow label="NIK">
                 <input
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -347,6 +369,7 @@ export function CreateLeadPage() {
                   { label: "Name", value: leadName || null },
                   { label: "NIK", value: nik || null },
                   { label: "Source", value: source.replace("_", " ") },
+                  { label: "Status", value: STATUSES.find((s) => s.value === status)?.label ?? status },
                   { label: "Branch", value: activeBranches.find((b) => b.id === branchId)?.name ?? null },
                   { label: "Referrer", value: selectedCustomer?.full_name ?? null },
                   { label: "Coords", value: pinMoved ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : null },
