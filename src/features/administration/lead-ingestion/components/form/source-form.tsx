@@ -288,10 +288,16 @@ export function SourceForm({ onSubmit }: Props) {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="referral">Referral</SelectItem>
-                    <SelectItem value="website">Website</SelectItem>
                     <SelectItem value="cold_call">Cold Call</SelectItem>
-                    <SelectItem value="cs">CS</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="website">Website</SelectItem>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                    <SelectItem value="social_media_dm">Social Media DM</SelectItem>
+                    <SelectItem value="voip_call">VoIP Call</SelectItem>
+                    <SelectItem value="line_call">Line Call</SelectItem>
+                    <SelectItem value="walk_in">Walk In</SelectItem>
+                    <SelectItem value="event">Event</SelectItem>
+                    <SelectItem value="partner">Partner</SelectItem>
+                    <SelectItem value="cs_referral">CS Referral</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
