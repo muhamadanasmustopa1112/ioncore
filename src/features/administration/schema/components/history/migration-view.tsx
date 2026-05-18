@@ -25,6 +25,13 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
   useSchemas,
   useSchemaVersions,
   useCustomerSchemasByVersion,
@@ -55,11 +62,279 @@ function CustomerRow({ item }: { item: CustomerSchema }) {
   );
 }
 
+// ── Client-side diff ────────────────────────────────────────────────────────
+
+type PowItem = {
+  item_id: string;
+  item_label: string;
+  field_type: string;
+  category: string;
+  required: boolean;
+  order: number;
+};
+
+type DiffRow =
+  | { kind: "added";    label: string; value: string }
+  | { kind: "removed";  label: string; value: string }
+  | { kind: "modified"; label: string; from: string; to: string };
+
+function fmt(v: unknown): string {
+  if (v === null || v === undefined || v === "") return "—";
+  if (typeof v === "boolean") return v ? "true" : "false";
+  if (typeof v === "object") return JSON.stringify(v);
+  return String(v);
+}
+
+function diffObjects(
+  from: Record<string, unknown>,
+  to: Record<string, unknown>,
+  prefix = "",
+): DiffRow[] {
+  const rows: DiffRow[] = [];
+  const allKeys = Array.from(new Set([...Object.keys(from), ...Object.keys(to)]));
+  allKeys.forEach((k) => {
+    const label = prefix ? `${prefix}.${k}` : k;
+    if (!(k in from)) {
+      rows.push({ kind: "added", label, value: fmt(to[k]) });
+    } else if (!(k in to)) {
+      rows.push({ kind: "removed", label, value: fmt(from[k]) });
+    } else if (JSON.stringify(from[k]) !== JSON.stringify(to[k])) {
+      rows.push({ kind: "modified", label, from: fmt(from[k]), to: fmt(to[k]) });
+    }
+  });
+  return rows;
+}
+
+function diffPow(fromArr: PowItem[], toArr: PowItem[]): DiffRow[] {
+  const rows: DiffRow[] = [];
+  const fromMap = new Map(fromArr.map((x) => [x.item_id, x]));
+  const toMap   = new Map(toArr.map((x) => [x.item_id, x]));
+
+  toMap.forEach((item, id) => {
+    if (!fromMap.has(id)) {
+      rows.push({ kind: "added", label: `proof_of_work: "${item.item_label}"`, value: `${item.field_type} · ${item.category}` });
+    }
+  });
+  fromMap.forEach((item, id) => {
+    if (!toMap.has(id)) {
+      rows.push({ kind: "removed", label: `proof_of_work: "${item.item_label}"`, value: `${item.field_type} · ${item.category}` });
+    }
+  });
+  fromMap.forEach((fromItem, id) => {
+    const toItem = toMap.get(id);
+    if (!toItem) return;
+    const fields: (keyof PowItem)[] = ["item_label", "field_type", "category", "required", "order"];
+    fields.forEach((f) => {
+      if (String(fromItem[f]) !== String(toItem[f])) {
+        rows.push({
+          kind: "modified",
+          label: `proof_of_work[${fromItem.item_label}].${f}`,
+          from: fmt(fromItem[f]),
+          to: fmt(toItem[f]),
+        });
+      }
+    });
+  });
+  return rows;
+}
+
+function computeDiff(
+  fromContent: Record<string, unknown>,
+  toContent: Record<string, unknown>,
+): DiffRow[] {
+  const rows: DiffRow[] = [];
+
+  // scalar top-level
+  for (const k of ["wo_type", "product_type"]) {
+    if (JSON.stringify(fromContent[k]) !== JSON.stringify(toContent[k])) {
+      rows.push({ kind: "modified", label: k, from: fmt(fromContent[k]), to: fmt(toContent[k]) });
+    }
+  }
+
+  // proof_of_work array
+  rows.push(...diffPow(
+    (fromContent.proof_of_work as PowItem[] | undefined) ?? [],
+    (toContent.proof_of_work  as PowItem[] | undefined) ?? [],
+  ));
+
+  // completion_rules
+  if (fromContent.completion_rules || toContent.completion_rules) {
+    rows.push(...diffObjects(
+      (fromContent.completion_rules as Record<string, unknown>) ?? {},
+      (toContent.completion_rules  as Record<string, unknown>) ?? {},
+      "completion_rules",
+    ));
+  }
+
+  // customer_sign_off
+  if (fromContent.customer_sign_off || toContent.customer_sign_off) {
+    rows.push(...diffObjects(
+      (fromContent.customer_sign_off as Record<string, unknown>) ?? {},
+      (toContent.customer_sign_off  as Record<string, unknown>) ?? {},
+      "customer_sign_off",
+    ));
+  }
+
+  return rows;
+}
+
+// ── Diff row renderers ───────────────────────────────────────────────────────
+
+function AddedRow({ row }: { row: Extract<DiffRow, { kind: "added" }> }) {
+  return (
+    <div className="flex items-start gap-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2">
+      <span className="text-emerald-600 font-bold text-xs w-4 shrink-0 mt-0.5">+</span>
+      <div className="min-w-0">
+        <span className="font-mono text-xs text-emerald-700 dark:text-emerald-400 font-semibold">{row.label}</span>
+        <span className="font-mono text-xs text-emerald-600 dark:text-emerald-300 ml-2">{row.value}</span>
+      </div>
+    </div>
+  );
+}
+
+function RemovedRow({ row }: { row: Extract<DiffRow, { kind: "removed" }> }) {
+  return (
+    <div className="flex items-start gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-3 py-2">
+      <span className="text-destructive font-bold text-xs w-4 shrink-0 mt-0.5">−</span>
+      <div className="min-w-0">
+        <span className="font-mono text-xs text-red-700 dark:text-red-400 font-semibold">{row.label}</span>
+        <span className="font-mono text-xs text-red-600 dark:text-red-300 ml-2 line-through">{row.value}</span>
+      </div>
+    </div>
+  );
+}
+
+function ModifiedRow({ row }: { row: Extract<DiffRow, { kind: "modified" }> }) {
+  return (
+    <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2">
+      <span className="text-amber-500 font-bold text-xs w-4 shrink-0 mt-0.5">~</span>
+      <div className="min-w-0 space-y-0.5">
+        <span className="font-mono text-xs text-amber-700 dark:text-amber-400 font-semibold block">{row.label}</span>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="font-mono text-xs text-red-600 dark:text-red-400 line-through">{row.from}</span>
+          <span className="text-muted-foreground text-xs">→</span>
+          <span className="font-mono text-xs text-emerald-600 dark:text-emerald-400">{row.to}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Confirm dialog ───────────────────────────────────────────────────────────
+
+function MigrationConfirmDialog({
+  open,
+  onOpenChange,
+  fromVersion,
+  toVersion,
+  fromContent,
+  toContent,
+  customerCount,
+  isPending,
+  onConfirm,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  fromVersion: string;
+  toVersion: string;
+  fromContent: Record<string, unknown> | null;
+  toContent: Record<string, unknown> | null;
+  customerCount: number;
+  isPending: boolean;
+  onConfirm: () => void;
+}) {
+  const rows = fromContent && toContent ? computeDiff(fromContent, toContent) : [];
+  const added    = rows.filter((r) => r.kind === "added")    as Extract<DiffRow, { kind: "added" }>[];
+  const removed  = rows.filter((r) => r.kind === "removed")  as Extract<DiffRow, { kind: "removed" }>[];
+  const modified = rows.filter((r) => r.kind === "modified") as Extract<DiffRow, { kind: "modified" }>[];
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col gap-0 p-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <RiExchangeLine className="size-4 text-primary" />
+            Confirm Migration
+          </DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            {customerCount} customer(s) will move from{" "}
+            <span className="font-mono font-semibold text-foreground">{fromVersion}</span>
+            {" → "}
+            <span className="font-mono font-semibold text-foreground">{toVersion}</span>.
+            Each migration is logged to the audit trail.
+          </p>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+          {rows.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-6">
+              No differences detected between versions.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {added.length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
+                    Added ({added.length})
+                  </p>
+                  <div className="space-y-1.5">
+                    {added.map((r, i) => <AddedRow key={i} row={r} />)}
+                  </div>
+                </div>
+              )}
+              {removed.length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-destructive">
+                    Removed ({removed.length})
+                  </p>
+                  <div className="space-y-1.5">
+                    {removed.map((r, i) => <RemovedRow key={i} row={r} />)}
+                  </div>
+                </div>
+              )}
+              {modified.length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-amber-600">
+                    Modified ({modified.length})
+                  </p>
+                  <div className="space-y-1.5">
+                    {modified.map((r, i) => <ModifiedRow key={i} row={r} />)}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="px-6 py-4 border-t border-border shrink-0 flex items-center justify-between sm:justify-between gap-3">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1"><span className="text-emerald-600 font-bold">+</span> Added</span>
+            <span className="text-border mx-1">·</span>
+            <span className="inline-flex items-center gap-1"><span className="text-destructive font-bold">−</span> Removed</span>
+            <span className="text-border mx-1">·</span>
+            <span className="inline-flex items-center gap-1"><span className="text-amber-500 font-bold">~</span> Modified</span>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={isPending}>
+              Cancel
+            </Button>
+            <Button variant="primary" size="sm" disabled={isPending} onClick={onConfirm}>
+              <RiExchangeLine className="size-4" />
+              {isPending ? "Migrating…" : `Migrate ${customerCount} Customer(s)`}
+            </Button>
+          </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?: string }) {
   const [schemaId, setSchemaId] = useState(initialSchemaId);
   const [schemaOpen, setSchemaOpen] = useState(false);
   const [fromVersionId, setFromVersionId] = useState("");
   const [toVersionId, setToVersionId] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   // nuqs hydrates URL params after mount — sync once the value becomes available
   useEffect(() => {
@@ -114,11 +389,12 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
     setToVersionId("");
   }
 
-  function handleMigrate() {
+  function executeMigrate() {
     migrate.mutate(
       { original_schema_version_id: fromVersionId, new_schema_version_id: toVersionId },
       {
         onSuccess: () => {
+          setConfirmOpen(false);
           toast.success(`Migration triggered for ${rows.length} customer(s).`);
           setTimeout(() => refetchCustomers(), 2000);
         },
@@ -128,7 +404,13 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
     );
   }
 
-  const canMigrate = !!fromVersionId && !!toVersionId && rows.length > 0;
+  const fromVersionObj = allVersions.find((v) => v.id === fromVersionId);
+  const toVersionObj   = allVersions.find((v) => v.id === toVersionId);
+  const fromVersion    = fromVersionObj?.version ?? fromVersionId;
+  const toVersion      = toVersionObj?.version ?? toVersionId;
+  const fromContent    = (fromVersionObj?.content as Record<string, unknown> | undefined) ?? null;
+  const toContent      = (toVersionObj?.content   as Record<string, unknown> | undefined) ?? null;
+  const canMigrate     = !!fromVersionId && !!toVersionId && rows.length > 0;
 
   return (
     <div className="space-y-5">
@@ -258,24 +540,25 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
       )}
 
       {canMigrate && (
-        <>
-          <div className="rounded-lg border border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-4 space-y-1">
-            <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
-              ⚠ Confirm Migration
-            </p>
-            <p className="text-sm text-amber-700 dark:text-amber-300">
-              {rows.length} customer(s) will be migrated to the new schema version. Each migration
-              is logged to the audit trail.
-            </p>
-          </div>
-          <div className="flex justify-end">
-            <Button variant="primary" disabled={migrate.isPending} onClick={handleMigrate}>
-              <RiExchangeLine className="size-4" />
-              {migrate.isPending ? "Migrating…" : `Migrate ${rows.length} Customer(s)`}
-            </Button>
-          </div>
-        </>
+        <div className="flex justify-end">
+          <Button variant="primary" onClick={() => setConfirmOpen(true)}>
+            <RiExchangeLine className="size-4" />
+            {`Migrate ${rows.length} Customer(s)`}
+          </Button>
+        </div>
       )}
+
+      <MigrationConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        fromVersion={fromVersion}
+        toVersion={toVersion}
+        fromContent={fromContent}
+        toContent={toContent}
+        customerCount={rows.length}
+        isPending={migrate.isPending}
+        onConfirm={executeMigrate}
+      />
     </div>
   );
 }

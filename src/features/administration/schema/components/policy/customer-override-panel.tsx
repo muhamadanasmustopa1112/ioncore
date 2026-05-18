@@ -40,9 +40,9 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
             <div className="flex items-center gap-2 flex-wrap">
               <Link
                 href={`/crm-and-sales/${item.customer_id}`}
-                className="font-semibold text-sm font-mono truncate hover:underline text-primary"
+                className="font-semibold text-sm truncate hover:underline text-primary"
               >
-                {item.customer_id}
+                {item.customer_name ?? item.customer_id}
               </Link>
               {item.schema_type && (
                 <Badge variant="info" appearance="light" className="text-[11px] px-2 capitalize">
@@ -120,7 +120,8 @@ export function CustomerOverridePanel() {
   const filtered = search
     ? rows.filter((o) => {
         const q = search.toLowerCase();
-        return o.customer_id.toLowerCase().includes(q) ||
+        return (o.customer_name ?? o.customer_id).toLowerCase().includes(q) ||
+          o.customer_id.toLowerCase().includes(q) ||
           o.schema_id.toLowerCase().includes(q) ||
           o.schema_type.toLowerCase().includes(q);
       })
