@@ -10,7 +10,8 @@ import {
   useAdminBroadbandPlan,
   useAddBranchToBroadbandPlan, useRemoveBranchFromBroadbandPlan,
 } from "../../api/products-queries";
-import { useCreateBroadbandPlanSchema } from "@/features/rule-schema";
+import { useCreateBroadbandPlanSchema, useDeleteBroadbandPlanSchema, useBroadbandPlanSchemas } from "@/features/rule-schema";
+import type { EditSchemaChange } from "./plan-schema-tab";
 import { SCHEMA_TYPE_OPTIONS } from "@/features/administration/schema/types/schema-type-constants";
 import type { BroadbandPlan, CreateBroadbandPlanPayload, ProductEnvelope } from "../../types/products";
 import { PlanForm } from "./plan-form";
@@ -31,26 +32,65 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
   const [customerType, setCustomerType] = useState(selected?.customer_type ?? "broadband");
   const [isFormDirty, setIsFormDirty] = useState(false);
 
+  // edit-mode buffered branch changes
+  const [editBranchAdds, setEditBranchAdds] = useState<string[]>([]);
+  const [editBranchRemoves, setEditBranchRemoves] = useState<string[]>([]);
+
+  // edit-mode buffered schema changes
+  const [editSchemaChanges, setEditSchemaChanges] = useState<Record<string, EditSchemaChange>>({});
+
   const { data: detail } = useAdminBroadbandPlan(
     open && mode !== "new" && selected ? selected.id : null
   );
   const planData = mode === "new" ? null : (detail ?? selected);
+
+  const { data: schemasEnv } = useBroadbandPlanSchemas(
+    open && mode === "edit" && planData ? { broadband_plan_id: planData.id, size: 100 } : undefined
+  );
+  const liveSchemas = schemasEnv?.data?.broadband_plan_schemas ?? [];
 
   const create = useCreateBroadbandPlan();
   const update = useUpdateBroadbandPlan();
   const addBranch = useAddBranchToBroadbandPlan();
   const removeBranch = useRemoveBranchFromBroadbandPlan();
   const assignSchema = useCreateBroadbandPlanSchema();
-  const isPending = create.isPending || update.isPending;
-  const branchPending = addBranch.isPending || removeBranch.isPending;
+  const deleteSchema = useDeleteBroadbandPlanSchema();
+
+  const anyPending =
+    create.isPending || update.isPending ||
+    addBranch.isPending || removeBranch.isPending ||
+    assignSchema.isPending || deleteSchema.isPending;
+
+  const isEditDirty =
+    isFormDirty ||
+    editBranchAdds.length > 0 ||
+    editBranchRemoves.length > 0 ||
+    Object.keys(editSchemaChanges).length > 0;
 
   const handleClose = () => {
     setActiveTab("details");
     setPendingBranchIds([]);
     setPendingSchemas([]);
     setCustomerType("broadband");
+    setEditBranchAdds([]);
+    setEditBranchRemoves([]);
+    setEditSchemaChanges({});
     onClose();
   };
+
+  const getEffectiveBranchCount = () =>
+    [
+      ...(planData?.branches ?? []).map((b) => b.id).filter((id) => !editBranchRemoves.includes(id)),
+      ...editBranchAdds,
+    ].length;
+
+  const getUncoveredSchemaCount = () =>
+    SCHEMA_TYPE_OPTIONS.filter((opt) => {
+      const change = editSchemaChanges[opt.value];
+      if (change?.action === "remove") return true;
+      if (change?.action === "assign") return false;
+      return !liveSchemas.find((r) => r.schema_type === opt.value);
+    }).length;
 
   const handleSubmit = (payload: CreateBroadbandPlanPayload) => {
     if (mode === "new") {
@@ -78,7 +118,7 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (mode === "new") {
       if (pendingBranchIds.length === 0) {
         setActiveTab("branches");
@@ -90,12 +130,67 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
         toast.error(`All ${SCHEMA_TYPE_OPTIONS.length} schema types must be assigned before creating a plan.`);
         return;
       }
+      const fn = (window as unknown as Record<string, unknown>).__productFormSubmit;
+      if (typeof fn === "function") (fn as () => void)();
+      else setActiveTab("details");
+      return;
     }
-    const fn = (window as unknown as Record<string, unknown>).__productFormSubmit;
-    if (typeof fn === "function") {
-      (fn as () => void)();
-    } else {
-      setActiveTab("details");
+
+    if (mode === "edit") {
+      if (getEffectiveBranchCount() === 0) {
+        setActiveTab("branches");
+        toast.error("At least 1 branch must be assigned to this plan.");
+        return;
+      }
+      if (getUncoveredSchemaCount() > 0) {
+        setActiveTab("schemas");
+        toast.error(`All ${SCHEMA_TYPE_OPTIONS.length} schema types must be assigned.`);
+        return;
+      }
+
+      if (isFormDirty) {
+        const fn = (window as unknown as Record<string, unknown>).__productFormSubmit;
+        if (typeof fn === "function") (fn as () => void)();
+        else setActiveTab("details");
+      }
+
+      const branchDirty = editBranchAdds.length > 0 || editBranchRemoves.length > 0;
+      const schemaDirty = Object.keys(editSchemaChanges).length > 0;
+
+      if (!branchDirty && !schemaDirty) return;
+
+      try {
+        await Promise.all([
+          branchDirty && editBranchAdds.length > 0
+            ? addBranch.mutateAsync({ planId: planData!.id, branchIds: editBranchAdds })
+            : Promise.resolve(),
+          ...(branchDirty
+            ? editBranchRemoves.map((branchId) =>
+                removeBranch.mutateAsync({ planId: planData!.id, branchId })
+              )
+            : []),
+          ...(schemaDirty
+            ? Object.entries(editSchemaChanges).map(async ([schemaType, change]) => {
+                if (change.action === "remove") {
+                  await deleteSchema.mutateAsync(change.removeRecordId);
+                } else {
+                  if (change.removeRecordId) await deleteSchema.mutateAsync(change.removeRecordId);
+                  await assignSchema.mutateAsync({
+                    broadband_plan_id: planData!.id,
+                    schema_id: change.schemaId,
+                    schema_type: schemaType,
+                  });
+                }
+              })
+            : []),
+        ]);
+
+        if (branchDirty) { setEditBranchAdds([]); setEditBranchRemoves([]); }
+        if (schemaDirty) setEditSchemaChanges({});
+        if (branchDirty || schemaDirty) toast.success("Changes saved.");
+      } catch {
+        toast.error("Failed to save changes.");
+      }
     }
   };
 
@@ -107,7 +202,6 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
 
   const schemaBadgeCount = mode === "new" ? pendingSchemas.length : 0;
   const allSchemasAssigned = pendingSchemas.length >= SCHEMA_TYPE_OPTIONS.length;
-
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && handleClose()}>
@@ -156,16 +250,24 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
                 />
               ) : planData ? (
                 <BranchAvailability
-                  assignedBranchIds={(planData.branches ?? []).map((b) => b.id)}
-                  onAdd={(branchId) => addBranch.mutate({ planId: planData.id, branchIds: [branchId] })}
-                  onRemove={(branchId) => {
-                    if ((planData.branches ?? []).length <= 1) {
-                      toast.error("At least 1 branch must remain assigned to this plan.");
-                      return;
-                    }
-                    removeBranch.mutate({ planId: planData.id, branchId });
+                  assignedBranchIds={[
+                    ...(planData.branches ?? [])
+                      .map((b) => b.id)
+                      .filter((id) => !editBranchRemoves.includes(id)),
+                    ...editBranchAdds,
+                  ]}
+                  onAdd={(branchId) => {
+                    setEditBranchAdds((prev) => prev.includes(branchId) ? prev : [...prev, branchId]);
+                    setEditBranchRemoves((prev) => prev.filter((id) => id !== branchId));
                   }}
-                  isPending={branchPending}
+                  onRemove={(branchId) => {
+                    if (editBranchAdds.includes(branchId)) {
+                      setEditBranchAdds((prev) => prev.filter((id) => id !== branchId));
+                    } else {
+                      setEditBranchRemoves((prev) => prev.includes(branchId) ? prev : [...prev, branchId]);
+                    }
+                  }}
+                  isPending={false}
                   readOnly={mode === "details"}
                 />
               ) : null}
@@ -187,6 +289,23 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
                   planId={planData.id}
                   customerType={planData.customer_type}
                   readOnly={mode === "details"}
+                  editChanges={mode === "edit" ? editSchemaChanges : undefined}
+                  onEditChange={
+                    mode === "edit"
+                      ? (schemaType, change) =>
+                          setEditSchemaChanges((prev) => ({ ...prev, [schemaType]: change }))
+                      : undefined
+                  }
+                  onEditUndo={
+                    mode === "edit"
+                      ? (schemaType) =>
+                          setEditSchemaChanges((prev) => {
+                            const next = { ...prev };
+                            delete next[schemaType];
+                            return next;
+                          })
+                      : undefined
+                  }
                 />
               ) : null}
             </TabsContent>
@@ -195,22 +314,19 @@ export function PlanSheet({ open, mode, selected, onClose }: PlanSheetProps) {
 
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
           <>
-            <Button variant="ghost" onClick={handleClose}>Close</Button>
+            <Button variant="ghost" onClick={handleClose}>
+              {mode === "new" ? "Cancel" : "Close"}
+            </Button>
             <div className="flex-1" />
-            {(mode === "new" || activeTab === "details") && (
-              <>
-                {mode === "new" && (
-                  <Button variant="outline" onClick={handleClose} className="mr-3" disabled={isPending}>Cancel</Button>
-                )}
-                <Button
-                  variant="primary"
-                  onClick={handleSave}
-                  disabled={mode === "details" || isPending || (mode === "edit" && !isFormDirty)}
-                  className="font-semibold"
-                >
-                  {isPending ? "Saving..." : mode === "new" ? "Create Plan" : "Save Changes"}
-                </Button>
-              </>
+            {mode !== "details" && (
+              <Button
+                variant="primary"
+                onClick={handleSave}
+                disabled={anyPending || (mode === "edit" && !isEditDirty)}
+                className="font-semibold"
+              >
+                {anyPending ? "Saving..." : mode === "new" ? "Create Plan" : "Save Changes"}
+              </Button>
             )}
           </>
         </SheetFooter>

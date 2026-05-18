@@ -38,6 +38,10 @@ export interface PendingSchema {
   schemaType: string;
 }
 
+export type EditSchemaChange =
+  | { action: "assign"; schemaId: string; schemaName: string; removeRecordId?: string }
+  | { action: "remove"; removeRecordId: string };
+
 interface PlanSchemaTabProps {
   planId: string | null;
   readOnly?: boolean;
@@ -46,6 +50,10 @@ interface PlanSchemaTabProps {
   pending?: PendingSchema[];
   onAddPending?: (s: PendingSchema) => void;
   onRemovePending?: (schemaId: string) => void;
+  // edit-mode buffered
+  editChanges?: Record<string, EditSchemaChange>;
+  onEditChange?: (schemaType: string, change: EditSchemaChange) => void;
+  onEditUndo?: (schemaType: string) => void;
 }
 
 const TYPE_COLOR: Record<string, string> = {
@@ -170,8 +178,12 @@ export function PlanSchemaTab({
   pending = [],
   onAddPending,
   onRemovePending,
+  editChanges,
+  onEditChange,
+  onEditUndo,
 }: PlanSchemaTabProps) {
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const isEditBuffered = editChanges !== undefined;
 
   const { data: listEnv, isLoading } = useBroadbandPlanSchemas(
     planId ? { broadband_plan_id: planId, size: 100 } : undefined,
@@ -219,6 +231,15 @@ export function PlanSchemaTab({
   }
 
   // ── Edit / details mode ─────────────────────────────────────
+  const effectiveAssigned = isEditBuffered
+    ? SCHEMA_TYPE_OPTIONS.filter((opt) => {
+        const change = editChanges![opt.value];
+        if (change?.action === "remove") return false;
+        if (change?.action === "assign") return true;
+        return !!liveSchemas.find((r) => r.schema_type === opt.value);
+      }).length
+    : assignedCount;
+
   return (
     <div className="flex flex-col h-full px-6 py-5 gap-3">
       <p className="text-xs text-muted-foreground">
@@ -234,24 +255,54 @@ export function PlanSchemaTab({
           <div className="space-y-2">
             {SCHEMA_TYPE_OPTIONS.map((opt) => {
               const live = liveSchemas.find((r) => r.schema_type === opt.value);
+              const change = isEditBuffered ? editChanges![opt.value] : undefined;
+
+              let assignedName: string | undefined;
+              if (isEditBuffered) {
+                if (change?.action === "assign") assignedName = change.schemaName;
+                else if (change?.action === "remove") assignedName = undefined;
+                else assignedName = live?.schema_name;
+              } else {
+                assignedName = live?.schema_name;
+              }
+
               return (
                 <RequiredRow
                   key={opt.value}
                   schemaType={opt.value}
                   label={opt.label}
-                  assignedName={live?.schema_name}
+                  assignedName={assignedName}
                   customerType={customerType}
                   readOnly={readOnly}
-                  isRemoving={deleteSchema.isPending && deleteTarget?.id === live?.id}
-                  onSelect={(schemaId) => {
-                    if (!planId) return;
-                    createSchema.mutate({
-                      broadband_plan_id: planId,
-                      schema_id: schemaId,
-                      schema_type: opt.value,
-                    });
+                  isRemoving={!isEditBuffered && deleteSchema.isPending && deleteTarget?.id === live?.id}
+                  onSelect={(schemaId, schemaName) => {
+                    if (isEditBuffered) {
+                      onEditChange!(opt.value, {
+                        action: "assign",
+                        schemaId,
+                        schemaName,
+                        removeRecordId: live?.id,
+                      });
+                    } else {
+                      if (!planId) return;
+                      createSchema.mutate({
+                        broadband_plan_id: planId,
+                        schema_id: schemaId,
+                        schema_type: opt.value,
+                      });
+                    }
                   }}
-                  onRemove={() => live && setDeleteTarget({ id: live.id, name: live.schema_name })}
+                  onRemove={() => {
+                    if (isEditBuffered) {
+                      if (change?.action === "assign") {
+                        onEditUndo!(opt.value);
+                      } else if (live) {
+                        onEditChange!(opt.value, { action: "remove", removeRecordId: live.id });
+                      }
+                    } else {
+                      if (live) setDeleteTarget({ id: live.id, name: live.schema_name });
+                    }
+                  }}
                 />
               );
             })}
@@ -260,35 +311,37 @@ export function PlanSchemaTab({
       )}
 
       <p className="text-xs text-muted-foreground">
-        {assignedCount} / {totalRequired} assigned
+        {effectiveAssigned} / {totalRequired} assigned
       </p>
 
-      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove schema assignment?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will unlink{" "}
-              <span className="font-semibold text-foreground">{deleteTarget?.name}</span> from this
-              plan. The schema itself will not be deleted.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteSchema.isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={deleteSchema.isPending}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={() => {
-                if (deleteTarget) {
-                  deleteSchema.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) });
-                }
-              }}
-            >
-              {deleteSchema.isPending ? "Removing…" : "Remove"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {!isEditBuffered && (
+        <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove schema assignment?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will unlink{" "}
+                <span className="font-semibold text-foreground">{deleteTarget?.name}</span> from
+                this plan. The schema itself will not be deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={deleteSchema.isPending}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={deleteSchema.isPending}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  if (deleteTarget) {
+                    deleteSchema.mutate(deleteTarget.id, { onSuccess: () => setDeleteTarget(null) });
+                  }
+                }}
+              >
+                {deleteSchema.isPending ? "Removing…" : "Remove"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }
