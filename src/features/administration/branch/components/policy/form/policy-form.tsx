@@ -215,6 +215,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                   onChange={(e) => setSlaHours(e.target.value)}
                   disabled={isDetailMode}
                   min={1}
+                  step={1}
                 />
               </div>
               <div className="space-y-2">
@@ -294,7 +295,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                   onChange={(e) => setExcessCablePrice(e.target.value)}
                   disabled={isDetailMode}
                   min={0}
-                  step={1000}
+                  step={1}
                 />
               </div>
               <div className="space-y-2">
@@ -308,6 +309,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                   onChange={(e) => setCableThresholdMeter(e.target.value)}
                   disabled={isDetailMode}
                   min={0}
+                  step={1}
                 />
               </div>
               <div className="space-y-2">
@@ -335,6 +337,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                   onChange={(e) => setMaxCableRunMeter(e.target.value)}
                   disabled={isDetailMode}
                   min={0}
+                  step={1}
                 />
               </div>
             </div>

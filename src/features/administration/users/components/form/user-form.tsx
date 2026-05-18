@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   RiInformationLine,
   RiOrganizationChart,
@@ -9,7 +9,7 @@ import {
   RiAddLine,
   RiDeleteBinLine,
 } from "@remixicon/react";
-import { Check, Loader2, X } from "lucide-react";
+import { Check, Eye, EyeOff, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
@@ -210,6 +210,7 @@ export function UserForm() {
   }, [selectedUser, form]);
 
   const password = form.watch("password");
+  const [pwVisible, setPwVisible] = useState(false);
 
   const roleAssignments = useWatch({
     control: form.control,
@@ -519,11 +520,21 @@ export function UserForm() {
                           Password <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
-                          <Input
-                            type="password"
-                            placeholder="Temporary password"
-                            {...field}
-                          />
+                          <div className="relative">
+                            <Input
+                              type={pwVisible ? "text" : "password"}
+                              placeholder="Temporary password"
+                              {...field}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setPwVisible((v) => !v)}
+                              className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 inline-flex items-center justify-center rounded text-muted-foreground hover:text-foreground"
+                              aria-label={pwVisible ? "Hide password" : "Show password"}
+                            >
+                              {pwVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage className="text-[11px]" />
                         <ul className="mt-1.5 space-y-1 text-[11px]">

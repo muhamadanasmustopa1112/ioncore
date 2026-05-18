@@ -3,8 +3,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
-import { Plus, Search, Settings2, X } from "lucide-react";
-import { RiArrowRightUpLine, RiUserAddLine } from "@remixicon/react";
+import { Eye, MoreHorizontal, Plus, Search, Settings2, X } from "lucide-react";
+import { RiArrowRightUpLine } from "@remixicon/react";
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -20,6 +20,12 @@ import {
   CardHeading,
   CardTable,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { DataGrid, DataGridContainer, useDataGrid } from "@/components/ui/data-grid";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { DataGridColumnVisibility } from "@/components/ui/data-grid-column-visibility";
@@ -27,6 +33,13 @@ import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import {
   Toolbar,
@@ -35,9 +48,34 @@ import {
   ToolbarTitle,
 } from "@/components/common/toolbar";
 import { paths } from "@/config/paths";
+import { useBranchList } from "@/features/administration/branch/api/branch-queries";
 import { useAdminLeads } from "../api/leads-queries";
-import type { LeadDto, LeadStatus } from "../types/leads-api";
+import type { LeadDto, LeadSource, LeadStatus } from "../types/leads-api";
 import { RerouteLeadSheet } from "./reroute-lead-sheet";
+
+const LEAD_STATUSES: { value: LeadStatus; label: string }[] = [
+  { value: "new", label: "New" },
+  { value: "potential", label: "Potential" },
+  { value: "warm", label: "Warm" },
+  { value: "hot", label: "Hot" },
+  { value: "active", label: "Active" },
+  { value: "converted", label: "Converted" },
+  { value: "lost", label: "Lost" },
+];
+
+const LEAD_SOURCES: { value: LeadSource; label: string }[] = [
+  { value: "referral", label: "Referral" },
+  { value: "cold_call", label: "Cold Call" },
+  { value: "website", label: "Website" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "social_media_dm", label: "Social Media DM" },
+  { value: "voip_call", label: "VoIP Call" },
+  { value: "line_call", label: "Line Call" },
+  { value: "walk_in", label: "Walk In" },
+  { value: "event", label: "Event" },
+  { value: "partner", label: "Partner" },
+  { value: "cs_referral", label: "CS Referral" },
+];
 
 function LeadsViewToggle() {
   const { table } = useDataGrid();
@@ -69,12 +107,22 @@ const PAGE_SIZE = 25;
 export function LeadsList() {
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
+  const [statusFilter, setStatusFilter] = useQueryState("status", parseAsString.withDefault(""));
+  const [branchFilter, setBranchFilter] = useQueryState("branch_id", parseAsString.withDefault(""));
+  const [sourceFilter, setSourceFilter] = useQueryState("source", parseAsString.withDefault(""));
   const [searchInput, setSearchInput] = useState(search);
   const router = useRouter();
   const [rerouteLead, setRerouteLead] = useState<LeadDto | null>(null);
 
+  const { data: branchesData } = useBranchList({ per_page: 200 });
+  const branches = branchesData ?? [];
+  const areaBranches = branches.filter((b) => b.level === "area");
+
   const { data, isLoading } = useAdminLeads({
     name: search || undefined,
+    branch_id: branchFilter || undefined,
+    status: (statusFilter as LeadStatus) || undefined,
+    source: (sourceFilter as LeadSource) || undefined,
     page,
     per_page: PAGE_SIZE,
   });
@@ -163,33 +211,25 @@ export function LeadsList() {
       id: "actions",
       header: () => <span className="text-[0.8125rem] font-semibold text-accent-foreground">Action</span>,
       cell: ({ row }) => {
-        const { id, status } = row.original;
-        // const canConvert = status !== "converted" && status !== "lost";
+        const { id } = row.original;
         return (
-          <div className="flex items-center gap-1">
-            <Button asChild variant="ghost" mode="link" size="sm">
-              <Link href={paths.dashboard.crmAndSales.leads.detail.getHref(id)}>
-                Detail
-              </Link>
-            </Button>
-            {/* {canConvert && (
-              <Button asChild variant="outline" size="sm" className="gap-1 text-xs">
-                <Link href={paths.dashboard.crmAndSales.leads.convert.getHref(id)}>
-                  <RiUserAddLine className="size-3.5" />
-                  Convert
-                </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button mode="icon" variant="ghost" size="sm">
+                <MoreHorizontal className="size-4" />
               </Button>
-            )} */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setRerouteLead(row.original)}
-              className="gap-1 text-xs"
-            >
-              <RiArrowRightUpLine className="size-3.5" />
-              Reroute
-            </Button>
-          </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={paths.dashboard.crmAndSales.leads.detail.getHref(id)}>
+                  <Eye className="size-4 mr-2" /> Detail
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setRerouteLead(row.original)}>
+                <RiArrowRightUpLine className="size-4 mr-2" /> Reroute
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         );
       },
       size: 210,
@@ -251,25 +291,60 @@ export function LeadsList() {
           <Card>
             <CardHeader>
               <CardHeading>
-                <div className="relative">
-                  <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by name…"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && applySearch()}
-                    className="ps-9 w-60"
-                  />
-                  {searchInput && (
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-                      onClick={() => { setSearchInput(""); void setSearch(""); void setPage(1); }}
-                    >
-                      <X />
-                    </Button>
-                  )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name…"
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && applySearch()}
+                      className="ps-9 w-52"
+                    />
+                    {searchInput && (
+                      <Button
+                        mode="icon"
+                        variant="ghost"
+                        className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
+                        onClick={() => { setSearchInput(""); void setSearch(""); void setPage(1); }}
+                      >
+                        <X />
+                      </Button>
+                    )}
+                  </div>
+                  <Select value={statusFilter || "all"} onValueChange={(v) => { void setStatusFilter(v === "all" ? "" : v); void setPage(1); }}>
+                    <SelectTrigger className="h-9 w-36">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      {LEAD_STATUSES.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={branchFilter || "all"} onValueChange={(v) => { void setBranchFilter(v === "all" ? "" : v); void setPage(1); }}>
+                    <SelectTrigger className="h-9 w-40">
+                      <SelectValue placeholder="All Branches" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Branches</SelectItem>
+                      {areaBranches.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={sourceFilter || "all"} onValueChange={(v) => { void setSourceFilter(v === "all" ? "" : v); void setPage(1); }}>
+                    <SelectTrigger className="h-9 w-40">
+                      <SelectValue placeholder="All Sources" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sources</SelectItem>
+                      {LEAD_SOURCES.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardHeading>
               <LeadsViewToggle />

@@ -22,7 +22,7 @@ export type SchemaStatus =
 
 export type CustomerType = string;
 
-export type SchemaFormMode = "new" | "edit" | "details" | "clone" | "override" | null;
+export type SchemaFormMode = "new" | "edit" | "details" | "clone" | "override" | "view_override" | null;
 
 /** Shape returned by GET /v1/schemas/ list endpoint */
 export interface SchemaRecord {

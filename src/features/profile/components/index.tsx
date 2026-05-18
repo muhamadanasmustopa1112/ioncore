@@ -8,7 +8,7 @@ import {
   RiHistoryLine,
   RiFileList3Line,
 } from "@remixicon/react";
-import { Check, Loader2, Monitor, X } from "lucide-react";
+import { Check, Eye, EyeOff, Loader2, Monitor, X } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
@@ -65,6 +65,9 @@ export function ProfilePage() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [oldPwVisible, setOldPwVisible] = useState(false);
+  const [newPwVisible, setNewPwVisible] = useState(false);
+  const [confirmPwVisible, setConfirmPwVisible] = useState(false);
 
   useEffect(() => {
     if (me) {
@@ -279,11 +282,21 @@ export function ProfilePage() {
                 <CardContent className="space-y-4 pt-6">
                   <div className="space-y-2">
                     <Label className="text-xs font-medium text-muted-foreground">Current Password</Label>
-                    <Input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Enter current password" />
+                    <div className="relative">
+                      <Input type={oldPwVisible ? "text" : "password"} value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="Enter current password" />
+                      <button type="button" onClick={() => setOldPwVisible((v) => !v)} className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 inline-flex items-center justify-center rounded text-muted-foreground hover:text-foreground" aria-label={oldPwVisible ? "Hide password" : "Show password"}>
+                        {oldPwVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs font-medium text-muted-foreground">New Password</Label>
-                    <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" />
+                    <div className="relative">
+                      <Input type={newPwVisible ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Enter new password" />
+                      <button type="button" onClick={() => setNewPwVisible((v) => !v)} className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 inline-flex items-center justify-center rounded text-muted-foreground hover:text-foreground" aria-label={newPwVisible ? "Hide password" : "Show password"}>
+                        {newPwVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
                     {newPassword && (
                       <ul className="mt-1.5 space-y-1">
                         <PwRule ok={pwRules.length} label="Min 8 characters" />
@@ -296,7 +309,12 @@ export function ProfilePage() {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs font-medium text-muted-foreground">Confirm New Password</Label>
-                    <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repeat new password" />
+                    <div className="relative">
+                      <Input type={confirmPwVisible ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repeat new password" />
+                      <button type="button" onClick={() => setConfirmPwVisible((v) => !v)} className="absolute end-0 top-1/2 me-1.5 h-7 w-7 -translate-y-1/2 inline-flex items-center justify-center rounded text-muted-foreground hover:text-foreground" aria-label={confirmPwVisible ? "Hide password" : "Show password"}>
+                        {confirmPwVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                      </button>
+                    </div>
                     {confirmPassword && newPassword !== confirmPassword && (
                       <p className="text-[11px] text-destructive mt-1">Passwords do not match</p>
                     )}

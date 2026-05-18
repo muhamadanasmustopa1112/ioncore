@@ -103,13 +103,19 @@ function RequiredRow({
   const schemas = schemasData?.schemas ?? [];
 
   if (assignedName) {
+    const assignedSchema = schemas.find((s) => s.name === assignedName);
     return (
       <div className="flex items-center gap-3 rounded-md border border-border px-3 py-2.5">
         <CheckCircle2 className="size-4 text-green-500 shrink-0" />
         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold shrink-0 uppercase ${typeColor(schemaType)}`}>
           {label}
         </span>
-        <p className="flex-1 text-sm font-medium truncate">{assignedName}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{assignedName}</p>
+          {assignedSchema?.latest_version && (
+            <p className="text-[10px] font-mono text-muted-foreground/70">v{assignedSchema.latest_version}</p>
+          )}
+        </div>
         {!readOnly && (
           <Button
             mode="icon"
@@ -154,7 +160,12 @@ function RequiredRow({
                         setOpen(false);
                       }}
                     >
-                      {s.name}
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="truncate text-sm">{s.name}</span>
+                        {s.latest_version && (
+                          <span className="text-[10px] font-mono text-muted-foreground/70">{s.latest_version}</span>
+                        )}
+                      </div>
                     </CommandItem>
                   ))}
                 </CommandGroup>

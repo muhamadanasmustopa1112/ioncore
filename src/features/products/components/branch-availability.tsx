@@ -17,7 +17,7 @@ interface BranchAvailabilityProps {
 }
 
 export function BranchAvailability({ assignedBranchIds, onAdd, onRemove, isPending, readOnly }: BranchAvailabilityProps) {
-  const { data: branches = [] } = useBranchList();
+  const { data: branches = [] } = useBranchList({ branch_type: "noc" });
   const [adding, setAdding] = useState("");
 
   const assigned = branches.filter((b) => assignedBranchIds.includes(b.id));

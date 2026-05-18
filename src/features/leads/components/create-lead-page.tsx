@@ -110,6 +110,7 @@ export function CreateLeadPage() {
   const [referrerCustomerId, setReferrerCustomerId] = useState("");
   const [branchId, setBranchId] = useState("");
   const [nik, setNik] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [lat, setLat] = useState(INSTALL_DEFAULT[0]);
   const [lng, setLng] = useState(INSTALL_DEFAULT[1]);
   const [covered, setCovered] = useState<boolean | null>(null);
@@ -158,6 +159,7 @@ export function CreateLeadPage() {
         referrer_customer_id: source === "referral" && referrerCustomerId ? referrerCustomerId : null,
         status,
         ...(nik.trim() ? { nik: nik.trim() } : {}),
+        ...(phoneNumber.trim() ? { phone_number: phoneNumber.trim() } : {}),
         ...(pinMoved ? { latitude: lat, longitude: lng } : {}),
       });
       router.push(paths.dashboard.crmAndSales.leads.root.getHref());
@@ -344,15 +346,26 @@ export function CreateLeadPage() {
                 </Select>
               </FieldRow>
 
-              <FieldRow label="NIK">
-                <input
-                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  value={nik}
-                  onChange={(e) => setNik(e.target.value)}
-                  placeholder="16-digit NIK"
-                  maxLength={16}
-                />
-              </FieldRow>
+              <div className="grid grid-cols-2 gap-4">
+                <FieldRow label="NIK">
+                  <input
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    value={nik}
+                    onChange={(e) => setNik(e.target.value)}
+                    placeholder="16-digit NIK"
+                    maxLength={16}
+                  />
+                </FieldRow>
+                <FieldRow label="Phone Number">
+                  <input
+                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="+62812..."
+                    type="tel"
+                  />
+                </FieldRow>
+              </div>
             </CardContent>
           </Card>
 

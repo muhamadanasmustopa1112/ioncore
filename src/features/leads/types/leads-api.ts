@@ -94,6 +94,7 @@ export interface CreateLeadPayload {
   branch_id: string;
   assigned_sales_id?: string;
   nik?: string;
+  phone_number?: string;
   status?: LeadStatus;
   latitude?: number;
   longitude?: number;
@@ -131,6 +132,8 @@ export interface LeadListParams {
   branch_id?: string;
   name?: string;
   assigned_sales_id?: string;
+  status?: LeadStatus;
+  source?: LeadSource;
   sort_by?: "created_at" | "updated_at" | "status";
   sort_dir?: "asc" | "desc";
   page?: number;

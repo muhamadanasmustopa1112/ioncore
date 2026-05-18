@@ -39,8 +39,9 @@ export function SchemaFormSheet() {
 
   const isNewMode = form === "new";
   const isCloneMode = form === "clone";
-  const isDetailMode = form === "details";
-  const isOverrideMode = form === "override";
+  const isDetailMode = form === "details" || form === "view_override";
+  const isOverrideMode = form === "override" || form === "view_override";
+  const isViewOverrideMode = form === "view_override";
   const label = activeSchemaType
     ? `${SCHEMA_TYPE_LABEL[activeSchemaType.toUpperCase()] ?? activeSchemaType} Schema`
     : "Schema";
@@ -51,9 +52,11 @@ export function SchemaFormSheet() {
       ? `Clone ${label}`
       : form === "edit"
         ? `Edit ${label} (Draft)`
-        : isOverrideMode
+        : form === "override"
           ? `Override ${label}`
-          : `${label} Details`;
+          : isViewOverrideMode
+            ? `View Override — ${label}`
+            : `${label} Details`;
 
   function handleConfirmOverride() {
     confirmOverride();

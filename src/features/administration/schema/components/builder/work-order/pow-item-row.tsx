@@ -5,6 +5,7 @@ import { UseFormReturn } from "react-hook-form";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import type { WorkOrderFormValues, WoCategory, WoCaptureType } from "../../../types/work-order-schema";
+import type { WorkOrderFormValues, WoCaptureType } from "../../../types/work-order-schema";
 
 interface Props {
   id: string;
@@ -25,15 +26,6 @@ interface Props {
   isDetailMode: boolean;
   onRemove: () => void;
 }
-
-const CATEGORIES: { value: WoCategory; label: string }[] = [
-  { value: "photo", label: "Photo" },
-  { value: "serial", label: "Serial Number" },
-  { value: "test", label: "Test Result" },
-  { value: "inspection", label: "Inspection" },
-  { value: "signature", label: "Signature" },
-  { value: "other", label: "Other" },
-];
 
 const CAPTURE_TYPES: { value: WoCaptureType; label: string }[] = [
   { value: "photo", label: "Photo" },
@@ -116,23 +108,7 @@ export function PowItemRow({ id, index, form, isDetailMode, onRemove }: Props) {
           {itemErrors?.item_label && <p className="text-xs text-red-500">{itemErrors.item_label.message}</p>}
         </div>
 
-        <div className="space-y-1.5">
-          <Label className="text-xs font-medium text-muted-foreground">Category</Label>
-          <Select
-            value={watch(`${prefix}.category`)}
-            onValueChange={(v) => setValue(`${prefix}.category`, v as WoCategory)}
-            disabled={isDetailMode}
-          >
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {CATEGORIES.map((c) => (
-                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 sm:col-span-2">
           <Label className="text-xs font-medium text-muted-foreground">Capture Type</Label>
           <Select
             value={watch(`${prefix}.field_type`)}
@@ -147,6 +123,15 @@ export function PowItemRow({ id, index, form, isDetailMode, onRemove }: Props) {
             </SelectContent>
           </Select>
         </div>
+
+        {watch(`${prefix}.field_type`) === "checkbox" && (
+          <div className="sm:col-span-2 flex items-center gap-2 rounded-md border border-border/40 px-3 py-2 bg-muted/20">
+            <Checkbox disabled checked={false} id={`${prefix}-checkbox-preview`} />
+            <Label htmlFor={`${prefix}-checkbox-preview`} className="text-xs text-muted-foreground">
+              {watch(`${prefix}.item_label`) || "Checkbox item"}
+            </Label>
+          </div>
+        )}
       </div>
 
       <div className="space-y-1.5">

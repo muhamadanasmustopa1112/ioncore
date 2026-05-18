@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, Eye } from "lucide-react";
 import {
   RiLoader4Line,
   RiSearchLine,
@@ -26,8 +25,7 @@ import { useSchemaStore } from "../../store/schema";
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 function SchemaCard({ item }: { item: CustomerSchema }) {
-  const [expanded, setExpanded] = useState(false);
-  const { openOverrideSheet } = useSchemaStore();
+  const { openOverrideSheet, openViewOverrideSheet } = useSchemaStore();
 
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
@@ -61,8 +59,9 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="ghost" size="sm" className="h-7 text-xs px-3" onClick={() => setExpanded((v) => !v)}>
-            {expanded ? "Collapse" : "View"}
+          <Button variant="ghost" size="sm" className="h-7 text-xs px-3 gap-1.5" onClick={() => openViewOverrideSheet(item)}>
+            <Eye className="size-3.5" />
+            View
           </Button>
           <Button variant="outline" size="sm" className="h-7 text-xs px-3" onClick={() => openOverrideSheet(item)}>
             Override
@@ -70,28 +69,18 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
         </div>
       </div>
 
-      {expanded && (
-        <div className="border-t border-border/60 px-4 pb-4 pt-3 space-y-3">
-          <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
-            <span className="text-muted-foreground font-medium">Version ID</span>
-            <span className="font-mono truncate">{item.schema_version_id || "—"}</span>
-            <span className="text-muted-foreground font-medium">Rule</span>
-            <span className="truncate">{item.rule || "—"}</span>
-            <span className="text-muted-foreground font-medium">Created</span>
-            <span>{item.created_at ? new Date(item.created_at).toLocaleString() : "—"}</span>
-            <span className="text-muted-foreground font-medium">Updated</span>
-            <span>{item.updated_at ? new Date(item.updated_at).toLocaleString() : "—"}</span>
-          </div>
-          {item.overridden_content && (
-            <div className="space-y-1">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Overridden Content</p>
-              <pre className="text-xs bg-muted/40 rounded-lg px-3 py-2 overflow-auto max-h-48 whitespace-pre-wrap break-all">
-                {JSON.stringify(item.overridden_content, null, 2)}
-              </pre>
-            </div>
-          )}
+      <div className="border-t border-border/60 px-4 pb-3 pt-3">
+        <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
+          <span className="text-muted-foreground font-medium">Version ID</span>
+          <span className="font-mono truncate">{item.schema_version_id || "—"}</span>
+          <span className="text-muted-foreground font-medium">Rule</span>
+          <span className="truncate">{item.rule || "—"}</span>
+          <span className="text-muted-foreground font-medium">Created</span>
+          <span>{item.created_at ? new Date(item.created_at).toLocaleString() : "—"}</span>
+          <span className="text-muted-foreground font-medium">Updated</span>
+          <span>{item.updated_at ? new Date(item.updated_at).toLocaleString() : "—"}</span>
         </div>
-      )}
+      </div>
     </div>
   );
 }

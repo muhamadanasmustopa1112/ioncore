@@ -27,7 +27,7 @@ export function PlanList() {
     limit: parseAsInteger.withDefault(10),
   });
 
-  const { data: branchesData } = useBranchList({ per_page: 200 });
+  const { data: branchesData } = useBranchList({ per_page: 200, branch_type: "noc" });
   const branches = branchesData ?? [];
 
   const { data, isLoading } = useAdminBroadbandPlans({

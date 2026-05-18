@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +11,48 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
 import type { BroadbandPlan, CreateBroadbandPlanPayload } from "../../types/products";
+
+function formatIdr(value: number): string {
+  if (!value && value !== 0) return "";
+  return new Intl.NumberFormat("id-ID").format(value);
+}
+
+
+interface CurrencyInputProps {
+  value: number;
+  onChange: (v: number) => void;
+  disabled?: boolean;
+  placeholder?: string;
+}
+
+function CurrencyInput({ value, onChange, disabled, placeholder }: CurrencyInputProps) {
+  const [display, setDisplay] = useState(value ? formatIdr(value) : "");
+
+  useEffect(() => {
+    setDisplay(value ? formatIdr(value) : "");
+  }, [value]);
+
+  return (
+    <div className="relative flex items-center">
+      <span className="absolute left-3 text-sm text-muted-foreground select-none">Rp</span>
+      <Input
+        className="pl-8"
+        value={display}
+        disabled={disabled}
+        placeholder={placeholder ?? "0"}
+        onChange={(e) => {
+          const raw = e.target.value.replace(/[^\d]/g, "");
+          const num = raw === "" ? 0 : parseInt(raw, 10);
+          setDisplay(raw === "" ? "" : formatIdr(num));
+          onChange(num);
+        }}
+        onBlur={() => {
+          setDisplay(value ? formatIdr(value) : "");
+        }}
+      />
+    </div>
+  );
+}
 
 function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
   return (
@@ -106,10 +148,14 @@ export function PlanForm({ selected, mode, onSubmit, onCustomerTypeChange, onDir
 
         <div className="grid grid-cols-2 gap-4">
           <Field label="Monthly Price (IDR)" required error={errors.price?.message}>
-            <Input type="number" {...register("price", { valueAsNumber: true })} disabled={isDetail} />
+            <Controller name="price" control={control} render={({ field }) => (
+              <CurrencyInput value={field.value} onChange={field.onChange} disabled={isDetail} />
+            )} />
           </Field>
           <Field label="One-Time Charge (IDR)" required error={errors.one_time_charge?.message}>
-            <Input type="number" {...register("one_time_charge", { valueAsNumber: true })} disabled={isDetail} />
+            <Controller name="one_time_charge" control={control} render={({ field }) => (
+              <CurrencyInput value={field.value} onChange={field.onChange} disabled={isDetail} />
+            )} />
           </Field>
         </div>
 

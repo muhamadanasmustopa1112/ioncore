@@ -39,6 +39,7 @@ interface SchemaStore {
   setSelectedSchemaId: (id: string | null) => void;
   openSchemaSheet: (form: "new" | "edit" | "details" | "clone") => void;
   openOverrideSheet: (customerSchema: CustomerSchema) => void;
+  openViewOverrideSheet: (customerSchema: CustomerSchema) => void;
   closeSchemaSheet: () => void;
   setForm: (form: SchemaFormMode) => void;
   openApprovalPanel: (schemaId: string) => void;
@@ -87,6 +88,13 @@ const useSchemaStore = create<SchemaStore>((set) => ({
     set({
       schemaSheetOpen: true,
       form: "override",
+      overrideCustomerSchema: customerSchema,
+      activeSchemaType: normalizeSchemaType(customerSchema.schema_type),
+    }),
+  openViewOverrideSheet: (customerSchema) =>
+    set({
+      schemaSheetOpen: true,
+      form: "view_override",
       overrideCustomerSchema: customerSchema,
       activeSchemaType: normalizeSchemaType(customerSchema.schema_type),
     }),
