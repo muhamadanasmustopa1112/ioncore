@@ -33,12 +33,12 @@ export const columns: ColumnDef<RoleData>[] = [
       <DataGridColumnHeader title="Description" column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
-      <div className="text-muted-foreground text-sm truncate max-w-[360px]" title={row.original.description}>
+      <div className="text-muted-foreground text-sm truncate max-w-full" title={row.original.description}>
         {row.original.description || "—"}
       </div>
     ),
     enableSorting: false,
-    size: 380,
+    size: 400,
   },
   {
     id: "createdAt",

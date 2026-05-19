@@ -237,7 +237,7 @@ export function ApprovalPanel() {
                   onChange={(e) => setMinApprovals(Math.max(1, parseInt(e.target.value || "1", 10)))}
                 />
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">
                   Required approver IDs (comma-separated, optional)
                 </label>
@@ -246,7 +246,7 @@ export function ApprovalPanel() {
                   value={requiredApprovers}
                   onChange={(e) => setRequiredApprovers(e.target.value)}
                 />
-              </div>
+              </div> */}
               <Button
                 variant="outline"
                 className="w-full"
