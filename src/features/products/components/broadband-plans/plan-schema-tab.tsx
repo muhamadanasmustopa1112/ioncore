@@ -113,7 +113,7 @@ function RequiredRow({
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{assignedName}</p>
           {assignedSchema?.latest_version && (
-            <p className="text-[10px] font-mono text-muted-foreground/70">v{assignedSchema.latest_version}</p>
+            <p className="text-[10px] font-mono text-muted-foreground/70">{assignedSchema.latest_version}</p>
           )}
         </div>
         {!readOnly && (
