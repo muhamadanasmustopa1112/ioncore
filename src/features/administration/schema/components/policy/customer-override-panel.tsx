@@ -51,11 +51,6 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
             <p className="mt-0.5 text-xs text-muted-foreground font-mono truncate">
               Schema: {item.schema_id}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
-              Created by {item.created_by}
-              {item.updated_by && item.updated_by !== item.created_by
-                ? ` · Updated by ${item.updated_by}` : ""}
-            </p>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -73,8 +68,10 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
         <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
           <span className="text-muted-foreground font-medium">Version ID</span>
           <span className="font-mono truncate">{item.schema_version_id || "—"}</span>
-          <span className="text-muted-foreground font-medium">Rule</span>
-          <span className="truncate">{item.rule || "—"}</span>
+          <span className="text-muted-foreground font-medium">Schema Name</span>
+          <span className="truncate">{item.schema_name || "—"}</span>
+          <span className="text-muted-foreground font-medium">Schema Version</span>
+          <span>{item.schema_version || "—"}</span>
           <span className="text-muted-foreground font-medium">Created</span>
           <span>{item.created_at ? new Date(item.created_at).toLocaleString() : "—"}</span>
           <span className="text-muted-foreground font-medium">Updated</span>

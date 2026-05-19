@@ -58,8 +58,8 @@ const DEFAULT_ONBOARDING: OnboardingFormValues = {
 
 export function OnboardingForm() {
   const { form, activeSchemaType, selectedSchemaId, setFormSubmitter, overrideCustomerSchema, closeSchemaSheet, openOverrideConfirm, overrideConfirmTrigger } = useSchemaStore();
-  const isDetailMode = form === "details";
-  const isOverride = form === "override";
+  const isDetailMode = form === "details" || form === "view_override";
+  const isOverride = form === "override" || form === "view_override";
   const createSchema = useCreateSchema();
   const editSchema = useEditSchema();
   const updateCustomerSchema = useUpdateCustomerSchema();
