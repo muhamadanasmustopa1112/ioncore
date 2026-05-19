@@ -1,6 +1,6 @@
 "use client";
 
-import { useImperativeHandle, forwardRef } from "react";
+import { useImperativeHandle, forwardRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
@@ -10,6 +10,7 @@ import { DEFAULT_ODP_VALUES, OdpData, odpSchema, type OdpFormValues, type OdpPay
 import { useOdpStore } from "../../store/odp";
 import { useCreateOdp } from "../../api/create-odp";
 import { useUpdateOdp } from "../../api/update-odp";
+import { useOdp } from "../../api/get-odp";
 import { OdpGeneralInfoSection } from "./sections/odp-general-info-section";
 import { OdpLocationInfoSection } from "./sections/odp-location-info-section";
 
@@ -33,6 +34,25 @@ export const OdpForm = forwardRef<OdpFormRef, OdpFormProps>(
     const urlOltId = params?.id as string;
 
     const data = selectedOdp;
+
+    const { data: odpListRes } = useOdp({ params: { limit: 1000 } });
+
+    const nextSuffix = useMemo(() => {
+      if (mode !== "new" && data?.code) {
+        const match = data.code.match(/-(\d+)$/);
+        return match ? match[1] : "001";
+      }
+      const codes = odpListRes?.data?.map((o) => o.code) || [];
+      const numbers = codes
+        .map((code) => {
+          if (!code) return 0;
+          const match = code.match(/-(\d+)$/);
+          return match ? parseInt(match[1], 10) : 0;
+        })
+        .filter(Boolean);
+      const nextNum = numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
+      return nextNum.toString().padStart(3, "0");
+    }, [odpListRes, data, mode]);
 
     const mapOdpToFormValues = (odp: OdpData): any => ({
       code: odp.code ?? "",
@@ -105,6 +125,8 @@ export const OdpForm = forwardRef<OdpFormRef, OdpFormProps>(
               <OdpGeneralInfoSection
                 readOnly={readOnly}
                 isPending={isPending}
+                nextSuffix={nextSuffix}
+                mode={mode}
               />
 
               <OdpLocationInfoSection

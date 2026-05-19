@@ -118,7 +118,7 @@ export const columns: ColumnDef<PolicyData>[] = [
       const tax = row.original.policyJson.tax_default;
       return (
         <span className="text-sm text-foreground">
-          {tax != null ? `${(tax * 100).toFixed(0)}%` : "—"}
+          {tax != null ? `${(tax * 10).toFixed(0)}%` : "—"}
         </span>
       );
     },

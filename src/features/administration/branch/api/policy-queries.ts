@@ -23,7 +23,7 @@ const defaultPolicyJson = {
   sla_hours: 24,
   working_hours: { start: "08:00", end: "17:00" },
   timezone: "Asia/Jakarta",
-  tax_default: 0.11,
+  tax_default: 1.1,
   notification_contacts: [],
   approval_matrix: { level_1: "", level_2: "" },
   excess_cable_price: 35000,

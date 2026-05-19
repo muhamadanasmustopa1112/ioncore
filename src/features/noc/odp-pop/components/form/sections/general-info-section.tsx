@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import {
     RiSignalTowerLine,
@@ -31,6 +32,8 @@ type GeneralInfoSectionProps = {
     isLoadingBranches: boolean;
     readOnly: boolean;
     isPending: boolean;
+    nextSuffix: string;
+    mode: "new" | "edit" | "details";
 };
 
 export function GeneralInfoSection({
@@ -38,8 +41,41 @@ export function GeneralInfoSection({
     isLoadingBranches,
     readOnly,
     isPending,
+    nextSuffix,
+    mode,
 }: GeneralInfoSectionProps) {
-    const { control, getValues } = useFormContext<PopFormValues>();
+    const { control, setValue, watch } = useFormContext<PopFormValues>();
+    const codeValue = watch("code") || "";
+
+    const getMiddlePart = (fullCode: string) => {
+        if (!fullCode) return "";
+        const parts = fullCode.split("-");
+        if (parts.length > 2) {
+            return parts.slice(1, -1).join("-");
+        }
+        return "";
+    };
+
+    const [middle, setMiddle] = useState(() => getMiddlePart(codeValue));
+
+    // Keep middle in sync with full code when loaded/selected POP changes
+    useEffect(() => {
+        setMiddle(getMiddlePart(codeValue));
+    }, [codeValue]);
+
+    // Handle change of the middle part
+    const handleMiddleChange = (val: string) => {
+        const cleaned = val.toUpperCase().replace(/[^A-Z0-9_]/g, "");
+        setMiddle(cleaned);
+        setValue("code", cleaned ? `POP-${cleaned}-${nextSuffix}` : "", { shouldValidate: true });
+    };
+
+    // Ensure code is synced on mount/when nextSuffix changes for new mode
+    useEffect(() => {
+        if (mode === "new" && middle) {
+            setValue("code", `POP-${middle}-${nextSuffix}`, { shouldValidate: true });
+        }
+    }, [middle, nextSuffix, mode, setValue]);
 
     return (
         <div className="space-y-4">
@@ -85,7 +121,17 @@ export function GeneralInfoSection({
                                 Code
                             </FormLabel>
                             <FormControl>
-                                <Input placeholder="POP-001" {...field} disabled={readOnly || isPending} />
+                                <div className="flex items-center rounded-lg border border-input bg-background pl-3 focus-within:ring-1 focus-within:ring-ring h-10 w-full">
+                                    <span className="text-sm font-semibold text-muted-foreground/60 select-none">POP-</span>
+                                    <Input
+                                        className="flex-1 border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-1 text-sm uppercase h-full bg-transparent font-medium"
+                                        placeholder="LOCATION"
+                                        value={middle}
+                                        onChange={(e) => handleMiddleChange(e.target.value)}
+                                        disabled={readOnly || isPending || mode !== "new"}
+                                    />
+                                    <span className="text-sm font-semibold text-muted-foreground/60 select-none pr-3">-{nextSuffix}</span>
+                                </div>
                             </FormControl>
                             <FormMessage />
                         </FormItem>

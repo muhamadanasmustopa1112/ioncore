@@ -1,6 +1,6 @@
 "use client";
 
-import { useImperativeHandle, forwardRef } from "react";
+import { useImperativeHandle, forwardRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
@@ -10,6 +10,7 @@ import { usePopStore } from "../../store/pop";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
 import { useCreatePop } from "../../api/create-pop";
 import { useUpdatePop } from "../../api/update-pop";
+import { usePop } from "../../api/get-pop";
 import { GeneralInfoSection } from "./sections/general-info-section";
 import { LocationInfoSection } from "./sections/location-info-section";
 
@@ -32,6 +33,25 @@ export const PopForm = forwardRef<PopFormRef, PopFormProps>(
         const { data: branches, isLoading: isLoadingBranches } = useBranchList({ branch_type: "noc" });
 
         const data = selectedPop;
+
+        const { data: popListRes } = usePop({ params: { limit: 1000 } });
+
+        const nextSuffix = useMemo(() => {
+            if (mode !== "new" && data?.code) {
+                const match = data.code.match(/-(\d+)$/);
+                return match ? match[1] : "001";
+            }
+            const codes = popListRes?.data?.map((p) => p.code) || [];
+            const numbers = codes
+                .map((code) => {
+                    if (!code) return 0;
+                    const match = code.match(/-(\d+)$/);
+                    return match ? parseInt(match[1], 10) : 0;
+                })
+                .filter(Boolean);
+            const nextNum = numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
+            return nextNum.toString().padStart(3, "0");
+        }, [popListRes, data, mode]);
 
         const mapPopToFormValues = (pop: PopData): PopFormValues => {
             const branchId = pop.branch?.id || (pop as any).branch_id || "";
@@ -107,6 +127,8 @@ export const PopForm = forwardRef<PopFormRef, PopFormProps>(
                                 isLoadingBranches={isLoadingBranches}
                                 readOnly={readOnly}
                                 isPending={isPending}
+                                nextSuffix={nextSuffix}
+                                mode={mode}
                             />
 
                             <LocationInfoSection
