@@ -41,6 +41,7 @@ export interface LeadDto {
   lead_name: string;
   source: LeadSource;
   referrer_customer_id: string | null;
+  referrer_name?: string | null;
   assigned_sales_id: string;
   branch_id: string;
   branch_name?: string | null;
@@ -125,7 +126,7 @@ export interface CreateLeadActivityPayload {
 
 export interface RerouteLeadPayload {
   branch_id: string;
-  assigned_sales_id: string;
+  assigned_sales_id?: string;
 }
 
 export interface LeadListParams {

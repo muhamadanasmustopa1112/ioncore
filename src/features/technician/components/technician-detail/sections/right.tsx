@@ -2,9 +2,34 @@
 
 import { useMemo, useState } from "react";
 import { Camera, Clock, History, Maximize2, Building, Image as ImageIcon, FileText } from "lucide-react";
-import type { WorkOrderDetailResponse } from "../../../types/technician-api";
+import type { AuditTrailEntry, WorkOrderDetailResponse } from "../../../types/technician-api";
 import { SectionCard, Row, Empty, fmtDate } from "../shared";
 import { TimelineEntry } from "../shared-widgets";
+
+type AuditMetadataDisplayKey = keyof Pick<
+  NonNullable<AuditTrailEntry["metadata"]>,
+  | "added_technician_names"
+  | "removed_technician_names"
+  | "original_pair_names"
+  | "new_pair_names"
+  | "reassignment_mode"
+>;
+
+const AUDIT_METADATA_FIELDS: { key: AuditMetadataDisplayKey; label: string }[] = [
+  { key: "added_technician_names", label: "Added technician" },
+  { key: "removed_technician_names", label: "Removed technician" },
+  { key: "original_pair_names", label: "Original pair" },
+  { key: "new_pair_names", label: "New pair" },
+  { key: "reassignment_mode", label: "Reassignment mode" },
+];
+
+function formatAuditMetadataValue(val: string): string {
+  return val
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .join(", ");
+}
 
 export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -140,7 +165,6 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
         <div className="space-y-2 text-sm mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
           <Row label="Created" value={fmtDate(wo.created_at)} />
           <Row label="Updated" value={fmtDate(wo.updated_at)} />
-          <Row label="ID" value={<span className="font-mono text-[10px]">{wo.id}</span>} />
         </div>
 
         {/* Activity stream */}
@@ -159,18 +183,27 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-500 mb-2">
-                    By {item.actor_id} · {fmtDate(item.created_at)}
+                    By {item.actor_role} · {fmtDate(item.created_at)}
                   </p>
 
-                  {item.metadata && Object.keys(item.metadata).length > 0 && (
+                  {item.metadata &&
+                    AUDIT_METADATA_FIELDS.some(({ key }) => {
+                      const val = item.metadata?.[key];
+                      return typeof val === "string" && val.trim().length > 0;
+                    }) && (
                     <div className="text-[10px] bg-white dark:bg-slate-900/50 p-2 rounded border border-slate-100 dark:border-slate-800 space-y-2 font-medium text-slate-600">
-                      {Object.entries(item.metadata).map(([key, val]) => {
-                        if (!val) return null;
+                      {AUDIT_METADATA_FIELDS.map(({ key, label }) => {
+                        const raw = item.metadata?.[key];
+                        if (typeof raw !== "string" || !raw.trim()) return null;
+                        const display =
+                          key === "reassignment_mode"
+                            ? raw.replace(/_/g, " ")
+                            : formatAuditMetadataValue(raw);
                         return (
                           <div key={key} className="flex flex-col">
-                            <span className="text-slate-400 uppercase text-[8px] font-bold tracking-wider">{key.replace(/_/g, " ")}</span>
-                            <span className="break-all font-mono text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 px-1 py-0.5 rounded mt-0.5 border border-slate-100/50 dark:border-slate-800">
-                              {String(val)}
+                            <span className="text-slate-400 uppercase text-[8px] font-bold tracking-wider">{label}</span>
+                            <span className="text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 px-1 py-0.5 rounded mt-0.5 border border-slate-100/50 dark:border-slate-800 capitalize">
+                              {display}
                             </span>
                           </div>
                         );

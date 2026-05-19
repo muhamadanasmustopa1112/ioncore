@@ -57,7 +57,7 @@ export function CustomerHeader({ customer, onDeactivate, isDeactivating }: Props
             </Badge>
           </div>
           <p className="text-muted-foreground font-medium">
-            ID: {customer?.id ?? "—"} · {customer?.customer_type ?? "—"}
+            {customer?.customer_type ?? "—"}
           </p>
           {customer?.activation_date && (
             <p className="text-sm text-muted-foreground">

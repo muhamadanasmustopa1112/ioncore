@@ -179,8 +179,8 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
     setValue("code", generated, { shouldValidate: false });
   }, [name, isSubArea, isEditMode, isDetailMode, setValue]);
 
-  const { data: regionals = [] } = useRegionalList(branchType);
-  const { data: areas = [] } = useAreaList(regionalId, branchType);
+  const { data: regionals = [] } = useRegionalList();
+  const { data: areas = [] } = useAreaList(regionalId);
 
   const isRegional = level === "regional";
   const isArea = level === "area";

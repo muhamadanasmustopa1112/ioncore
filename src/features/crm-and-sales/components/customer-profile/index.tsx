@@ -99,13 +99,14 @@ export function CustomerProfile() {
               <CardTitle className="text-sm">Profile Details</CardTitle>
             </CardHeader>
             <CardContent className="pt-2 pb-4 px-6">
-              <DetailRow label="Customer ID" value={customer?.id} />
+              <DetailRow label="NIK" value={customer?.nik} />
               <DetailRow label="Full Name" value={customer?.full_name} />
+              <DetailRow label="Phone" value={customer?.phone} />
+              <DetailRow label="Email" value={customer?.email} />
               <DetailRow label="Company Name" value={customer?.company_name} />
               <DetailRow label="Customer Type" value={customer?.customer_type} />
               <DetailRow label="Status" value={customer?.status} />
-              <DetailRow label="Branch ID" value={customer?.branch_id} />
-              <DetailRow label="Account Manager ID" value={customer?.account_manager_id} />
+              <DetailRow label="Account Manager" value={customer?.account_manager_id} />
             </CardContent>
           </Card>
 

@@ -121,7 +121,7 @@ export function CreateLeadPage() {
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList();
   const { data: customersData, isLoading: customersLoading } = useReferrerCustomers(
-    source === "referral" ? { search: customerSearch || undefined, size: 20 } : {}
+    source === "referral" ? { search: customerSearch || undefined, size: 20, status: "active" } : {}
   );
   const createLead = useCreateLead();
 

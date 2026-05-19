@@ -61,6 +61,9 @@ export interface CustomerDto {
   company_name?: string | null;
   status: CustomerStatus;
   branch_id: string;
+  nik?: string | null;
+  phone?: string | null;
+  email?: string | null;
   account_manager_id?: string | null;
   onboarding_schema_version_id?: string | null;
   billing_schema_version_id?: string | null;
@@ -80,8 +83,8 @@ export interface CustomerDto {
 
 export interface CustomerDetail extends CustomerDto {
   documents?: CustomerDocumentDto[];
-  orders?: Array<{ id: string; status: string; [k: string]: unknown }>;
-  work_orders?: Array<{ id: string; status: string; [k: string]: unknown }>;
+  orders?: Array<{ id: string; status: string;[k: string]: unknown }>;
+  work_orders?: Array<{ id: string; status: string;[k: string]: unknown }>;
 }
 
 export interface CustomerListParams {
