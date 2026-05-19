@@ -150,6 +150,7 @@ export interface BranchListParams {
   per_page?: number;
   type?: string;
   search?: string;
+  keyword?: string;
   branch_type?: string;
   level?: string;
 }

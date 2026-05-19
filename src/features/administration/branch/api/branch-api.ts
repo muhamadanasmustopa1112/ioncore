@@ -30,12 +30,13 @@ export function getBranchById(id: string) {
 // ─── List ─────────────────────────────────────────────────────────────────────
 
 export function getBranchList(params: BranchListParams = {}) {
+  const searchVal = params.keyword?.trim() || params.search?.trim();
   return cast<ApiResponse<BranchFlatListResponse>>(
     userServiceApi.get(`${BASE}/`, {
       params: {
         page: params.page ?? 1,
         per_page: params.per_page ?? 100,
-        keyword: params.search?.trim() ? params.search.trim() : undefined,
+        keyword: searchVal ? searchVal : undefined,
         branch_type: params.branch_type
           ? params.branch_type.toUpperCase()
           : undefined,
