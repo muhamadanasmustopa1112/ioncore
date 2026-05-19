@@ -48,8 +48,11 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
                 </Badge>
               )}
             </div>
-            <p className="mt-0.5 text-xs text-muted-foreground font-mono truncate">
-              Schema: {item.schema_id}
+            <p className="mt-0.5 text-xs text-muted-foreground truncate">
+              {item.schema_name || "—"}
+              {item.schema_version && (
+                <span className="ml-1.5 font-mono text-[10px] opacity-60">{item.schema_version}</span>
+              )}
             </p>
           </div>
         </div>
@@ -66,8 +69,6 @@ function SchemaCard({ item }: { item: CustomerSchema }) {
 
       <div className="border-t border-border/60 px-4 pb-3 pt-3">
         <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
-          <span className="text-muted-foreground font-medium">Version ID</span>
-          <span className="font-mono truncate">{item.schema_version_id || "—"}</span>
           <span className="text-muted-foreground font-medium">Schema Name</span>
           <span className="truncate">{item.schema_name || "—"}</span>
           <span className="text-muted-foreground font-medium">Schema Version</span>
