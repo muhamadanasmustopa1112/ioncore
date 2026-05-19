@@ -42,7 +42,6 @@ export interface BroadbandPlan {
   price: number;
   one_time_charge: number;
   customer_type: BroadbandCustomerType;
-  temporary_activation_window_hours: number;
   bandwidth_profile_id: string;
   is_active: boolean;
   branches?: BranchInfo[];
@@ -74,7 +73,6 @@ export interface CreateBroadbandPlanPayload {
   price: number;
   one_time_charge: number;
   customer_type: BroadbandCustomerType;
-  temporary_activation_window_hours: number;
   is_active: boolean;
 }
 

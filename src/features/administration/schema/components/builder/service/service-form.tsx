@@ -39,6 +39,7 @@ const DEFAULT_SERVICE: ServiceFormValues = {
   support_tier: "standard",
   maintenance_allowed: true,
   maintenance_schedule: "weekdays_02:00-06:00",
+  temporary_activation_window_hours: 24,
 };
 
 export function ServiceForm() {
@@ -82,6 +83,7 @@ export function ServiceForm() {
       support_tier: c.support_tier as ServiceFormValues["support_tier"],
       maintenance_allowed: mw.allowed as boolean,
       maintenance_schedule: mw.schedule as string,
+      temporary_activation_window_hours: c.temporary_activation_window_hours as number,
     };
   }
 
@@ -128,6 +130,7 @@ export function ServiceForm() {
         allowed: values.maintenance_allowed,
         schedule: values.maintenance_schedule ?? "",
       },
+      temporary_activation_window_hours: values.temporary_activation_window_hours,
     };
   }
 
@@ -380,6 +383,34 @@ export function ServiceForm() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Radius Provisioning */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+              <RiSettings3Line className="size-4 text-orange-500" />
+              <h3 className="text-sm font-semibold">Radius Provisioning</h3>
+            </div>
+            <DiffWrap name="temporary_activation_window_hours">
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  Temporary Activation Window (hours)
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  step={1}
+                  disabled={isDetailMode}
+                  {...register("temporary_activation_window_hours", { valueAsNumber: true })}
+                />
+                {errors.temporary_activation_window_hours && (
+                  <p className="text-xs text-red-500">{errors.temporary_activation_window_hours.message}</p>
+                )}
+                <p className="text-[11px] text-muted-foreground">
+                  Duration the customer stays in TEMPORARY state on Radius before transitioning to PERMANENT ACTIVE.
+                </p>
+              </div>
+            </DiffWrap>
           </div>
 
         </div>

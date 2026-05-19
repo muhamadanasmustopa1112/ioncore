@@ -17,6 +17,7 @@ export interface ServiceContent {
     allowed: boolean;
     schedule: string;
   };
+  temporary_activation_window_hours: number;
 }
 
 export const serviceFormSchema = z.object({
@@ -30,6 +31,7 @@ export const serviceFormSchema = z.object({
   support_tier: z.enum(["standard", "priority", "dedicated"]),
   maintenance_allowed: z.boolean(),
   maintenance_schedule: z.string().optional(),
+  temporary_activation_window_hours: z.number().int().min(1),
 });
 
 export type ServiceFormValues = z.infer<typeof serviceFormSchema>;

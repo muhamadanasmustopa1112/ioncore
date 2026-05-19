@@ -71,7 +71,6 @@ const schema = z.object({
   price: z.number({ error: "Required" }).min(0, "Required"),
   one_time_charge: z.number({ error: "Required" }).min(0, "Required"),
   customer_type: z.string().min(1, "Customer type is required"),
-  temporary_activation_window_hours: z.number({ error: "Required" }).min(0, "Required"),
   is_active: z.boolean(),
 });
 
@@ -95,7 +94,7 @@ export function PlanForm({ selected, mode, onSubmit, onCustomerTypeChange, onDir
     defaultValues: {
       name: "", speed_download_mbps: 0, speed_upload_mbps: 0,
       price: 0, one_time_charge: 0, customer_type: "broadband",
-      temporary_activation_window_hours: 24, is_active: true,
+      is_active: true,
     },
   });
 
@@ -108,11 +107,10 @@ export function PlanForm({ selected, mode, onSubmit, onCustomerTypeChange, onDir
         price: selected.price,
         one_time_charge: selected.one_time_charge,
         customer_type: selected.customer_type,
-        temporary_activation_window_hours: selected.temporary_activation_window_hours,
         is_active: selected.is_active,
       });
     } else if (!selected && mode === "new") {
-      reset({ name: "", speed_download_mbps: 0, speed_upload_mbps: 0, price: 0, one_time_charge: 0, customer_type: "broadband", temporary_activation_window_hours: 24, is_active: true });
+      reset({ name: "", speed_download_mbps: 0, speed_upload_mbps: 0, price: 0, one_time_charge: 0, customer_type: "broadband", is_active: true });
     }
   }, [selected, mode, reset]);
 
@@ -186,10 +184,6 @@ export function PlanForm({ selected, mode, onSubmit, onCustomerTypeChange, onDir
             )} />
           </Field>
         </div>
-
-        <Field label="Temp Activation Window (hours)" required error={errors.temporary_activation_window_hours?.message}>
-          <Input type="number" {...register("temporary_activation_window_hours", { valueAsNumber: true })} disabled={isDetail} />
-        </Field>
 
 
       </div>
