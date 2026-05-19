@@ -15,6 +15,8 @@ import {
   Empty,
   fmtDate,
   humanize,
+  formatResolutionTimeSpent,
+  hasResolutionTimeSpent,
   RESOLUTION_VARIANT,
   SIGNOFF_VARIANT,
   NOC_DECISION_VARIANT,
@@ -123,13 +125,24 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
                 {r.category && <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-2">{humanize(r.category)}</p>}
                 {r.finding && <p className="text-xs text-slate-600 dark:text-slate-400 mb-1"><span className="font-semibold text-slate-500">Finding:</span> {r.finding}</p>}
                 {r.action_taken && <p className="text-xs text-slate-600 dark:text-slate-400"><span className="font-semibold text-slate-500">Action:</span> {r.action_taken}</p>}
-                {((r.time_spent_minutes ?? 0) > 0 || r.timestamp) && (
-                  <div className="flex flex-wrap gap-x-3 text-[10px] text-slate-400 mt-2">
-                    {r.time_spent_minutes != null && r.time_spent_minutes > 0 && <span>{r.time_spent_minutes} min</span>}
-                    {r.time_spent_minutes != null && r.time_spent_minutes > 0 && r.timestamp && <span>·</span>}
-                    {r.timestamp && <span>{fmtDate(r.timestamp)}</span>}
-                  </div>
-                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  {hasResolutionTimeSpent(r.time_spent_minutes, r.time_spent_hh_mm_ss) && (
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Work duration</p>
+                      <p className="text-[9px] text-slate-400 mt-0.5">Time spent on this item</p>
+                      <p className="text-sm font-semibold mt-1">
+                        {formatResolutionTimeSpent(r.time_spent_minutes, r.time_spent_hh_mm_ss) ?? "—"}
+                      </p>
+                    </div>
+                  )}
+                  {r.timestamp && (
+                    <div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Resolved at</p>
+                      <p className="text-[9px] text-slate-400 mt-0.5">When this entry was logged</p>
+                      <p className="text-sm font-semibold mt-1">{fmtDate(r.timestamp)}</p>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -190,6 +203,7 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <Field label="Submitted At" value={fmtDate(wo.bast.submitted_at)} />
             <Field label="Submitted By" value={`${wo.bast.submitted_by ?? "—"} (${wo.bast.submitted_role ?? "—"})`} />
+            {wo.bast.work_duration && <Field label="Work duration" value={wo.bast.work_duration} />}
             {wo.bast.summary && <Field label="Summary" value={wo.bast.summary} className="sm:col-span-2" />}
           </div>
           {wo.bast.flags && wo.bast.flags.length > 0 && (

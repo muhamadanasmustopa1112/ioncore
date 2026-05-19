@@ -46,7 +46,7 @@ export function useCustomerList(params: CustomerListParams = {}) {
   });
 }
 
-export function useReferrerCustomers(params: { search?: string; page?: number; size?: number } = {}) {
+export function useReferrerCustomers(params: { search?: string; page?: number; size?: number; status?: string } = {}) {
   return useQuery({
     queryKey: ["customers", "referrer", params],
     queryFn: async () => {

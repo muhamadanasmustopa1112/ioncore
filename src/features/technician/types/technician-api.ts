@@ -227,7 +227,8 @@ export interface ResolutionLogItem {
   finding: string;
   action_taken: string;
   resolution_status: ResolutionStatus | "";
-  time_spent_minutes: number;
+  time_spent_minutes?: number;
+  time_spent_hh_mm_ss?: string;
   resolved_by_user_id?: string;
   timestamp?: string;
 }
@@ -253,11 +254,13 @@ export interface CustomerSignOff {
 }
 
 export interface BASTSubmission {
+  id?: string;
   summary: string;
-  flags: string[];
+  flags?: string[];
   submitted_at: string;
   submitted_by: string;
   submitted_role: string;
+  work_duration?: string;
 }
 
 export interface NOCApprovalLogEntry {
@@ -390,11 +393,14 @@ export interface AuditTrailEntry {
   actor_role: string;
   metadata?: {
     added_technician?: string;
+    added_technician_names?: string;
     new_pair?: string;
+    new_pair_names?: string;
     original_pair?: string;
+    original_pair_names?: string;
     reassignment_mode?: string;
     removed_technician?: string;
-    [key: string]: any;
+    removed_technician_names?: string;
   };
   created_at: string;
 }

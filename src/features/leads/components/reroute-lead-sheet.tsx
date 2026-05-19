@@ -21,7 +21,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
-import { useRerouteLead, useSalesList } from "../api/leads-queries";
+import { useRerouteLead } from "../api/leads-queries";
 import type { LeadDto } from "../types/leads-api";
 
 interface Props {
@@ -32,44 +32,28 @@ interface Props {
 
 export function RerouteLeadSheet({ lead, open, onClose }: Props) {
   const [branchId, setBranchId] = useState("");
-  const [salesId, setSalesId] = useState("");
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList();
-  const { data: salesReps = [], isLoading: salesLoading } = useSalesList(
-    branchId ? { branch_id: branchId } : {}
-  );
 
   const reroute = useRerouteLead(lead?.id ?? "");
 
   useEffect(() => {
     if (open) {
       setBranchId(lead?.branch_id ?? "");
-      setSalesId(lead?.assigned_sales_id ?? "");
     }
   }, [open, lead]);
 
-  useEffect(() => {
-    setSalesId("");
-  }, [branchId]);
-
   const handleSubmit = () => {
-    if (!lead || !branchId || !salesId) return;
+    if (!lead || !branchId) return;
     reroute.mutate(
-      { branch_id: branchId, assigned_sales_id: salesId },
+      { branch_id: branchId },
       { onSuccess: onClose }
     );
   };
 
   const activeBranches = branches.filter((b) => b.active && (b.level === "area" || b.level === "sub_area"));
 
-  // Filter sales reps by type matching lead_type (SIT-C05)
-  const compatibleReps = salesReps.filter((rep) => {
-    if (!lead) return true;
-    if (rep.type === "both") return true;
-    return rep.type === lead.lead_type;
-  });
-
-  const canSubmit = !!branchId && !!salesId && !reroute.isPending;
+  const canSubmit = !!branchId && !reroute.isPending;
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -125,51 +109,6 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
                     })}
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Assigned Sales Rep <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={salesId}
-                  onValueChange={setSalesId}
-                  disabled={!branchId || salesLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={
-                        !branchId
-                          ? "Select a branch first"
-                          : salesLoading
-                            ? "Loading sales reps…"
-                            : salesReps.length === 0
-                              ? "No reps in this branch"
-                              : "Select sales rep"
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {compatibleReps.map((rep) => (
-                      <SelectItem key={rep.id} value={rep.id}>
-                        <span>{rep.name}</span>
-                        <span className="ml-2 text-xs text-muted-foreground capitalize">
-                          {rep.type}
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {branchId && !salesLoading && compatibleReps.length === 0 && salesReps.length > 0 && (
-                  <p className="text-xs text-amber-600">
-                    No {lead?.lead_type} reps in this branch. Only reps with matching type are shown.
-                  </p>
-                )}
-                {branchId && !salesLoading && salesReps.length === 0 && (
-                  <p className="text-xs text-amber-600">
-                    No sales reps assigned to this branch.
-                  </p>
-                )}
               </div>
             </div>
           </ScrollArea>

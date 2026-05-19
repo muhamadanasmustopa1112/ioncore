@@ -101,7 +101,7 @@ export function CreateCustomer() {
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList({ level: "sub_area" });
   const { data: referrerData } = useReferrerCustomers(
-    source === "referral" ? { search: referrerSearch || undefined, size: 20 } : {}
+    source === "referral" ? { search: referrerSearch || undefined, size: 20, status: "active" } : {}
   );
   const referrerOptions = useMemo(
     () => (source === "referral" ? (referrerData?.items ?? []) : []),
@@ -353,7 +353,7 @@ export function CreateCustomer() {
             lat={installLat}
             lng={installLng}
             onLatLngChange={(lat, lng) => { setInstallLat(lat); setInstallLng(lng); }}
-            onAddressChange={() => {}}
+            onAddressChange={() => { }}
             onCoverageChange={setCovered}
           />
         </div>
@@ -380,7 +380,7 @@ export function CreateCustomer() {
                 ) : null)}
               </div>
 
-<div className="space-y-2 pt-1">
+              <div className="space-y-2 pt-1">
                 <Button variant="primary" className="w-full font-semibold" onClick={handleSubmit} disabled={!canSubmit}>
                   {submitLabel}
                 </Button>

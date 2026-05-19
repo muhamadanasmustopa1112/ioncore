@@ -2,7 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { RiArrowRightUpLine, RiUserAddLine, RiMapPinLine, RiRouteLine } from "@remixicon/react";
+import { RiArrowRightUpLine, RiUserAddLine, RiMapPinLine, RiRouteLine, RiCheckboxCircleLine, RiUserReceivedLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -128,15 +128,25 @@ export function LeadDetail() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Cable Distance", value: `${lead.cable_distance_meters} m`, icon: <RiRouteLine className="size-4 text-muted-foreground" /> },
-          { label: "Excess Cable", value: lead.is_excess_cable_accepted ? "Accepted" : "Not accepted" },
+          { label: "Excess Cable", value: lead.is_excess_cable_accepted ? "Accepted" : "Not accepted", icon: <RiCheckboxCircleLine className="size-4 text-muted-foreground" /> },
           { label: "Coords", value: lead.installation_point_lat ? `${lead.installation_point_lat?.toFixed(4)}, ${lead.installation_point_lng?.toFixed(4)}` : "—", icon: <RiMapPinLine className="size-4 text-muted-foreground" /> },
-          { label: "Referrer", value: lead.referrer_customer_id ? lead.referrer_customer_id.slice(0, 10) + "…" : "—" },
+          {
+            label: "Referrer",
+            value: lead.referrer_customer_id ? (
+              <a
+                href={paths.dashboard.crmAndSales.customer.detail.getHref(lead.referrer_customer_id)}
+              >
+                {lead.referrer_name}
+              </a>
+            ) : "—",
+            icon: <RiUserReceivedLine className="size-4 text-muted-foreground" />
+          },
         ].map(({ label, value, icon }) => (
           <div key={label} className="rounded-xl border bg-card p-4">
             <p className="text-xs text-muted-foreground font-medium flex items-center gap-1.5 mb-1">
               {icon}{label}
             </p>
-            <p className="text-sm font-semibold">{value}</p>
+            <div className="text-sm font-semibold">{value}</div>
           </div>
         ))}
       </div>

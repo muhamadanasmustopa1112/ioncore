@@ -124,7 +124,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
     keyword: search || undefined,
   });
   const { data: customersData, isLoading: customersLoading } = useReferrerCustomers(
-    source === "referral" ? { search: customerSearch || undefined, size: 500 } : {}
+    source === "referral" ? { search: customerSearch || undefined, size: 500, status: "active" } : {}
   );
   const createLead = useCreateLead();
 

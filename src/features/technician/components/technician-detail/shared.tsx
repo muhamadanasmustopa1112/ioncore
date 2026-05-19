@@ -96,6 +96,21 @@ export function humanize(s: string | undefined | null) {
   return s.replace(/_/g, " ");
 }
 
+export function formatResolutionTimeSpent(
+  minutes?: number | null,
+  hhMmSs?: string | null,
+): string | null {
+  const clock = hhMmSs?.trim();
+  if (minutes != null && clock) return `${minutes} min (${clock})`;
+  if (minutes != null) return `${minutes} min`;
+  if (clock) return clock;
+  return null;
+}
+
+export function hasResolutionTimeSpent(minutes?: number | null, hhMmSs?: string | null): boolean {
+  return minutes != null || Boolean(hhMmSs?.trim());
+}
+
 // ── Layout primitives ──────────────────────────────────────────────────────
 
 export function SectionCard({
