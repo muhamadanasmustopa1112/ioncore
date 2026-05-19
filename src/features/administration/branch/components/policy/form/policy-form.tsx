@@ -22,6 +22,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePolicyStore } from "../../../store/policy";
 import { PolicyPayload } from "../../../types/policy-api";
 
+function formatRupiah(value: number): string {
+  return new Intl.NumberFormat("id-ID").format(value);
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat("id-ID").format(value);
+}
+
 interface PolicyFormProps {
   onSubmit?: (payload: PolicyPayload) => void;
   branchType?: string;
@@ -39,17 +47,17 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
   const [workStart, setWorkStart] = useState("08:00");
   const [workEnd, setWorkEnd] = useState("17:00");
   const [timezone, setTimezone] = useState("Asia/Jakarta");
-  const [taxDefault, setTaxDefault] = useState("0.11");
+  const [taxDefault, setTaxDefault] = useState("1.1");
   const [contacts, setContacts] = useState("");
   const [approvalL1, setApprovalL1] = useState("");
   const [approvalL2, setApprovalL2] = useState("");
   const [excessCablePrice, setExcessCablePrice] = useState("35000");
   const [cableThresholdMeter, setCableThresholdMeter] = useState("210");
-  const [cableRouteFactor, setCableRouteFactor] = useState("1.0");
+  const [cableRouteFactor, setCableRouteFactor] = useState("10");
   const [maxCableRunMeter, setMaxCableRunMeter] = useState("500");
   const [odpStrategy, setOdpStrategy] = useState<OdpSelectionStrategyType>("nearest");
-  const [odpWeightDistance, setOdpWeightDistance] = useState("0.6");
-  const [odpWeightCapacity, setOdpWeightCapacity] = useState("0.4");
+  const [odpWeightDistance, setOdpWeightDistance] = useState("6");
+  const [odpWeightCapacity, setOdpWeightCapacity] = useState("4");
 
   useEffect(() => {
     if (selectedPolicy && (form === "edit" || form === "details")) {
@@ -61,17 +69,20 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
       setWorkStart(p.policyJson.working_hours?.start ?? "08:00");
       setWorkEnd(p.policyJson.working_hours?.end ?? "17:00");
       setTimezone(p.policyJson.timezone ?? "Asia/Jakarta");
-      setTaxDefault(p.policyJson.tax_default?.toString() ?? "0.11");
+      setTaxDefault(p.policyJson.tax_default?.toString() ?? "1.1");
       setContacts(p.policyJson.notification_contacts?.join(", ") ?? "");
       setApprovalL1(p.policyJson.approval_matrix?.level_1 ?? "");
       setApprovalL2(p.policyJson.approval_matrix?.level_2 ?? "");
       setExcessCablePrice(p.policyJson.excess_cable_price?.toString() ?? "35000");
       setCableThresholdMeter(p.policyJson.cable_threshold_meter?.toString() ?? "210");
-      setCableRouteFactor(p.policyJson.cable_route_factor?.toString() ?? "1.0");
+      const crf = p.policyJson.cable_route_factor;
+      setCableRouteFactor(crf != null ? Math.round(crf * 10).toString() : "10");
       setMaxCableRunMeter(p.policyJson.max_cable_run_meter?.toString() ?? "500");
       setOdpStrategy((p.policyJson.odp_selection_strategy?.type as OdpSelectionStrategyType) ?? "nearest");
-      setOdpWeightDistance(p.policyJson.odp_selection_strategy?.weights?.distance?.toString() ?? "0.6");
-      setOdpWeightCapacity(p.policyJson.odp_selection_strategy?.weights?.available_capacity?.toString() ?? "0.4");
+      const dist = p.policyJson.odp_selection_strategy?.weights?.distance;
+      setOdpWeightDistance(dist != null ? (dist * 10).toString() : "6");
+      const cap = p.policyJson.odp_selection_strategy?.weights?.available_capacity;
+      setOdpWeightCapacity(cap != null ? (cap * 10).toString() : "4");
     } else if (form === "new") {
       setName("");
       setDescription("");
@@ -80,17 +91,17 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
       setWorkStart("08:00");
       setWorkEnd("17:00");
       setTimezone("Asia/Jakarta");
-      setTaxDefault("0.11");
+      setTaxDefault("1.1");
       setContacts("");
       setApprovalL1("");
       setApprovalL2("");
       setExcessCablePrice("35000");
       setCableThresholdMeter("210");
-      setCableRouteFactor("1.0");
+      setCableRouteFactor("10");
       setMaxCableRunMeter("500");
       setOdpStrategy("nearest");
-      setOdpWeightDistance("0.6");
-      setOdpWeightCapacity("0.4");
+      setOdpWeightDistance("6");
+      setOdpWeightCapacity("4");
     }
   }, [selectedPolicy, form]);
 
@@ -113,15 +124,15 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
         ...(isNoc && {
           excess_cable_price: Number(excessCablePrice) || 0,
           cable_threshold_meter: Number(cableThresholdMeter) || 0,
-          cable_route_factor: Number(cableRouteFactor) || 1.0,
+          cable_route_factor: (Number(cableRouteFactor) || 10) / 10,
           max_cable_run_meter: Number(maxCableRunMeter) || 0,
         }),
         ...(isNoc && {
           odp_selection_strategy: {
             type: odpStrategy,
             weights: {
-              distance: Number(odpWeightDistance) || 0.6,
-              available_capacity: Number(odpWeightCapacity) || 0.4,
+              distance: (Number(odpWeightDistance) || 6) / 10,
+              available_capacity: (Number(odpWeightCapacity) || 4) / 10,
             },
           },
         }),
@@ -222,12 +233,21 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                 <Label className="text-xs font-medium text-muted-foreground">
                   Timezone
                 </Label>
-                <Input
-                  placeholder="Asia/Jakarta"
-                  value={timezone}
-                  onChange={(e) => setTimezone(e.target.value)}
-                  disabled={isDetailMode}
-                />
+                {isDetailMode ? (
+                  <Input value={timezone} disabled />
+                ) : (
+                  <Select value={timezone} onValueChange={setTimezone}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Timezone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Asia/Jakarta">Asia/Jakarta (WIB)</SelectItem>
+                      <SelectItem value="Asia/Makassar">Asia/Makassar (WITA)</SelectItem>
+                      <SelectItem value="Asia/Jayapura">Asia/Jayapura (WIT)</SelectItem>
+                      <SelectItem value="UTC">UTC</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
@@ -260,17 +280,16 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  placeholder="0.11"
+                  placeholder="1.1"
                   value={taxDefault}
                   onChange={(e) => setTaxDefault(e.target.value)}
                   disabled={isDetailMode}
-                  step={0.01}
+                  step={0.1}
                   min={0}
-                  max={1}
                   className="w-32"
                 />
                 <span className="text-sm text-muted-foreground">
-                  ({((Number(taxDefault) || 0) * 100).toFixed(0)}%)
+                  ({((Number(taxDefault) || 0) * 10).toFixed(0)}%)
                 </span>
               </div>
             </div>
@@ -288,28 +307,34 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                 <Label className="text-xs font-medium text-muted-foreground">
                   Excess Cable Price
                 </Label>
-                <Input
-                  type="number"
-                  placeholder="35000"
-                  value={excessCablePrice}
-                  onChange={(e) => setExcessCablePrice(e.target.value)}
-                  disabled={isDetailMode}
-                  min={0}
-                  step={1}
-                />
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-sm text-muted-foreground select-none">Rp</span>
+                  <Input
+                    className="pl-8"
+                    type="text"
+                    placeholder="35.000"
+                    value={excessCablePrice ? formatRupiah(Number(excessCablePrice) || 0) : ""}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^\d]/g, "");
+                      setExcessCablePrice(raw);
+                    }}
+                    disabled={isDetailMode}
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
                   Cable Threshold (meter)
                 </Label>
                 <Input
-                  type="number"
+                  type="text"
                   placeholder="210"
-                  value={cableThresholdMeter}
-                  onChange={(e) => setCableThresholdMeter(e.target.value)}
+                  value={cableThresholdMeter ? formatNumber(Number(cableThresholdMeter) || 0) : ""}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^\d]/g, "");
+                    setCableThresholdMeter(raw);
+                  }}
                   disabled={isDetailMode}
-                  min={0}
-                  step={1}
                 />
               </div>
               <div className="space-y-2">
@@ -317,12 +342,13 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                   Cable Route Factor
                 </Label>
                 <Input
-                  type="number"
-                  placeholder="1.0"
-                  step="0.01"
-                  min="0"
-                  value={cableRouteFactor}
-                  onChange={(e) => setCableRouteFactor(e.target.value)}
+                  type="text"
+                  placeholder="10"
+                  value={cableRouteFactor ? formatNumber(Number(cableRouteFactor) || 0) : ""}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^\d]/g, "");
+                    setCableRouteFactor(raw);
+                  }}
                   disabled={isDetailMode}
                 />
               </div>
@@ -331,13 +357,14 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                   Max Cable Run (meter)
                 </Label>
                 <Input
-                  type="number"
+                  type="text"
                   placeholder="300"
-                  value={maxCableRunMeter}
-                  onChange={(e) => setMaxCableRunMeter(e.target.value)}
+                  value={maxCableRunMeter ? formatNumber(Number(maxCableRunMeter) || 0) : ""}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^\d]/g, "");
+                    setMaxCableRunMeter(raw);
+                  }}
                   disabled={isDetailMode}
-                  min={0}
-                  step={1}
                 />
               </div>
             </div>
@@ -373,14 +400,14 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                 <div className="space-y-2">
                   <Label className="text-xs font-medium text-muted-foreground">
                     Weight — Distance
-                    <span className="ml-1 text-muted-foreground/60 font-normal">(0–1)</span>
+                    <span className="ml-1 text-muted-foreground/60 font-normal">(0–10)</span>
                   </Label>
                   <Input
                     type="number"
-                    step="0.1"
+                    step="1"
                     min="0"
-                    max="1"
-                    placeholder="0.6"
+                    max="10"
+                    placeholder="6"
                     value={odpWeightDistance}
                     onChange={(e) => setOdpWeightDistance(e.target.value)}
                     disabled={isDetailMode}
@@ -389,14 +416,14 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                 <div className="space-y-2">
                   <Label className="text-xs font-medium text-muted-foreground">
                     Weight — Available Capacity
-                    <span className="ml-1 text-muted-foreground/60 font-normal">(0–1)</span>
+                    <span className="ml-1 text-muted-foreground/60 font-normal">(0–10)</span>
                   </Label>
                   <Input
                     type="number"
-                    step="0.1"
+                    step="1"
                     min="0"
-                    max="1"
-                    placeholder="0.4"
+                    max="10"
+                    placeholder="4"
                     value={odpWeightCapacity}
                     onChange={(e) => setOdpWeightCapacity(e.target.value)}
                     disabled={isDetailMode}

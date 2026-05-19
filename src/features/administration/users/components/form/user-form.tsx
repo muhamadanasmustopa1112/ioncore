@@ -63,7 +63,7 @@ const userFormSchema = z.object({
   technicianId: z.string().optional(),
   homeBranchId: z.string().min(1, "Home branch is required"),
   activeBranchId: z.string().min(1, "Active branch is required"),
-  reportsToUserId: z.string().optional(),
+  reportsToUserId: z.string().min(1, "Reports to is required"),
   roleAssignments: z.array(roleAssignmentSchema).min(1, "At least one role assignment is required"),
 });
 
@@ -216,6 +216,77 @@ export function UserForm() {
     control: form.control,
     name: "roleAssignments",
   });
+
+  const assignedBranches = useMemo(() => {
+    const selectedBranchIds = (roleAssignments || [])
+      .map((ra) => ra.branchId)
+      .filter(Boolean);
+    const uniqueIds = Array.from(new Set(selectedBranchIds));
+    return uniqueIds
+      .map((id) => branches.find((b) => b.id === id))
+      .filter(Boolean) as BranchData[];
+  }, [roleAssignments, branches]);
+
+  const homeBranchId = form.watch("homeBranchId");
+  const activeBranchId = form.watch("activeBranchId");
+
+  useEffect(() => {
+    if (isDetailMode) return;
+
+    const assignedBranchIds = assignedBranches.map((b) => b.id);
+
+    if (assignedBranchIds.length === 0) {
+      if (homeBranchId) {
+        form.setValue("homeBranchId", "", { shouldDirty: true, shouldValidate: true });
+      }
+      if (activeBranchId) {
+        form.setValue("activeBranchId", "", { shouldDirty: true, shouldValidate: true });
+      }
+    } else {
+      const targetBranchId = assignedBranchIds[0];
+      if (homeBranchId !== targetBranchId) {
+        form.setValue("homeBranchId", targetBranchId, { shouldDirty: true, shouldValidate: true });
+      }
+      if (activeBranchId !== targetBranchId) {
+        form.setValue("activeBranchId", targetBranchId, { shouldDirty: true, shouldValidate: true });
+      }
+    }
+  }, [assignedBranches, homeBranchId, activeBranchId, form, isDetailMode]);
+
+  const homeBranchOptions = isDetailMode ? branches : assignedBranches;
+  const activeBranchOptions = isDetailMode ? branches : assignedBranches;
+
+  const workingScope = form.watch("workingScope");
+
+  const assignedLevels = useMemo(() => {
+    const levels = assignedBranches.map((b) => b.level).filter(Boolean);
+    return Array.from(new Set(levels));
+  }, [assignedBranches]);
+
+  useEffect(() => {
+    if (isDetailMode) return;
+
+    if (assignedLevels.length === 0) {
+      if (workingScope) {
+        form.setValue("workingScope", "", { shouldDirty: true, shouldValidate: true });
+      }
+    } else {
+      const targetLevel = assignedLevels[0];
+      if (workingScope !== targetLevel) {
+        form.setValue("workingScope", targetLevel, { shouldDirty: true, shouldValidate: true });
+      }
+    }
+  }, [assignedLevels, workingScope, form, isDetailMode]);
+
+  const workingScopeOptions = useMemo(() => {
+    const allOptions = [
+      { value: "regional", label: "Regional" },
+      { value: "area", label: "Area" },
+      { value: "sub_area", label: "Sub Area" },
+    ];
+    if (isDetailMode) return allOptions;
+    return allOptions.filter((opt) => assignedLevels.includes(opt.value as any));
+  }, [assignedLevels, isDetailMode]);
 
   const { isSalesRole, lockedSalesType } = useMemo(() => {
     const assignedRoleNames = (roleAssignments || []).map((ra) => {
@@ -773,7 +844,7 @@ export function UserForm() {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
-                        disabled={isDetailMode}
+                        disabled={true}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -781,9 +852,17 @@ export function UserForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="regional">Regional</SelectItem>
-                          <SelectItem value="area">Area</SelectItem>
-                          <SelectItem value="sub_area">Sub Area</SelectItem>
+                          {workingScopeOptions.length === 0 ? (
+                            <SelectItem value="no-scope" disabled>
+                              Select branch in Role Assignment first
+                            </SelectItem>
+                          ) : (
+                            workingScopeOptions.map((opt) => (
+                              <SelectItem key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormDescription className="text-[10px] leading-tight">
@@ -852,7 +931,7 @@ export function UserForm() {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
-                        disabled={isDetailMode}
+                        disabled={true}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -860,16 +939,22 @@ export function UserForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {branches.map((b) => (
-                            <SelectItem key={b.id} value={b.id}>
-                              <div className="flex flex-col text-left">
-                                <span className="font-medium">{b.name}</span>
-                                <span className="text-[10px] text-muted-foreground uppercase">
-                                  {b.level?.replace("_", " ")} • {b.branchType}
-                                </span>
-                              </div>
+                          {homeBranchOptions.length === 0 ? (
+                            <SelectItem value="no-branch" disabled>
+                              Select branch in Role Assignment first
                             </SelectItem>
-                          ))}
+                          ) : (
+                            homeBranchOptions.map((b) => (
+                              <SelectItem key={b.id} value={b.id}>
+                                <div className="flex flex-col text-left">
+                                  <span className="font-medium">{b.name}</span>
+                                  <span className="text-[10px] text-muted-foreground uppercase">
+                                    {b.level?.replace("_", " ")} • {b.branchType}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage className="text-[11px]" />
@@ -887,7 +972,7 @@ export function UserForm() {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
-                        disabled={isDetailMode}
+                        disabled={true}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -895,16 +980,22 @@ export function UserForm() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {branches.map((b) => (
-                            <SelectItem key={b.id} value={b.id}>
-                              <div className="flex flex-col text-left">
-                                <span className="font-medium">{b.name}</span>
-                                <span className="text-[10px] text-muted-foreground uppercase">
-                                  {b.level?.replace("_", " ")} • {b.branchType}
-                                </span>
-                              </div>
+                          {activeBranchOptions.length === 0 ? (
+                            <SelectItem value="no-branch" disabled>
+                              Select branch in Role Assignment first
                             </SelectItem>
-                          ))}
+                          ) : (
+                            activeBranchOptions.map((b) => (
+                              <SelectItem key={b.id} value={b.id}>
+                                <div className="flex flex-col text-left">
+                                  <span className="font-medium">{b.name}</span>
+                                  <span className="text-[10px] text-muted-foreground uppercase">
+                                    {b.level?.replace("_", " ")} • {b.branchType}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage className="text-[11px]" />

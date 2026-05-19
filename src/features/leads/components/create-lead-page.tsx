@@ -35,6 +35,7 @@ import { useReferrerCustomers } from "@/features/customers/api/customers-queries
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { paths } from "@/config/paths";
+import { useUsers } from "@/features/user-service/api/users";
 import { useCreateLead } from "../api/leads-queries";
 import type { CustomerSubType, LeadSource, LeadStatus, LeadType } from "../types/leads-api";
 
@@ -123,6 +124,9 @@ export function CreateLeadPage() {
   const { data: customersData, isLoading: customersLoading } = useReferrerCustomers(
     source === "referral" ? { search: customerSearch || undefined, size: 20 } : {}
   );
+  const [assignedSalesId, setAssignedSalesId] = useState("");
+  const { data: usersResp, isLoading: usersLoading } = useUsers({ per_page: 500 });
+  const usersList = useMemo(() => usersResp?.data ?? [], [usersResp]);
   const createLead = useCreateLead();
 
   const activeBranches = useMemo(() => branches.filter((b) => b.active && b.level === "area"), [branches]);
@@ -157,6 +161,7 @@ export function CreateLeadPage() {
         source,
         branch_id: branchId,
         referrer_customer_id: source === "referral" && referrerCustomerId ? referrerCustomerId : null,
+        assigned_sales_id: "91fce6ad-f5a2-484d-9aac-03ca4db2e7c5",
         status,
         ...(nik.trim() ? { nik: nik.trim() } : {}),
         ...(phoneNumber.trim() ? { phone_number: phoneNumber.trim() } : {}),
@@ -318,7 +323,11 @@ export function CreateLeadPage() {
               )}
 
               <FieldRow label="Branch" required>
-                <Select value={branchId} onValueChange={setBranchId} disabled={branchesLoading}>
+                <Select
+                  value={branchId}
+                  onValueChange={setBranchId}
+                  disabled={branchesLoading}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder={branchesLoading ? "Loading…" : "Select branch"} />
                   </SelectTrigger>
@@ -331,6 +340,37 @@ export function CreateLeadPage() {
                         </span>
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </FieldRow>
+
+              <FieldRow label="Assigned Sales">
+                <Select
+                  value={assignedSalesId}
+                  onValueChange={setAssignedSalesId}
+                  disabled={usersLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        usersLoading
+                          ? "Loading users..."
+                          : "Select user"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {usersList.length === 0 ? (
+                      <SelectItem value="no-users" disabled>
+                        No users available
+                      </SelectItem>
+                    ) : (
+                      usersList.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </FieldRow>
@@ -373,7 +413,7 @@ export function CreateLeadPage() {
             lat={lat}
             lng={lng}
             onLatLngChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }}
-            onAddressChange={() => {}}
+            onAddressChange={() => { }}
             onCoverageChange={setCovered}
           />
         </div>
@@ -390,6 +430,7 @@ export function CreateLeadPage() {
                   { label: "Source", value: source.replace("_", " ") },
                   { label: "Status", value: STATUSES.find((s) => s.value === status)?.label ?? status },
                   { label: "Branch", value: activeBranches.find((b) => b.id === branchId)?.name ?? null },
+                  { label: "Assigned Sales", value: usersList.find((u) => u.id === assignedSalesId)?.name ?? null },
                   { label: "Referrer", value: selectedCustomer?.full_name ?? null },
                   { label: "Coords", value: pinMoved ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : null },
                 ] as { label: string; value: string | null }[]).map(({ label, value }) => value ? (

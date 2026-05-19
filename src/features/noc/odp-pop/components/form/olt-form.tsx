@@ -1,6 +1,6 @@
 "use client";
 
-import { useImperativeHandle, forwardRef, useMemo } from "react";
+import { useImperativeHandle, forwardRef, useMemo, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
@@ -33,6 +33,7 @@ import { DEFAULT_OLT_VALUES, OltData, oltSchema, type OltFormValues } from "../.
 import { useOltStore } from "../../store/olt";
 import { useCreateOlt } from "../../api/create-olt";
 import { useUpdateOlt } from "../../api/update-olt";
+import { useOlt } from "../../api/get-olt";
 
 type OltFormProps = {
   mode: "new" | "edit" | "details";
@@ -58,6 +59,25 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
 
     const data = selectedOlt;
 
+    const { data: oltListRes } = useOlt({ params: { limit: 1000 } });
+
+    const nextSuffix = useMemo(() => {
+      if (mode !== "new" && data?.code) {
+        const match = data.code.match(/-(\d+)$/);
+        return match ? match[1] : "001";
+      }
+      const codes = oltListRes?.data?.map((o) => o.code) || [];
+      const numbers = codes
+        .map((code) => {
+          if (!code) return 0;
+          const match = code.match(/-(\d+)$/);
+          return match ? parseInt(match[1], 10) : 0;
+        })
+        .filter(Boolean);
+      const nextNum = numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
+      return nextNum.toString().padStart(3, "0");
+    }, [oltListRes, data, mode]);
+
     const mapOltToFormValues = (olt: OltData): OltFormValues => ({
       code: olt.code ?? "",
       name: olt.name,
@@ -74,6 +94,38 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
         pop_id: urlPopId || "",
       } as OltFormValues,
     });
+
+    const codeValue = form.watch("code") || "";
+
+    const getMiddlePart = (fullCode: string) => {
+      if (!fullCode) return "";
+      const parts = fullCode.split("-");
+      if (parts.length > 2) {
+        return parts.slice(1, -1).join("-");
+      }
+      return "";
+    };
+
+    const [middle, setMiddle] = useState(() => getMiddlePart(codeValue));
+
+    // Keep middle in sync with full code when loaded/selected OLT changes
+    useEffect(() => {
+      setMiddle(getMiddlePart(codeValue));
+    }, [codeValue]);
+
+    // Handle change of the middle part
+    const handleMiddleChange = (val: string) => {
+      const cleaned = val.toUpperCase().replace(/[^A-Z0-9_]/g, "");
+      setMiddle(cleaned);
+      form.setValue("code", cleaned ? `OLT-${cleaned}-${nextSuffix}` : "", { shouldValidate: true });
+    };
+
+    // Ensure code is synced on mount/when nextSuffix changes for new mode
+    useEffect(() => {
+      if (mode === "new" && middle) {
+        form.setValue("code", `OLT-${middle}-${nextSuffix}`, { shouldValidate: true });
+      }
+    }, [middle, nextSuffix, mode, form]);
 
     const { mutate: createOlt, isPending: isCreating } = useCreateOlt({
       mutationConfig: {
@@ -138,7 +190,17 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
                           Code
                         </FormLabel>
                         <FormControl>
-                          <Input placeholder="OLT-JKT-001" {...field} disabled={readOnly || isPending} />
+                          <div className="flex items-center rounded-lg border border-input bg-background pl-3 focus-within:ring-1 focus-within:ring-ring h-10 w-full">
+                            <span className="text-sm font-semibold text-muted-foreground/60 select-none">OLT-</span>
+                            <Input
+                              className="flex-1 border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-1 text-sm uppercase h-full bg-transparent font-medium"
+                              placeholder="LOCATION"
+                              value={middle}
+                              onChange={(e) => handleMiddleChange(e.target.value)}
+                              disabled={readOnly || isPending || mode !== "new"}
+                            />
+                            <span className="text-sm font-semibold text-muted-foreground/60 select-none pr-3">-{nextSuffix}</span>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>

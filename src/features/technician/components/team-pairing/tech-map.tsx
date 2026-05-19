@@ -147,7 +147,7 @@ export default function TechnicianDispatchMap({ technicians = [] }: { technician
                         {tech.technician_name.charAt(0)}
                       </div>
                       <div>
-                        <h5 className="text-sm font-bold text-slate-900 leading-none mb-0.5">
+                        <h5 className="text-sm font-bold text-slate-900 dark:text-white leading-none mb-0.5">
                           {tech.technician_name}
                         </h5>
                         <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">

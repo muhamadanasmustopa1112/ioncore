@@ -35,6 +35,7 @@ import { BranchCombobox } from "@/features/administration/branch/components/bran
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { useReferrerCustomers } from "@/features/customers/api/customers-queries";
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
+import { useUsers } from "@/features/user-service/api/users";
 import { useCreateLead } from "../api/leads-queries";
 import type {
   CreateLeadPayload,
@@ -96,6 +97,7 @@ function resetState() {
     source: "referral" as LeadSource,
     referrerCustomerId: "",
     branchId: "",
+    assignedSalesId: "",
     nik: "",
     lat: INSTALL_DEFAULT[0],
     lng: INSTALL_DEFAULT[1],
@@ -120,8 +122,11 @@ export function CreateLeadSheet({ open, onClose }: Props) {
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList();
   const { data: customersData, isLoading: customersLoading } = useReferrerCustomers(
-    source === "referral" ? { search: customerSearch || undefined, size: 20 } : {}
+    source === "referral" ? { search: customerSearch || undefined, size: 500 } : {}
   );
+  const [assignedSalesId, setAssignedSalesId] = useState(initial.assignedSalesId);
+  const { data: usersResp, isLoading: usersLoading } = useUsers({ per_page: 500 });
+  const usersList = useMemo(() => usersResp?.data ?? [], [usersResp]);
   const createLead = useCreateLead();
 
   const activeBranches = useMemo(
@@ -158,6 +163,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
       setSource(s.source);
       setReferrerCustomerId(s.referrerCustomerId);
       setBranchId(s.branchId);
+      setAssignedSalesId(s.assignedSalesId);
       setNik(s.nik);
       setLat(s.lat);
       setLng(s.lng);
@@ -177,6 +183,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
       branch_id: branchId,
       referrer_customer_id:
         source === "referral" && referrerCustomerId ? referrerCustomerId : null,
+      assigned_sales_id: assignedSalesId || undefined,
       status: "new",
       ...(nik.trim() ? { nik: nik.trim() } : {}),
       ...(pinMoved ? { latitude: lat, longitude: lng } : {}),
@@ -343,7 +350,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                 lat={lat}
                 lng={lng}
                 onLatLngChange={(newLat, newLng) => { setLat(newLat); setLng(newLng); }}
-                onAddressChange={() => {}}
+                onAddressChange={() => { }}
               />
 
               <div className="space-y-2">
@@ -359,6 +366,38 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                   isLoading={branchesLoading}
                   className="w-full"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">Assigned Sales</Label>
+                <Select
+                  value={assignedSalesId}
+                  onValueChange={setAssignedSalesId}
+                  disabled={usersLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        usersLoading
+                          ? "Loading users..."
+                          : "Select user"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {usersList.length === 0 ? (
+                      <SelectItem value="no-users" disabled>
+                        No users available
+                      </SelectItem>
+                    ) : (
+                      usersList.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </ScrollArea>
