@@ -60,7 +60,7 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
     );
   };
 
-  const activeBranches = branches.filter((b) => b.active);
+  const activeBranches = branches.filter((b) => b.active && (b.level === "area" || b.level === "sub_area"));
 
   // Filter sales reps by type matching lead_type (SIT-C05)
   const compatibleReps = salesReps.filter((rep) => {
@@ -106,14 +106,23 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
                     <SelectValue placeholder={branchesLoading ? "Loading branches…" : "Select branch"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {activeBranches.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>
-                        <span>{b.name}</span>
-                        <span className="ml-2 text-xs text-muted-foreground capitalize">
-                          {b.level.replace("_", " ")}
-                        </span>
-                      </SelectItem>
-                    ))}
+                    {activeBranches.map((b) => {
+                      const parentArea = b.level === "sub_area" ? branches.find((item) => item.id === b.parentId || item.id === b._areaId) : null;
+                      const parentName = parentArea?.name || b.parentName || b._areaName;
+                      return (
+                        <SelectItem key={b.id} value={b.id}>
+                          <span>{b.name}</span>
+                          {parentName && (
+                            <span className="ml-1 text-xs text-muted-foreground">
+                              ({parentName})
+                            </span>
+                          )}
+                          <span className="ml-2 text-xs text-muted-foreground capitalize">
+                            {b.level.replace("_", " ")}
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>

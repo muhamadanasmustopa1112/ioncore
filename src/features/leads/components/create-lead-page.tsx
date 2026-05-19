@@ -35,7 +35,6 @@ import { useReferrerCustomers } from "@/features/customers/api/customers-queries
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { paths } from "@/config/paths";
-import { useUsers } from "@/features/user-service/api/users";
 import { useCreateLead } from "../api/leads-queries";
 import type { CustomerSubType, LeadSource, LeadStatus, LeadType } from "../types/leads-api";
 
@@ -124,12 +123,12 @@ export function CreateLeadPage() {
   const { data: customersData, isLoading: customersLoading } = useReferrerCustomers(
     source === "referral" ? { search: customerSearch || undefined, size: 20 } : {}
   );
-  const [assignedSalesId, setAssignedSalesId] = useState("");
-  const { data: usersResp, isLoading: usersLoading } = useUsers({ per_page: 500 });
-  const usersList = useMemo(() => usersResp?.data ?? [], [usersResp]);
   const createLead = useCreateLead();
 
-  const activeBranches = useMemo(() => branches.filter((b) => b.active && b.level === "area"), [branches]);
+  const activeBranches = useMemo(
+    () => branches.filter((b) => b.active && (b.level === "area" || b.level === "sub_area")),
+    [branches]
+  );
 
   const customerOptions = useMemo(
     () => (source === "referral" ? (customersData?.items ?? []) : []),
@@ -161,7 +160,6 @@ export function CreateLeadPage() {
         source,
         branch_id: branchId,
         referrer_customer_id: source === "referral" && referrerCustomerId ? referrerCustomerId : null,
-        assigned_sales_id: "91fce6ad-f5a2-484d-9aac-03ca4db2e7c5",
         status,
         ...(nik.trim() ? { nik: nik.trim() } : {}),
         ...(phoneNumber.trim() ? { phone_number: phoneNumber.trim() } : {}),
@@ -303,7 +301,7 @@ export function CreateLeadPage() {
                                       <span className="font-medium truncate">{c.full_name}</span>
                                       <StatusBadge status={c.status} />
                                     </div>
-                                    <span className="text-xs text-muted-foreground font-mono truncate">{c.id}</span>
+
                                   </div>
                                   {referrerCustomerId === c.id && (
                                     <Check className="size-4 text-primary shrink-0" />
@@ -332,48 +330,27 @@ export function CreateLeadPage() {
                     <SelectValue placeholder={branchesLoading ? "Loading…" : "Select branch"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {activeBranches.map((b) => (
-                      <SelectItem key={b.id} value={b.id}>
-                        <span>{b.name}</span>
-                        <span className="ml-2 text-xs text-muted-foreground capitalize">
-                          {b.level.replace("_", " ")}
-                        </span>
-                      </SelectItem>
-                    ))}
+                    {activeBranches.map((b) => {
+                      const parentArea = b.level === "sub_area" ? branches.find((item) => item.id === b.parentId || item.id === b._areaId) : null;
+                      const parentName = parentArea?.name || b.parentName || b._areaName;
+                      return (
+                        <SelectItem key={b.id} value={b.id}>
+                          <span>{b.name}</span>
+                          {parentName && (
+                            <span className="ml-1 text-xs text-muted-foreground">
+                              ({parentName})
+                            </span>
+                          )}
+                          <span className="ml-2 text-xs text-muted-foreground capitalize">
+                            {b.level.replace("_", " ")}
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </FieldRow>
 
-              <FieldRow label="Assigned Sales">
-                <Select
-                  value={assignedSalesId}
-                  onValueChange={setAssignedSalesId}
-                  disabled={usersLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder={
-                        usersLoading
-                          ? "Loading users..."
-                          : "Select user"
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {usersList.length === 0 ? (
-                      <SelectItem value="no-users" disabled>
-                        No users available
-                      </SelectItem>
-                    ) : (
-                      usersList.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>
-                          {u.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
 
               <FieldRow label="Status" required>
                 <Select value={status} onValueChange={(v) => setStatus(v as LeadStatus)}>
@@ -429,8 +406,19 @@ export function CreateLeadPage() {
                   { label: "NIK", value: nik || null },
                   { label: "Source", value: source.replace("_", " ") },
                   { label: "Status", value: STATUSES.find((s) => s.value === status)?.label ?? status },
-                  { label: "Branch", value: activeBranches.find((b) => b.id === branchId)?.name ?? null },
-                  { label: "Assigned Sales", value: usersList.find((u) => u.id === assignedSalesId)?.name ?? null },
+                  {
+                    label: "Branch",
+                    value: (() => {
+                      const selectedBranch = activeBranches.find((b) => b.id === branchId);
+                      if (!selectedBranch) return null;
+                      const parentArea = selectedBranch.level === "sub_area" ? branches.find((item) => item.id === selectedBranch.parentId || item.id === selectedBranch._areaId) : null;
+                      const parentName = parentArea?.name || selectedBranch.parentName || selectedBranch._areaName;
+                      if (parentName) {
+                        return `${selectedBranch.name} (${parentName})`;
+                      }
+                      return selectedBranch.name;
+                    })()
+                  },
                   { label: "Referrer", value: selectedCustomer?.full_name ?? null },
                   { label: "Coords", value: pinMoved ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : null },
                 ] as { label: string; value: string | null }[]).map(({ label, value }) => value ? (

@@ -87,7 +87,14 @@ export function BranchCombobox({
                   {selected.branchType.toUpperCase()}
                 </span>
               )}
-              <span className="truncate">{selected.name}</span>
+              <span className="truncate">
+                {selected.name}
+                {selected.level === "sub_area" && (() => {
+                  const parentArea = branches.find((item) => item.id === selected.parentId || item.id === selected._areaId);
+                  const parentName = parentArea?.name || selected.parentName || selected._areaName;
+                  return parentName ? ` (${parentName})` : "";
+                })()}
+              </span>
             </span>
           ) : (
             <span className="text-muted-foreground">Choose a branch to manage...</span>
@@ -128,27 +135,32 @@ export function BranchCombobox({
               {isLoading ? "Loading..." : "No branch found."}
             </CommandEmpty>
             <CommandGroup>
-              {branches.map((b) => (
-                <CommandItem
-                  key={b.id}
-                  value={`${b.name} ${levelLabel[b.level]} ${b.branchType ?? ""}`}
-                  onSelect={() => {
-                    onValueChange(b.id === value ? "" : b.id);
-                    setOpen(false);
-                  }}
-                >
-                  <span className="text-xs text-muted-foreground w-16 shrink-0">
-                    {levelLabel[b.level]}
-                  </span>
-                  {b.branchType && (
-                    <span className={cn("inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold", typeStyle[b.branchType] ?? "bg-muted text-muted-foreground")}>
-                      {b.branchType.toUpperCase()}
+              {branches.map((b) => {
+                const parentArea = b.level === "sub_area" ? branches.find((item) => item.id === b.parentId || item.id === b._areaId) : null;
+                const parentName = parentArea?.name || b.parentName || b._areaName;
+                const displayName = parentName ? `${b.name} (${parentName})` : b.name;
+                return (
+                  <CommandItem
+                    key={b.id}
+                    value={`${b.name} ${parentName ?? ""} ${levelLabel[b.level]} ${b.branchType ?? ""}`}
+                    onSelect={() => {
+                      onValueChange(b.id === value ? "" : b.id);
+                      setOpen(false);
+                    }}
+                  >
+                    <span className="text-xs text-muted-foreground w-16 shrink-0">
+                      {levelLabel[b.level]}
                     </span>
-                  )}
-                  <span className="truncate">{b.name}</span>
-                  {value === b.id && <Check className="ml-auto size-4 text-primary shrink-0" />}
-                </CommandItem>
-              ))}
+                    {b.branchType && (
+                      <span className={cn("inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold", typeStyle[b.branchType] ?? "bg-muted text-muted-foreground")}>
+                        {b.branchType.toUpperCase()}
+                      </span>
+                    )}
+                    <span className="truncate">{displayName}</span>
+                    {value === b.id && <Check className="ml-auto size-4 text-primary shrink-0" />}
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
