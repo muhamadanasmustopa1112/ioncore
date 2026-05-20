@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useProcessNOCApproval } from "../../../api/noc";
+import { RadiusCredentialsPanel } from "../radius-credentials-panel";
 import { ModalShell, FieldLabel } from "./shell";
 
 type Decision = "approved" | "rejected";
@@ -40,7 +41,7 @@ export function NOCApprovalModal({
       title="NOC Verification"
       subtitle={workOrderNumber}
       onClose={onClose}
-      widthClass="max-w-md"
+      widthClass="max-w-lg"
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose}>
@@ -59,6 +60,8 @@ export function NOCApprovalModal({
       }
     >
       <div className="space-y-4">
+        <RadiusCredentialsPanel workOrderId={workOrderId} variant="compact" />
+
         <div>
           <FieldLabel required>Decision</FieldLabel>
           <div className="grid grid-cols-2 gap-2">

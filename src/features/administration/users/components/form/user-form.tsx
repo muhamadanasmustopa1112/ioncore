@@ -335,6 +335,18 @@ export function UserForm() {
 
     if (!isNewMode && selectedUser) {
       try {
+        const role_ids = Array.from(
+          new Set(values.roleAssignments.map((r) => r.roleId).filter(Boolean)),
+        );
+        const branch_ids = Array.from(
+          new Set(
+            [
+              ...values.roleAssignments.map((r) => r.branchId),
+              values.homeBranchId,
+            ].filter(Boolean) as string[],
+          ),
+        );
+
         await updateUser({
           id: selectedUser.id,
           payload: {
@@ -351,25 +363,10 @@ export function UserForm() {
             technician_id: values.technicianId || undefined,
             active_branch_id: values.activeBranchId || undefined,
             reports_to_user_id: values.reportsToUserId || undefined,
+            role_ids: role_ids.length ? role_ids : undefined,
+            branch_ids: branch_ids.length ? branch_ids : undefined,
           },
         });
-
-        const role_ids = Array.from(
-          new Set(values.roleAssignments.map((r) => r.roleId).filter(Boolean)),
-        );
-        const branch_ids = Array.from(
-          new Set(
-            [
-              ...values.roleAssignments.map((r) => r.branchId),
-              values.homeBranchId,
-            ].filter(Boolean) as string[],
-          ),
-        );
-
-        await Promise.all([
-          assignRoles({ id: selectedUser.id, payload: { role_ids } }),
-          assignBranches({ id: selectedUser.id, payload: { branch_ids } }),
-        ]);
 
         const hasScopeChanged = values.workingScope !== selectedUser.workingScope;
 
