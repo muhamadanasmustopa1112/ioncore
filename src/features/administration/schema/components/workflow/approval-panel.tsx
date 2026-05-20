@@ -33,10 +33,12 @@ import {
 export function ApprovalPanel() {
   const { approvalPanelOpen, closeApprovalPanel, selectedSchemaId } = useSchemaStore();
   const currentUserId = useAuthStore((s) => s.user?.id ?? "");
+  const currentUserName = useAuthStore((s) => s.user?.fullName ?? "");
   const [comment, setComment] = useState("");
   const [changeReason, setChangeReason] = useState("");
   const [minApprovals, setMinApprovals] = useState(1);
   const [requiredApprovers, setRequiredApprovers] = useState("");
+  const [hasDecided, setHasDecided] = useState(false);
   const publishVersion = usePublishSchemaVersion();
   const submitForReview = useSubmitForReview();
   const addDecision = useAddApprovalDecision();
@@ -50,6 +52,7 @@ export function ApprovalPanel() {
       qc.invalidateQueries({ queryKey: schemaKeys.versions(selectedSchemaId) });
       qc.removeQueries({ queryKey: ["schema-approval"], exact: false });
       qc.removeQueries({ queryKey: ["schema-approval-decisions"], exact: false });
+      setHasDecided(false);
     }
   }, [approvalPanelOpen, selectedSchemaId, qc]);
 
@@ -106,7 +109,9 @@ export function ApprovalPanel() {
   if (approval?.id) stableApprovalIdRef.current = approval.id;
   const stableApprovalId = stableApprovalIdRef.current;
 
-  const { data: decisions = [] } = useApprovalDecisions(approvalPanelOpen ? stableApprovalId : null);
+  const { data: fetchedDecisions = [] } = useApprovalDecisions(approvalPanelOpen ? stableApprovalId : null);
+  // Prefer embedded decisions from approval response (fresher, no extra round-trip)
+  const decisions = (approval?.decisions ?? fetchedDecisions);
 
   const approvalStatus = approval?.status?.toUpperCase();
   const hasRejected = decisions.some((d) => d.decision?.toUpperCase() === "REJECTED");
@@ -142,9 +147,8 @@ export function ApprovalPanel() {
   // If we have ANY sign of an approval cycle, we can't show 'Submit for review'
   const canSubmitForReview = isDraft && latestDraftVersion && !stableApprovalId && !canPublish && !hasRejected;
 
-  const isSubmitter = !!currentUserId && currentUserId === latestDraftVersion?.created_by;
-  const alreadyDecided = !!currentUserId && decisions.some((d) => d.approver_user_id === currentUserId);
-  const canDecide = !isSubmitter && !alreadyDecided;
+  const alreadyDecided = hasDecided || decisions.some((d) => d.approver_user_id === currentUserId);
+  const canDecide = !alreadyDecided;
 
   return (
     <Sheet open={approvalPanelOpen} onOpenChange={(open) => !open && closeApprovalPanel()}>
@@ -162,8 +166,8 @@ export function ApprovalPanel() {
               Loading schema...
             </div>
           ) : (<>
-          {/* Progress — only shown when there are final decisions */}
-          {!isRollback && (isApproved || isRejected) && (
+          {/* Progress — shown when there are decisions (including in-review partial approvals) */}
+          {!isRollback && (isApproved || isRejected || (isInReview && decisions.length > 0)) && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Approval Progress</span>
@@ -175,8 +179,8 @@ export function ApprovalPanel() {
             </div>
           )}
 
-          {/* Approver decisions list — only shown when there are final decisions */}
-          {!isRollback && (isApproved || isRejected) && (
+          {/* Approver decisions list — shown when decisions exist (including partial in-review) */}
+          {!isRollback && (isApproved || isRejected || (isInReview && decisions.length > 0)) && (
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-foreground">Approval Decisions</h3>
               {decisions.length > 0 ? decisions.map((d) => {
@@ -193,7 +197,13 @@ export function ApprovalPanel() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-sm font-medium">{d.approver_user_id}</span>
+                        <span className="text-sm font-medium">
+                          {d.approver_name
+                            ? d.approver_name
+                            : d.approver_user_id === currentUserId
+                              ? currentUserName || "You"
+                              : "••••••••"}
+                        </span>
                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                           isDecisionApproved ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
                           : isDecisionRejected ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
@@ -295,9 +305,7 @@ export function ApprovalPanel() {
               <h3 className="text-sm font-semibold text-foreground">Your Decision</h3>
               {!canDecide ? (
                 <p className="text-sm text-muted-foreground">
-                  {isSubmitter
-                    ? "You submitted this version and cannot approve your own submission."
-                    : "You have already submitted a decision for this version."}
+                  {"You have already submitted a decision for this version."}
                 </p>
               ) : (
                 <>
@@ -320,6 +328,7 @@ export function ApprovalPanel() {
                             payload: { decision: "REJECTED", notes: comment },
                           });
                           setComment("");
+                          setHasDecided(true);
                         } catch {
                           // toast already shown by hook
                         }
@@ -338,6 +347,7 @@ export function ApprovalPanel() {
                             payload: { decision: "APPROVED", notes: comment },
                           });
                           setComment("");
+                          setHasDecided(true);
                         } catch {
                           // toast already shown by hook
                         }

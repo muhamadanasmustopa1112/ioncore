@@ -81,6 +81,20 @@ export interface RollbackPayload {
   target_version: string;
 }
 
+export interface SchemaApprovalDecisionRecord {
+  id: string;
+  schema_approval_id: string;
+  approver_user_id: string;
+  approver_name?: string | null;
+  decision: "APPROVED" | "REJECTED" | "PENDING";
+  comment: string;
+  decided_at: string;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
 export interface SchemaApprovalRecord {
   id: string;
   schema_version_id: string;
@@ -92,17 +106,7 @@ export interface SchemaApprovalRecord {
   updated_by: string;
   created_at: string;
   updated_at: string;
-}
-
-export interface SchemaApprovalDecisionRecord {
-  id: string;
-  schema_approval_id: string;
-  approver_user_id: string;
-  decision: "APPROVED" | "REJECTED" | "PENDING";
-  comment: string;
-  decided_at: string;
-  created_at: string;
-  updated_at: string;
+  decisions?: SchemaApprovalDecisionRecord[];
 }
 
 export interface SchemaApprovalDecisionListData {
