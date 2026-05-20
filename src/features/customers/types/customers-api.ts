@@ -61,6 +61,7 @@ export interface CustomerDto {
   company_name?: string | null;
   status: CustomerStatus;
   branch_id: string;
+  branch_name?: string | null;
   nik?: string | null;
   phone?: string | null;
   email?: string | null;

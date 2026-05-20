@@ -387,9 +387,6 @@ export function PlanSheet({ open, mode, selected, onClose, onSwitchToEdit }: Pla
                   >
                     {update.isPending ? "Saving..." : "Back to Draft"}
                   </Button>
-                  <Button variant="primary" onClick={() => ac("Submit for Review?", "Plan will be submitted to reviewers.", () => submitReview.mutate(planData.id))} disabled={submitReview.isPending} className="font-semibold">
-                    {submitReview.isPending ? "Submitting..." : "Submit for Review"}
-                  </Button>
                 </>
               );
               if (s === "in_review") return canApprove ? (
@@ -406,9 +403,12 @@ export function PlanSheet({ open, mode, selected, onClose, onSwitchToEdit }: Pla
                 </Button>
               );
               if (s === "published") return (
-                <Button variant="outline" className="text-destructive border-destructive hover:bg-destructive/10" onClick={() => ac("Deactivate Plan?", "Plan will be hidden from customers.", () => setVisibility.mutate({ id: planData.id, status: "inactive" }))} disabled={setVisibility.isPending}>
-                  {setVisibility.isPending ? "Deactivating..." : "Deactivate"}
-                </Button>
+                <>
+                  <Button variant="outline" className="text-destructive border-destructive hover:bg-destructive/10" onClick={() => ac("Deactivate Plan?", "Plan will be hidden from customers.", () => setVisibility.mutate({ id: planData.id, status: "inactive" }))} disabled={setVisibility.isPending}>
+                    {setVisibility.isPending ? "Deactivating..." : "Deactivate"}
+                  </Button>
+                  <Button variant="primary" onClick={() => onSwitchToEdit?.(planData)}>Edit</Button>
+                </>
               );
               if (s === "inactive") return (
                 <Button

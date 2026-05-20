@@ -30,7 +30,7 @@ export function CustomerWidgets({ customer }: Props) {
         </CardHeader>
         <CardContent className="text-sm space-y-2 pt-0">
           {([
-            { label: "Branch ID", value: customer?.branch_id },
+            { label: "Branch", value: customer?.branch_name ?? customer?.branch_id },
             { label: "Account Mgr", value: customer?.account_manager_id },
             { label: "Type", value: customer?.customer_type },
             {

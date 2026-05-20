@@ -108,12 +108,12 @@ export function CustomersList() {
       size: 130,
     },
     {
-      id: "company_name",
-      accessorKey: "company_name",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Company" className="font-semibold" />,
+      id: "nik",
+      accessorKey: "nik",
+      header: ({ column }) => <DataGridColumnHeader column={column} title="NIK" className="font-semibold" />,
       cell: ({ row }) => (
-        <span className={row.original.company_name ? "text-foreground" : "text-muted-foreground/40"}>
-          {row.original.company_name ?? "—"}
+        <span className={row.original.nik ? "font-mono text-xs" : "text-muted-foreground/40"}>
+          {row.original.nik ?? "—"}
         </span>
       ),
       size: 180,
@@ -132,13 +132,13 @@ export function CustomersList() {
     {
       id: "branch_id",
       accessorKey: "branch_id",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Branch ID" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title="Branch" className="font-semibold" />,
       cell: ({ row }) => (
-        <span className="font-mono text-xs font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded">
-          {row.original.branch_id}
+        <span className="text-sm">
+          {row.original.branch_name ?? row.original.branch_id}
         </span>
       ),
-      size: 240,
+      size: 200,
     },
     {
       id: "created_at",
