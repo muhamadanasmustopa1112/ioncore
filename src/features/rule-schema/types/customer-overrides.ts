@@ -62,6 +62,19 @@ export interface ContentDiff {
   diff: ContentDiffOp[];
 }
 
+export interface CustomerGrouped {
+  customer_id: string;
+  customer_name: string;
+  customer_schemas: CustomerSchema[];
+  customer_schema_count: number;
+}
+
+export interface ListCustomerSchemasGroupedParams {
+  search?: string;
+  page?: number;
+  size?: number;
+}
+
 // Legacy aliases
 /** @deprecated use CustomerSchema */
 export type CustomerOverrideSchema = CustomerSchema;

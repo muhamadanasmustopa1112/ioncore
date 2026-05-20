@@ -7,6 +7,8 @@ import type {
   BroadbandPlanListParams,
   BroadbandPlanBranchesData,
   CreateBroadbandPlanPayload,
+  RejectBroadbandPlanPayload,
+  SetBroadbandPlanVisibilityPayload,
   EnterpriseService,
   EnterpriseServiceListData,
   EnterpriseServiceListParams,
@@ -113,6 +115,30 @@ export function adminAddBranchToBroadbandPlan(planId: string, branchIds: string[
 export function adminRemoveBranchFromBroadbandPlan(planId: string, branchId: string) {
   return cast<ProductEnvelope<null>>(
     userServiceApi.delete(`${BASE}/admin/broadband-plans/${planId}/branches/${branchId}`)
+  );
+}
+
+export function adminSubmitReviewBroadbandPlan(id: string) {
+  return cast<ProductEnvelope<BroadbandPlan>>(
+    userServiceApi.post(`${BASE}/admin/broadband-plans/${id}/submit-review`, {})
+  );
+}
+
+export function adminApproveBroadbandPlan(id: string, payload: { notes?: string } = {}) {
+  return cast<ProductEnvelope<BroadbandPlan>>(
+    userServiceApi.post(`${BASE}/admin/broadband-plans/${id}/approve`, payload)
+  );
+}
+
+export function adminRejectBroadbandPlan(id: string, payload: RejectBroadbandPlanPayload = {}) {
+  return cast<ProductEnvelope<BroadbandPlan>>(
+    userServiceApi.post(`${BASE}/admin/broadband-plans/${id}/reject`, payload)
+  );
+}
+
+export function adminSetBroadbandPlanVisibility(id: string, payload: SetBroadbandPlanVisibilityPayload) {
+  return cast<ProductEnvelope<BroadbandPlan>>(
+    userServiceApi.post(`${BASE}/admin/broadband-plans/${id}/visibility`, payload)
   );
 }
 

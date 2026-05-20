@@ -22,6 +22,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { serviceFormSchema, type ServiceFormValues } from "../../../types/service-schema";
 import { useSchemaStore } from "../../../store/schema";
+import { MaintenanceSchedulePicker } from "./maintenance-schedule-picker";
 import { useCreateSchema, useEditSchema, useSchema, useSchemaVersions } from "../../../api/schema-queries";
 import { useActiveCustomerTypes } from "@/features/administration/customer-types/api/customer-types-queries";
 import { useUpdateCustomerSchema } from "@/features/rule-schema";
@@ -43,7 +44,7 @@ const DEFAULT_SERVICE: ServiceFormValues = {
 };
 
 export function ServiceForm() {
-  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter, overrideCustomerSchema, closeSchemaSheet, openOverrideConfirm, overrideConfirmTrigger } = useSchemaStore();
+  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter, setSheetLoading, overrideCustomerSchema, closeSchemaSheet, openOverrideConfirm, overrideConfirmTrigger } = useSchemaStore();
   const isDetailMode = form === "details" || form === "view_override";
   const isOverride = form === "override" || form === "view_override";
   const createSchema = useCreateSchema();
@@ -66,9 +67,17 @@ export function ServiceForm() {
   const bandwidthType = watch("bandwidth_type");
   const maintenanceAllowed = watch("maintenance_allowed");
 
-  const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
-  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
+  const needsData = form === "edit" || form === "details" || form === "clone";
+  const { data: schemaDetail, isLoading: isSchemaLoading } = useSchema(needsData ? selectedSchemaId : null);
+  const { data: schemaVersions, isLoading: isVersionsLoading } = useSchemaVersions(needsData ? selectedSchemaId : null);
+  const isLoadingData = needsData && (isSchemaLoading || isVersionsLoading);
   const { data: customerTypes = [] } = useActiveCustomerTypes();
+
+  useEffect(() => {
+    setSheetLoading(isLoadingData);
+    return () => setSheetLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoadingData]);
 
   function fromApiContent(c: Record<string, unknown>): Partial<ServiceFormValues> {
     const sla = (c.sla ?? {}) as Record<string, unknown>;
@@ -196,6 +205,12 @@ export function ServiceForm() {
     >
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
+        {isLoadingData ? (
+          <div className="flex items-center justify-center gap-2 py-20 text-sm text-muted-foreground">
+            <div className="size-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+            Loading schema...
+          </div>
+        ) : (
         <div className="space-y-8 pb-6">
 
           {!isOverride && (
@@ -372,13 +387,10 @@ export function ServiceForm() {
               </div>
               {maintenanceAllowed && (
                 <div className="space-y-2 md:col-span-2">
-                  <Label className="text-xs font-medium text-muted-foreground">
-                    Maintenance Schedule
-                  </Label>
-                  <Input
-                    placeholder="e.g. weekdays_02:00-06:00"
+                  <MaintenanceSchedulePicker
+                    value={watch("maintenance_schedule") ?? ""}
+                    onChange={(v) => setValue("maintenance_schedule", v)}
                     disabled={isDetailMode}
-                    {...register("maintenance_schedule")}
                   />
                 </div>
               )}
@@ -414,6 +426,7 @@ export function ServiceForm() {
           </div>
 
         </div>
+        )}
       </ScrollArea>
     </div>
     </OverrideDiffProvider>

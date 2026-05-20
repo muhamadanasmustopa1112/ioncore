@@ -28,6 +28,7 @@ interface SchemaStore {
   selectedSchemaId: string | null;
   view: SchemaView;
   formSubmitter: (() => void) | null;
+  sheetLoading: boolean;
   pendingApproval: boolean;
   overrideCustomerSchema: CustomerSchema | null;
   overrideConfirmOpen: boolean;
@@ -49,6 +50,7 @@ interface SchemaStore {
   openHistoryPanel: (schemaId: string) => void;
   closeHistoryPanel: () => void;
   setFormSubmitter: (fn: (() => void) | null) => void;
+  setSheetLoading: (v: boolean) => void;
   setPendingApproval: (v: boolean) => void;
   openOverrideConfirm: (changes: OverrideChange[]) => void;
   closeOverrideConfirm: () => void;
@@ -73,6 +75,7 @@ const useSchemaStore = create<SchemaStore>((set) => ({
   selectedSchemaId: null,
   view: "schemas",
   formSubmitter: null,
+  sheetLoading: false,
   pendingApproval: false,
   overrideCustomerSchema: null,
   overrideConfirmOpen: false,
@@ -104,6 +107,7 @@ const useSchemaStore = create<SchemaStore>((set) => ({
       form: null,
       selectedSchemaId: null,
       formSubmitter: null,
+      sheetLoading: false,
       pendingApproval: false,
       overrideCustomerSchema: null,
       overrideConfirmOpen: false,
@@ -120,6 +124,7 @@ const useSchemaStore = create<SchemaStore>((set) => ({
     set({ historyPanelOpen: true, selectedSchemaId: schemaId }),
   closeHistoryPanel: () => set({ historyPanelOpen: false }),
   setFormSubmitter: (fn) => set({ formSubmitter: fn }),
+  setSheetLoading: (v) => set({ sheetLoading: v }),
   openOverrideConfirm: (changes) =>
     set({ overrideConfirmOpen: true, overrideChanges: changes }),
   closeOverrideConfirm: () =>

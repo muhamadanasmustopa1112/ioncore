@@ -74,7 +74,7 @@ export function SchemaList() {
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const { data: queryResult, isLoading } = useSchemaList({
+  const { data: queryResult, isLoading, isFetching } = useSchemaList({
     schemaType: activeSchemaType,
     page: pagination.page,
     size: pagination.limit,
@@ -129,7 +129,7 @@ export function SchemaList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={isLoading}
+      isLoading={isLoading || isFetching}
     >
       <Tabs
         value={activeSchemaType}

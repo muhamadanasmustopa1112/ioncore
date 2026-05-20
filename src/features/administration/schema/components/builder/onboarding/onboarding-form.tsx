@@ -57,7 +57,7 @@ const DEFAULT_ONBOARDING: OnboardingFormValues = {
 };
 
 export function OnboardingForm() {
-  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter, overrideCustomerSchema, closeSchemaSheet, openOverrideConfirm, overrideConfirmTrigger } = useSchemaStore();
+  const { form, activeSchemaType, selectedSchemaId, setFormSubmitter, setSheetLoading, overrideCustomerSchema, closeSchemaSheet, openOverrideConfirm, overrideConfirmTrigger } = useSchemaStore();
   const isDetailMode = form === "details" || form === "view_override";
   const isOverride = form === "override" || form === "view_override";
   const createSchema = useCreateSchema();
@@ -71,9 +71,17 @@ export function OnboardingForm() {
 
   const { register, watch, setValue, handleSubmit, reset, getValues, formState: { errors } } = rhfForm;
 
-  const { data: schemaDetail } = useSchema((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
-  const { data: schemaVersions } = useSchemaVersions((form === "edit" || form === "details" || form === "clone") ? selectedSchemaId : null);
+  const needsData = form === "edit" || form === "details" || form === "clone";
+  const { data: schemaDetail, isLoading: isSchemaLoading } = useSchema(needsData ? selectedSchemaId : null);
+  const { data: schemaVersions, isLoading: isVersionsLoading } = useSchemaVersions(needsData ? selectedSchemaId : null);
+  const isLoadingData = needsData && (isSchemaLoading || isVersionsLoading);
   const { data: customerTypes = [] } = useActiveCustomerTypes();
+
+  useEffect(() => {
+    setSheetLoading(isLoadingData);
+    return () => setSheetLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoadingData]);
 
   function fromApiContent(c: Record<string, unknown>): Partial<OnboardingFormValues> {
     const timeline = (c.timeline ?? {}) as Record<string, unknown>;
@@ -209,6 +217,12 @@ export function OnboardingForm() {
     >
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
+        {isLoadingData ? (
+          <div className="flex items-center justify-center gap-2 py-20 text-sm text-muted-foreground">
+            <div className="size-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+            Loading schema...
+          </div>
+        ) : (
         <div className="space-y-8 pb-6">
 
           <div className="space-y-4">
@@ -289,6 +303,7 @@ export function OnboardingForm() {
           <DocumentsSection form={rhfForm} disabled={isDetailMode} />
 
         </div>
+        )}
       </ScrollArea>
     </div>
     </OverrideDiffProvider>

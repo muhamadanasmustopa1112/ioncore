@@ -157,33 +157,20 @@ export function PlanForm({ selected, mode, onSubmit, onCustomerTypeChange, onDir
           </Field>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Customer Type" required error={errors.customer_type?.message}>
-            <Controller name="customer_type" control={control} render={({ field }) => (
-              <Select value={field.value} onValueChange={(v) => { field.onChange(v); onCustomerTypeChange?.(v); }} disabled={isCustomerTypeReadonly}>
-                <SelectTrigger><SelectValue placeholder="Select type…" /></SelectTrigger>
-                <SelectContent>
-                  {customerTypes.map((ct) => (
-                    <SelectItem key={ct.id} value={ct.name}>
-                      {ct.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )} />
-          </Field>
-          <Field label="Status">
-            <Controller name="is_active" control={control} render={({ field }) => (
-              <Select value={field.value ? "true" : "false"} onValueChange={(v) => field.onChange(v === "true")} disabled={isDetail}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="true">Active</SelectItem>
-                  <SelectItem value="false">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            )} />
-          </Field>
-        </div>
+        <Field label="Customer Type" required error={errors.customer_type?.message}>
+          <Controller name="customer_type" control={control} render={({ field }) => (
+            <Select value={field.value} onValueChange={(v) => { field.onChange(v); onCustomerTypeChange?.(v); }} disabled={isCustomerTypeReadonly}>
+              <SelectTrigger><SelectValue placeholder="Select type…" /></SelectTrigger>
+              <SelectContent>
+                {customerTypes.map((ct) => (
+                  <SelectItem key={ct.id} value={ct.name}>
+                    {ct.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )} />
+        </Field>
 
 
       </div>

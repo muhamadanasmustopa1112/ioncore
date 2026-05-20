@@ -13,6 +13,14 @@ import type { ContentDiffOp, CustomerSchema } from "@/features/rule-schema";
 import { useSchemaStore } from "@/features/administration/schema/store/schema";
 import { SchemaFormSheet } from "@/features/administration/schema/components/schema-form-sheet";
 
+const SCHEMA_TYPE_COLORS: Record<string, "info" | "success" | "warning" | "destructive" | "secondary"> = {
+  WORK_ORDER: "info",
+  SUSPENSION: "warning",
+  ONBOARDING: "success",
+  SERVICE: "secondary",
+  COMMISSION: "destructive",
+};
+
 const OP_STYLE: Record<string, { label: string; class: string }> = {
   replace: { label: "Changed", class: "bg-blue-500/10 text-blue-600" },
   add:     { label: "Added",   class: "bg-green-500/10 text-green-600" },
@@ -58,12 +66,21 @@ function SchemaRow({ item, onOverride }: { item: CustomerSchema; onOverride: (it
     <div className="border-b border-border/40 last:border-0">
       <div className="flex items-center justify-between py-3 gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <Badge variant="info" appearance="light" className="text-[11px] px-2 capitalize shrink-0">
+          <Badge
+            variant={SCHEMA_TYPE_COLORS[item.schema_type] ?? "secondary"}
+            appearance="light"
+            className="text-[11px] px-2 capitalize shrink-0"
+          >
             {item.schema_type.replace(/_/g, " ").toLowerCase()}
           </Badge>
           <span className="text-xs text-muted-foreground truncate">{item.schema_name ?? item.schema_id}</span>
           {item.schema_version && (
             <span className="font-mono text-[10px] text-muted-foreground/70 shrink-0">{item.schema_version}</span>
+          )}
+          {item.is_overridden && (
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-500/10 text-yellow-600 shrink-0">
+              Overridden
+            </span>
           )}
         </div>
         <div className="flex items-center gap-1 shrink-0">

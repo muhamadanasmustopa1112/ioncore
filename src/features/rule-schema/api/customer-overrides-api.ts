@@ -5,7 +5,9 @@ import { ruleSchemaKeys } from "./keys";
 import type {
   ContentDiff,
   CreateCustomerSchemaRequest,
+  CustomerGrouped,
   CustomerSchema,
+  ListCustomerSchemasGroupedParams,
   ListCustomerSchemasParams,
   MigrateCustomerSchemasRequest,
   UpdateCustomerSchemaRequest,
@@ -72,6 +74,12 @@ export const getCustomerSchemaDiff = (id: string) =>
 
 export const migrateCustomerSchemas = (payload: MigrateCustomerSchemasRequest) =>
   userServiceApi.post<unknown, CustomerEnvelope<null>>(`${path}/migrate`, payload);
+
+export const listCustomerSchemasGrouped = (params?: ListCustomerSchemasGroupedParams) =>
+  userServiceApi.get<unknown, { data: CustomerGrouped[]; metadata: { page: number; size: number; total: number } }>(
+    `${path}/grouped`,
+    { params },
+  );
 
 // ── Hooks ───────────────────────────────────────────────
 
@@ -184,6 +192,22 @@ export const useMigrateCustomerSchemas = () => {
     onSuccess: () => qc.invalidateQueries({ queryKey: CS_PREFIX }),
   });
 };
+
+const EMPTY_GROUPED = { data: [] as CustomerGrouped[], metadata: { page: 1, size: 10, total: 0 } };
+
+export const useCustomerSchemasGrouped = (params?: ListCustomerSchemasGroupedParams) =>
+  useQuery({
+    queryKey: [...ruleSchemaKeys.all, "customer-schemas-grouped", params],
+    queryFn: async () => {
+      try {
+        return await listCustomerSchemasGrouped(params);
+      } catch {
+        return EMPTY_GROUPED;
+      }
+    },
+    placeholderData: EMPTY_GROUPED,
+    retry: false,
+  });
 
 // ── Legacy aliases ──────────────────────────────────────
 /** @deprecated use useCustomerSchemas */

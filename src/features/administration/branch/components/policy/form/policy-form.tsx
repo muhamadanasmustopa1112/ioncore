@@ -289,7 +289,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                   className="w-32"
                 />
                 <span className="text-sm text-muted-foreground">
-                  ({((Number(taxDefault) || 0) * 10).toFixed(0)}%)
+                  ({(Number(taxDefault) || 0).toFixed(2).replace(/\.?0+$/, "")}%)
                 </span>
               </div>
             </div>

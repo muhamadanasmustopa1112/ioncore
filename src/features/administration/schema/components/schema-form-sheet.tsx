@@ -29,6 +29,7 @@ export function SchemaFormSheet() {
     form,
     activeSchemaType,
     formSubmitter,
+    sheetLoading,
     setPendingApproval,
     overrideCustomerSchema,
     overrideConfirmOpen,
@@ -99,11 +100,12 @@ export function SchemaFormSheet() {
                 </Button>
                 {form === "edit" && (
                   <>
-                    <Button variant="outline" onClick={() => formSubmitter?.()} className="mr-3">
+                    <Button variant="outline" onClick={() => formSubmitter?.()} className="mr-3" disabled={sheetLoading}>
                       Save as Draft
                     </Button>
                     <Button
                       variant="primary"
+                      disabled={sheetLoading}
                       onClick={() => {
                         setPendingApproval(true);
                         formSubmitter?.();
@@ -117,6 +119,7 @@ export function SchemaFormSheet() {
                   <Button
                     variant="primary"
                     className="font-semibold"
+                    disabled={sheetLoading}
                     onClick={() => formSubmitter?.()}
                   >
                     {isCloneMode ? "Create Clone" : "Create Schema"}
@@ -126,6 +129,7 @@ export function SchemaFormSheet() {
                   <Button
                     variant="primary"
                     className="font-semibold"
+                    disabled={sheetLoading}
                     onClick={() => formSubmitter?.()}
                   >
                     Save Override

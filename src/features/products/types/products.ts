@@ -33,6 +33,8 @@ export interface BroadbandPlanBranchesData {
   branches: BranchInfo[];
 }
 
+export type BroadbandPlanStatus = "draft" | "in_review" | "rejected" | "approved" | "published" | "inactive";
+
 export interface BroadbandPlan {
   id: string;
   name: string;
@@ -44,6 +46,9 @@ export interface BroadbandPlan {
   customer_type: BroadbandCustomerType;
   bandwidth_profile_id: string;
   is_active: boolean;
+  status: BroadbandPlanStatus;
+  notes?: string;
+  rejection_notes?: string;
   branches?: BranchInfo[];
   created_at: string;
   updated_at: string;
@@ -62,9 +67,13 @@ export interface BroadbandPlanListParams {
   channel?: string;
   name?: string;
   is_active?: boolean;
+  status?: BroadbandPlanStatus;
   page?: number;
   per_page?: number;
 }
+
+export interface RejectBroadbandPlanPayload { notes?: string; }
+export interface SetBroadbandPlanVisibilityPayload { status: "published" | "inactive"; notes?: string; }
 
 export interface CreateBroadbandPlanPayload {
   name: string;

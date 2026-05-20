@@ -7,6 +7,8 @@ import type {
   BroadbandPlanListData,
   BroadbandPlanListParams,
   CreateBroadbandPlanPayload,
+  RejectBroadbandPlanPayload,
+  SetBroadbandPlanVisibilityPayload,
   EnterpriseService,
   EnterpriseServiceListData,
   EnterpriseServiceListParams,
@@ -32,6 +34,10 @@ import {
   adminDeleteBroadbandPlan,
   adminAddBranchToBroadbandPlan,
   adminRemoveBranchFromBroadbandPlan,
+  adminSubmitReviewBroadbandPlan,
+  adminApproveBroadbandPlan,
+  adminRejectBroadbandPlan,
+  adminSetBroadbandPlanVisibility,
   adminListEnterpriseServices,
   adminGetEnterpriseService,
   adminCreateEnterpriseService,
@@ -226,6 +232,56 @@ export function useRemoveBranchFromBroadbandPlan() {
       toast.success("Branch removed.");
     },
     onError: (err) => toast.error(getApiError(err, "Failed to remove branch.")),
+  });
+}
+
+export function useSubmitReviewBroadbandPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminSubmitReviewBroadbandPlan(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: productKeys.all });
+      toast.success("Plan submitted for review.");
+    },
+    onError: (err) => toast.error(getApiError(err, "Failed to submit for review.")),
+  });
+}
+
+export function useApproveBroadbandPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => adminApproveBroadbandPlan(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: productKeys.all });
+      toast.success("Plan approved.");
+    },
+    onError: (err) => toast.error(getApiError(err, "Failed to approve plan.")),
+  });
+}
+
+export function useRejectBroadbandPlan() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, notes }: { id: string } & RejectBroadbandPlanPayload) =>
+      adminRejectBroadbandPlan(id, { notes }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: productKeys.all });
+      toast.success("Plan rejected.");
+    },
+    onError: (err) => toast.error(getApiError(err, "Failed to reject plan.")),
+  });
+}
+
+export function useSetBroadbandPlanVisibility() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string } & SetBroadbandPlanVisibilityPayload) =>
+      adminSetBroadbandPlanVisibility(id, { status }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: productKeys.all });
+      toast.success("Plan visibility updated.");
+    },
+    onError: (err) => toast.error(getApiError(err, "Failed to update visibility.")),
   });
 }
 

@@ -14,7 +14,15 @@ import { DataGridTable } from "@/components/ui/data-grid-table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
-import { useAdminBroadbandPlans, useDeleteBroadbandPlan } from "../../api/products-queries";
+import {
+  useAdminBroadbandPlans,
+  useDeleteBroadbandPlan,
+  useUpdateBroadbandPlan,
+  useSubmitReviewBroadbandPlan,
+  useApproveBroadbandPlan,
+  useRejectBroadbandPlan,
+  useSetBroadbandPlanVisibility,
+} from "../../api/products-queries";
 import type { BroadbandPlan } from "../../types/products";
 import { getPlanColumns } from "./plan-columns";
 import { PlanSheet } from "./plan-sheet";
@@ -23,6 +31,7 @@ export function PlanList() {
   const [filter, setFilter] = useQueryStates({
     search: parseAsString,
     branch: parseAsString,
+    status: parseAsString,
     page: parseAsInteger.withDefault(1),
     limit: parseAsInteger.withDefault(10),
   });
@@ -33,11 +42,17 @@ export function PlanList() {
   const { data, isLoading } = useAdminBroadbandPlans({
     name: filter.search || undefined,
     branch_id: filter.branch || undefined,
+    status: (filter.status as import("../../types/products").BroadbandPlanStatus) || undefined,
     page: filter.page,
     per_page: filter.limit,
   });
 
   const deletePlan = useDeleteBroadbandPlan();
+  const updatePlan = useUpdateBroadbandPlan();
+  const submitReview = useSubmitReviewBroadbandPlan();
+  const approvePlan = useApproveBroadbandPlan();
+  const rejectPlan = useRejectBroadbandPlan();
+  const setVisibility = useSetBroadbandPlanVisibility();
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -58,7 +73,16 @@ export function PlanList() {
   };
 
   const columns = useMemo(
-    () => getPlanColumns(openEdit, openDetail, (id) => deletePlan.mutate(id)),
+    () => getPlanColumns(
+      openEdit,
+      openDetail,
+      (id) => deletePlan.mutate(id),
+      (id) => submitReview.mutate(id),
+      (id) => approvePlan.mutate(id),
+      (id, notes) => rejectPlan.mutate({ id, notes }),
+      (id, status) => setVisibility.mutate({ id, status }),
+      (row) => updatePlan.mutate({ id: row.id, payload: { name: row.name, speed_download_mbps: row.speed_download_mbps, speed_upload_mbps: row.speed_upload_mbps, price: row.price, one_time_charge: row.one_time_charge, customer_type: row.customer_type, is_active: row.is_active } }),
+    ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -114,6 +138,23 @@ export function PlanList() {
                     ))}
                   </SelectContent>
                 </Select>
+                <Select
+                  value={filter.status || "all"}
+                  onValueChange={(v) => setFilter({ status: v === "all" ? null : v, page: 1 })}
+                >
+                  <SelectTrigger className="h-9 w-[140px]">
+                    <SelectValue placeholder="All statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All statuses</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="in_review">In Review</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Button variant="primary" className="h-9 px-4 text-sm font-semibold" onClick={openNew}>
                   <RiAddLine className="size-4" /> Add Plan
                 </Button>
@@ -134,7 +175,7 @@ export function PlanList() {
           </CardFooter>
         </Card>
       </DataGrid>
-      <PlanSheet open={sheetOpen} mode={mode} selected={selected} onClose={handleClose} />
+      <PlanSheet open={sheetOpen} mode={mode} selected={selected} onClose={handleClose} onSwitchToEdit={openEdit} />
     </>
   );
 }

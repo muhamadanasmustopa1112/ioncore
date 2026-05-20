@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { Can } from "@/lib/permissions";
+import { useAuthStore } from "@/store/auth-store";
 import { useSchemaStore } from "../../store/schema";
 import {
   usePublishSchemaVersion,
@@ -31,6 +32,7 @@ import {
 
 export function ApprovalPanel() {
   const { approvalPanelOpen, closeApprovalPanel, selectedSchemaId } = useSchemaStore();
+  const currentUserId = useAuthStore((s) => s.user?.id ?? "");
   const [comment, setComment] = useState("");
   const [changeReason, setChangeReason] = useState("");
   const [minApprovals, setMinApprovals] = useState(1);
@@ -49,8 +51,9 @@ export function ApprovalPanel() {
     }
   }, [approvalPanelOpen, selectedSchemaId, qc]);
 
-  const { data: schema } = useSchema(approvalPanelOpen ? selectedSchemaId : null);
-  const { data: versions } = useSchemaVersions(approvalPanelOpen ? selectedSchemaId : null);
+  const { data: schema, isLoading: isSchemaLoading } = useSchema(approvalPanelOpen ? selectedSchemaId : null);
+  const { data: versions, isLoading: isVersionsLoading } = useSchemaVersions(approvalPanelOpen ? selectedSchemaId : null);
+  const isLoadingData = approvalPanelOpen && (isSchemaLoading || isVersionsLoading);
 
   const isReviewStatus = (status?: string) => {
     const s = status?.toUpperCase();
@@ -137,6 +140,10 @@ export function ApprovalPanel() {
   // If we have ANY sign of an approval cycle, we can't show 'Submit for review'
   const canSubmitForReview = isDraft && latestDraftVersion && !stableApprovalId && !canPublish && !hasRejected;
 
+  const isSubmitter = !!currentUserId && currentUserId === latestDraftVersion?.created_by;
+  const alreadyDecided = !!currentUserId && decisions.some((d) => d.approver_user_id === currentUserId);
+  const canDecide = !isSubmitter && !alreadyDecided;
+
   return (
     <Sheet open={approvalPanelOpen} onOpenChange={(open) => !open && closeApprovalPanel()}>
       <SheetContent className="inset-y-8 lg:end-10 start-auto h-full max-h-[calc(100vh-64px)] gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[560px] flex flex-col [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5 shadow-2xl">
@@ -147,6 +154,12 @@ export function ApprovalPanel() {
         </SheetHeader>
 
         <SheetBody className="flex-1 overflow-y-auto p-5 space-y-6">
+          {isLoadingData ? (
+            <div className="flex items-center justify-center gap-2 py-20 text-sm text-muted-foreground">
+              <div className="size-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+              Loading schema...
+            </div>
+          ) : (<>
           {/* Progress — only shown when there are final decisions */}
           {!isRollback && (isApproved || isRejected) && (
             <div className="space-y-2">
@@ -278,51 +291,61 @@ export function ApprovalPanel() {
             >
             <div className="space-y-3 border-t pt-5">
               <h3 className="text-sm font-semibold text-foreground">Your Decision</h3>
-              <Textarea
-                placeholder="Add a comment (optional)..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                className="min-h-[80px] resize-none"
-                disabled={addDecision.isPending}
-              />
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
-                  disabled={addDecision.isPending}
-                  onClick={async () => {
-                    try {
-                      await addDecision.mutateAsync({
-                        versionId: latestDraftVersion.id,
-                        payload: { decision: "REJECTED", notes: comment },
-                      });
-                      setComment("");
-                    } catch {
-                      // toast already shown by hook
-                    }
-                  }}
-                >
-                  {addDecision.isPending ? "Submitting..." : "Reject"}
-                </Button>
-                <Button
-                  variant="primary"
-                  className="flex-1"
-                  disabled={addDecision.isPending}
-                  onClick={async () => {
-                    try {
-                      await addDecision.mutateAsync({
-                        versionId: latestDraftVersion.id,
-                        payload: { decision: "APPROVED", notes: comment },
-                      });
-                      setComment("");
-                    } catch {
-                      // toast already shown by hook
-                    }
-                  }}
-                >
-                  {addDecision.isPending ? "Submitting..." : "Approve"}
-                </Button>
-              </div>
+              {!canDecide ? (
+                <p className="text-sm text-muted-foreground">
+                  {isSubmitter
+                    ? "You submitted this version and cannot approve your own submission."
+                    : "You have already submitted a decision for this version."}
+                </p>
+              ) : (
+                <>
+                  <Textarea
+                    placeholder="Add a comment (optional)..."
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    className="min-h-[80px] resize-none"
+                    disabled={addDecision.isPending}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950"
+                      disabled={addDecision.isPending}
+                      onClick={async () => {
+                        try {
+                          await addDecision.mutateAsync({
+                            versionId: latestDraftVersion.id,
+                            payload: { decision: "REJECTED", notes: comment },
+                          });
+                          setComment("");
+                        } catch {
+                          // toast already shown by hook
+                        }
+                      }}
+                    >
+                      {addDecision.isPending ? "Submitting..." : "Reject"}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      className="flex-1"
+                      disabled={addDecision.isPending}
+                      onClick={async () => {
+                        try {
+                          await addDecision.mutateAsync({
+                            versionId: latestDraftVersion.id,
+                            payload: { decision: "APPROVED", notes: comment },
+                          });
+                          setComment("");
+                        } catch {
+                          // toast already shown by hook
+                        }
+                      }}
+                    >
+                      {addDecision.isPending ? "Submitting..." : "Approve"}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
             </Can>
           )}
@@ -385,6 +408,7 @@ export function ApprovalPanel() {
               </div>
             )}
           </Can>
+          </>)}
         </SheetBody>
 
         <SheetFooter className="border-border border-t p-5 pb-4">

@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ChevronLeftIcon, ChevronRightIcon, Eye } from "lucide-react";
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from "lucide-react";
 import {
   RiLoader4Line,
   RiSearchLine,
@@ -18,67 +19,154 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useCustomerSchemas } from "@/features/rule-schema";
-import type { CustomerSchema } from "@/features/rule-schema";
+import { useCustomerSchemasGrouped, useCustomerSchemaDiff } from "@/features/rule-schema";
+import type { ContentDiffOp, CustomerGrouped, CustomerSchema } from "@/features/rule-schema";
 import { useSchemaStore } from "../../store/schema";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
-function SchemaCard({ item }: { item: CustomerSchema }) {
-  const { openOverrideSheet, openViewOverrideSheet } = useSchemaStore();
+const SCHEMA_TYPE_COLORS: Record<string, "info" | "success" | "warning" | "destructive" | "secondary"> = {
+  WORK_ORDER: "info",
+  SUSPENSION: "warning",
+  ONBOARDING: "success",
+  SERVICE: "secondary",
+  COMMISSION: "destructive",
+};
+
+const OP_STYLE: Record<string, { label: string; class: string }> = {
+  replace: { label: "Changed", class: "bg-blue-500/10 text-blue-600" },
+  add:     { label: "Added",   class: "bg-green-500/10 text-green-600" },
+  remove:  { label: "Removed", class: "bg-red-500/10 text-red-600" },
+};
+
+function DiffRow({ op }: { op: ContentDiffOp }) {
+  const style = OP_STYLE[op.op] ?? { label: op.op, class: "bg-muted text-muted-foreground" };
+  return (
+    <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 rounded-lg bg-muted/40 px-3 py-2 text-xs">
+      <span className="font-mono text-muted-foreground truncate">{op.path}</span>
+      {op.old_value !== undefined && (
+        <span className="line-through text-muted-foreground">{String(op.old_value)}</span>
+      )}
+      {op.value !== undefined && (
+        <span className="font-medium">{String(op.value)}</span>
+      )}
+      <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${style.class}`}>{style.label}</span>
+    </div>
+  );
+}
+
+function DiffPanel({ schemaId }: { schemaId: string }) {
+  const { data, isFetching } = useCustomerSchemaDiff(schemaId, true);
+  const ops = data?.data.diff ?? [];
+
+  if (isFetching) return (
+    <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+      <RiLoader4Line className="size-3.5 animate-spin" />Loading diff…
+    </div>
+  );
+  if (ops.length === 0) return <p className="text-xs text-muted-foreground py-2">No differences.</p>;
+  return (
+    <div className="space-y-1.5">
+      {ops.map((op, i) => <DiffRow key={`${op.path}-${i}`} op={op} />)}
+    </div>
+  );
+}
+
+function SchemaRow({ schema }: { schema: CustomerSchema }) {
+  const [expanded, setExpanded] = useState(false);
+  const { openOverrideSheet } = useSchemaStore();
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
-      <div className="flex items-start justify-between p-4 gap-4">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted">
-            <RiUserLine className="size-4 text-muted-foreground" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Link
-                href={`/crm-and-sales/${item.customer_id}`}
-                className="font-semibold text-sm truncate hover:underline text-primary"
-              >
-                {item.customer_name ?? item.customer_id}
-              </Link>
-              {item.schema_type && (
-                <Badge variant="info" appearance="light" className="text-[11px] px-2 capitalize">
-                  {item.schema_type}
-                </Badge>
-              )}
-            </div>
-            <p className="mt-0.5 text-xs text-muted-foreground truncate">
-              {item.schema_name || "—"}
-              {item.schema_version && (
-                <span className="ml-1.5 font-mono text-[10px] opacity-60">{item.schema_version}</span>
-              )}
-            </p>
-          </div>
+    <div className="border-b border-border/40 last:border-0">
+      <div className="flex items-center justify-between py-2.5 gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <Badge
+            variant={SCHEMA_TYPE_COLORS[schema.schema_type] ?? "secondary"}
+            appearance="light"
+            className="text-[11px] px-2 capitalize shrink-0"
+          >
+            {schema.schema_type.replace(/_/g, " ").toLowerCase()}
+          </Badge>
+          <span className="text-xs text-muted-foreground truncate">{schema.schema_name || "—"}</span>
+          {schema.schema_version && (
+            <span className="font-mono text-[10px] text-muted-foreground/70 shrink-0">{schema.schema_version}</span>
+          )}
+          {schema.is_overridden && (
+            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-500/10 text-yellow-600 shrink-0">
+              Overridden
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button variant="ghost" size="sm" className="h-7 text-xs px-3 gap-1.5" onClick={() => openViewOverrideSheet(item)}>
-            <Eye className="size-3.5" />
-            View
+        <div className="flex items-center gap-1 shrink-0">
+          <Button variant="ghost" size="sm" className="h-6 text-xs px-2"
+            onClick={() => setExpanded((v) => !v)}>
+            {expanded ? "Hide" : "Diff"}
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs px-3" onClick={() => openOverrideSheet(item)}>
+          <Button variant="outline" size="sm" className="h-6 text-xs px-2"
+            onClick={() => openOverrideSheet(schema)}>
             Override
           </Button>
         </div>
       </div>
 
-      <div className="border-t border-border/60 px-4 pb-3 pt-3">
-        <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
-          <span className="text-muted-foreground font-medium">Schema Name</span>
-          <span className="truncate">{item.schema_name || "—"}</span>
-          <span className="text-muted-foreground font-medium">Schema Version</span>
-          <span>{item.schema_version || "—"}</span>
-          <span className="text-muted-foreground font-medium">Created</span>
-          <span>{item.created_at ? new Date(item.created_at).toLocaleString() : "—"}</span>
-          <span className="text-muted-foreground font-medium">Updated</span>
-          <span>{item.updated_at ? new Date(item.updated_at).toLocaleString() : "—"}</span>
+      {expanded && (
+        <div className="pb-3">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Changes</p>
+          <DiffPanel schemaId={schema.id} />
         </div>
-      </div>
+      )}
+    </div>
+  );
+}
+
+function CustomerCard({ group }: { group: CustomerGrouped }) {
+  const [expanded, setExpanded] = useState(false);
+  const overriddenCount = group.customer_schemas.filter((s) => s.is_overridden).length;
+
+  return (
+    <div className="rounded-xl border border-border bg-card overflow-hidden">
+      <button
+        className="w-full flex items-center justify-between gap-4 p-4 text-left hover:bg-muted/30 transition-colors"
+        onClick={() => setExpanded((v) => !v)}
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-muted">
+            <RiUserLine className="size-4 text-muted-foreground" />
+          </div>
+          <div className="min-w-0">
+            <Link
+              href={`/crm-and-sales/${group.customer_id}`}
+              className="font-semibold text-sm truncate hover:underline text-primary"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {group.customer_name || group.customer_id}
+            </Link>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Badge variant="secondary" appearance="light" className="text-[11px] px-2">
+            {group.customer_schema_count} schema{group.customer_schema_count !== 1 ? "s" : ""}
+          </Badge>
+          {overriddenCount > 0 && (
+            <Badge variant="warning" appearance="light" className="text-[11px] px-2">
+              {overriddenCount} overridden
+            </Badge>
+          )}
+          {expanded ? (
+            <ChevronUpIcon className="size-4 text-muted-foreground" />
+          ) : (
+            <ChevronDownIcon className="size-4 text-muted-foreground" />
+          )}
+        </div>
+      </button>
+
+      {expanded && group.customer_schemas.length > 0 && (
+        <div className="border-t border-border/60 px-4 pt-1 pb-2">
+          {group.customer_schemas.map((schema) => (
+            <SchemaRow key={schema.id} schema={schema} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -98,21 +186,16 @@ export function CustomerOverridePanel() {
   function setSize(s: number) { setParams({ co_size: s, co_page: 1 }); }
   function setSearch(v: string) { setParams({ co_search: v || null, co_page: 1 }); }
 
-  const { data, isLoading, isError } = useCustomerSchemas({ page, size });
-  const rows  = data?.data.customer_schemas ?? [];
-  const rawMeta = data?.data.metadata;
-  const total = rawMeta ? Number(rawMeta.total) || 0 : 0;
-  const totalPages = Math.max(1, Math.ceil(total / size));
+  const { data, isLoading, isError } = useCustomerSchemasGrouped({
+    page,
+    size,
+    search: search || undefined,
+  });
 
-  const filtered = search
-    ? rows.filter((o) => {
-        const q = search.toLowerCase();
-        return (o.customer_name ?? o.customer_id).toLowerCase().includes(q) ||
-          o.customer_id.toLowerCase().includes(q) ||
-          o.schema_id.toLowerCase().includes(q) ||
-          o.schema_type.toLowerCase().includes(q);
-      })
-    : rows;
+  const groups     = data?.data ?? [];
+  const meta       = data?.metadata;
+  const total      = meta ? Number(meta.total) || 0 : 0;
+  const totalPages = Math.max(1, Math.ceil(total / size));
 
   const pgGroupStart = Math.floor((page - 1) / 5) * 5;
   const pgGroupEnd   = Math.min(pgGroupStart + 5, totalPages);
@@ -128,23 +211,28 @@ export function CustomerOverridePanel() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="relative w-full sm:w-64">
           <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input placeholder="Search customer, schema, type..." className="pl-9 h-9"
-            value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Search customer..."
+            className="pl-9 h-9"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
-          <RiLoader4Line className="size-4 animate-spin" />Loading customer schemas...
+          <RiLoader4Line className="size-4 animate-spin" />
+          Loading customer schemas...
         </div>
       ) : isError ? (
         <p className="py-12 text-center text-sm text-destructive">Failed to load customer schemas.</p>
-      ) : filtered.length === 0 ? (
+      ) : groups.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">No customer schemas found.</p>
       ) : (
         <div className="space-y-3">
-          {filtered.map((item) => (
-            <SchemaCard key={item.id} item={item} />
+          {groups.map((group) => (
+            <CustomerCard key={group.customer_id} group={group} />
           ))}
         </div>
       )}
@@ -167,7 +255,7 @@ export function CustomerOverridePanel() {
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             <span className="text-sm text-muted-foreground text-nowrap">
-              {(page - 1) * size + 1} - {Math.min(page * size, total)} of {total}
+              {(page - 1) * size + 1}–{Math.min(page * size, total)} of {total}
             </span>
             {totalPages > 1 && (
               <div className="flex items-center gap-1">
@@ -182,7 +270,8 @@ export function CustomerOverridePanel() {
                 {pgButtons.map((p) => (
                   <Button key={p} size="sm" mode="icon" variant="ghost"
                     className={`size-7 p-0 text-sm ${page === p ? "bg-accent text-accent-foreground" : "text-muted-foreground"}`}
-                    onClick={() => setPage(p)}>{p}</Button>
+                    onClick={() => setPage(p)}>{p}
+                  </Button>
                 ))}
                 {pgGroupEnd < totalPages && (
                   <Button size="sm" mode="icon" variant="ghost" className="size-7 p-0 text-sm"
@@ -197,7 +286,6 @@ export function CustomerOverridePanel() {
           </div>
         </div>
       )}
-
     </div>
   );
 }
