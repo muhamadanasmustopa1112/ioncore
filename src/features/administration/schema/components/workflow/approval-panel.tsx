@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { schemaKeys } from "../../api/schema-queries";
 import { format } from "date-fns";
-import { RiCheckLine, RiCheckboxCircleLine, RiCloseLine, RiTimeLine, RiSendPlaneLine } from "@remixicon/react";
+import { RiCheckLine, RiCheckboxCircleLine, RiCloseLine, RiEditLine, RiTimeLine, RiSendPlaneLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -48,6 +48,8 @@ export function ApprovalPanel() {
   useEffect(() => {
     if (approvalPanelOpen && selectedSchemaId) {
       qc.invalidateQueries({ queryKey: schemaKeys.versions(selectedSchemaId) });
+      qc.removeQueries({ queryKey: ["schema-approval"], exact: false });
+      qc.removeQueries({ queryKey: ["schema-approval-decisions"], exact: false });
     }
   }, [approvalPanelOpen, selectedSchemaId, qc]);
 
@@ -352,13 +354,26 @@ export function ApprovalPanel() {
 
           {/* Rejected state */}
           {isRejected && latestDraftVersion && (
-            <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20 p-4">
-              <p className="text-sm font-medium text-red-700 dark:text-red-400">
-                Version Rejected
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Edit the schema and resubmit a new draft for review.
-              </p>
+            <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20 p-4 space-y-3">
+              <div>
+                <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                  Version Rejected
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Edit the schema and resubmit a new draft for review.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  // closeApprovalPanel() nullifies selectedSchemaId — transition atomically instead
+                  useSchemaStore.setState({ approvalPanelOpen: false, schemaSheetOpen: true, form: "edit" });
+                }}
+              >
+                <RiEditLine className="mr-2 size-4" /> Edit Schema
+              </Button>
             </div>
           )}
 

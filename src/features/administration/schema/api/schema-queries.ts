@@ -268,8 +268,7 @@ export function useVersionApproval(versionId: string | null) {
     },
     enabled: !!versionId,
     retry: false,
-    // Keep previous data during background refetch so approval ID never goes null
-    placeholderData: (prev) => prev,
+    staleTime: 0,
   });
 }
 
@@ -281,8 +280,7 @@ export function useApprovalDecisions(approvalId: string | null) {
       return res.data?.decisions ?? [];
     },
     enabled: !!approvalId,
-    // Keep previous data so decisions never drop to [] during refetch
-    placeholderData: (prev) => prev ?? [],
+    placeholderData: [],
   });
 }
 

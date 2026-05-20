@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetBody } from "@/components/ui/sheet";
@@ -13,6 +14,7 @@ import {
   useAddBranchToBroadbandPlan, useRemoveBranchFromBroadbandPlan,
   useSubmitReviewBroadbandPlan, useApproveBroadbandPlan,
   useRejectBroadbandPlan, useSetBroadbandPlanVisibility,
+  productKeys,
 } from "../../api/products-queries";
 import { useCreateBroadbandPlanSchema, useDeleteBroadbandPlanSchema, useBroadbandPlanSchemas } from "@/features/rule-schema";
 import { useCan } from "@/lib/permissions";
@@ -32,6 +34,7 @@ interface PlanSheetProps {
 }
 
 export function PlanSheet({ open, mode, selected, onClose, onSwitchToEdit }: PlanSheetProps) {
+  const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState("details");
   const [pendingBranchIds, setPendingBranchIds] = useState<string[]>([]);
   const [pendingSchemas, setPendingSchemas] = useState<PendingSchema[]>([]);
@@ -204,9 +207,9 @@ export function PlanSheet({ open, mode, selected, onClose, onSwitchToEdit }: Pla
             : []),
         ]);
 
-        if (branchDirty) { setEditBranchAdds([]); setEditBranchRemoves([]); }
-        if (schemaDirty) setEditSchemaChanges({});
-        if (branchDirty || schemaDirty) toast.success("Changes saved.");
+        if (schemaDirty) qc.invalidateQueries({ queryKey: productKeys.all });
+        toast.success("Changes saved.");
+        handleClose();
       } catch {
         toast.error("Failed to save changes.");
       }
