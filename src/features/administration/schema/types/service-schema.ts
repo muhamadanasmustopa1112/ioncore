@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+export const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+export type DayKey = (typeof DAY_KEYS)[number];
+
+export const maintenanceScheduleItemSchema = z.object({
+  day: z.enum(DAY_KEYS),
+  start_time: z.string(),
+  end_time: z.string(),
+});
+
+export type MaintenanceScheduleItem = z.infer<typeof maintenanceScheduleItemSchema>;
+
 export interface ServiceContent {
   schema_name: string;
   customer_type: string;
@@ -15,7 +26,7 @@ export interface ServiceContent {
   support_tier: "standard" | "priority" | "dedicated";
   maintenance_window: {
     allowed: boolean;
-    schedule: string;
+    schedule: MaintenanceScheduleItem[];
   };
   temporary_activation_window_hours: number;
 }
@@ -30,7 +41,7 @@ export const serviceFormSchema = z.object({
   contention_ratio: z.enum(["1:1", "1:4", "1:8"]),
   support_tier: z.enum(["standard", "priority", "dedicated"]),
   maintenance_allowed: z.boolean(),
-  maintenance_schedule: z.string().optional(),
+  maintenance_schedule: z.array(maintenanceScheduleItemSchema).optional(),
   temporary_activation_window_hours: z.number().int().min(1),
 });
 

@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { serviceFormSchema, type ServiceFormValues } from "../../../types/service-schema";
+import { serviceFormSchema, type ServiceFormValues, type MaintenanceScheduleItem } from "../../../types/service-schema";
 import { useSchemaStore } from "../../../store/schema";
 import { MaintenanceSchedulePicker } from "./maintenance-schedule-picker";
 import { useCreateSchema, useEditSchema, useSchema, useSchemaVersions } from "../../../api/schema-queries";
@@ -28,6 +28,14 @@ import { useActiveCustomerTypes } from "@/features/administration/customer-types
 import { useUpdateCustomerSchema } from "@/features/rule-schema";
 import { DiffWrap, OverrideDiffProvider } from "../override-diff";
 import { computeOverrideChanges } from "../../../utils/override-changes";
+
+const DEFAULT_SCHEDULE: MaintenanceScheduleItem[] = [
+  { day: "mon", start_time: "02:00", end_time: "06:00" },
+  { day: "tue", start_time: "02:00", end_time: "06:00" },
+  { day: "wed", start_time: "02:00", end_time: "06:00" },
+  { day: "thu", start_time: "02:00", end_time: "06:00" },
+  { day: "fri", start_time: "02:00", end_time: "06:00" },
+];
 
 const DEFAULT_SERVICE: ServiceFormValues = {
   name: "",
@@ -39,7 +47,7 @@ const DEFAULT_SERVICE: ServiceFormValues = {
   contention_ratio: "1:8",
   support_tier: "standard",
   maintenance_allowed: true,
-  maintenance_schedule: "weekdays_02:00-06:00",
+  maintenance_schedule: DEFAULT_SCHEDULE,
   temporary_activation_window_hours: 24,
 };
 
@@ -79,6 +87,24 @@ export function ServiceForm() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoadingData]);
 
+  function parseMaintenanceSchedule(raw: unknown): MaintenanceScheduleItem[] {
+    if (Array.isArray(raw)) return raw as MaintenanceScheduleItem[];
+    if (typeof raw === "string" && raw) {
+      // backward compat: "mon,tue,fri_02:00-06:00"
+      const parts = raw.split("_");
+      const daysPart = parts[0];
+      const timePart = parts.slice(1).join("_");
+      const match = timePart.match(/^(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+      const start_time = match ? match[1] : "02:00";
+      const end_time = match ? match[2] : "06:00";
+      const validDays = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+      return daysPart.split(",")
+        .filter((d) => validDays.includes(d))
+        .map((day) => ({ day: day as MaintenanceScheduleItem["day"], start_time, end_time }));
+    }
+    return DEFAULT_SCHEDULE;
+  }
+
   function fromApiContent(c: Record<string, unknown>): Partial<ServiceFormValues> {
     const sla = (c.sla ?? {}) as Record<string, unknown>;
     const bp = (c.bandwidth_profile ?? {}) as Record<string, unknown>;
@@ -91,7 +117,7 @@ export function ServiceForm() {
       contention_ratio: bp.contention_ratio as ServiceFormValues["contention_ratio"],
       support_tier: c.support_tier as ServiceFormValues["support_tier"],
       maintenance_allowed: mw.allowed as boolean,
-      maintenance_schedule: mw.schedule as string,
+      maintenance_schedule: parseMaintenanceSchedule(mw.schedule),
       temporary_activation_window_hours: c.temporary_activation_window_hours as number,
     };
   }
@@ -137,7 +163,7 @@ export function ServiceForm() {
       support_tier: values.support_tier,
       maintenance_window: {
         allowed: values.maintenance_allowed,
-        schedule: values.maintenance_schedule ?? "",
+        schedule: values.maintenance_allowed ? (values.maintenance_schedule ?? []) : [],
       },
       temporary_activation_window_hours: values.temporary_activation_window_hours,
     };
@@ -388,7 +414,7 @@ export function ServiceForm() {
               {maintenanceAllowed && (
                 <div className="space-y-2 md:col-span-2">
                   <MaintenanceSchedulePicker
-                    value={watch("maintenance_schedule") ?? ""}
+                    value={watch("maintenance_schedule") ?? []}
                     onChange={(v) => setValue("maintenance_schedule", v)}
                     disabled={isDetailMode}
                   />

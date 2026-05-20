@@ -64,15 +64,6 @@ function CustomerRow({ item }: { item: CustomerSchema }) {
 
 // ── Client-side diff ────────────────────────────────────────────────────────
 
-type PowItem = {
-  item_id: string;
-  item_label: string;
-  field_type: string;
-  category: string;
-  required: boolean;
-  order: number;
-};
-
 type DiffRow =
   | { kind: "added";    label: string; value: string }
   | { kind: "removed";  label: string; value: string }
@@ -80,61 +71,103 @@ type DiffRow =
 
 function fmt(v: unknown): string {
   if (v === null || v === undefined || v === "") return "—";
-  if (typeof v === "boolean") return v ? "true" : "false";
-  if (typeof v === "object") return JSON.stringify(v);
+  if (typeof v === "boolean") return v ? "Yes" : "No";
+  if (Array.isArray(v)) return v.length === 0 ? "(empty)" : `${v.length} item(s)`;
+  if (isPlainObject(v)) {
+    return Object.entries(v as Record<string, unknown>)
+      .map(([k, val]) => `${toLabel(k)}: ${String(val)}`)
+      .join(" · ");
+  }
   return String(v);
 }
 
-function diffObjects(
-  from: Record<string, unknown>,
-  to: Record<string, unknown>,
-  prefix = "",
-): DiffRow[] {
-  const rows: DiffRow[] = [];
-  const allKeys = Array.from(new Set([...Object.keys(from), ...Object.keys(to)]));
-  allKeys.forEach((k) => {
-    const label = prefix ? `${prefix}.${k}` : k;
-    if (!(k in from)) {
-      rows.push({ kind: "added", label, value: fmt(to[k]) });
-    } else if (!(k in to)) {
-      rows.push({ kind: "removed", label, value: fmt(from[k]) });
-    } else if (JSON.stringify(from[k]) !== JSON.stringify(to[k])) {
-      rows.push({ kind: "modified", label, from: fmt(from[k]), to: fmt(to[k]) });
-    }
-  });
-  return rows;
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return v !== null && typeof v === "object" && !Array.isArray(v);
 }
 
-function diffPow(fromArr: PowItem[], toArr: PowItem[]): DiffRow[] {
-  const rows: DiffRow[] = [];
-  const fromMap = new Map(fromArr.map((x) => [x.item_id, x]));
-  const toMap   = new Map(toArr.map((x) => [x.item_id, x]));
+function toLabel(key: string): string {
+  return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
-  toMap.forEach((item, id) => {
-    if (!fromMap.has(id)) {
-      rows.push({ kind: "added", label: `proof_of_work: "${item.item_label}"`, value: `${item.field_type} · ${item.category}` });
-    }
-  });
-  fromMap.forEach((item, id) => {
-    if (!toMap.has(id)) {
-      rows.push({ kind: "removed", label: `proof_of_work: "${item.item_label}"`, value: `${item.field_type} · ${item.category}` });
-    }
-  });
-  fromMap.forEach((fromItem, id) => {
-    const toItem = toMap.get(id);
-    if (!toItem) return;
-    const fields: (keyof PowItem)[] = ["item_label", "field_type", "category", "required", "order"];
-    fields.forEach((f) => {
-      if (String(fromItem[f]) !== String(toItem[f])) {
-        rows.push({
-          kind: "modified",
-          label: `proof_of_work[${fromItem.item_label}].${f}`,
-          from: fmt(fromItem[f]),
-          to: fmt(toItem[f]),
-        });
+function formatPath(path: string): string {
+  return path
+    .replace(/\["([^"]+)"\]/g, " › $1")
+    .replace(/\[(\d+)\]/g, (_, n) => ` › Item ${parseInt(n) + 1}`)
+    .split(".")
+    .map((seg) => {
+      const clean = seg.replace(/ › /g, "|||");
+      return clean.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\|\|\|/g, " › ");
+    })
+    .join(" › ");
+}
+
+const ITEM_ID_FIELDS = ["document_id", "step_id", "item_id", "id", "day", "key", "code"];
+const ITEM_LABEL_FIELDS = ["document_name", "step_name", "item_label", "name", "title", "label", "day"];
+
+function findIdField(arr: unknown[]): string | null {
+  const sample = arr.find(isPlainObject);
+  if (!sample) return null;
+  return ITEM_ID_FIELDS.find((f) => f in sample) ?? null;
+}
+
+function getItemLabel(item: Record<string, unknown>): string {
+  for (const f of ITEM_LABEL_FIELDS) {
+    if (typeof item[f] === "string") return item[f] as string;
+  }
+  for (const f of ITEM_ID_FIELDS) {
+    if (item[f]) return String(item[f]);
+  }
+  return "?";
+}
+
+function deepDiff(from: unknown, to: unknown, prefix = ""): DiffRow[] {
+  const rows: DiffRow[] = [];
+
+  if (Array.isArray(from) && Array.isArray(to)) {
+    const idField = findIdField([...from, ...to]);
+    if (idField) {
+      const fromMap = new Map((from as Record<string, unknown>[]).map((x) => [x[idField], x]));
+      const toMap   = new Map((to   as Record<string, unknown>[]).map((x) => [x[idField], x]));
+      toMap.forEach((item, id) => {
+        if (!fromMap.has(id)) {
+          rows.push({ kind: "added", label: `${prefix}["${getItemLabel(item)}"]`, value: fmt(item) });
+        }
+      });
+      fromMap.forEach((item, id) => {
+        if (!toMap.has(id)) {
+          rows.push({ kind: "removed", label: `${prefix}["${getItemLabel(item)}"]`, value: fmt(item) });
+        }
+      });
+      fromMap.forEach((fromItem, id) => {
+        const toItem = toMap.get(id);
+        if (!toItem) return;
+        rows.push(...deepDiff(fromItem, toItem, `${prefix}["${getItemLabel(fromItem)}"]`));
+      });
+    } else {
+      const len = Math.max(from.length, to.length);
+      for (let i = 0; i < len; i++) {
+        if (i >= from.length) rows.push({ kind: "added",   label: `${prefix}[${i}]`, value: fmt(to[i]) });
+        else if (i >= to.length) rows.push({ kind: "removed", label: `${prefix}[${i}]`, value: fmt(from[i]) });
+        else rows.push(...deepDiff(from[i], to[i], `${prefix}[${i}]`));
       }
-    });
-  });
+    }
+    return rows;
+  }
+
+  if (isPlainObject(from) && isPlainObject(to)) {
+    const allKeys = Array.from(new Set([...Object.keys(from), ...Object.keys(to)]));
+    for (const k of allKeys) {
+      const label = prefix ? `${prefix}.${k}` : k;
+      if (!(k in from)) rows.push({ kind: "added",   label, value: fmt(to[k]) });
+      else if (!(k in to)) rows.push({ kind: "removed", label, value: fmt(from[k]) });
+      else rows.push(...deepDiff(from[k], to[k], label));
+    }
+    return rows;
+  }
+
+  if (JSON.stringify(from) !== JSON.stringify(to)) {
+    rows.push({ kind: "modified", label: prefix, from: fmt(from), to: fmt(to) });
+  }
   return rows;
 }
 
@@ -142,40 +175,7 @@ function computeDiff(
   fromContent: Record<string, unknown>,
   toContent: Record<string, unknown>,
 ): DiffRow[] {
-  const rows: DiffRow[] = [];
-
-  // scalar top-level
-  for (const k of ["wo_type", "product_type"]) {
-    if (JSON.stringify(fromContent[k]) !== JSON.stringify(toContent[k])) {
-      rows.push({ kind: "modified", label: k, from: fmt(fromContent[k]), to: fmt(toContent[k]) });
-    }
-  }
-
-  // proof_of_work array
-  rows.push(...diffPow(
-    (fromContent.proof_of_work as PowItem[] | undefined) ?? [],
-    (toContent.proof_of_work  as PowItem[] | undefined) ?? [],
-  ));
-
-  // completion_rules
-  if (fromContent.completion_rules || toContent.completion_rules) {
-    rows.push(...diffObjects(
-      (fromContent.completion_rules as Record<string, unknown>) ?? {},
-      (toContent.completion_rules  as Record<string, unknown>) ?? {},
-      "completion_rules",
-    ));
-  }
-
-  // customer_sign_off
-  if (fromContent.customer_sign_off || toContent.customer_sign_off) {
-    rows.push(...diffObjects(
-      (fromContent.customer_sign_off as Record<string, unknown>) ?? {},
-      (toContent.customer_sign_off  as Record<string, unknown>) ?? {},
-      "customer_sign_off",
-    ));
-  }
-
-  return rows;
+  return deepDiff(fromContent, toContent);
 }
 
 // ── Diff row renderers ───────────────────────────────────────────────────────
@@ -185,8 +185,8 @@ function AddedRow({ row }: { row: Extract<DiffRow, { kind: "added" }> }) {
     <div className="flex items-start gap-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2">
       <span className="text-emerald-600 font-bold text-xs w-4 shrink-0 mt-0.5">+</span>
       <div className="min-w-0">
-        <span className="font-mono text-xs text-emerald-700 dark:text-emerald-400 font-semibold">{row.label}</span>
-        <span className="font-mono text-xs text-emerald-600 dark:text-emerald-300 ml-2">{row.value}</span>
+        <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">{formatPath(row.label)}</span>
+        <span className="text-xs text-emerald-600 dark:text-emerald-300 ml-2">{row.value}</span>
       </div>
     </div>
   );
@@ -197,8 +197,8 @@ function RemovedRow({ row }: { row: Extract<DiffRow, { kind: "removed" }> }) {
     <div className="flex items-start gap-2 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30 px-3 py-2">
       <span className="text-destructive font-bold text-xs w-4 shrink-0 mt-0.5">−</span>
       <div className="min-w-0">
-        <span className="font-mono text-xs text-red-700 dark:text-red-400 font-semibold">{row.label}</span>
-        <span className="font-mono text-xs text-red-600 dark:text-red-300 ml-2 line-through">{row.value}</span>
+        <span className="text-xs text-red-700 dark:text-red-400 font-semibold">{formatPath(row.label)}</span>
+        <span className="text-xs text-red-600 dark:text-red-300 ml-2 line-through">{row.value}</span>
       </div>
     </div>
   );
@@ -209,7 +209,7 @@ function ModifiedRow({ row }: { row: Extract<DiffRow, { kind: "modified" }> }) {
     <div className="flex items-start gap-2 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 px-3 py-2">
       <span className="text-amber-500 font-bold text-xs w-4 shrink-0 mt-0.5">~</span>
       <div className="min-w-0 space-y-0.5">
-        <span className="font-mono text-xs text-amber-700 dark:text-amber-400 font-semibold block">{row.label}</span>
+        <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold block">{formatPath(row.label)}</span>
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="font-mono text-xs text-red-600 dark:text-red-400 line-through">{row.from}</span>
           <span className="text-muted-foreground text-xs">→</span>
