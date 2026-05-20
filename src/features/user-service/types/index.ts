@@ -161,6 +161,7 @@ export interface UpdateUserRequest {
   reports_to_user_id?: string;
   home_branch_id?: string;
   active_branch_id?: string;
+  role_ids?: string[];
   branch_ids?: string[];
 }
 

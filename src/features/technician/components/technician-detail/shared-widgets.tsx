@@ -149,6 +149,7 @@ export function TimelineEntry({
     action?: string;
     actor_id?: string;
     actor_role?: string;
+    actor_name?: string;
     cable_excess_meter?: number
     cable_excess_price?: number
     from_state?: WorkOrderState | null;
@@ -195,7 +196,7 @@ export function TimelineEntry({
       {t?.actor_role && (
         <p className="text-[10px] text-slate-400 italic mt-1">
           by <span className="capitalize font-medium">{humanize(t.actor_role)}</span>
-          {t.actor_id ? ` · ${t.actor_id}` : ""}
+          {t.actor_name ? ` · ${t.actor_name}` : ""}
         </p>
       )}
     </li>

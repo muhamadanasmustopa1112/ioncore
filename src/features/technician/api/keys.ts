@@ -41,4 +41,6 @@ export const TECHNICIAN_KEYS = {
     [...TECHNICIAN_KEYS.all, "list", params] as const,
   latestLocations: (branch_id?: string) =>
     [...TECHNICIAN_KEYS.all, "latest-locations", { branch_id }] as const,
+  radiusCredential: (workOrderId: string) =>
+    [...TECHNICIAN_KEYS.all, "work-order", workOrderId, "radius-credential"] as const,
 };

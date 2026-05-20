@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { WorkOrderDetailResponse } from "../../../types/technician-api";
 import { SectionCard, Field, SpecCell, Empty, fmtDate, humanize } from "../shared";
 import { TechnicianCard, JourneyRow } from "../shared-widgets";
+import { RadiusCredentialsPanel } from "../radius-credentials-panel";
 import { useRequestTemporaryRadius } from "../../../api/warehouse";
 
 export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
@@ -141,8 +142,6 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
             <SpecCell label="VLAN" value={wo.ont_configuration.vlan_id} />
             <SpecCell label="IP Address" value={wo.ont_configuration.ip_address} />
             <SpecCell label="Auth Status" value={wo.ont_configuration.authentication_status} />
-            <SpecCell label="Radius User" value={wo.ont_configuration.radius_username} />
-            <SpecCell label="Radius Pass" value={wo.ont_configuration.radius_password} />
             <SpecCell
               label="Bandwidth"
               value={
@@ -152,6 +151,11 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
               }
             />
           </div>
+          <RadiusCredentialsPanel
+            workOrderId={wo.id}
+            maskedUsername={wo.ont_configuration.radius_username}
+            maskedPassword={wo.ont_configuration.radius_password}
+          />
         </SectionCard>
       )}
 
@@ -173,7 +177,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
         <SectionCard icon={Truck} title="Warehouse Dispatch">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <Field label="Dispatched At" value={fmtDate(wo.warehouse_dispatch.dispatched_at)} />
-            <Field label="Dispatched By" value={wo.warehouse_dispatch.dispatched_by} />
+            <Field label="Dispatched By" value={wo.warehouse_dispatch.dispatched_by_name} />
             <Field label="Warehouse Branch" value={wo.warehouse_dispatch.warehouse_branch.name} />
             {wo.warehouse_dispatch.note && (
               <Field label="Note" value={wo.warehouse_dispatch.note} className="sm:col-span-2" />
@@ -213,7 +217,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
             <Field label="Remnant Meters" value={`${wo.cable_consumption.remnant_meters} m`} />
             <Field label="Remnant Returned" value={wo.cable_consumption.remnant_returned ? "Yes" : "No"} />
             <Field label="Recorded At" value={fmtDate(wo.cable_consumption.recorded_at)} />
-            <Field label="Recorded By" value={wo.cable_consumption.recorded_by} />
+            <Field label="Recorded By" value={wo.cable_consumption.recorded_by_user.name} />
             <Field label="Recorded Role" value={wo.cable_consumption.recorded_role} capitalize />
             {wo.cable_consumption.note && (
               <Field label="Note" value={wo.cable_consumption.note} className="sm:col-span-2" />

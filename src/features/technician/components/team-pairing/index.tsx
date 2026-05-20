@@ -59,7 +59,10 @@ export function TeamPairingDashboard() {
 
   const { data: latestLocations, refetch: refetchMap } = useTechnicianLatestLocations(
     isLeader ? branchId : undefined,
-    { enabled: !!rawUser }
+    { 
+      enabled: !!rawUser,
+      refetchInterval: 60000
+    }
   );
 
 

@@ -313,6 +313,7 @@ export interface ONTConfiguration {
   expected_bandwidth_up_mbps: number;
   radius_password: string;
   radius_username: string;
+  credentials_visible?: boolean;
   model: string;
   ip_address: string;
   vlan_id: string;
@@ -326,6 +327,7 @@ export interface ONTConfiguration {
 export interface WarehouseDispatch {
   warehouse_branch_id: string;
   dispatched_at: string;
+  dispatched_by_name: string;
   dispatched_by: string;
   warehouse_branch: WarehouseBranch;
   devices: WarehouseDevice[];
@@ -344,6 +346,13 @@ export interface CableConsumption {
   recorded_by: string;
   recorded_role: string;
   recorded_at: string;
+  recorded_by_user: {
+    id: string;
+    name: string;
+    role: string;
+    code: string;
+    type: string
+  }
   remnant_returned: boolean;
   note: string;
 }
