@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUsers } from "@/features/user-service/api/users";
 import { getPageCount } from "@/lib/pagination";
 import { mapAuthUserToUserData } from "../../mappers";
@@ -48,9 +48,26 @@ export function UserList() {
   });
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const [searchInput, setSearchInput] = useState(filter.search ?? "");
+  const [debouncedSearch, setDebouncedSearch] = useState(filter.search ?? "");
+
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(searchInput), 400);
+    return () => clearTimeout(id);
+  }, [searchInput]);
+
+  useEffect(() => {
+    const next = debouncedSearch.trim() ? debouncedSearch.trim() : null;
+    if (next !== (filter.search ?? null)) {
+      void setFilter({ ...filter, search: next });
+      void setPagination({ ...pagination, page: 1 });
+    }
+  }, [debouncedSearch]);
+
   const { data: usersResp, isLoading } = useUsers({
     page: pagination.page,
     per_page: pagination.limit,
+    search: filter.search ?? undefined,
   });
   const data = useMemo<UserData[]>(
     () => (usersResp?.data || []).map(mapAuthUserToUserData),
@@ -64,18 +81,8 @@ export function UserList() {
       result = result.filter((r) => r.status === filter.status);
     }
 
-    if (filter.search) {
-      const q = filter.search.toLowerCase();
-      result = result.filter(
-        (r) =>
-          r.fullName.toLowerCase().includes(q) ||
-          r.email.toLowerCase().includes(q) ||
-          r.employeeId.toLowerCase().includes(q)
-      );
-    }
-
     return result;
-  }, [data, filter.search, filter.status]);
+  }, [data, filter.status]);
 
   const table = useReactTable({
     columns,
@@ -121,16 +128,16 @@ export function UserList() {
                 <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                 <Input
                   placeholder="Search users..."
-                  value={filter.search || ""}
-                  onChange={(e) => setFilter({ ...filter, search: e.target.value })}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                   className="w-52 ps-9"
                 />
-                {filter.search && (
+                {searchInput && (
                   <Button
                     mode="icon"
                     variant="ghost"
                     className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-                    onClick={() => setFilter({ ...filter, search: "" })}
+                    onClick={() => setSearchInput("")}
                   >
                     <X />
                   </Button>

@@ -187,6 +187,7 @@ export interface AssignBranchesRequest {
 
 export interface ListUsersParams extends PaginationParams {
   branch_id?: string;
+  search?: string;
 }
 
 // ── Sessions ───────────────────────────────────────────

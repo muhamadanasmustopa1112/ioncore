@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { ScreenLoader } from "@/components/common/screen-loader";
+import { useQueryStates, parseAsString } from "nuqs";
 import { HierarchicalFilter } from "@/features/noc/odp-pop/components/map/hierarchical-filter";
 import { usePop } from "@/features/noc/odp-pop/api/get-pop";
 
@@ -20,14 +20,10 @@ const OdpPopMap = dynamic(
 );
 
 export default function Page() {
-    const [filters, setFilters] = useState<{
-        area: string | null;
-        popId: string | null;
-        odpId: string | null;
-    }>({
-        area: null,
-        popId: null,
-        odpId: null,
+    const [filters, setFilters] = useQueryStates({
+        area_id: parseAsString,
+        pop_id: parseAsString,
+        odp_id: parseAsString,
     });
 
     const { data: popData, isLoading } = usePop({
@@ -35,16 +31,16 @@ export default function Page() {
             limit: 100,
             page: 1,
             search: "",
+            ...(filters.area_id ? { area_id: filters.area_id } : {}),
         }
     });
 
-    const handleFilterChange = useCallback((newFilters: {
-        area: string | null;
-        popId: string | null;
-        odpId: string | null;
-    }) => {
-        setFilters(newFilters);
-    }, []);
+    const handleFilterChange = useCallback(
+        (newFilters: { area_id: string | null; pop_id: string | null; odp_id: string | null }) => {
+            setFilters(newFilters);
+        },
+        [setFilters],
+    );
 
     return (
         <div className="flex flex-col gap-6 p-6 h-auto">
@@ -59,6 +55,7 @@ export default function Page() {
             {/* Filter Section */}
             <HierarchicalFilter
                 popData={popData}
+                value={filters}
                 onFilterChange={handleFilterChange}
             />
 
@@ -67,10 +64,10 @@ export default function Page() {
                 <OdpPopMap
                     data={popData}
                     isLoading={isLoading}
-                    selectedArea={filters.area}
-                    selectedPopId={filters.popId}
-                    selectedOdpId={filters.odpId}
-                    onSelect={(id) => setFilters(prev => ({ ...prev, popId: id, odpId: null }))}
+                    selectedArea={filters.area_id}
+                    selectedPopId={filters.pop_id}
+                    selectedOdpId={filters.odp_id}
+                    onSelect={(id) => setFilters(prev => ({ ...prev, pop_id: id, odp_id: null }))}
                 />
             </div>
         </div>

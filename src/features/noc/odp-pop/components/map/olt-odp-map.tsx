@@ -8,7 +8,6 @@ import L from "leaflet";
 import { Map as MapIcon, Maximize2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RiFocus2Line } from "@remixicon/react";
 import { useTheme } from "next-themes";
 import { useMemo } from "react";
 import { OdpResponse, OdpData } from "../../types/odp";
@@ -27,8 +26,7 @@ function MapFocusController({ selectedOdpId, points, markerRefs }: {
       if (odp) {
         // Pan and Zoom
         map.flyTo([odp.gps_lat, odp.gps_lng], 18, {
-          animate: true,
-          duration: 1.5
+          animate: false,
         });
 
         // Open Popup
@@ -36,7 +34,7 @@ function MapFocusController({ selectedOdpId, points, markerRefs }: {
         if (marker) {
           setTimeout(() => {
             marker.openPopup();
-          }, 1500); // Wait for flight to finish
+          }, 100);
         }
       }
     }
@@ -52,7 +50,7 @@ function MapBoundsController({ points }: { points: OdpData[] }) {
   useEffect(() => {
     if (points.length > 0) {
       const bounds = L.latLngBounds(points.map(p => [p.gps_lat, p.gps_lng]));
-      map.fitBounds(bounds, { padding: [50, 50], animate: true });
+      map.fitBounds(bounds, { padding: [50, 50], animate: false });
     }
   }, [points, map]);
 
@@ -124,9 +122,8 @@ export default function OltOdpMap({ data, isLoading }: { data?: OdpResponse; isL
         {/* Map Container */}
         <MapContainer center={defaultCenter} zoom={15} className="h-full w-full z-0" scrollWheelZoom={false}>
           <TileLayer
-            attribution='&copy; Google Maps'
-            url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
-            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
           <MapBoundsController points={points} />

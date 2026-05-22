@@ -71,4 +71,6 @@ export type PopParams = {
   search?: string;
   sort_by?: string;
   sort_order?: string;
+  branch_id?: string;
+  area_id?: string;
 };

@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
-import { SearchableSelect } from "@/components/ui/searchable-select";
+import { useMemo } from "react";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { DUMMY_POP_DATA } from "../../data/dummy-odp-pop";
 import { DUMMY_OLT_DETAILS } from "../../data/dummy-olt-details";
 import { DUMMY_ODP_LIST } from "../../data/dummy-odp-list";
@@ -11,38 +11,41 @@ import { PopResponse } from "../../types/pop";
 
 interface HierarchicalFilterProps {
   popData?: PopResponse;
+  value?: {
+    area_id: string | null;
+    pop_id: string | null;
+    odp_id: string | null;
+  };
   onFilterChange: (filters: {
-    area: string | null;
-    popId: string | null;
-    odpId: string | null;
+    area_id: string | null;
+    pop_id: string | null;
+    odp_id: string | null;
   }) => void;
 }
 
-export function HierarchicalFilter({ onFilterChange, popData }: HierarchicalFilterProps) {
-  const [selectedArea, setSelectedArea] = useState<string | null>(null);
-  const [selectedPopId, setSelectedPopId] = useState<string | null>(null);
-  const [selectedOdpId, setSelectedOdpId] = useState<string | null>(null);
+export function HierarchicalFilter({ onFilterChange, popData, value }: HierarchicalFilterProps) {
+  const selectedArea = value?.area_id ?? null;
+  const selectedPopId = value?.pop_id ?? null;
+  const selectedOdpId = value?.odp_id ?? null;
 
   const { data: branches = [] } = useBranchList();
-
   const pops = useMemo(() => popData?.data || DUMMY_POP_DATA, [popData]);
 
-  // 1. Get Unique Areas (now from branches)
+  // 1. Area options from branches (value = branch.id)
   const areaOptions = useMemo(() => {
     if (branches.length > 0) {
       return branches
         .sort((a, b) => a.name.localeCompare(b.name))
-        .map((branch) => ({ value: branch.name, label: branch.name }));
+        .map((branch) => ({ value: branch.id, label: branch.name }));
     }
-    // Fallback to dummy if no branches yet
-    const areas = Array.from(new Set(pops.map((p) => p.area)));
+    const areas = Array.from(new Set(pops.map((p) => p.area).filter(Boolean)));
     return areas.sort().map((area) => ({ value: area, label: area }));
   }, [branches, pops]);
 
   // 2. Get POPs based on Area
   const popOptions = useMemo(() => {
     const filtered = selectedArea
-      ? pops.filter((p) => p.area === selectedArea)
+      ? pops.filter((p) => p.branch?.id === selectedArea)
       : pops;
     return filtered.map((p) => ({ value: p.id, label: p.name }));
   }, [selectedArea, pops]);
@@ -55,15 +58,6 @@ export function HierarchicalFilter({ onFilterChange, popData }: HierarchicalFilt
     return odps.map((o) => ({ value: o.id, label: o.name }));
   }, [selectedPopId]);
 
-  // Notify parent of changes
-  useEffect(() => {
-    onFilterChange({
-      area: selectedArea,
-      popId: selectedPopId,
-      odpId: selectedOdpId,
-    });
-  }, [selectedArea, selectedPopId, selectedOdpId, onFilterChange]);
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 bg-card/50 backdrop-blur-md p-6 rounded-3xl border-2 border-border/40 shadow-xl relative z-20">
       {/* Area Filter */}
@@ -74,11 +68,9 @@ export function HierarchicalFilter({ onFilterChange, popData }: HierarchicalFilt
         <SearchableSelect
           value={selectedArea || ""}
           options={areaOptions}
-          onSelect={(val) => {
-            setSelectedArea(val);
-            setSelectedPopId(null);
-            setSelectedOdpId(null);
-          }}
+          onSelect={(val) =>
+            onFilterChange({ area_id: val, pop_id: null, odp_id: null })
+          }
           placeholder="Select Area..."
           triggerClassName="rounded-2xl border-2 border-border/40 h-12 bg-background/80"
         />
@@ -92,10 +84,9 @@ export function HierarchicalFilter({ onFilterChange, popData }: HierarchicalFilt
         <SearchableSelect
           value={selectedPopId || ""}
           options={popOptions}
-          onSelect={(val) => {
-            setSelectedPopId(val);
-            setSelectedOdpId(null);
-          }}
+          onSelect={(val) =>
+            onFilterChange({ area_id: selectedArea, pop_id: val, odp_id: null })
+          }
           placeholder="Select POP..."
           triggerClassName="rounded-2xl border-2 border-border/40 h-12 bg-background/80"
           disabled={!selectedArea && pops.length > 50}
@@ -110,7 +101,9 @@ export function HierarchicalFilter({ onFilterChange, popData }: HierarchicalFilt
         <SearchableSelect
           value={selectedOdpId || ""}
           options={odpOptions}
-          onSelect={(val) => setSelectedOdpId(val)}
+          onSelect={(val) =>
+            onFilterChange({ area_id: selectedArea, pop_id: selectedPopId, odp_id: val })
+          }
           placeholder={selectedPopId ? "Select ODP..." : "Select POP first"}
           disabled={!selectedPopId}
           triggerClassName="rounded-2xl border-2 border-border/40 h-12 bg-background/80"
