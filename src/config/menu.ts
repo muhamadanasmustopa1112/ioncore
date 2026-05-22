@@ -387,6 +387,7 @@ const ADMINISTRATION_ITEMS = [
 
 // Menu untuk halaman dashboard (production/main app)
 export const DASHBOARD_MENU: MenuConfig = [
+  DASHBOARD_ITEM,
   CRM_SALES_ITEM,
   NETWORK_ORCHESTRATION_ITEM,
   TECHNICIAN_FIELD_ITEM,
