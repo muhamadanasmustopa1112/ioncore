@@ -56,6 +56,7 @@ export interface OrderDto {
   id: string;
   order_number: string;
   customer_id: string;
+  customer_name?: string;
   lead_id: string;
   plan_id: string;
   plan_name: string;

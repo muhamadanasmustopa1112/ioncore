@@ -119,6 +119,10 @@ function OrderDetailSheet({
                   {ORDER_STATUS_LABELS[order.status]}
                 </Badge>
               </div>
+              <div className="col-span-2">
+                <p className="text-muted-foreground text-xs font-medium mb-1">Customer</p>
+                <p>{order.customer_name ?? <span className="font-mono text-xs">{order.customer_id}</span>}</p>
+              </div>
               <div>
                 <p className="text-muted-foreground text-xs font-medium mb-1">Type</p>
                 <p>{ORDER_TYPE_LABELS[order.order_type] ?? order.order_type}</p>
@@ -251,11 +255,15 @@ export function OrdersPage() {
       size: 160,
     },
     {
-      id: "customer_id",
-      accessorKey: "customer_id",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Customer ID" className="font-semibold" />,
-      cell: ({ row }) => <span className="font-mono text-xs text-muted-foreground">{row.original.customer_id.slice(0, 8)}…</span>,
-      size: 130,
+      id: "customer_name",
+      accessorKey: "customer_name",
+      header: ({ column }) => <DataGridColumnHeader column={column} title="Customer" className="font-semibold" />,
+      cell: ({ row }) => (
+        <span className="text-sm">
+          {row.original.customer_name ?? <span className="font-mono text-xs text-muted-foreground">{row.original.customer_id.slice(0, 8)}…</span>}
+        </span>
+      ),
+      size: 160,
     },
     {
       id: "order_type",
