@@ -1,12 +1,14 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { RiRouterLine, RiSignalTowerLine, RiFlashlightLine, RiToolsLine } from "@remixicon/react";
 
 export function PopDetailKpi({ pop }: { pop: any }) {
+  const { t } = useTranslation();
   const stats = [
     {
-      title: "TOTAL DEVICES",
+      title: t("odpPop.totalDevices", "TOTAL DEVICES"),
       value: "142",
       change: "+2%",
       trend: "up",
@@ -15,7 +17,7 @@ export function PopDetailKpi({ pop }: { pop: any }) {
       bg: "bg-blue-600/10"
     },
     {
-      title: "ONLINE DEVICES",
+      title: t("odpPop.onlineDevices", "ONLINE DEVICES"),
       value: "138",
       change: "-1%",
       trend: "down",
@@ -24,7 +26,7 @@ export function PopDetailKpi({ pop }: { pop: any }) {
       bg: "bg-emerald-600/10"
     },
     {
-      title: "OFFLINE DEVICES",
+      title: t("odpPop.offlineDevices", "OFFLINE DEVICES"),
       value: "4",
       change: "+50%",
       trend: "up",
@@ -33,7 +35,7 @@ export function PopDetailKpi({ pop }: { pop: any }) {
       bg: "bg-rose-600/10"
     },
     {
-      title: "RACK UTILIZATION",
+      title: t("odpPop.rackUtilization", "RACK UTILIZATION"),
       value: "78%",
       progress: 78,
       icon: RiToolsLine,

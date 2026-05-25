@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
 import { TrendingUp, ClipboardList, Clock, XCircle, Loader2 } from "lucide-react";
 import type { WorkOrderDashboardSummary } from "../types/technician-api";
 
@@ -7,6 +10,7 @@ interface Props {
 }
 
 export function TechnicianKpiCards({ summary, isLoading }: Props) {
+  const { t } = useTranslation();
   const total = summary?.total ?? 0;
   const byState = summary?.by_state ?? ({} as Record<string, number>);
 
@@ -27,35 +31,35 @@ export function TechnicianKpiCards({ summary, isLoading }: Props) {
 
   const cards = [
     {
-      label: "Total Work Orders",
+      label: t("workOrder.kpi.totalWorkOrders"),
       value: total,
       valueClass: "text-primary",
       icon: ClipboardList,
-      sub: `${completed} completed`,
+      sub: `${completed} ${t("workOrder.kpi.completed")}`,
       subClass: "text-slate-400",
     },
     {
-      label: "In Progress",
+      label: t("workOrder.kpi.inProgress"),
       value: inProgress,
       valueClass: "text-primary",
       icon: TrendingUp,
-      sub: "Active on site",
+      sub: t("workOrder.kpi.activeOnSite"),
       subClass: "text-emerald-600",
     },
     {
-      label: "Pending Assignment",
+      label: t("workOrder.kpi.pendingAssignment"),
       value: pending,
       valueClass: pending > 0 ? "text-amber-600" : "text-primary",
       icon: Clock,
-      sub: pending > 0 ? "Needs attention" : "All assigned",
+      sub: pending > 0 ? t("workOrder.kpi.needsAttention") : t("workOrder.kpi.allAssigned"),
       subClass: pending > 0 ? "text-amber-600" : "text-slate-400",
     },
     {
-      label: "Cancelled",
+      label: t("workOrder.kpi.cancelled"),
       value: cancelled,
       valueClass: cancelled > 0 ? "text-rose-600" : "text-primary",
       icon: XCircle,
-      sub: "This period",
+      sub: t("workOrder.kpi.thisPeriod"),
       subClass: cancelled > 0 ? "text-rose-600" : "text-slate-400",
     },
   ];

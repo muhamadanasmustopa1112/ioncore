@@ -19,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 import type { WorkOrderDetailResponse } from "../../../types/technician-api";
 import { SectionCard, Field, SpecCell, Empty, fmtDate, humanize } from "../shared";
 import { TechnicianCard, JourneyRow } from "../shared-widgets";
@@ -26,6 +27,7 @@ import { RadiusCredentialsPanel } from "../radius-credentials-panel";
 import { useRequestTemporaryRadius } from "../../../api/warehouse";
 
 export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
+  const { t } = useTranslation();
   const { mutate, isPending } = useRequestTemporaryRadius();
   const [forceReserved, setForceReserved] = useState(false);
 
@@ -40,36 +42,36 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
   return (
     <>
       {/* Customer & Site */}
-      <SectionCard icon={User} title="Customer & Site">
+      <SectionCard icon={User} title={t("workOrder.detail.customerSite")}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-          <Field label="Customer" value={wo.customer_name} />
-          <Field label="Phone" value={wo.customer_phone} />
-          {wo.customer_email && <Field label="Email" value={wo.customer_email} className="sm:col-span-2" />}
-          <Field label="Site Name" value={wo.site_name} />
-          <Field label="Package" value={wo.package_name} />
-          <Field label="Service Type" value={wo.service_type} capitalize />
-          <Field label="Product Type" value={wo.product_type} capitalize />
-          <Field label="Address" value={wo.site_address} className="sm:col-span-2" />
+          <Field label={t("workOrder.detail.customer")} value={wo.customer_name} />
+          <Field label={t("workOrder.detail.phone")} value={wo.customer_phone} />
+          {wo.customer_email && <Field label={t("workOrder.detail.email")} value={wo.customer_email} className="sm:col-span-2" />}
+          <Field label={t("workOrder.detail.siteName")} value={wo.site_name} />
+          <Field label={t("workOrder.detail.package")} value={wo.package_name} />
+          <Field label={t("workOrder.detail.serviceType")} value={wo.service_type} capitalize />
+          <Field label={t("workOrder.detail.productType")} value={wo.product_type} capitalize />
+          <Field label={t("workOrder.detail.address")} value={wo.site_address} className="sm:col-span-2" />
         </div>
       </SectionCard>
 
       {/* Routing */}
       {wo.routing && (
-        <SectionCard icon={Network} title="Routing">
+        <SectionCard icon={Network} title={t("workOrder.detail.routing")}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <Field label="Branch" value={wo.branch.name} />
-            <Field label="Area" value={wo.area_name || wo.routing.resolved_area_id} />
-            <Field label="Sub Area" value={wo.sub_area_name || wo.routing.resolved_sub_area_id} />
-            <Field label="Routed To" value={wo.routing.routed_to_role} />
+            <Field label={t("workOrder.detail.branch")} value={wo.branch.name} />
+            <Field label={t("workOrder.detail.area")} value={wo.area_name || wo.routing.resolved_area_id} />
+            <Field label={t("workOrder.detail.subArea")} value={wo.sub_area_name || wo.routing.resolved_sub_area_id} />
+            <Field label={t("workOrder.detail.routedTo")} value={wo.routing.routed_to_role} />
             {wo.routing.escalated_at && (
-              <Field label="Escalated" value={fmtDate(wo.routing.escalated_at)} />
+              <Field label={t("workOrder.detail.escalated")} value={fmtDate(wo.routing.escalated_at)} />
             )}
           </div>
         </SectionCard>
       )}
 
       {/* Assigned Team */}
-      <SectionCard icon={Settings} title="Assigned Team">
+      <SectionCard icon={Settings} title={t("workOrder.detail.assignedTeam")}>
         {wo.assigned_team && wo.assigned_team.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4">
             {wo.assigned_team.map((t) => (
@@ -77,7 +79,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
             ))}
           </div>
         ) : (
-          <Empty>No technicians assigned yet.</Empty>
+          <Empty>{t("workOrder.detail.noTechniciansAssigned")}</Empty>
         )}
       </SectionCard>
 
@@ -87,14 +89,14 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
           <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 w-full">
               <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                <MapPin className="size-4 text-primary" /> Location
+                <MapPin className="size-4 text-primary" /> {t("workOrder.detail.location")}
               </CardTitle>
               <Link
                 href={wo.navigation_url || `https://maps.google.com/maps?q=${wo.latitude},${wo.longitude}`}
                 target="_blank"
                 className="text-[10px] text-primary font-bold uppercase tracking-widest hover:underline"
               >
-                Open in Google Maps
+                {t("workOrder.detail.openInGoogleMaps")}
               </Link>
             </div>
           </CardHeader>
@@ -117,33 +119,15 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* Infrastructure / ONT */}
       {wo.ont_configuration && (
-        <SectionCard icon={Activity} title="Infrastructure / ONT Configuration">
+        <SectionCard icon={Activity} title={t("workOrder.detail.infrastructureConfiguration")}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {/* <SpecCell label="ODP ID" value={wo.ont_configuration.odp_id} />
-            <SpecCell label="Slot" value={wo.ont_configuration.odp_slot} />
+            <SpecCell label={t("workOrder.detail.model")} value={wo.ont_configuration.model} />
+            <SpecCell label={t("workOrder.detail.serialNumber")} value={wo.ont_configuration.serial_number} />
+            <SpecCell label={t("workOrder.detail.vlan")} value={wo.ont_configuration.vlan_id} />
+            <SpecCell label={t("workOrder.detail.ipAddress")} value={wo.ont_configuration.ip_address} />
+            <SpecCell label={t("workOrder.detail.authStatus")} value={wo.ont_configuration.authentication_status} />
             <SpecCell
-              label="ODP Location"
-              value={
-                wo.ont_configuration.odp_location_lat && wo.ont_configuration.odp_location_lng
-                  ? `${wo.ont_configuration.odp_location_lat}, ${wo.ont_configuration.odp_location_lng}`
-                  : undefined
-              }
-            />
-            <SpecCell
-              label="Cable Distance"
-              value={
-                wo.ont_configuration.cable_distance_meters
-                  ? `${wo.ont_configuration.cable_distance_meters} m`
-                  : undefined
-              }
-            /> */}
-            <SpecCell label="Model" value={wo.ont_configuration.model} />
-            <SpecCell label="Serial #" value={wo.ont_configuration.serial_number} />
-            <SpecCell label="VLAN" value={wo.ont_configuration.vlan_id} />
-            <SpecCell label="IP Address" value={wo.ont_configuration.ip_address} />
-            <SpecCell label="Auth Status" value={wo.ont_configuration.authentication_status} />
-            <SpecCell
-              label="Bandwidth"
+              label={t("workOrder.detail.bandwidth")}
               value={
                 wo.ont_configuration.expected_bandwidth_down_mbps && wo.ont_configuration.expected_bandwidth_up_mbps
                   ? `↓${wo.ont_configuration.expected_bandwidth_down_mbps} / ↑${wo.ont_configuration.expected_bandwidth_up_mbps} Mbps`
@@ -161,7 +145,7 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* Required Skills */}
       {Array.isArray(wo.required_skills) && wo.required_skills.length > 0 && (
-        <SectionCard icon={ShieldCheck} title="Required Skills">
+        <SectionCard icon={ShieldCheck} title={t("workOrder.detail.requiredSkills")}>
           <div className="flex flex-wrap gap-2">
             {wo.required_skills.map((s) => (
               <Badge key={s} variant="info" appearance="light" className="capitalize">
@@ -174,18 +158,18 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* Warehouse Dispatch */}
       {wo.warehouse_dispatch && (
-        <SectionCard icon={Truck} title="Warehouse Dispatch">
+        <SectionCard icon={Truck} title={t("workOrder.detail.warehouseDispatch")}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-            <Field label="Dispatched At" value={fmtDate(wo.warehouse_dispatch.dispatched_at)} />
-            <Field label="Dispatched By" value={wo.warehouse_dispatch.dispatched_by_name} />
-            <Field label="Warehouse Branch" value={wo.warehouse_dispatch.warehouse_branch.name} />
+            <Field label={t("workOrder.detail.dispatchedAt")} value={fmtDate(wo.warehouse_dispatch.dispatched_at)} />
+            <Field label={t("workOrder.detail.dispatchedBy")} value={wo.warehouse_dispatch.dispatched_by_name} />
+            <Field label={t("workOrder.detail.warehouseBranch")} value={wo.warehouse_dispatch.warehouse_branch.name} />
             {wo.warehouse_dispatch.note && (
-              <Field label="Note" value={wo.warehouse_dispatch.note} className="sm:col-span-2" />
+              <Field label={t("workOrder.detail.note")} value={wo.warehouse_dispatch.note} className="sm:col-span-2" />
             )}
           </div>
           {wo.warehouse_dispatch.devices && wo.warehouse_dispatch.devices.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Devices</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">{t("workOrder.detail.devices")}</p>
               <div className="space-y-2">
                 {wo.warehouse_dispatch.devices.map((d, i) => (
                   <div key={i} className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-800">
@@ -197,9 +181,9 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
                       </div>
                     </div>
                     {d.picked_up ? (
-                      <Badge variant="success" appearance="light" size="sm">Picked up</Badge>
+                      <Badge variant="success" appearance="light" size="sm">{t("workOrder.detail.pickedUp")}</Badge>
                     ) : (
-                      <Badge variant="warning" appearance="light" size="sm">Pending</Badge>
+                      <Badge variant="warning" appearance="light" size="sm">{t("workOrder.detail.pending")}</Badge>
                     )}
                   </div>
                 ))}
@@ -211,16 +195,16 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* Cable Consumption */}
       {wo.cable_consumption && (
-        <SectionCard icon={Activity} title="Cable Consumption">
+        <SectionCard icon={Activity} title={t("workOrder.detail.cableConsumption")}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label="Used Meters" value={`${wo.cable_consumption.cable_used_meters} m`} />
-            <Field label="Remnant Meters" value={`${wo.cable_consumption.remnant_meters} m`} />
-            <Field label="Remnant Returned" value={wo.cable_consumption.remnant_returned ? "Yes" : "No"} />
-            <Field label="Recorded At" value={fmtDate(wo.cable_consumption.recorded_at)} />
-            <Field label="Recorded By" value={wo.cable_consumption.recorded_by_user.name} />
-            <Field label="Recorded Role" value={wo.cable_consumption.recorded_role} capitalize />
+            <Field label={t("workOrder.detail.usedMeters")} value={`${wo.cable_consumption.cable_used_meters} m`} />
+            <Field label={t("workOrder.detail.remnantMeters")} value={`${wo.cable_consumption.remnant_meters} m`} />
+            <Field label={t("workOrder.detail.remnantReturned")} value={wo.cable_consumption.remnant_returned ? t("workOrder.detail.yes") : t("workOrder.detail.no")} />
+            <Field label={t("workOrder.detail.recordedAt")} value={fmtDate(wo.cable_consumption.recorded_at)} />
+            <Field label={t("workOrder.detail.recordedBy")} value={wo.cable_consumption.recorded_by_user.name} />
+            <Field label={t("workOrder.detail.recordedRole")} value={wo.cable_consumption.recorded_role} capitalize />
             {wo.cable_consumption.note && (
-              <Field label="Note" value={wo.cable_consumption.note} className="sm:col-span-2" />
+              <Field label={t("workOrder.detail.note")} value={wo.cable_consumption.note} className="sm:col-span-2" />
             )}
           </div>
         </SectionCard>
@@ -228,30 +212,30 @@ export function LeftInfoSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* Execution Journey */}
       {wo.execution && (
-        <SectionCard icon={MapIcon} title="Execution Journey">
+        <SectionCard icon={MapIcon} title={t("workOrder.detail.executionJourney")}>
           <div className="space-y-3">
             <JourneyRow
-              label="Acceptances"
+              label={t("workOrder.detail.acceptances")}
               done={!!wo.execution.acceptances && wo.execution.acceptances.length > 0}
               detail={
                 wo.execution.acceptances && wo.execution.acceptances.length > 0
-                  ? `${wo.execution.acceptances.length} technician${wo.execution.acceptances.length > 1 ? "s" : ""} accepted`
-                  : "Awaiting acceptance"
+                  ? t("workOrder.detail.techniciansAccepted", { count: wo.execution.acceptances.length })
+                  : t("workOrder.detail.awaitingAcceptance")
               }
             />
             <JourneyRow
-              label="Journey Started"
+              label={t("workOrder.detail.journeyStarted")}
               done={!!wo.execution.journey_started}
-              detail={wo.execution.journey_started ? fmtDate(wo.execution.journey_started.recorded_at) : "Not started"}
+              detail={wo.execution.journey_started ? fmtDate(wo.execution.journey_started.recorded_at) : t("workOrder.detail.notStarted")}
             />
             <JourneyRow
-              label="Arrived On Site"
+              label={t("workOrder.detail.arrivedOnSite")}
               done={!!wo.execution.arrival}
-              detail={wo.execution.arrival ? fmtDate(wo.execution.arrival.recorded_at) : "Not arrived"}
+              detail={wo.execution.arrival ? fmtDate(wo.execution.arrival.recorded_at) : t("workOrder.detail.notArrived")}
             />
             {wo.execution.last_known_gps && (
               <div className="text-[10px] text-slate-400 mt-2 font-mono">
-                Last GPS: {wo.execution.last_known_gps.latitude}, {wo.execution.last_known_gps.longitude}
+                {t("workOrder.detail.lastGps")}: {wo.execution.last_known_gps.latitude}, {wo.execution.last_known_gps.longitude}
                 {wo.execution.last_known_gps.recorded_at && ` · ${fmtDate(wo.execution.last_known_gps.recorded_at)}`}
               </div>
             )}

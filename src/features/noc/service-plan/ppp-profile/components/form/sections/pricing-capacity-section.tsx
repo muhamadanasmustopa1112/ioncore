@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { RiMoneyDollarCircleLine } from "@remixicon/react";
 import {
     FormControl,
@@ -18,13 +19,14 @@ type SectionProps = {
 };
 
 export function PricingCapacitySection({ isDetailMode, isPending }: SectionProps) {
+    const { t } = useTranslation();
     const { control } = useFormContext<PPPProfileFormData>();
 
     return (
         <section className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                 <RiMoneyDollarCircleLine className="size-4 text-emerald-500" />
-                <h3 className="text-sm font-semibold">Pricing & Capacity</h3>
+                <h3 className="text-sm font-semibold">{t("pppProfile.pricingCapacity", "Pricing & Capacity")}</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
@@ -33,7 +35,7 @@ export function PricingCapacitySection({ isDetailMode, isPending }: SectionProps
                     name="capital_price"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Capital Price</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.capitalPrice", "Capital Price")}</FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input {...field} type="number" disabled={isDetailMode || isPending} className="h-10 pl-9" />
@@ -49,7 +51,7 @@ export function PricingCapacitySection({ isDetailMode, isPending }: SectionProps
                     name="sell_price"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Sell Price</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.sellPrice", "Sell Price")}</FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input {...field} type="number" disabled={isDetailMode || isPending} className="h-10 pl-9" />
@@ -65,7 +67,7 @@ export function PricingCapacitySection({ isDetailMode, isPending }: SectionProps
                     name="customer_count"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Customer Count</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.customerCount", "Customer Count")}</FormLabel>
                             <FormControl>
                                 <Input {...field} type="number" disabled={isDetailMode || isPending} className="h-10" />
                             </FormControl>
@@ -78,7 +80,7 @@ export function PricingCapacitySection({ isDetailMode, isPending }: SectionProps
                     name="voucher_count"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Voucher Count</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.voucherCount", "Voucher Count")}</FormLabel>
                             <FormControl>
                                 <Input {...field} type="number" disabled={isDetailMode || isPending} className="h-10" />
                             </FormControl>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RiAddLine, RiInformationLine } from "@remixicon/react";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { PopFormSheet } from "./form/pop-form-sheet";
 import { usePop } from "../api/get-pop";
 
 export function OdpPopManagePage() {
+    const { t } = useTranslation();
     const { openPopFormSheet } = usePopStore();
 
     const [selectedPopId, setSelectedPopId] = useState<string | null>(null);
@@ -48,24 +50,24 @@ export function OdpPopManagePage() {
             <PageBreadcrumb
                 items={[
                     {
-                        title: "Network & Orchestration",
+                        title: t("menu.headings.networkOrchestration"),
                         path: paths.dashboard.networkAndOrchestration.root.getHref(),
                     },
-                    { title: "ODP & POP" },
-                    { title: "Manage" },
+                    { title: t("menu.odpPop") },
+                    { title: t("common.manage") },
                 ]}
                 className="mb-2"
             />
             <Toolbar className="mt-2 items-center flex-none">
                 <ToolbarHeading className="gap-0">
-                    <ToolbarTitle className="text-2xl font-extrabold tracking-tight">POP Management Dashboard</ToolbarTitle>
+                    <ToolbarTitle className="text-2xl font-extrabold tracking-tight">{t("odpPop.manageTitle", "POP Management Dashboard")}</ToolbarTitle>
                     <div className="mt-2 flex items-center gap-2.5 text-sm font-medium">
                         <Badge variant="info" appearance="light" className="h-6 px-2.5 gap-1.5 border-none font-semibold">
                             <RiInformationLine className="size-3.5" />
-                            Live Capacity Data
+                            {t("odpPop.liveCapacity", "Live Capacity Data")}
                         </Badge>
                         <span className="text-muted-foreground/60">•</span>
-                        <span className="text-muted-foreground font-normal">Real-time infrastructure health monitoring</span>
+                        <span className="text-muted-foreground font-normal">{t("odpPop.realTimeMonitoring", "Real-time infrastructure health monitoring")}</span>
                     </div>
                 </ToolbarHeading>
                 <ToolbarActions>
@@ -75,7 +77,7 @@ export function OdpPopManagePage() {
                         onClick={() => openPopFormSheet("new")}
                     >
                         <RiAddLine className="size-5" />
-                        Add New POP
+                        {t("odpPop.addNewPop", "Add New POP")}
                     </Button>
                 </ToolbarActions>
             </Toolbar>

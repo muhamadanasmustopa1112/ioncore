@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
@@ -7,13 +8,15 @@ import { Progress } from "@/components/ui/progress";
 import { OltData } from "@/features/noc/odp-pop/types/olt";
 import { OltActionsCell } from "./olt-actions-cell";
 
-export const columns: ColumnDef<OltData>[] = [
+export function useOltColumns(): ColumnDef<OltData>[] {
+  const { t } = useTranslation();
+  return [
   {
     id: "code",
     accessorKey: "code",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="OLT CODE"
+        title={t("odpPop.oltCode", "OLT CODE")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -28,7 +31,7 @@ export const columns: ColumnDef<OltData>[] = [
     accessorKey: "name",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="NAME"
+        title={t("common.name")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -42,7 +45,7 @@ export const columns: ColumnDef<OltData>[] = [
     id: "ports",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="PORT CAPACITY"
+        title={t("odpPop.portCapacity", "PORT CAPACITY")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -92,7 +95,7 @@ export const columns: ColumnDef<OltData>[] = [
     accessorKey: "status",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="STATUS"
+        title={t("common.status")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -112,7 +115,7 @@ export const columns: ColumnDef<OltData>[] = [
     id: "actions",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="ACTIONS"
+        title={t("common.actions")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase text-center"
       />
@@ -120,4 +123,5 @@ export const columns: ColumnDef<OltData>[] = [
     cell: ({ row }) => <OltActionsCell row={row} />,
     size: 100,
   },
-];
+  ];
+}

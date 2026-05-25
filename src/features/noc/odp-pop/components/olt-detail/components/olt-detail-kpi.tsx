@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { RiSignalTowerLine, RiHashtag, RiGlobalLine } from "@remixicon/react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { OltData } from "../../../types/olt";
 
 export function OltDetailKpi({ olt }: { olt: OltData }) {
+  const { t } = useTranslation();
   const portsUsed = olt.portsUsed || 0;
   const totalPorts = olt.totalPorts || 16;
   const capacityPercentage = (portsUsed / totalPorts) * 100;
@@ -18,7 +20,7 @@ export function OltDetailKpi({ olt }: { olt: OltData }) {
             <RiSignalTowerLine className="size-6" />
           </div>
           <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">
-            Port Capacity
+            {t("odpPop.portCapacity")}
           </span>
         </div>
         <div className="space-y-3">
@@ -49,11 +51,11 @@ export function OltDetailKpi({ olt }: { olt: OltData }) {
             <RiHashtag className="size-6" />
           </div>
           <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">
-            ODP Connected
+            {t("odpPop.odpConnected", "ODP Connected")}
           </span>
         </div>
         <h3 className="text-3xl font-black text-foreground">
-          {olt.odpCount || 0} <span className="text-lg text-muted-foreground ml-1 uppercase">Units</span>
+          {olt.odpCount || 0} <span className="text-lg text-muted-foreground ml-1 uppercase">{t("odpPop.units", "Units")}</span>
         </h3>
       </Card>
 
@@ -63,7 +65,7 @@ export function OltDetailKpi({ olt }: { olt: OltData }) {
             <RiGlobalLine className="size-6" />
           </div>
           <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">
-            IP Address
+            {t("odpPop.ipAddress")}
           </span>
         </div>
         <h3 className="text-3xl font-black text-foreground font-mono">

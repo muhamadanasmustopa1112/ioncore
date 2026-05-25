@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { RiInformationLine, RiDatabase2Line } from "@remixicon/react";
 import {
     FormControl,
@@ -19,13 +20,14 @@ type SectionProps = {
 };
 
 export function GeneralInformationSection({ isDetailMode, isPending, isNewMode }: SectionProps) {
+    const { t } = useTranslation();
     const { control } = useFormContext<PPPProfileFormData>();
 
     return (
         <section className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                 <RiInformationLine className="size-4 text-blue-500" />
-                <h3 className="text-sm font-semibold">General Information</h3>
+                <h3 className="text-sm font-semibold">{t("pppProfile.generalInformation", "General Information")}</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
@@ -34,9 +36,9 @@ export function GeneralInformationSection({ isDetailMode, isPending, isNewMode }
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Profile Name</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.profileName", "Profile Name")}</FormLabel>
                             <FormControl>
-                                <Input {...field} disabled={isDetailMode || isPending} className="h-10" placeholder="e.g. PPP Basic" />
+                                <Input {...field} disabled={isDetailMode || isPending} className="h-10" placeholder={t("pppProfile.profileNamePlaceholder", "e.g. PPP Basic")} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -47,9 +49,9 @@ export function GeneralInformationSection({ isDetailMode, isPending, isNewMode }
                     name="code"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Profile Code</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.profileCode", "Profile Code")}</FormLabel>
                             <FormControl>
-                                <Input {...field} disabled={isDetailMode || !isNewMode || isPending} className="h-10 uppercase" placeholder="e.g. PPP-BASIC" />
+                                <Input {...field} disabled={isDetailMode || !isNewMode || isPending} className="h-10 uppercase" placeholder={t("pppProfile.profileCodePlaceholder", "e.g. PPP-BASIC")} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -60,7 +62,7 @@ export function GeneralInformationSection({ isDetailMode, isPending, isNewMode }
                     name="data_owner"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Data Owner</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.dataOwner", "Data Owner")}</FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input {...field} disabled={isDetailMode || isPending} className="h-10 pl-9" />
@@ -76,7 +78,7 @@ export function GeneralInformationSection({ isDetailMode, isPending, isNewMode }
                     name="attributes.realm"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Realm</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.realm", "Realm")}</FormLabel>
                             <FormControl>
                                 <Input {...field} disabled={isDetailMode || isPending} className="h-10" />
                             </FormControl>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useFormContext } from "react-hook-form";
 import { RiMapPinLine, RiCompass3Line, RiMapPin2Line } from "@remixicon/react";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +24,7 @@ export function OdpLocationInfoSection({
   readOnly,
   isPending,
 }: OdpLocationInfoSectionProps) {
+  const { t } = useTranslation();
   const { control, watch, setValue } = useFormContext<OdpFormValues>();
 
   const lat = watch("gps_lat");
@@ -35,7 +37,7 @@ export function OdpLocationInfoSection({
     <div className="space-y-4 pt-2">
       <div className="flex items-center gap-2 pb-1 border-b border-border/50">
         <RiCompass3Line className="size-4 text-purple-500" />
-        <h3 className="text-sm font-semibold">Location Information</h3>
+        <h3 className="text-sm font-semibold">{t("odpPop.locationInformation")}</h3>
       </div>
       <div className="grid grid-cols-2 gap-x-6 gap-y-4">
         <FormField
@@ -45,11 +47,11 @@ export function OdpLocationInfoSection({
             <FormItem className="col-span-2">
               <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <RiMapPin2Line className="size-3" />
-                Address
+                {t("common.address")}
               </FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Enter full address..."
+                  placeholder={t("odpPop.enterFullAddress")}
                   className="min-h-[80px] resize-none"
                   {...field}
                   value={field.value ?? ""}
@@ -72,12 +74,12 @@ export function OdpLocationInfoSection({
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <RiMapPinLine className="size-4 text-emerald-500" />
-                  <span className="text-sm font-medium">Coordinate Picker</span>
+                  <span className="text-sm font-medium">{t("odpPop.coordinatePicker")}</span>
                 </div>
                 {(lat || lng) && (
                   <div className="flex gap-3 text-[11px] font-mono text-muted-foreground bg-muted/50 px-2 py-1 rounded-md border border-border/50">
-                    <span>Lat: {lat || "-"}</span>
-                    <span>Lng: {lng || "-"}</span>
+                    <span>{t("odpPop.lat")}: {lat || "-"}</span>
+                    <span>{t("odpPop.lng")}: {lng || "-"}</span>
                   </div>
                 )}
               </div>

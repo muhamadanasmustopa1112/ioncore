@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
 import { Users, RefreshCw, AlertTriangle, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { KpiCardProps } from "../types/customer";
@@ -21,27 +24,28 @@ function KpiCard({ title, value, icon, colorClassName }: KpiCardProps) {
 }
 
 export function CustomerKpiCards() {
+  const { t } = useTranslation();
   const cards = [
     {
-      title: "Registration This Month",
+      title: t("nocCustomer.kpi.registrationMonth", "Registration This Month"),
       value: 0,
       icon: <Users className="size-8 stroke-[1.5px]" />,
       colorClassName: "bg-primary",
     },
     {
-      title: "Renewal This Month",
+      title: t("nocCustomer.kpi.renewalMonth", "Renewal This Month"),
       value: 0,
       icon: <RefreshCw className="size-8 stroke-[1.5px]" />,
       colorClassName: "bg-[#00A86B]",
     },
     {
-      title: "Suspended Customers",
+      title: t("nocCustomer.kpi.suspendedCustomers", "Suspended Customers"),
       value: 972,
       icon: <AlertTriangle className="size-8 stroke-[1.5px]" />,
       colorClassName: "bg-[#F9A602]",
     },
     {
-      title: "Account Disabled",
+      title: t("nocCustomer.kpi.accountDisabled", "Account Disabled"),
       value: 1,
       icon: <Ban className="size-8 stroke-[1.5px]" />,
       colorClassName: "bg-[#DC143C]",

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
@@ -8,13 +9,15 @@ import { OdpData } from "@/features/noc/odp-pop/types/odp";
 
 import { OdpActionsCell } from "./odp-actions-cell";
 
-export const columns: ColumnDef<OdpData>[] = [
+export function useOdpColumns(): ColumnDef<OdpData>[] {
+  const { t } = useTranslation();
+  return [
   {
     id: "name",
     accessorKey: "name",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="ODP NAME"
+        title={t("odpPop.odpName", "ODP NAME")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -33,7 +36,7 @@ export const columns: ColumnDef<OdpData>[] = [
     accessorKey: "gps_lat",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="LATITUDE"
+        title={t("odpPop.latitude", "LATITUDE")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -50,7 +53,7 @@ export const columns: ColumnDef<OdpData>[] = [
     accessorKey: "gps_lng",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="LONGITUDE"
+        title={t("odpPop.longitude", "LONGITUDE")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -67,7 +70,7 @@ export const columns: ColumnDef<OdpData>[] = [
     accessorKey: "olt_port",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="PON PORT"
+        title={t("odpPop.ponPort", "PON PORT")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -86,7 +89,7 @@ export const columns: ColumnDef<OdpData>[] = [
     id: "portCapacity",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="PORT CAPACITY"
+        title={t("odpPop.portCapacity")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -136,7 +139,7 @@ export const columns: ColumnDef<OdpData>[] = [
     accessorKey: "status",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="STATUS"
+        title={t("common.status")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase"
       />
@@ -156,7 +159,7 @@ export const columns: ColumnDef<OdpData>[] = [
     id: "actions",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="ACTIONS"
+        title={t("common.actions")}
         column={column}
         className="text-[10px] text-muted-foreground font-black tracking-widest uppercase text-center"
       />
@@ -164,5 +167,8 @@ export const columns: ColumnDef<OdpData>[] = [
     cell: ({ row }) => <OdpActionsCell row={row} />,
     size: 100,
   },
-];
+  ];
+}
+
+export const columns = useOdpColumns;
 

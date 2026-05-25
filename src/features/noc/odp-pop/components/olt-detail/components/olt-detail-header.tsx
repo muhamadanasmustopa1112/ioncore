@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { RiRouterLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { OltData } from "../../../types/olt";
 
 export function OltDetailHeader({ olt }: { olt: OltData }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-card p-8 rounded-3xl shadow-sm border border-border/40">
       <div className="flex items-start gap-5">
@@ -21,7 +23,7 @@ export function OltDetailHeader({ olt }: { olt: OltData }) {
               appearance="light"
               className="px-3 py-1 text-[10px] font-black uppercase tracking-widest"
             >
-              {olt.status === 'active' ? 'Online' : 'Warning'}
+              {olt.status === 'active' ? t("odpPop.online", "Online") : t("odpPop.warning", "Warning")}
             </Badge>
           </div>
           <p className="text-muted-foreground font-bold tracking-tight uppercase text-sm">

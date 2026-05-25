@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Filter } from "lucide-react";
 import type { WorkOrderListParams, WorkOrderState, WorkOrderType } from "../types/technician-api";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
@@ -13,47 +14,48 @@ interface Props {
   hideSubArea?: boolean;
 }
 
-const WO_STATES: { label: string; value: WorkOrderState | "" }[] = [
-  { label: "All Statuses", value: "" },
-  { label: "Unassigned", value: "unassigned" },
-  { label: "Assigned", value: "assigned" },
-  { label: "Accepted", value: "accepted" },
-  { label: "Dispatched", value: "dispatched" },
-  { label: "In Progress", value: "in_progress" },
-  { label: "Pending NOC", value: "pending_noc_verification" },
-  { label: "Completed", value: "completed" },
-  { label: "Rescheduled", value: "rescheduled" },
-  { label: "Cancelled", value: "cancelled" },
-];
-
-const WO_TYPES: { label: string; value: WorkOrderType | "" }[] = [
-  { label: "All Types", value: "" },
-  { label: "New Install (Broadband)", value: "new_installation_broadband" },
-  { label: "New Install (Enterprise)", value: "new_installation_enterprise" },
-  { label: "Maintenance", value: "maintenance" },
-  { label: "Termination", value: "termination" },
-];
-
 const selectClass =
   "w-full bg-surface-variant dark:bg-slate-800 border border-outline text-slate-600 dark:text-slate-300 rounded text-sm py-2 px-3 focus:ring-1 focus:ring-primary outline-none appearance-none cursor-pointer";
 
 export function TechnicianFilterBar({ filters, onChange, onApply, hideSubArea }: Props) {
+  const { t } = useTranslation();
   const { data: branches } = useBranchList({ per_page: 500 });
+
+  const WO_STATES: { label: string; value: WorkOrderState | "" }[] = [
+    { label: t("workOrder.states.allStatuses"), value: "" },
+    { label: t("workOrder.states.unassigned"), value: "unassigned" },
+    { label: t("workOrder.states.assigned"), value: "assigned" },
+    { label: t("workOrder.states.accepted"), value: "accepted" },
+    { label: t("workOrder.states.dispatched"), value: "dispatched" },
+    { label: t("workOrder.states.inProgress"), value: "in_progress" },
+    { label: t("workOrder.states.pendingNoc"), value: "pending_noc_verification" },
+    { label: t("workOrder.states.completed"), value: "completed" },
+    { label: t("workOrder.states.rescheduled"), value: "rescheduled" },
+    { label: t("workOrder.states.cancelled"), value: "cancelled" },
+  ];
+
+  const WO_TYPES: { label: string; value: WorkOrderType | "" }[] = [
+    { label: t("workOrder.types.allTypes"), value: "" },
+    { label: t("workOrder.types.newInstallBroadband"), value: "new_installation_broadband" },
+    { label: t("workOrder.types.newInstallEnterprise"), value: "new_installation_enterprise" },
+    { label: t("workOrder.types.maintenance"), value: "maintenance" },
+    { label: t("workOrder.types.termination"), value: "termination" },
+  ];
 
   const branchOptions = useMemo(() => {
     const opts = (branches ?? []).map((b: any) => ({
       value: b.id,
       label: b.name,
     }));
-    return [{ value: "", label: "All Sub Areas" }, ...opts];
-  }, [branches]);
+    return [{ value: "", label: t("workOrder.filter.allSubAreas") }, ...opts];
+  }, [branches, t]);
 
   return (
     <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded shadow-sm border border-outline mb-4 sm:mb-6">
       <div className={`grid grid-cols-1 sm:grid-cols-2 ${hideSubArea ? 'lg:grid-cols-4' : 'lg:grid-cols-5'} gap-3 sm:gap-4 items-end`}>
         <div className="space-y-1">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            Date
+            {t("workOrder.filter.date")}
           </label>
           <input
             type="date"
@@ -67,7 +69,7 @@ export function TechnicianFilterBar({ filters, onChange, onApply, hideSubArea }:
 
         <div className="space-y-1">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            Status
+            {t("workOrder.filter.status")}
           </label>
           <select
             className={selectClass}
@@ -86,7 +88,7 @@ export function TechnicianFilterBar({ filters, onChange, onApply, hideSubArea }:
 
         <div className="space-y-1">
           <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            Order Type
+            {t("workOrder.filter.orderType")}
           </label>
           <select
             className={selectClass}
@@ -106,12 +108,12 @@ export function TechnicianFilterBar({ filters, onChange, onApply, hideSubArea }:
         {!hideSubArea && (
           <div className="space-y-1">
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-              Sub Area
+              {t("workOrder.filter.subArea")}
             </label>
             <SearchableSelect
               value={filters.branch_id ?? ""}
               options={branchOptions}
-              placeholder="All Sub Areas"
+              placeholder={t("workOrder.filter.allSubAreas")}
               onSelect={(val) =>
                 onChange({ ...filters, branch_id: val, page: 1 })
               }
@@ -125,7 +127,7 @@ export function TechnicianFilterBar({ filters, onChange, onApply, hideSubArea }:
             onClick={onApply}
             className="w-full bg-primary text-white font-semibold py-2 rounded text-sm flex items-center justify-center gap-2 hover:bg-blue-800 transition-colors shadow-sm"
           >
-            <Filter className="size-4" /> Apply Filters
+            <Filter className="size-4" /> {t("workOrder.filter.applyFilters")}
           </button>
         </div>
       </div>

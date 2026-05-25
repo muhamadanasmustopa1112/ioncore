@@ -5,6 +5,7 @@ import { Loader2, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 import { useCreateCrossAreaRequest } from "../../../api/cross-area";
 import { useTechnicianList } from "../../../api/dashboard";
 import { MultiSelect } from "@/components/ui/multi-select";
@@ -19,6 +20,7 @@ export function CrossAreaModal({
   workOrderNumber: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [lendingAreaId, setLendingAreaId] = useState("");
   const [lendingLeaderId, setLendingLeaderId] = useState("");
   const [lendingLeaderName, setLendingLeaderName] = useState("");
@@ -93,14 +95,14 @@ export function CrossAreaModal({
 
   return (
     <ModalShell
-      title="Cross-Area Request"
-      subtitle={`${workOrderNumber} · borrow technicians from another area`}
+      title={t("workOrder.detail.modals.crossArea.title")}
+      subtitle={`${workOrderNumber} · ${t("workOrder.detail.modals.crossArea.subtitle")}`}
       onClose={onClose}
       widthClass="max-w-lg"
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose}>
-            Cancel
+            {t("common.cancel") || "Cancel"}
           </Button>
           <Button
             variant="primary"
@@ -109,7 +111,7 @@ export function CrossAreaModal({
             disabled={!ready || mutation.isPending}
           >
             {mutation.isPending && <Loader2 className="size-3 animate-spin mr-2" />}
-            Send Request
+            {t("workOrder.detail.modals.crossArea.sendRequest")}
           </Button>
         </>
       }
@@ -118,41 +120,41 @@ export function CrossAreaModal({
         <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-100 dark:border-blue-900/30">
           <Network className="size-4 text-primary mt-0.5 shrink-0" />
           <p className="text-xs text-slate-600 dark:text-slate-400">
-            Use when no available technicians in current area. Lending team leader must approve.
+            {t("workOrder.detail.modals.crossArea.hint")}
           </p>
         </div>
         <div>
-          <FieldLabel required>Your Name</FieldLabel>
+          <FieldLabel required>{t("workOrder.detail.modals.crossArea.yourName")}</FieldLabel>
           <Input
             value={requestingLeaderName}
             onChange={(e) => setRequestingLeaderName(e.target.value)}
-            placeholder="Requesting leader name"
+            placeholder={t("workOrder.detail.modals.crossArea.requestingLeader")}
           />
         </div>
         <div>
-          <FieldLabel required>Candidate Technicians</FieldLabel>
+          <FieldLabel required>{t("workOrder.detail.modals.crossArea.candidateTechnicians")}</FieldLabel>
           <div className="w-full [&>button]:h-10">
             <MultiSelect
               value={selectedCandidates}
               onChange={handleCandidatesChange}
-              filteredText="Technicians"
-              placeholder="Select candidate technicians..."
+              filteredText={t("workOrder.title")}
+              placeholder={t("workOrder.detail.modals.crossArea.selectCandidates")}
               className="w-full text-xs font-semibold"
               options={filteredOptions}
               isLoading={isTechListLoading}
               onSearch={setSearchQuery}
               maxHeight="250px"
-              emptyText="No technicians found"
+              emptyText={t("workOrder.detail.modals.pairing.noMatching")}
             />
           </div>
-          <p className="text-[10px] text-slate-400 mt-1">{candidates.length} candidates selected</p>
+          <p className="text-[10px] text-slate-400 mt-1">{candidates.length} {t("workOrder.detail.modals.crossArea.candidatesSelected")}</p>
         </div>
         <div>
-          <FieldLabel>Note</FieldLabel>
+          <FieldLabel>{t("workOrder.detail.note")}</FieldLabel>
           <Textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Reason / urgency..."
+            placeholder={t("workOrder.detail.modals.crossArea.reasonUrgency")}
             className="min-h-[70px]"
           />
         </div>

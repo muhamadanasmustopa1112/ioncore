@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import {
@@ -21,6 +22,7 @@ import { WorkOrdersTable } from "./work-order-table/work-orders-table";
 import { TechnicianFilterBar } from "./technician-filter-bar";
 
 export function TechnicianDashboard() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -106,20 +108,20 @@ export function TechnicianDashboard() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={paths.dashboard.root.getHref()}>Home</Link>
+              <Link href={paths.dashboard.root.getHref()}>{t("common.home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Technician &amp; Field</BreadcrumbPage>
+            <BreadcrumbPage>{t("technician.title")}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
       <div>
-        <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">Work Order Monitoring</h1>
+        <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">{t("workOrder.title")}</h1>
         <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-          Real-time status tracking for field technician operations.
+          {t("workOrder.subtitle")}
         </p>
       </div>
 
@@ -147,7 +149,7 @@ export function TechnicianDashboard() {
           <Plus className="size-6" />
         </button>
         <span className="hidden sm:inline-block absolute right-14 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs py-1 px-3 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-          New Work Order
+          {t("workOrder.newWorkOrder")}
         </span>
       </div>
     </div>

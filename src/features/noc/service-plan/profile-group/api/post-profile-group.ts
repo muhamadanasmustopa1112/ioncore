@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
 
+import i18n from "@/i18n";
 import { services } from "@/config/constants";
 import { api } from "@/lib/api-client";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -41,7 +42,7 @@ export const useCreateProfileGroup = ({ mutationConfig }: UseCreateProfileGroupO
     ...restConfig,
     mutationFn: createProfileGroup,
     onSuccess: (data, variables, context) => {
-      toast.success("Profile Group created successfully");
+      toast.success(i18n.t("nocProfileGroup.toasts.createSuccess", "Profile Group created successfully"));
 
       queryClient.invalidateQueries({
         queryKey: PROFILE_GROUP_KEYS.all(),
@@ -52,7 +53,8 @@ export const useCreateProfileGroup = ({ mutationConfig }: UseCreateProfileGroupO
       onSuccess?.(data, variables, context);
     },
     onError: (error: any, variables, context) => {
-      const msg = error?.response?.data?.response?.message_en || error.message || "Failed to create profile group";
+      const backendMsg = i18n.language === "id" ? error?.response?.data?.response?.message_id : error?.response?.data?.response?.message_en;
+      const msg = backendMsg || error.message || i18n.t("nocProfileGroup.toasts.createError", "Failed to create profile group");
       toast.error(msg);
 
       mutationConfig?.onError?.(error, variables, context);

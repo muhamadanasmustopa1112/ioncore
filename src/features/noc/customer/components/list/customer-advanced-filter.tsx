@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/select";
 
 export function CustomerAdvancedFilter() {
+  const { t } = useTranslation();
   const [registerDate, setRegisterDate] = useState<Date>();
   const [dueDate, setDueDate] = useState<Date>();
   const [renewalDate, setRenewalDate] = useState<Date>();
@@ -30,41 +32,41 @@ export function CustomerAdvancedFilter() {
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 py-4 px-1">
       {/* Row 1 */}
       <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Service Status</Label>
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("nocCustomer.serviceStatus", "Service Status")}</Label>
         <Select>
           <SelectTrigger className="bg-background">
-            <SelectValue placeholder="ALL STATUS" />
+            <SelectValue placeholder={t("nocCustomer.allStatus", "ALL STATUS")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">ALL STATUS</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="suspended">Suspended</SelectItem>
-            <SelectItem value="disabled">Disabled</SelectItem>
+            <SelectItem value="all">{t("nocCustomer.allStatus", "ALL STATUS")}</SelectItem>
+            <SelectItem value="active">{t("nocCustomer.active", "Active")}</SelectItem>
+            <SelectItem value="suspended">{t("nocCustomer.suspended", "Suspended")}</SelectItem>
+            <SelectItem value="disabled">{t("nocCustomer.disabled", "Disabled")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Data Owner</Label>
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("nocCustomer.dataOwner", "Data Owner")}</Label>
         <Select>
           <SelectTrigger className="bg-background">
-            <SelectValue placeholder="- All Owner -" />
+            <SelectValue placeholder={t("nocCustomer.allOwner", "- All Owner -")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">- All Owner -</SelectItem>
-            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="all">{t("nocCustomer.allOwner", "- All Owner -")}</SelectItem>
+            <SelectItem value="admin">{t("nocCustomer.admin", "Admin")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Service Plan</Label>
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("nocCustomer.servicePlan", "Service Plan")}</Label>
         <Select>
           <SelectTrigger className="bg-background">
-            <SelectValue placeholder="- All Profile -" />
+            <SelectValue placeholder={t("nocCustomer.allProfile", "- All Profile -")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">- All Profile -</SelectItem>
+            <SelectItem value="all">{t("nocCustomer.allProfile", "- All Profile -")}</SelectItem>
             <SelectItem value="10mbps">10 Mbps</SelectItem>
             <SelectItem value="20mbps">20 Mbps</SelectItem>
             <SelectItem value="50mbps">50 Mbps</SelectItem>
@@ -73,27 +75,27 @@ export function CustomerAdvancedFilter() {
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name Prefix | Customer ID</Label>
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("nocCustomer.namePrefixIdPlaceholder", "Name Prefix | Customer ID")}</Label>
         <div className="relative">
-          <Input placeholder="Search by Name Prefix | Customer ID" className="bg-background" />
+          <Input placeholder={t("nocCustomer.namePrefixIdPlaceholder", "Search by Name Prefix | Customer ID")} className="bg-background" />
         </div>
       </div>
 
       {/* Row 2 */}
       <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">ODP | POP</Label>
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("nocCustomer.popOdp", "ODP | POP")}</Label>
         <Select>
           <SelectTrigger className="bg-background">
-            <SelectValue placeholder="- All ODP | POP -" />
+            <SelectValue placeholder={t("nocCustomer.allPopOdp", "- All ODP | POP -")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">- All ODP | POP -</SelectItem>
+            <SelectItem value="all">{t("nocCustomer.allPopOdp", "- All ODP | POP -")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Register Date</Label>
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("nocCustomer.registerDate", "Register Date")}</Label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -104,7 +106,7 @@ export function CustomerAdvancedFilter() {
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-              {registerDate ? format(registerDate, "PPP") : <span>Registration Date</span>}
+              {registerDate ? format(registerDate, "PPP") : <span>{t("nocCustomer.registrationDatePlaceholder", "Registration Date")}</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -119,7 +121,7 @@ export function CustomerAdvancedFilter() {
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Due Date</Label>
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("nocCustomer.dueDate", "Due Date")}</Label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -130,7 +132,7 @@ export function CustomerAdvancedFilter() {
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-              {dueDate ? format(dueDate, "PPP") : <span>Expiration Date</span>}
+              {dueDate ? format(dueDate, "PPP") : <span>{t("nocCustomer.expirationDatePlaceholder", "Expiration Date")}</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -145,7 +147,7 @@ export function CustomerAdvancedFilter() {
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Renewal</Label>
+        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("nocCustomer.renewal", "Renewal")}</Label>
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -156,7 +158,7 @@ export function CustomerAdvancedFilter() {
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-              {renewalDate ? format(renewalDate, "PPP") : <span>Renewal Date</span>}
+              {renewalDate ? format(renewalDate, "PPP") : <span>{t("nocCustomer.renewalDatePlaceholder", "Renewal Date")}</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -173,11 +175,11 @@ export function CustomerAdvancedFilter() {
       {/* Row 3 - Actions */}
       <div className="md:col-span-4 flex justify-end items-center gap-3 mt-2">
         <Button variant="ghost" className="text-muted-foreground font-semibold h-11 px-6">
-          Clear All
+          {t("nocCustomer.clearAll", "Clear All")}
         </Button>
         <Button variant="primary" className="font-bold h-11 px-10 shadow-md">
           <Search className="size-4" />
-          Search
+          {t("nocCustomer.search", "Search")}
         </Button>
       </div>
     </div>

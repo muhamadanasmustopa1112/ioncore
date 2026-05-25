@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Sparkles, X, AlertTriangle, User, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,9 +50,23 @@ function CandidateCard({
   selected: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   const lc = LEVEL_COLOR[candidate.level] ?? LEVEL_COLOR.junior;
   const initials = candidate.technician_name
     .split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+
+  const levelLower = candidate.level.toLowerCase();
+  const translatedLevel = levelLower === "senior" || levelLower === "lead"
+    ? t("workOrder.detail.modals.pairing.seniorLead")
+    : levelLower === "junior"
+      ? t("workOrder.detail.modals.pairing.junior")
+      : candidate.level;
+
+  const availabilityText = candidate.availability_status === "available"
+    ? t("workOrder.detail.modals.pairing.available")
+    : candidate.availability_status.replace(/_/g, " ");
+
+  const activeWoText = t(candidate.active_workload === 1 ? "workOrder.detail.modals.pairing.activeWo" : "workOrder.detail.modals.pairing.activeWos", { count: candidate.active_workload });
 
   return (
     <button
@@ -70,7 +85,7 @@ function CandidateCard({
           <div className="flex items-center gap-2 mb-1.5">
             <span className="text-sm font-semibold truncate">{candidate.technician_name}</span>
             <Badge variant={candidate.level === "senior" ? "primary" : "info"} appearance="light" size="sm" className="uppercase shrink-0">
-              {candidate.level}
+              {translatedLevel}
             </Badge>
             {candidate.availability_status && (
               <Badge
@@ -79,13 +94,13 @@ function CandidateCard({
                 size="sm"
                 className="shrink-0 uppercase"
               >
-                {candidate.availability_status}
+                {availabilityText}
               </Badge>
             )}
           </div>
           <ScoreBar score={candidate.match_score} />
           <div className="flex flex-wrap items-center gap-x-3 mt-1.5 text-[10px] text-slate-500">
-            <span className="font-medium">{candidate.active_workload} active WO{candidate.active_workload !== 1 ? "s" : ""}</span>
+            <span className="font-medium">{activeWoText}</span>
             {candidate.skills?.slice(0, 3).map((s) => (
               <span key={s} className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-500">{s}</span>
             ))}
@@ -118,6 +133,7 @@ export function PairingModal({
   teamLeaderId?: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const isReassign = currentTeam.length > 0;
   const [useAuto, setUseAuto] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>(currentTeam.map((t) => t.technician_id));
@@ -199,18 +215,6 @@ export function PairingModal({
       { id: workOrderId, data: { technician_ids: selectedIds, use_auto_pairing: useAuto, override_current: override, note: note || undefined } },
       {
         onSuccess: () => {
-          // createAuditLog({
-          //   action_type: "override",
-          //   module: "technician_pairing",
-          //   record_type: "work_order_assignment",
-          //   record_id: workOrderId,
-          //   record_identifier: workOrderNumber,
-          //   before: { team: beforeTeam } as unknown as Record<string, unknown>,
-          //   after: { team: afterTeam, use_auto: useAuto } as unknown as Record<string, unknown>,
-          //   change_reason: note || "Pairing update executed",
-          //   status: "success"
-          // }).catch(() => console.warn("⚠️ Silent failure recording audit trace for pairing event"));
-
           onClose();
         }
       }
@@ -235,7 +239,7 @@ export function PairingModal({
     active_workload: t.active_workload,
     skills: t.skills,
     match_score: t.level === "senior" ? 85 : t.level === "lead" ? 90 : 65,
-    reasons: [`Area: ${t.area_id?.replace("area-", "").toUpperCase() || "UNKNOWN"}`],
+    reasons: [`${t("workOrder.detail.area")}: ${t.area_id?.replace("area-", "").toUpperCase() || "UNKNOWN"}`],
     cross_area: t.cross_area_enabled ?? false,
     area_id: t.area_id,
     sub_area_id: t.sub_area_id,
@@ -254,20 +258,20 @@ export function PairingModal({
 
   return (
     <ModalShell
-      title={isReassign ? "Reassign Pairing" : "Assign Pairing"}
+      title={isReassign ? t("workOrder.detail.reassignPairing") : t("workOrder.detail.assignPairing")}
       subtitle={workOrderNumber}
       onClose={onClose}
       widthClass="max-w-2xl"
       footer={
         <>
-          <Button variant="outline" size="sm" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" size="sm" onClick={onClose}>{t("common.cancel")}</Button>
           <Button
             variant="primary"
             size="sm"
             onClick={handleSubmit}
           >
             {mutation.isPending && <Loader2 className="size-3 animate-spin mr-2" />}
-            {isReassign ? "Reassign" : "Assign"} {!useAuto && selectedIds.length > 0 ? `(${selectedIds.length})` : ""}
+            {isReassign ? t("workOrder.detail.reassignPairing") : t("workOrder.detail.assignPairing")} {!useAuto && selectedIds.length > 0 ? `(${selectedIds.length})` : ""}
           </Button>
         </>
       }
@@ -278,7 +282,7 @@ export function PairingModal({
             <AlertTriangle className="size-4 text-rose-500 shrink-0 mt-0.5" />
             <div className="flex-1">
               <p className="text-xs text-rose-600 dark:text-rose-300 mt-0.5 leading-relaxed">
-                Setiap tim pairing wajib berisi setidaknya 1 teknisi level **Senior** atau **Lead**. Tim saat ini hanya berisi level Junior dan pengiriman ditolak oleh sistem.
+                {t("workOrder.detail.modals.pairing.validationError")}
               </p>
             </div>
           </div>
@@ -297,8 +301,8 @@ export function PairingModal({
             className="mt-0.5"
           />
           <label htmlFor="use_auto" className="flex-1 cursor-pointer">
-            <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">Auto Pairing</p>
-            <p className="text-xs text-slate-500 mt-0.5">System picks best available Senior + Junior pair automatically.</p>
+            <p className="text-sm font-semibold text-blue-700 dark:text-blue-400">{t("workOrder.detail.modals.pairing.autoPairing")}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{t("workOrder.detail.modals.pairing.autoPairingSub")}</p>
           </label>
         </div>
 
@@ -307,7 +311,7 @@ export function PairingModal({
             {/* Selected chips */}
             {selectedIds.length > 0 && (
               <div>
-                <FieldLabel>Selected Team ({selectedIds.length})</FieldLabel>
+                <FieldLabel>{t("workOrder.detail.modals.pairing.selectedTeam", { count: selectedIds.length })}</FieldLabel>
                 <div className="flex flex-wrap gap-2">
                   {selectedIds.map((id) => {
                     const name = nameMap[id] ?? id;
@@ -336,7 +340,7 @@ export function PairingModal({
                     : "text-slate-400 hover:text-slate-600"
                     }`}
                 >
-                  Recommended
+                  {t("workOrder.detail.modals.pairing.recommended")}
                 </button>
                 <button
                   type="button"
@@ -346,7 +350,7 @@ export function PairingModal({
                     : "text-slate-400 hover:text-slate-600"
                     }`}
                 >
-                  All Technicians ({allTechnicians.length})
+                  {t("workOrder.detail.modals.pairing.allTechnicians", { count: allTechnicians.length })}
                 </button>
               </div>
 
@@ -359,7 +363,7 @@ export function PairingModal({
                   className="gap-1 px-3"
                 >
                   {recommendMutation.isPending ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
-                  Get Recommendation
+                  {t("workOrder.detail.modals.pairing.getRecommendation")}
                 </Button>
               )}
             </div>
@@ -370,7 +374,7 @@ export function PairingModal({
                 {!recommendation ? (
                   <div className="p-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-center">
                     <Sparkles className="size-6 text-primary/40 mx-auto mb-2" />
-                    <p className="text-xs text-slate-500">Click &quot;Get Recommendation&quot; to fetch optimal candidates using the matching algorithm.</p>
+                    <p className="text-xs text-slate-500">{t("workOrder.detail.modals.pairing.recommendationPlaceholder")}</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -378,7 +382,15 @@ export function PairingModal({
                       <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg">
                         <AlertTriangle className="size-4 text-amber-500 shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">Priority · {recommendation.priority}</p>
+                          <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide">
+                            {(() => {
+                              const priorityLower = recommendation.priority?.toLowerCase();
+                              const translatedPriority = t(`technician.priority.${priorityLower}`) && !t(`technician.priority.${priorityLower}`).startsWith("technician.priority")
+                                ? t(`technician.priority.${priorityLower}`)
+                                : recommendation.priority;
+                              return t("workOrder.detail.modals.pairing.priorityTitle", { priority: translatedPriority });
+                            })()}
+                          </p>
                           <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">{recommendation.priority_reason}</p>
                         </div>
                       </div>
@@ -386,7 +398,7 @@ export function PairingModal({
 
                     {seniorCandidates.length > 0 && (
                       <div>
-                        <FieldLabel>Senior / Lead</FieldLabel>
+                        <FieldLabel>{t("workOrder.detail.modals.pairing.seniorLead")}</FieldLabel>
                         <div className="space-y-2">
                           {seniorCandidates.map((c) => (
                             <CandidateCard key={c.technician_id} candidate={c} selected={selectedIds.includes(c.technician_id)} onToggle={() => toggleCandidate(c.technician_id)} />
@@ -397,7 +409,7 @@ export function PairingModal({
 
                     {juniorCandidates.length > 0 && (
                       <div>
-                        <FieldLabel>Junior</FieldLabel>
+                        <FieldLabel>{t("workOrder.detail.modals.pairing.junior")}</FieldLabel>
                         <div className="space-y-2">
                           {juniorCandidates.map((c) => (
                             <CandidateCard key={c.technician_id} candidate={c} selected={selectedIds.includes(c.technician_id)} onToggle={() => toggleCandidate(c.technician_id)} />
@@ -408,7 +420,7 @@ export function PairingModal({
 
                     <button onClick={handleRecommend} disabled={recommendMutation.isPending} className="text-[11px] text-slate-400 hover:text-primary transition-colors flex items-center gap-1">
                       {recommendMutation.isPending ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
-                      Refresh Recommendation
+                      {t("workOrder.detail.modals.pairing.refreshRecommendation")}
                     </button>
                   </div>
                 )}
@@ -421,11 +433,11 @@ export function PairingModal({
                 {isTechListLoading ? (
                   <div className="flex flex-col items-center justify-center py-8 gap-2">
                     <Loader2 className="size-6 animate-spin text-primary" />
-                    <p className="text-xs text-slate-400">Loading technician directory...</p>
+                    <p className="text-xs text-slate-400">{t("workOrder.detail.modals.pairing.directoryLoading")}</p>
                   </div>
                 ) : allTechnicians.length === 0 ? (
                   <div className="p-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-center text-xs text-slate-400">
-                    No technicians found in the directory.
+                    {t("workOrder.detail.modals.pairing.directoryEmpty")}
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -433,7 +445,7 @@ export function PairingModal({
                     <div className="relative">
                       <input
                         type="text"
-                        placeholder="Search technician by name, level, or area..."
+                        placeholder={t("workOrder.detail.modals.pairing.searchPlaceholder")}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs py-2.5 px-3 pl-9 text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
@@ -445,7 +457,7 @@ export function PairingModal({
                           onClick={() => setSearchTerm("")}
                           className="absolute right-3 top-3 text-slate-400 hover:text-foreground text-xs font-semibold"
                         >
-                          Clear
+                          {t("common.clear") || "Clear"}
                         </button>
                       )}
                     </div>
@@ -454,7 +466,7 @@ export function PairingModal({
                     <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden max-h-[250px] overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 scrollbar-thin">
                       {filteredAllCandidates.length === 0 ? (
                         <div className="p-6 text-center text-xs text-slate-400 italic">
-                          No matching technicians found.
+                          {t("workOrder.detail.modals.pairing.noMatching")}
                         </div>
                       ) : (
                         filteredAllCandidates.map((c) => {
@@ -466,6 +478,19 @@ export function PairingModal({
                             .map((w) => w[0])
                             .join("")
                             .toUpperCase();
+
+                          const levelLower = c.level.toLowerCase();
+                          const translatedLevel = levelLower === "senior" || levelLower === "lead"
+                            ? t("workOrder.detail.modals.pairing.seniorLead")
+                            : levelLower === "junior"
+                              ? t("workOrder.detail.modals.pairing.junior")
+                              : c.level;
+
+                          const availabilityText = c.availability_status === "available"
+                            ? t("workOrder.detail.modals.pairing.available")
+                            : c.availability_status.replace(/_/g, " ");
+
+                          const activeWoText = t(c.active_workload === 1 ? "workOrder.detail.modals.pairing.activeWo" : "workOrder.detail.modals.pairing.activeWos", { count: c.active_workload });
 
                           return (
                             <button
@@ -484,19 +509,19 @@ export function PairingModal({
                                   <div className="flex items-center gap-1.5 flex-wrap">
                                     <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{c.technician_name}</span>
                                     <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${lc.bg} ${lc.text}`}>
-                                      {c.level}
+                                      {translatedLevel}
                                     </span>
                                     {c.availability_status && (
                                       <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${c.availability_status === "available"
                                         ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400"
                                         : "bg-amber-100 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400"
                                         }`}>
-                                        {c.availability_status.replace(/_/g, " ")}
+                                        {availabilityText}
                                       </span>
                                     )}
                                   </div>
                                   <div className="text-[10px] text-slate-400 mt-0.5 font-medium">
-                                    Area: <span className="uppercase text-slate-500 font-bold">{c.area_id?.replace("area-", "") || "UNKNOWN"}</span> · {c.active_workload} active WO
+                                    {t("workOrder.detail.area")}: <span className="uppercase text-slate-500 font-bold">{c.area_id?.replace("area-", "") || "UNKNOWN"}</span> · {activeWoText}
                                   </div>
                                 </div>
                               </div>
@@ -520,15 +545,15 @@ export function PairingModal({
           <div className={`flex items-start gap-3 p-3 rounded-lg border ${override ? "bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800" : "border-slate-200 dark:border-slate-700"}`}>
             <input id="override" type="checkbox" checked={override} onChange={(e) => setOverride(e.target.checked)} className="mt-0.5" />
             <label htmlFor="override" className="flex-1 cursor-pointer">
-              <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">Override Current Assignment</p>
-              <p className="text-xs text-slate-500 mt-0.5">Replaces current team. Existing technicians will be notified.</p>
+              <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">{t("workOrder.detail.modals.pairing.overrideCurrent")}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{t("workOrder.detail.modals.pairing.overrideCurrentSub")}</p>
             </label>
           </div>
         )}
 
         <div>
-          <FieldLabel>Note</FieldLabel>
-          <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Optional context for the team..." className="min-h-[70px]" />
+          <FieldLabel>{t("workOrder.detail.note")}</FieldLabel>
+          <Textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("workOrder.detail.modals.pairing.optionalContext")} className="min-h-[70px]" />
         </div>
       </div>
     </ModalShell>

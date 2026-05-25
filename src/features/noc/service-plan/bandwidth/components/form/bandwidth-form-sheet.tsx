@@ -1,4 +1,7 @@
+"use client";
+
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -12,6 +15,7 @@ import { useBandwidthStore } from "../../store/bandwidth";
 import { BandwidthForm, BandwidthFormRef } from "./bandwidth-form";
 
 export function BandwidthFormSheet() {
+    const { t } = useTranslation();
     const { bandwidthSheetOpen, closeBandwidthFormSheet, form, selectedBandwidth } = useBandwidthStore();
     const formRef = useRef<BandwidthFormRef>(null);
 
@@ -29,7 +33,7 @@ export function BandwidthFormSheet() {
                 {/* Header */}
                 <SheetHeader className="border-border border-b px-5 py-4">
                     <SheetTitle className="font-medium text-xl text-primary">
-                        {isNewMode ? "Add New Bandwidth" : isEditMode ? "Edit Bandwidth" : "Bandwidth Details"}
+                        {isNewMode ? t("nocBandwidth.form.addNewBandwidth", "Add New Bandwidth") : isEditMode ? t("nocBandwidth.form.editBandwidth", "Edit Bandwidth") : t("nocBandwidth.form.bandwidthDetails", "Bandwidth Details")}
                     </SheetTitle>
                 </SheetHeader>
 
@@ -46,13 +50,13 @@ export function BandwidthFormSheet() {
                 {/* Footer */}
                 <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
                     <Button variant="ghost" onClick={closeBandwidthFormSheet}>
-                        Close
+                        {t("nocBandwidth.form.close", "Close")}
                     </Button>
                     <div className="flex-1" />
                     {!isDetailMode && (
                         <>
                             <Button variant="outline" onClick={closeBandwidthFormSheet} className="mr-3">
-                                Cancel
+                                {t("nocBandwidth.form.cancel", "Cancel")}
                             </Button>
                             <Button
                                 variant="primary"
@@ -60,7 +64,7 @@ export function BandwidthFormSheet() {
                                 className="font-semibold min-w-[120px]"
                                 disabled={formRef.current?.isPending}
                             >
-                                {formRef.current?.isPending ? "Processing..." : isNewMode ? "Create Bandwidth" : "Save Changes"}
+                                {formRef.current?.isPending ? t("nocBandwidth.form.processing", "Processing...") : isNewMode ? t("nocBandwidth.form.createBandwidth", "Create Bandwidth") : t("nocBandwidth.form.saveChanges", "Save Changes")}
                             </Button>
                         </>
                     )}

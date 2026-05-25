@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -29,7 +30,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { getPopColumns } from "./table/columns";
+import { usePopColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { PopResponse } from "../../types/pop";
 
@@ -48,12 +49,13 @@ export function OdpPopList({
   filter: any;
   setFilter: (state: any) => void;
 }) {
+  const { t } = useTranslation();
   const data = useMemo(() => popData?.data || [], [popData]);
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const columns = useMemo(() => getPopColumns(type), [type]);
+  const columns = usePopColumns(type);
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => (column.id || (column as any).accessorKey) as string),
   );
@@ -109,13 +111,13 @@ export function OdpPopList({
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 px-2">
                     <Filter className="size-3.5 mr-2" />
-                    <span className="text-xs">Filter</span>
+                    <span className="text-xs">{t("common.filter")}</span>
                   </Button>
                 </CollapsibleTrigger>
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-3.5 -translate-y-1/2" />
                   <Input
-                    placeholder="Search POP..."
+                    placeholder={t("odpPop.searchPlaceholder", "Search POP...")}
                     value={filter?.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
@@ -140,7 +142,7 @@ export function OdpPopList({
 
             <CollapsibleContent className="border-t border-border/50 mt-4 pt-4">
               <div className="p-4 text-center text-xs text-muted-foreground italic">
-                Advanced filtering options will be available soon.
+                {t("odpPop.advancedFilteringSoon", "Advanced filtering options will be available soon.")}
               </div>
             </CollapsibleContent>
           </Collapsible>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   RiMapPinLine,
   RiCheckboxCircleLine,
@@ -11,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PopResponse } from "../types/pop";
 
 export function OdpPopKpiCards({ data: popData }: { data?: PopResponse }) {
+  const { t } = useTranslation();
   const stats = useMemo(() => {
     const total = popData?.recordsTotal || 0;
     const pops = popData?.data || [];
@@ -26,36 +28,36 @@ export function OdpPopKpiCards({ data: popData }: { data?: PopResponse }) {
 
   const items = [
     {
-      label: "Total POP Infrastructure",
+      label: t("odpPop.totalPopInfrastructure", "Total POP Infrastructure"),
       value: stats.total,
       icon: RiMapPinLine,
       color: "text-primary",
       bgColor: "bg-primary/10",
-      description: "Active infrastructure points"
+      description: t("odpPop.activeInfrastructurePoints", "Active infrastructure points")
     },
     {
-      label: "Active POPs",
+      label: t("odpPop.activePops", "Active POPs"),
       value: stats.active,
       icon: RiCheckboxCircleLine,
       color: "text-emerald-600",
       bgColor: "bg-emerald-500/10",
-      description: "Verified and operational"
+      description: t("odpPop.verifiedOperational", "Verified and operational")
     },
     {
-      label: "Warning/Issues",
+      label: t("odpPop.warningIssues", "Warning/Issues"),
       value: stats.warning,
       icon: RiTimeLine,
       color: "text-amber-600",
       bgColor: "bg-amber-500/10",
-      description: "Awaiting inspection or issues"
+      description: t("odpPop.awaitingInspection", "Awaiting inspection or issues")
     },
     {
-      label: "Total ODP Nodes",
+      label: t("odpPop.totalOdpNodes", "Total ODP Nodes"),
       value: stats.totalOdp,
       icon: RiDatabase2Line,
       color: "text-purple-600",
       bgColor: "bg-purple-500/10",
-      description: "Summary of downstream nodes"
+      description: t("odpPop.downstreamNodes", "Summary of downstream nodes")
     }
   ];
 

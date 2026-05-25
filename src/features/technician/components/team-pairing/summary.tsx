@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckCircle2, Clock, RefreshCw, AlertTriangle, Activity, AlertCircle, Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import type { TeamLeaderDailySummary, DashboardAlert } from "../../types/technician-api";
 
@@ -53,6 +54,7 @@ export function TeamPairingSummary({
   summary: TeamLeaderDailySummary | undefined;
   alerts: DashboardAlert[] | undefined;
 }) {
+  const { t } = useTranslation();
   const completed = summary?.completed_today ?? 0;
   const pending = summary?.pending_today ?? 0;
   const rescheduled = summary?.rescheduled_today ?? 0;
@@ -65,25 +67,25 @@ export function TeamPairingSummary({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-5">
         <KpiTile
           icon={CheckCircle2}
-          label="Completed Today"
+          label={t("workOrder.teamPairing.completedToday")}
           value={completed}
-          subtext="Successful work orders closed"
+          subtext={t("workOrder.teamPairing.completedTodaySub")}
           gradientClass="from-emerald-500 to-teal-400"
           iconColorClass="text-emerald-500 dark:text-emerald-400"
         />
         <KpiTile
           icon={Clock}
-          label="Pending Today"
+          label={t("workOrder.teamPairing.pendingToday")}
           value={pending}
-          subtext="Active jobs waiting in queue"
+          subtext={t("workOrder.teamPairing.pendingTodaySub")}
           gradientClass="from-indigo-500 to-blue-500"
           iconColorClass="text-indigo-500 dark:text-indigo-400"
         />
         <KpiTile
           icon={RefreshCw}
-          label="Rescheduled"
+          label={t("workOrder.states.rescheduled")}
           value={rescheduled}
-          subtext="Postponed to later slots"
+          subtext={t("workOrder.teamPairing.rescheduledSub")}
           gradientClass="from-amber-500 to-orange-400"
           iconColorClass="text-amber-500 dark:text-amber-400"
         />
@@ -97,9 +99,9 @@ export function TeamPairingSummary({
               <Activity className="size-4.5 text-primary animate-pulse" />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Daily Performance Tracking</p>
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-300">{t("workOrder.teamPairing.dailyPerformance")}</p>
               <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
-                {completed} of {total} scheduled work orders fully completed today
+                {t("workOrder.teamPairing.performanceSub", { completed, total })}
               </p>
             </div>
           </div>
@@ -112,7 +114,7 @@ export function TeamPairingSummary({
               />
             </div>
             <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 shrink-0 bg-emerald-50 dark:bg-emerald-950/30 py-1 px-2 rounded-lg border border-emerald-100 dark:border-emerald-900/40">
-              {completionRate}% Done
+              {completionRate}% {t("workOrder.states.completed")}
             </span>
           </div>
         </CardContent>
@@ -124,7 +126,7 @@ export function TeamPairingSummary({
           <div className="flex items-center gap-1.5 px-1">
             <div className="size-2 rounded-full bg-rose-500 animate-ping shrink-0" />
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-              Critical Pairing Real-time Alerts ({alerts.length})
+              {t("workOrder.teamPairing.alertsTitle", { count: alerts.length })}
             </h4>
           </div>
           <div className={`grid grid-cols-1 gap-3.5 ${alerts.length > 10 ? "max-h-[380px] overflow-y-auto pr-1.5 scrollbar-thin" : ""
@@ -137,7 +139,7 @@ export function TeamPairingSummary({
                   iconBg: "bg-rose-100/80 dark:bg-rose-900/30",
                   iconColor: "text-rose-600 dark:text-rose-400",
                   icon: AlertCircle,
-                  badge: "Critical"
+                  badge: t("workOrder.teamPairing.severity.critical")
                 },
                 warning: {
                   bg: "bg-amber-50/75 dark:bg-amber-950/15 border-amber-100 dark:border-amber-950/40 text-amber-800 dark:text-amber-300",
@@ -145,7 +147,7 @@ export function TeamPairingSummary({
                   iconBg: "bg-amber-100/80 dark:bg-amber-900/30",
                   iconColor: "text-amber-600 dark:text-amber-400",
                   icon: AlertTriangle,
-                  badge: "Warning"
+                  badge: t("workOrder.teamPairing.severity.warning")
                 },
                 info: {
                   bg: "bg-blue-50/75 dark:bg-blue-950/15 border-blue-100 dark:border-blue-950/40 text-blue-800 dark:text-blue-300",
@@ -153,7 +155,7 @@ export function TeamPairingSummary({
                   iconBg: "bg-blue-100/80 dark:bg-blue-900/30",
                   iconColor: "text-blue-600 dark:text-blue-400",
                   icon: Info,
-                  badge: "Info"
+                  badge: t("workOrder.teamPairing.severity.info")
                 }
               } as const;
 

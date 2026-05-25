@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -12,6 +13,7 @@ import { useProfileGroupStore } from "../../store/profile-group";
 import { ProfileGroupForm, ProfileGroupFormRef } from "./profile-group-form";
 
 export function ProfileGroupFormSheet() {
+    const { t } = useTranslation();
     const { profileGroupSheetOpen, closeProfileGroupFormSheet, form } = useProfileGroupStore();
     const formRef = useRef<ProfileGroupFormRef>(null);
 
@@ -32,7 +34,7 @@ export function ProfileGroupFormSheet() {
                 {/* Header */}
                 <SheetHeader className="border-border border-b px-5 py-4 shrink-0 bg-card">
                     <SheetTitle className="font-medium text-xl">
-                        {isNewMode ? "Add New Profile Group" : isEditMode ? "Edit Profile Group" : "Profile Group Details"}
+                        {isNewMode ? t("nocProfileGroup.form.addNewProfileGroup", "Add New Profile Group") : isEditMode ? t("nocProfileGroup.form.editProfileGroup", "Edit Profile Group") : t("nocProfileGroup.form.profileGroupDetails", "Profile Group Details")}
                     </SheetTitle>
                 </SheetHeader>
 
@@ -48,11 +50,11 @@ export function ProfileGroupFormSheet() {
                 {/* Footer */}
                 <SheetFooter className="border-border flex-nowrap gap-2.5 border-t p-5 shrink-0 bg-card">
                     <Button variant="ghost" onClick={closeProfileGroupFormSheet} disabled={isPending}>
-                        Close
+                        {t("nocProfileGroup.form.close", "Close")}
                     </Button>
                     <div className="flex-1" />
                     <Button variant="outline" onClick={closeProfileGroupFormSheet} disabled={isPending} className="mr-3">
-                        Cancel
+                        {t("nocProfileGroup.form.cancel", "Cancel")}
                     </Button>
                     <Button
                         onClick={handleSave}
@@ -60,7 +62,7 @@ export function ProfileGroupFormSheet() {
                         className="font-semibold"
                         disabled={isDetailMode || isPending}
                     >
-                        {isPending ? (isNewMode ? "Creating..." : "Saving...") : isNewMode ? "Create Profile Group" : "Save Changes"}
+                        {isPending ? (isNewMode ? t("nocProfileGroup.form.creating", "Creating...") : t("nocProfileGroup.form.saving", "Saving...")) : isNewMode ? t("nocProfileGroup.form.createProfileGroup", "Create Profile Group") : t("nocProfileGroup.form.saveChanges", "Save Changes")}
                     </Button>
                 </SheetFooter>
             </SheetContent>

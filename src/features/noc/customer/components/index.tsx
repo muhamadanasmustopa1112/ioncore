@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { RiAddLine, RiDownloadLine, RiInformationLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,28 +17,30 @@ import { CustomerList } from "./list/customer-list";
 import { CustomerKpiCards } from "./customer-kpi-cards";
 
 export function CustomerListPage() {
+    const { t } = useTranslation();
+
     return (
         <div className="relative h-full w-full overflow-hidden px-6 py-3">
             <PageBreadcrumb
                 items={[
                     {
-                        title: "Network & Orchestration",
+                        title: t("menu.networkOrchestration", "Network & Orchestration"),
                         path: paths.dashboard.networkAndOrchestration.root.getHref(),
                     },
-                    { title: "ION Radius" },
-                    { title: "Customer" },
+                    { title: t("menu.ionRadius", "ION Radius") },
+                    { title: t("nocCustomer.title", "Customer") },
                 ]}
             />
             <Toolbar className="mt-5 items-center">
                 <ToolbarHeading>
-                    <ToolbarTitle className="text-2xl font-extrabold tracking-tight">Customer</ToolbarTitle>
+                    <ToolbarTitle className="text-2xl font-extrabold tracking-tight">{t("nocCustomer.title", "Customer")}</ToolbarTitle>
                     <div className="mt-2.5 flex items-center gap-2.5 text-sm font-medium">
                         <Badge variant="info" appearance="light" className="h-6 px-2.5 gap-1.5 border-none font-semibold">
                             <RiInformationLine className="size-3.5" />
-                            Refresh Table: 1m
+                            {t("nocCustomer.refreshTable", "Refresh Table: 1m")}
                         </Badge>
                         <span className="text-muted-foreground/60">•</span>
-                        <span className="text-muted-foreground font-normal">Ping check every 5 minutes by system</span>
+                        <span className="text-muted-foreground font-normal">{t("nocCustomer.pingCheckText", "Ping check every 5 minutes by system")}</span>
                     </div>
                 </ToolbarHeading>
                 <ToolbarActions>
@@ -48,7 +51,7 @@ export function CustomerListPage() {
                     >
                         <Link href={paths.dashboard.networkAndOrchestration.customer.create.getHref()}>
                             <RiAddLine className="size-5" />
-                            Add New Customer
+                            {t("nocCustomer.addNewCustomer", "Add New Customer")}
                         </Link>
                     </Button>
                 </ToolbarActions>

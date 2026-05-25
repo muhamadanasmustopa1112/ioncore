@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, History } from "lucide-react";
@@ -26,7 +27,28 @@ function humanize(s: string | undefined | null) {
 }
 
 function TechnicianRow({ tech }: { tech: TechnicianAvailabilityItem }) {
+  const { t } = useTranslation();
   const [showHistory, setShowHistory] = useState(false);
+
+  const levelLower = tech.level.toLowerCase();
+  const translatedLevel = levelLower === "senior" || levelLower === "lead"
+    ? t("workOrder.detail.modals.pairing.seniorLead")
+    : levelLower === "junior"
+      ? t("workOrder.detail.modals.pairing.junior")
+      : tech.level;
+
+  const availabilityText = tech.availability_status === "available"
+    ? t("workOrder.detail.modals.pairing.available")
+    : tech.availability_status === "on_leave"
+      ? t("workOrder.teamPairing.status.onLeave", "On Leave")
+      : tech.availability_status === "on_other_wo"
+        ? t("workOrder.teamPairing.status.onOtherWo", "On Other WO")
+        : tech.availability_status === "cross_area"
+          ? t("workOrder.detail.crossArea")
+          : (tech.availability_status as string).replace(/_/g, " ");
+
+  const activeWoText = t(tech.active_workload === 1 ? "workOrder.detail.modals.pairing.activeWo" : "workOrder.detail.modals.pairing.activeWos", { count: tech.active_workload }).replace(String(tech.active_workload), "").trim();
+
   return (
     <>
       <div className="flex items-center gap-3 p-3 border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
@@ -39,16 +61,16 @@ function TechnicianRow({ tech }: { tech: TechnicianAvailabilityItem }) {
           <p className="text-sm font-semibold truncate">{tech.technician_name}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <Badge variant={LEVEL_VARIANT[tech.level] ?? "primary"} appearance="light" size="sm" className="uppercase">
-              {tech.level}
+              {translatedLevel}
             </Badge>
             <Badge variant={AVAILABILITY_VARIANT[tech.availability_status || tech.availability_status] ?? "info"} appearance="light" size="sm" className="capitalize">
-              {humanize(tech.availability_status || tech.availability_status)}
+              {availabilityText}
             </Badge>
           </div>
         </div>
         <div className="text-right shrink-0">
           <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{tech.active_workload}</p>
-          <p className="text-[10px] text-slate-400">active WOs</p>
+          <p className="text-[10px] text-slate-400">{activeWoText}</p>
         </div>
         <button
           onClick={() => setShowHistory(true)}
@@ -70,6 +92,7 @@ function TechnicianRow({ tech }: { tech: TechnicianAvailabilityItem }) {
 }
 
 export function AvailabilityBoard({ technicians }: { technicians: TechnicianAvailabilityItem[] }) {
+  const { t } = useTranslation();
   const available = technicians.filter((t) => (t.availability_status || t.availability_status) === "available");
   const busy = technicians.filter((t) => (t.availability_status || t.availability_status) !== "available");
 
@@ -78,20 +101,20 @@ export function AvailabilityBoard({ technicians }: { technicians: TechnicianAvai
       <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b">
         <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
           <Users className="size-4 text-primary" />
-          Availability Board
-          <Badge variant="success" appearance="light" size="sm">{available.length} free</Badge>
-          <Badge variant="warning" appearance="light" size="sm">{busy.length} busy</Badge>
+          {t("workOrder.teamPairing.availabilityBoard")}
+          <Badge variant="success" appearance="light" size="sm">{t("workOrder.teamPairing.free", { count: available.length })}</Badge>
+          <Badge variant="warning" appearance="light" size="sm">{t("workOrder.teamPairing.busy", { count: busy.length })}</Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0 max-h-[480px] overflow-y-auto">
         {technicians.length === 0 ? (
-          <p className="text-sm text-slate-400 italic p-4">No technician data.</p>
+          <p className="text-sm text-slate-400 italic p-4">{t("workOrder.teamPairing.noTechnicianData")}</p>
         ) : (
           <>
             {available.length > 0 && (
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-4 py-2 bg-emerald-50/50 dark:bg-emerald-900/5 border-b border-slate-100 dark:border-slate-800">
-                  Available ({available.length})
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-4 py-2 bg-emerald-50/50 dark:bg-emerald-950/5 border-b border-slate-100 dark:border-slate-800">
+                  {t("workOrder.teamPairing.availableWithCount", { count: available.length })}
                 </p>
                 {available.map((t) => <TechnicianRow key={t.technician_id} tech={t} />)}
               </div>
@@ -99,7 +122,7 @@ export function AvailabilityBoard({ technicians }: { technicians: TechnicianAvai
             {busy.length > 0 && (
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-4 py-2 bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
-                  Unavailable ({busy.length})
+                  {t("workOrder.teamPairing.unavailableWithCount", { count: busy.length })}
                 </p>
                 {busy.map((t) => <TechnicianRow key={t.technician_id} tech={t} />)}
               </div>

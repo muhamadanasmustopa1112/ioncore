@@ -1,6 +1,7 @@
 "use client";
 
 import { useImperativeHandle, forwardRef, useMemo, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "next/navigation";
@@ -49,6 +50,7 @@ export type OltFormRef = {
 
 export const OltForm = forwardRef<OltFormRef, OltFormProps>(
   ({ onSuccess, oltId, readOnly = false, mode }, ref) => {
+    const { t } = useTranslation();
     const params = useParams();
     const { closeOltFormSheet, selectedOlt } = useOltStore();
 
@@ -176,7 +178,7 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
               <div className="space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                   <RiCpuLine className="size-4 text-blue-500" />
-                  <h3 className="text-sm font-semibold">General Information</h3>
+                  <h3 className="text-sm font-semibold">{t("odpPop.generalInformation")}</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
@@ -187,14 +189,14 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
                       <FormItem>
                         <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                           <RiHashtag className="size-3" />
-                          Code
+                          {t("common.code")}
                         </FormLabel>
                         <FormControl>
                           <div className="flex items-center rounded-lg border border-input bg-background pl-3 focus-within:ring-1 focus-within:ring-ring h-10 w-full">
                             <span className="text-sm font-semibold text-muted-foreground/60 select-none">OLT-</span>
                             <Input
                               className="flex-1 border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-1 text-sm uppercase h-full bg-transparent font-medium"
-                              placeholder="LOCATION"
+                              placeholder={t("odpPop.locationPlaceholder")}
                               value={middle}
                               onChange={(e) => handleMiddleChange(e.target.value)}
                               disabled={readOnly || isPending || mode !== "new"}
@@ -212,9 +214,9 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-medium text-muted-foreground">OLT Name</FormLabel>
+                        <FormLabel className="text-xs font-medium text-muted-foreground">{t("odpPop.oltName", "OLT Name")}</FormLabel>
                         <FormControl>
-                          <Input placeholder="JAKARTA PUSAT MAIN OLT" {...field} disabled={readOnly || isPending} />
+                          <Input placeholder={t("odpPop.oltNamePlaceholder", "JAKARTA PUSAT MAIN OLT")} {...field} disabled={readOnly || isPending} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -228,7 +230,7 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
                       <FormItem>
                         <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                           <RiStackLine className="size-3" />
-                          Total Ports
+                          {t("odpPop.totalPorts", "Total Ports")}
                         </FormLabel>
                         <Select
                           onValueChange={(val) => field.onChange(Number(val))}
@@ -237,7 +239,7 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select Ports" />
+                              <SelectValue placeholder={t("odpPop.selectPorts", "Select Ports")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -263,7 +265,7 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
                       <FormItem>
                         <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                           <RiInformationLine className="size-3" />
-                          Status
+                          {t("common.status")}
                         </FormLabel>
                         <Select
                           onValueChange={field.onChange}
@@ -272,7 +274,7 @@ export const OltForm = forwardRef<OltFormRef, OltFormProps>(
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select Status" />
+                              <SelectValue placeholder={t("odpPop.selectStatus")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>

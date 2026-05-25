@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { RiShieldCheckLine, RiAddLine } from "@remixicon/react";
 import { Label } from "@/components/ui/label";
 import {
@@ -20,6 +21,7 @@ import { useBandwidths } from "@/features/noc/service-plan/bandwidth/api/get-ban
 import { BandwidthItem } from "@/features/noc/service-plan/bandwidth/types/bandwidth";
 
 export function ServiceConfigurationSection() {
+    const { t } = useTranslation();
     const { formData, updateFormData, form } = useCustomerStore();
     const isDetailMode = form === "details";
 
@@ -47,16 +49,16 @@ export function ServiceConfigurationSection() {
             <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
                     <RiShieldCheckLine className="size-4 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">Service Configuration</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wide">{t("nocCustomer.form.config.title", "Service Configuration")}</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
                     <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                            <Label htmlFor="server_name" className="text-xs font-medium text-muted-foreground">Server Name</Label>
+                            <Label htmlFor="server_name" className="text-xs font-medium text-muted-foreground">{t("nocCustomer.form.config.serverName", "Server Name")}</Label>
                             <Button variant="ghost" size="sm" className="h-6 text-primary hover:text-primary gap-1 px-1">
                                 <RiAddLine className="size-3" />
-                                Add Server
+                                {t("nocCustomer.form.config.addServer", "Add Server")}
                             </Button>
                         </div>
                         <Select
@@ -65,7 +67,7 @@ export function ServiceConfigurationSection() {
                             disabled={isDetailMode || isLoadingRouters}
                         >
                             <SelectTrigger id="server_name">
-                                <SelectValue placeholder={isLoadingRouters ? "Loading..." : "Select Server"} />
+                                <SelectValue placeholder={isLoadingRouters ? t("common.loading", "Loading...") : t("nocCustomer.form.config.selectServer", "Select Server")} />
                             </SelectTrigger>
                             <SelectContent>
                                 {routers.map((router: RouterItem) => (
@@ -78,7 +80,7 @@ export function ServiceConfigurationSection() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="auth_status" className="text-xs font-medium text-muted-foreground">Auth Status</Label>
+                        <Label htmlFor="auth_status" className="text-xs font-medium text-muted-foreground">{t("nocCustomer.form.config.authStatus", "Auth Status")}</Label>
                         <Select
                             value={formData.auth_status || "Enabled-Users"}
                             onValueChange={(v) => handleChange("auth_status", v)}
@@ -95,7 +97,7 @@ export function ServiceConfigurationSection() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="payment_type" className="text-xs font-medium text-muted-foreground">Payment Type</Label>
+                        <Label htmlFor="payment_type" className="text-xs font-medium text-muted-foreground">{t("nocCustomer.form.config.paymentType", "Payment Type")}</Label>
                         <Select value={formData.payment_type || "POSTPAID"} onValueChange={(v) => handleChange("payment_type", v)} disabled={isDetailMode}>
                             <SelectTrigger id="payment_type">
                                 <SelectValue />
@@ -108,7 +110,7 @@ export function ServiceConfigurationSection() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="bind_mac" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Bind MAC</Label>
+                        <Label htmlFor="bind_mac" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.config.bindMac", "Bind MAC")}</Label>
                         <Select
                             value={formData.bind_mac || "NO"}
                             onValueChange={(v) => handleChange("bind_mac", v)}
@@ -125,10 +127,10 @@ export function ServiceConfigurationSection() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="servicetype" className="text-xs font-medium text-muted-foreground">Service Type</Label>
+                        <Label htmlFor="servicetype" className="text-xs font-medium text-muted-foreground">{t("nocCustomer.form.config.serviceType", "Service Type")}</Label>
                         <Select value={formData.servicetype || "Framed-User"} onValueChange={(v) => handleChange("servicetype", v)} disabled={isDetailMode}>
                             <SelectTrigger id="servicetype">
-                                <SelectValue placeholder="Select Service Type" />
+                                <SelectValue placeholder={t("nocCustomer.form.config.selectServiceType", "Select Service Type")} />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="Framed-User">Framed-User</SelectItem>
@@ -139,7 +141,7 @@ export function ServiceConfigurationSection() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="nasporttype" className="text-xs font-medium text-muted-foreground">NAS Port Type</Label>
+                        <Label htmlFor="nasporttype" className="text-xs font-medium text-muted-foreground">{t("nocCustomer.form.config.nasPortType", "NAS Port Type")}</Label>
                         <Select value={formData.nasporttype || "Ethernet"} onValueChange={(v) => handleChange("nasporttype", v)} disabled={isDetailMode}>
                             <SelectTrigger id="nasporttype">
                                 <SelectValue />
@@ -152,14 +154,14 @@ export function ServiceConfigurationSection() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="plan_name" className="text-xs font-medium text-muted-foreground">Plan Name</Label>
+                        <Label htmlFor="plan_name" className="text-xs font-medium text-muted-foreground">{t("nocCustomer.form.config.planName", "Plan Name")}</Label>
                         <Select
                             value={formData.plan_name || ""}
                             onValueChange={(v) => handleChange("plan_name", v)}
                             disabled={isDetailMode || isLoadingProfiles}
                         >
                             <SelectTrigger id="plan_name">
-                                <SelectValue placeholder={isLoadingProfiles ? "Loading..." : "Select Plan"} />
+                                <SelectValue placeholder={isLoadingProfiles ? t("common.loading", "Loading...") : t("nocCustomer.form.config.selectPlan", "Select Plan")} />
                             </SelectTrigger>
                             <SelectContent>
                                 {profiles.map((profile: PPPProfileItem) => (
@@ -172,14 +174,14 @@ export function ServiceConfigurationSection() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="bandwidth" className="text-xs font-medium text-muted-foreground">Bandwidth Code</Label>
+                        <Label htmlFor="bandwidth" className="text-xs font-medium text-muted-foreground">{t("nocCustomer.form.config.bandwidthCode", "Bandwidth Code")}</Label>
                         <Select
                             value={formData.bandwidth || ""}
                             onValueChange={(v) => handleChange("bandwidth", v)}
                             disabled={isDetailMode || isLoadingBandwidths}
                         >
                             <SelectTrigger id="bandwidth">
-                                <SelectValue placeholder={isLoadingBandwidths ? "Loading..." : "Select Bandwidth"} />
+                                <SelectValue placeholder={isLoadingBandwidths ? t("common.loading", "Loading...") : t("nocCustomer.form.config.selectBandwidth", "Select Bandwidth")} />
                             </SelectTrigger>
                             <SelectContent>
                                 {bandwidths.map((bw: BandwidthItem) => (

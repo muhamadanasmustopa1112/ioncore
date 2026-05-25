@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -18,7 +19,7 @@ import { Loader2, MapPin } from "lucide-react";
 import Link from "next/link";
 import { paths } from "@/config/paths";
 import type { WorkOrderDashboardItem, Metadata, WorkOrderState, WorkOrderType } from "../../types/technician-api";
-import { columns as columnsDef } from "./columns";
+import { useWorkOrderColumns, STATE_STYLES, STATE_I18N_KEY, TYPE_I18N_KEY } from "./columns";
 import { DataTableToolbar } from "./data-table-toolbar";
 
 interface Props {
@@ -31,40 +32,6 @@ interface Props {
   onPerPageChange?: (limit: number) => void;
 }
 
-// Duplicate styles for mobile view fallback
-const STATE_STYLES: Record<WorkOrderState, string> = {
-  created: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800/50 dark:text-slate-300 dark:border-slate-700",
-  unassigned: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-900",
-  assigned: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-900",
-  accepted: "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-400 dark:border-indigo-900",
-  dispatched: "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/30 dark:text-violet-400 dark:border-violet-900",
-  in_progress: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-900",
-  pending_noc_verification: "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-900",
-  completed: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-900",
-  rescheduled: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-900",
-  cancelled: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-900",
-};
-
-const STATE_LABELS: Record<WorkOrderState, string> = {
-  created: "Created",
-  unassigned: "Unassigned",
-  assigned: "Assigned",
-  accepted: "Accepted",
-  dispatched: "Dispatched",
-  in_progress: "In Progress",
-  pending_noc_verification: "Pending NOC",
-  completed: "Completed",
-  rescheduled: "Rescheduled",
-  cancelled: "Cancelled",
-};
-
-const TYPE_LABELS: Record<WorkOrderType, string> = {
-  new_installation_broadband: "New Install (Broadband)",
-  new_installation_enterprise: "New Install (Enterprise)",
-  maintenance: "Maintenance",
-  termination: "Termination",
-};
-
 export function WorkOrdersTable({
   items,
   metadata,
@@ -74,8 +41,9 @@ export function WorkOrdersTable({
   perPage,
   onPerPageChange,
 }: Props) {
+  const { t } = useTranslation();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const columns = useMemo(() => columnsDef, []);
+  const columns = useWorkOrderColumns();
   const totalData = metadata?.count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalData / perPage));
 
@@ -129,12 +97,12 @@ export function WorkOrdersTable({
           </div>
         ) : items.length === 0 ? (
           <div className="px-4 py-12 text-center text-slate-400 text-sm">
-            No work orders found.
+            {t("workOrder.noWorkOrders")}
           </div>
         ) : (
           items.map((order) => {
             const engineers = order.assigned_team
-              ?.map((t) => t.technician_name)
+              ?.map((tm) => tm.technician_name)
               .filter(Boolean)
               .join(" & ") || "—";
 
@@ -149,14 +117,14 @@ export function WorkOrdersTable({
                     {order.number}
                   </span>
                   <span className={`shrink-0 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${STATE_STYLES[order.state] ?? ""}`}>
-                    {STATE_LABELS[order.state] ?? order.state}
+                    {t(STATE_I18N_KEY[order.state]) ?? order.state}
                   </span>
                 </div>
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 line-clamp-1">
                   {order.title || "—"}
                 </p>
                 <p className="text-xs text-slate-500 mb-2">
-                  {TYPE_LABELS[order.type] ?? order.type}
+                  {t(TYPE_I18N_KEY[order.type]) ?? order.type}
                 </p>
                 <div className="flex items-start gap-1.5 text-xs text-slate-600 dark:text-slate-400">
                   <MapPin className="text-blue-500 size-3.5 shrink-0 mt-0.5" />

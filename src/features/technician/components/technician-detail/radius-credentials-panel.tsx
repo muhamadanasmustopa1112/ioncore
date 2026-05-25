@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { useGenerateWorkOrderRadiusCredential, useRevealWorkOrderRadiusCredential } from "../../api/radius-credential.queries";
 import type { GenerateRadiusCredentialResponse, WorkOrderRadiusCredential } from "../../types/radius-credential-api";
+import { useTranslation } from "react-i18next";
 import { fmtDate, humanize } from "./shared";
 
 function isMaskedValue(value: string | undefined | null): boolean {
@@ -34,8 +35,9 @@ function CredentialField({
   value: string;
   mono?: boolean;
 }) {
+  const { t } = useTranslation();
   const { copyToClipboard, isCopied } = useCopyToClipboard({
-    onCopy: () => toast.success(`${label} copied`),
+    onCopy: () => toast.success(`${label} ${t("workOrder.detail.copied").toLowerCase()}`),
   });
 
   return (
@@ -55,13 +57,13 @@ function CredentialField({
           size="sm"
           className="shrink-0 h-8 px-2"
           onClick={() => copyToClipboard(value)}
-          title={`Copy ${label}`}
+          title={`${t("workOrder.detail.copied")} ${label}`}
         >
           <Copy className="size-3.5" />
           <span className="sr-only">Copy {label}</span>
         </Button>
         {isCopied && (
-          <span className="text-[9px] text-emerald-600 font-bold uppercase shrink-0">Copied</span>
+          <span className="text-[9px] text-emerald-600 font-bold uppercase shrink-0">{t("workOrder.detail.copied")}</span>
         )}
       </div>
     </div>
@@ -79,6 +81,7 @@ export function RadiusCredentialsPanel({
   maskedPassword?: string | null;
   variant?: "default" | "compact";
 }) {
+  const { t } = useTranslation();
   const [revealed, setRevealed] = useState<WorkOrderRadiusCredential | GenerateRadiusCredentialResponse | null>(null);
   const [hidden, setHidden] = useState(true);
 
@@ -87,7 +90,8 @@ export function RadiusCredentialsPanel({
       onSuccess: (data) => {
         setRevealed(data);
         setHidden(false);
-        toast.success("RADIUS credentials revealed");
+        const isIndo = t("workOrder.detail.no").toLowerCase() === "tidak";
+        toast.success(t("workOrder.detail.radiusCredentials") + " " + (isIndo ? "ditampilkan" : "revealed"));
       },
     },
   });
@@ -141,87 +145,24 @@ export function RadiusCredentialsPanel({
         <div className="min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-1.5">
             <ShieldAlert className="size-3.5 text-amber-500 shrink-0" />
-            RADIUS credentials
+            {t("workOrder.detail.radiusCredentials")}
           </p>
           <p className="text-[9px] text-slate-400 mt-0.5">
-            Reveal loads plaintext from the network service. Access is logged.
+            {t("workOrder.detail.revealLoadsPlaintext")}
           </p>
         </div>
-        {/* <div className="flex flex-wrap gap-2 shrink-0">
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            className="gap-1.5 text-[10px] font-bold uppercase tracking-wider"
-            onClick={() => handleGenerate(false)}
-            disabled={generateMutation.isPending}
-          >
-            {generateMutation.isPending ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <Zap className="size-3.5" />
-            )}
-            Generate
-          </Button>
-          {revealed && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-1.5 text-[10px] font-bold uppercase tracking-wider"
-              onClick={() => handleGenerate(true)}
-              disabled={generateMutation.isPending}
-            >
-              {generateMutation.isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <RefreshCw className="size-3.5" />
-              )}
-              Regenerate
-            </Button>
-          )}
-          {!showPlaintext && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-1.5 text-[10px] font-bold uppercase tracking-wider"
-              onClick={handleReveal}
-              disabled={revealMutation.isPending}
-            >
-              {revealMutation.isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <Eye className="size-3.5" />
-              )}
-              {revealed ? "Show credentials" : "Reveal credentials"}
-            </Button>
-          )}
-          {showPlaintext && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="gap-1.5 text-[10px] font-bold uppercase tracking-wider"
-              onClick={handleHide}
-            >
-              <EyeOff className="size-3.5" />
-              Hide
-            </Button>
-          )}
-        </div> */}
       </div>
 
       {!showPlaintext && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
           <div>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Username</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{t("workOrder.detail.username")}</p>
             <p className="text-sm font-mono font-semibold mt-1 text-slate-500">
               {isMaskedValue(maskedUsername) ? "••••••••" : (maskedUsername ?? "—")}
             </p>
           </div>
           <div>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Password</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{t("workOrder.detail.password")}</p>
             <p className="text-sm font-mono font-semibold mt-1 text-slate-500">
               {isMaskedValue(maskedPassword) ? "••••••••" : (maskedPassword ?? "—")}
             </p>
@@ -249,8 +190,8 @@ export function RadiusCredentialsPanel({
             )}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <CredentialField label="Username" value={displayUsername ?? "—"} mono />
-            <CredentialField label="Password" value={displayPassword ?? "—"} mono />
+            <CredentialField label={t("workOrder.detail.username")} value={displayUsername ?? "—"} mono />
+            <CredentialField label={t("workOrder.detail.password")} value={displayPassword ?? "—"} mono />
           </div>
         </div>
       )}

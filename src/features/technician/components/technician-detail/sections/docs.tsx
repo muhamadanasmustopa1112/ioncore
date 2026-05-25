@@ -5,6 +5,7 @@ import { Loader2, FileText, CheckCircle2, ClipboardCheck, AlertTriangle, PenTool
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 import { useUpdateWorkOrder } from "../../../api/actions";
 import { useCustomerHistory, useSiteHistory } from "../../../api/analytics";
 import type { WorkOrderDetailResponse } from "../../../types/technician-api";
@@ -25,6 +26,7 @@ import {
 import { HistoryList } from "../shared-widgets";
 
 export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
+  const { t } = useTranslation();
   const [notes, setNotes] = useState(wo.description ?? "");
   const [showCustomerHistory, setShowCustomerHistory] = useState(false);
   const [showSiteHistory, setShowSiteHistory] = useState(false);
@@ -38,11 +40,11 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
   return (
     <>
       {/* Description / Notes */}
-      <SectionCard icon={FileText} title="Description / Notes">
+      <SectionCard icon={FileText} title={t("workOrder.detail.descriptionNotes")}>
         <Textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Add installation notes, site difficulties, equipment IDs..."
+          placeholder={t("workOrder.detail.notesPlaceholder")}
           className="min-h-[120px] bg-slate-50 dark:bg-slate-800 border-none resize-none"
         />
         <div className="mt-4 flex justify-end">
@@ -54,13 +56,13 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
             className="font-bold uppercase tracking-widest text-[10px]"
           >
             {updateMutation.isPending && <Loader2 className="size-3 animate-spin mr-2" />}
-            Save Notes
+            {t("workOrder.detail.saveNotes")}
           </Button>
         </div>
       </SectionCard>
 
       {/* Proof of Work — READ-ONLY (execution handled by mobile app) */}
-      <SectionCard icon={CheckCircle2} title="Proof of Work">
+      <SectionCard icon={CheckCircle2} title={t("workOrder.detail.proofOfWork")}>
         {proofItems.length > 0 ? (
           <div className="space-y-2">
             {proofItems.map((item) => (
@@ -83,19 +85,19 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
                     {item.category && <span className="capitalize">{humanize(item.category)}</span>}
                     {item.field_type && <span>· {humanize(item.field_type)}</span>}
                     {item.completed_at && <span>· {fmtDate(item.completed_at)}</span>}
-                    {item.evidence && item.evidence.length > 0 && <span>· {item.evidence.length} evidence</span>}
+                    {item.evidence && item.evidence.length > 0 && <span>· {item.evidence.length} {t("workOrder.detail.evidence")}</span>}
                   </div>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <Empty>No proof-of-work items yet.</Empty>
+          <Empty>{t("workOrder.detail.noProofOfWork")}</Empty>
         )}
       </SectionCard>
 
       {/* Resolution Log */}
-      <SectionCard icon={ClipboardCheck} title="Resolution Log">
+      <SectionCard icon={ClipboardCheck} title={t("workOrder.detail.resolutionLog")}>
         {wo.resolution_log && wo.resolution_log.length > 0 ? (
           <div className="space-y-3">
             {wo.resolution_log.map((r) => (
@@ -118,18 +120,18 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
                       size="sm"
                       className="uppercase shrink-0 text-[9px] text-slate-400 border-dashed bg-transparent border-slate-200 dark:border-slate-700"
                     >
-                      Pending
+                      {t("workOrder.detail.pending")}
                     </Badge>
                   )}
                 </div>
                 {r.category && <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-2">{humanize(r.category)}</p>}
-                {r.finding && <p className="text-xs text-slate-600 dark:text-slate-400 mb-1"><span className="font-semibold text-slate-500">Finding:</span> {r.finding}</p>}
-                {r.action_taken && <p className="text-xs text-slate-600 dark:text-slate-400"><span className="font-semibold text-slate-500">Action:</span> {r.action_taken}</p>}
+                {r.finding && <p className="text-xs text-slate-600 dark:text-slate-400 mb-1"><span className="font-semibold text-slate-500">{t("workOrder.detail.finding")}:</span> {r.finding}</p>}
+                {r.action_taken && <p className="text-xs text-slate-600 dark:text-slate-400"><span className="font-semibold text-slate-500">{t("workOrder.detail.action")}:</span> {r.action_taken}</p>}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                   {hasResolutionTimeSpent(r.time_spent_minutes, r.time_spent_hh_mm_ss) && (
                     <div>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Work duration</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">Time spent on this item</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{t("workOrder.detail.workDuration")}</p>
+                      <p className="text-[9px] text-slate-400 mt-0.5">{t("workOrder.detail.timeSpentOnItem")}</p>
                       <p className="text-sm font-semibold mt-1">
                         {formatResolutionTimeSpent(r.time_spent_minutes, r.time_spent_hh_mm_ss) ?? "—"}
                       </p>
@@ -137,8 +139,8 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
                   )}
                   {r.timestamp && (
                     <div>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Resolved at</p>
-                      <p className="text-[9px] text-slate-400 mt-0.5">When this entry was logged</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{t("workOrder.detail.resolvedAt")}</p>
+                      <p className="text-[9px] text-slate-400 mt-0.5">{t("workOrder.detail.whenEntryLogged")}</p>
                       <p className="text-sm font-semibold mt-1">{fmtDate(r.timestamp)}</p>
                     </div>
                   )}
@@ -147,49 +149,49 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
             ))}
           </div>
         ) : (
-          <Empty>No resolution log items yet.</Empty>
+          <Empty>{t("workOrder.detail.noResolutionLog")}</Empty>
         )}
       </SectionCard>
 
       {/* Issue Report */}
       {wo.issue_report && (
-        <SectionCard icon={AlertTriangle} title="Issue Report" headerClass="border-l-4 border-rose-500">
+        <SectionCard icon={AlertTriangle} title={t("workOrder.detail.issueReport")} headerClass="border-l-4 border-rose-500">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label="Reason Code" value={humanize(wo.issue_report.reason_code)} />
-            <Field label="Reported At" value={fmtDate(wo.issue_report.reported_at)} />
-            <Field label="Reported By" value={`${wo.issue_report.reported_by ?? "—"} (${wo.issue_report.reported_role ?? "—"})`} />
-            <Field label="Reschedule Requested" value={wo.issue_report.request_reschedule ? "Yes" : "No"} />
-            {wo.issue_report.note && <Field label="Note" value={wo.issue_report.note} className="sm:col-span-2" />}
+            <Field label={t("workOrder.detail.reasonCode")} value={humanize(wo.issue_report.reason_code)} />
+            <Field label={t("workOrder.detail.reportedAt")} value={fmtDate(wo.issue_report.reported_at)} />
+            <Field label={t("workOrder.detail.reportedBy")} value={`${wo.issue_report.reported_by ?? "—"} (${wo.issue_report.reported_role ?? "—"})`} />
+            <Field label={t("workOrder.detail.rescheduleRequested")} value={wo.issue_report.request_reschedule ? t("workOrder.detail.yes") : t("workOrder.detail.no")} />
+            {wo.issue_report.note && <Field label={t("workOrder.detail.note")} value={wo.issue_report.note} className="sm:col-span-2" />}
           </div>
         </SectionCard>
       )}
 
       {/* Customer Sign-Off */}
       {wo.customer_sign_off && (
-        <SectionCard icon={PenTool} title="Customer Sign-Off">
+        <SectionCard icon={PenTool} title={t("workOrder.detail.customerSignOff")}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400">Status</p>
+              <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400">{t("workOrder.detail.status")}</p>
               <Badge variant={SIGNOFF_VARIANT[wo.customer_sign_off.status] ?? "info"} appearance="light" size="sm" className="uppercase mt-1">
                 {humanize(wo.customer_sign_off.status)}
               </Badge>
             </div>
-            <Field label="Mode" value={humanize(wo.customer_sign_off.mode)} />
-            <Field label="Signed By" value={wo.customer_sign_off.signed_by} />
-            <Field label="Requested At" value={fmtDate(wo.customer_sign_off.requested_at)} />
-            <Field label="Confirmed At" value={fmtDate(wo.customer_sign_off.confirmed_at)} />
+            <Field label={t("workOrder.detail.mode")} value={humanize(wo.customer_sign_off.mode)} />
+            <Field label={t("workOrder.detail.signedBy")} value={wo.customer_sign_off.signed_by} />
+            <Field label={t("workOrder.detail.requestedAt")} value={fmtDate(wo.customer_sign_off.requested_at)} />
+            <Field label={t("workOrder.detail.confirmedAt")} value={fmtDate(wo.customer_sign_off.confirmed_at)} />
           </div>
           {wo.customer_sign_off.signature_url && (
             <div className="mt-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Signature</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">{t("workOrder.detail.signature")}</p>
               <img src={wo.customer_sign_off.signature_url} alt="Signature" className="max-h-32 border border-slate-200 dark:border-slate-700 rounded bg-white" />
             </div>
           )}
           {wo.customer_sign_off.remote_otp && (
             <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-lg text-xs">
-              <p className="font-semibold text-blue-700 dark:text-blue-400 mb-1">Remote OTP</p>
+              <p className="font-semibold text-blue-700 dark:text-blue-400 mb-1">{t("workOrder.detail.remoteOtp")}</p>
               <p className="text-slate-600 dark:text-slate-400">
-                Status: <span className="font-semibold">{humanize(wo.customer_sign_off.remote_otp.status)}</span>
+                {t("workOrder.detail.status")}: <span className="font-semibold">{humanize(wo.customer_sign_off.remote_otp.status)}</span>
                 {wo.customer_sign_off.remote_otp.delivery_channel && ` · ${wo.customer_sign_off.remote_otp.delivery_channel}`}
               </p>
             </div>
@@ -199,12 +201,12 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* BAST Submission */}
       {wo.bast && (
-        <SectionCard icon={ClipboardCheck} title="BAST Submission" headerClass="border-l-4 border-emerald-500">
+        <SectionCard icon={ClipboardCheck} title={t("workOrder.detail.bastSubmission")} headerClass="border-l-4 border-emerald-500">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            <Field label="Submitted At" value={fmtDate(wo.bast.submitted_at)} />
-            <Field label="Submitted By" value={`${wo.bast.submitted_by ?? "—"} (${wo.bast.submitted_role ?? "—"})`} />
-            {wo.bast.work_duration && <Field label="Work duration" value={wo.bast.work_duration} />}
-            {wo.bast.summary && <Field label="Summary" value={wo.bast.summary} className="sm:col-span-2" />}
+            <Field label={t("workOrder.detail.submittedAt")} value={fmtDate(wo.bast.submitted_at)} />
+            <Field label={t("workOrder.detail.submittedBy")} value={`${wo.bast.submitted_by ?? "—"} (${wo.bast.submitted_role ?? "—"})`} />
+            {wo.bast.work_duration && <Field label={t("workOrder.detail.workDuration")} value={wo.bast.work_duration} />}
+            {wo.bast.summary && <Field label={t("workOrder.detail.summary")} value={wo.bast.summary} className="sm:col-span-2" />}
           </div>
           {wo.bast.flags && wo.bast.flags.length > 0 && (
             <div className="flex flex-wrap gap-2">
@@ -218,28 +220,28 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* NOC Approval */}
       {wo.noc_approval && (
-        <SectionCard icon={ClipboardCheck} title="NOC Approval">
+        <SectionCard icon={ClipboardCheck} title={t("workOrder.detail.nocApproval")}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400">Decision</p>
+              <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400">{t("workOrder.detail.decision")}</p>
               <Badge variant={NOC_DECISION_VARIANT[wo.noc_approval.decision] ?? "info"} appearance="light" size="sm" className="uppercase mt-1">
                 {humanize(wo.noc_approval.decision)}
               </Badge>
             </div>
-            <Field label="Reviewed At" value={fmtDate(wo.noc_approval.reviewed_at)} />
-            <Field label="Reviewed By" value={`${wo.noc_approval.reviewed_by ?? "—"} (${wo.noc_approval.reviewed_role ?? "—"})`} />
-            <Field label="Re-dispatch Required" value={wo.noc_approval.requires_redispatch ? "Yes" : "No"} />
-            {wo.noc_approval.note && <Field label="Note" value={wo.noc_approval.note} className="sm:col-span-2" />}
+            <Field label={t("workOrder.detail.reviewedAt")} value={fmtDate(wo.noc_approval.reviewed_at)} />
+            <Field label={t("workOrder.detail.reviewedBy")} value={`${wo.noc_approval.reviewed_by ?? "—"} (${wo.noc_approval.reviewed_role ?? "—"})`} />
+            <Field label={t("workOrder.detail.reDispatchRequired")} value={wo.noc_approval.requires_redispatch ? t("workOrder.detail.yes") : t("workOrder.detail.no")} />
+            {wo.noc_approval.note && <Field label={t("workOrder.detail.note")} value={wo.noc_approval.note} className="sm:col-span-2" />}
           </div>
           <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400 mb-1">Billing Trigger</p>
+              <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400 mb-1">{t("workOrder.detail.billingTrigger")}</p>
               <Badge variant={BILLING_VARIANT[wo.noc_approval.billing_trigger] ?? "info"} appearance="light" size="sm" className="uppercase">
                 {humanize(wo.noc_approval.billing_trigger)}
               </Badge>
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400 mb-1">Radius Trigger</p>
+              <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400 mb-1">{t("workOrder.detail.radiusTrigger")}</p>
               <Badge variant={BILLING_VARIANT[wo.noc_approval.radius_trigger] ?? "info"} appearance="light" size="sm" className="uppercase">
                 {humanize(wo.noc_approval.radius_trigger)}
               </Badge>
@@ -250,7 +252,7 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* NOC Approval Log */}
       {wo.noc_approval_log && wo.noc_approval_log.length > 0 && (
-        <SectionCard icon={History} title="NOC Approval Log">
+        <SectionCard icon={History} title={t("workOrder.detail.nocApprovalLog")}>
           <ol className="space-y-3">
             {wo.noc_approval_log.map((entry) => (
               <li key={entry.id} className="flex items-start justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
@@ -269,12 +271,12 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* Device Disposition */}
       {wo.device_disposition && (
-        <SectionCard icon={Package} title="Device Disposition">
+        <SectionCard icon={Package} title={t("workOrder.detail.deviceDisposition")}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Field label="Type" value={humanize(wo.device_disposition.type)} />
-            <Field label="Device Serial" value={wo.device_disposition.device_serial} />
-            <Field label="Decided By" value={wo.device_disposition.decided_by} />
-            <Field label="Decided At" value={fmtDate(wo.device_disposition.decided_at)} />
+            <Field label={t("workOrder.detail.type")} value={humanize(wo.device_disposition.type)} />
+            <Field label={t("workOrder.detail.deviceSerial")} value={wo.device_disposition.device_serial} />
+            <Field label={t("workOrder.detail.decidedBy")} value={wo.device_disposition.decided_by} />
+            <Field label={t("workOrder.detail.decidedAt")} value={fmtDate(wo.device_disposition.decided_at)} />
           </div>
         </SectionCard>
       )}
@@ -283,16 +285,16 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
       {wo.customer_id && (
         <SectionCard
           icon={History}
-          title="Customer WO History"
+          title={t("workOrder.detail.customerWoHistory")}
           rightSlot={
             <Button variant="outline" size="sm" onClick={() => setShowCustomerHistory(true)} className="text-[10px] h-6 px-2">
-              View Full History
+              {t("workOrder.detail.viewFullHistory")}
             </Button>
           }
         >
           {wo.previous_customer_jobs && wo.previous_customer_jobs.length > 0
             ? <HistoryList items={wo.previous_customer_jobs} />
-            : <Empty><>No previous jobs for this customer.</></Empty>}
+            : <Empty>{t("workOrder.detail.noPreviousJobsCustomer")}</Empty>}
         </SectionCard>
       )}
 
@@ -300,23 +302,23 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
       {wo.site_id && (
         <SectionCard
           icon={History}
-          title="Site WO History"
+          title={t("workOrder.detail.siteWoHistory")}
           rightSlot={
             <Button variant="outline" size="sm" onClick={() => setShowSiteHistory(true)} className="text-[10px] h-6 px-2">
-              View Full History
+              {t("workOrder.detail.viewFullHistory")}
             </Button>
           }
         >
           {wo.previous_site_jobs && wo.previous_site_jobs.length > 0
             ? <HistoryList items={wo.previous_site_jobs} />
-            : <Empty><>No previous jobs for this site.</></Empty>}
+            : <Empty>{t("workOrder.detail.noPreviousJobsSite")}</Empty>}
         </SectionCard>
       )}
 
       {/* Customer History Modal */}
       {showCustomerHistory && (
         <WOHistoryModal
-          title="Customer WO History"
+          title={t("workOrder.detail.customerWoHistory")}
           subtitle={wo.customer_name}
           items={customerHistory.data?.items ?? []}
           total={customerHistory.data?.total}
@@ -330,7 +332,7 @@ export function DocsSections({ wo }: { wo: WorkOrderDetailResponse }) {
       {/* Site History Modal */}
       {showSiteHistory && (
         <WOHistoryModal
-          title="Site WO History"
+          title={t("workOrder.detail.siteWoHistory")}
           subtitle={wo.site_name}
           items={siteHistory.data?.items ?? []}
           total={siteHistory.data?.total}

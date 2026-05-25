@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -13,6 +14,7 @@ import { ProvisionDeviceForm } from "./provision-device-form";
 import { useProvisioningStore } from "../../store/provisioning";
 
 export function ProvisionDeviceFormSheet() {
+  const { t } = useTranslation();
   const { isProvisioningSheetOpen, closeProvisioningSheet } = useProvisioningStore();
 
   return (
@@ -21,7 +23,7 @@ export function ProvisionDeviceFormSheet() {
         {/* Header */}
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl text-foreground">
-            Provision New Device
+            {t("odpPop.provisionNewDevice", "Provision New Device")}
           </SheetTitle>
         </SheetHeader>
 
@@ -33,11 +35,11 @@ export function ProvisionDeviceFormSheet() {
         {/* Footer */}
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
           <Button variant="ghost" onClick={closeProvisioningSheet}>
-            Close
+            {t("common.close")}
           </Button>
           <div className="flex-1" />
           <Button variant="outline" onClick={closeProvisioningSheet} className="mr-3">
-            Cancel
+            {t("common.cancel")}
           </Button>
           <Button
             type="submit"
@@ -45,7 +47,7 @@ export function ProvisionDeviceFormSheet() {
             variant="primary"
             className="font-semibold"
           >
-            Provision Device
+            {t("odpPop.provisionDevice")}
           </Button>
         </SheetFooter>
       </SheetContent>

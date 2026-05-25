@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
+import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
 import { MapPin, User } from "lucide-react";
 import type { TechnicianLatestLocation } from "../../types/technician-api";
@@ -68,6 +69,7 @@ function RecenterMap({ center, bounds }: { center: [number, number]; bounds?: L.
 }
 
 export default function TechnicianDispatchMap({ technicians = [] }: { technicians?: TechnicianLatestLocation[] }) {
+  const { t } = useTranslation();
   const defaultCenter: [number, number] = [-6.2088, 106.8456];
 
   const validPoints = technicians.filter(
@@ -90,27 +92,27 @@ export default function TechnicianDispatchMap({ technicians = [] }: { technician
       {/* Legend Overlay */}
       <div className="absolute top-3 right-3 z-[1000] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-2.5 rounded-lg shadow-sm border border-slate-200/60 dark:border-slate-700/50 text-[10px] space-y-1.5 font-bold w-32">
         <div className="flex items-center justify-between text-slate-400 uppercase tracking-wider border-b pb-1 mb-1 dark:border-slate-700">
-          <span>Tech Status</span>
+          <span>{t("workOrder.teamPairing.techStatus")}</span>
           <User className="size-3" />
         </div>
         <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <div className="size-2 rounded-full bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.5)]" />
-          Available
+          {t("workOrder.detail.modals.pairing.available")}
         </div>
         <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <div className="size-2 rounded-full bg-blue-500 shadow-[0_0_5px_rgba(59,130,246,0.5)]" />
-          On Work Order
+          {t("workOrder.teamPairing.onWorkOrder")}
         </div>
         <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <div className="size-2 rounded-full bg-amber-500 shadow-[0_0_5px_rgba(245,158,11,0.5)]" />
-          Cross Area
+          {t("workOrder.detail.crossArea")}
         </div>
       </div>
 
       {/* Label indicator */}
       <div className="absolute bottom-3 left-3 z-[1000] bg-primary/90 backdrop-blur-md text-white px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
         <div className="size-1.5 bg-white rounded-full animate-pulse" />
-        Technician Live Locations
+        {t("workOrder.teamPairing.liveLocations")}
       </div>
 
       <div className="h-[320px] sm:h-[380px] w-full z-0 bg-slate-50 dark:bg-slate-900 relative">
@@ -130,6 +132,18 @@ export default function TechnicianDispatchMap({ technicians = [] }: { technician
 
           {validPoints.map((tech) => {
             const markerPos: [number, number] = [tech.latest_location!.latitude, tech.latest_location!.longitude];
+
+            const availabilityText = tech.availability_status === "available"
+              ? t("workOrder.detail.modals.pairing.available")
+              : tech.availability_status === "on_leave"
+                ? t("workOrder.teamPairing.status.onLeave", "On Leave")
+                : tech.availability_status === "on_other_wo"
+                  ? t("workOrder.teamPairing.status.onOtherWo", "On Other WO")
+                  : tech.availability_status === "cross_area"
+                    ? t("workOrder.detail.crossArea")
+                    : (tech.availability_status as string).replace(/_/g, " ");
+
+            const activeWoText = t(tech.active_workload === 1 ? "workOrder.detail.modals.pairing.activeWo" : "workOrder.detail.modals.pairing.activeWos", { count: tech.active_workload });
 
             return (
               <Marker
@@ -158,7 +172,7 @@ export default function TechnicianDispatchMap({ technicians = [] }: { technician
 
                     <div className="flex flex-col gap-1.5 border-t pt-2 border-slate-100 dark:border-slate-800">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500 font-medium">Status</span>
+                        <span className="text-slate-500 font-medium">{t("common.status")}</span>
                         <span
                           className="font-bold uppercase text-[9px] px-1.5 py-0.5 rounded-full"
                           style={{
@@ -166,19 +180,19 @@ export default function TechnicianDispatchMap({ technicians = [] }: { technician
                             color: getStatusColor(tech.availability_status)
                           }}
                         >
-                          {tech.availability_status.replace(/_/g, " ")}
+                          {availabilityText}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500 font-medium">Active Workload</span>
+                        <span className="text-slate-500 font-medium">{t("workOrder.teamPairing.activeWorkload")}</span>
                         <span className="font-bold text-slate-800 dark:text-slate-200">
-                          {tech.active_workload} WO
+                          {activeWoText}
                         </span>
                       </div>
 
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500 font-medium">Last Sync</span>
+                        <span className="text-slate-500 font-medium">{t("workOrder.teamPairing.lastSync")}</span>
                         <span className="text-slate-600 dark:text-slate-400">
                           {tech.latest_location?.recorded_at 
                             ? new Date(tech.latest_location.recorded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })

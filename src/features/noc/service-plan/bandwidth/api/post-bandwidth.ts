@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { toast } from "sonner";
 
+import i18n from "@/i18n";
 import { services } from "@/config/constants";
 import { api } from "@/lib/api-client";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -56,7 +57,7 @@ export const useCreateBandwidth = ({
     mutationFn: createBandwidth,
     onSuccess: (data, variables, context) => {
       // Automatic success feedback
-      toast.success("Bandwidth created successfully");
+      toast.success(i18n.t("nocBandwidth.toasts.createSuccess", "Bandwidth created successfully"));
 
       // Robust table refresh logic
       queryClient.invalidateQueries({
@@ -70,7 +71,8 @@ export const useCreateBandwidth = ({
     },
     onError: (error: any, variables, context) => {
       // Automatic error feedback
-      const msg = error?.response?.data?.response?.message_en || error.message || "Failed to create bandwidth";
+      const backendMsg = i18n.language === "id" ? error?.response?.data?.response?.message_id : error?.response?.data?.response?.message_en;
+      const msg = backendMsg || error.message || i18n.t("nocBandwidth.toasts.createError", "Failed to create bandwidth");
       toast.error(msg);
       
       // Execute custom callback if provided

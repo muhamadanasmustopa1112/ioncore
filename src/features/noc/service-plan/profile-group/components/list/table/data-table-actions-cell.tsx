@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RiDeleteBin7Line, RiEditLine, RiEyeLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -24,6 +25,7 @@ import { useProfileGroupStore } from "../../../store/profile-group";
 import { useDeleteProfileGroup } from "../../../api/delete-profile-group";
 
 export function ActionsCell({ row }: { row: Row<ProfileGroupItem> }) {
+  const { t } = useTranslation();
   const { openProfileGroupFormSheet, setSelectedProfileGroup } = useProfileGroupStore();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -54,11 +56,11 @@ export function ActionsCell({ row }: { row: Row<ProfileGroupItem> }) {
         <DropdownMenuContent side="bottom" align="end">
           <DropdownMenuItem className="cursor-pointer" onClick={handleDetailClick}>
             <RiEyeLine />
-            Detail
+            {t("nocProfileGroup.actions.detail", "Detail")}
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" onClick={handleEditClick}>
             <RiEditLine />
-            Edit
+            {t("nocProfileGroup.actions.edit", "Edit")}
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
@@ -66,7 +68,7 @@ export function ActionsCell({ row }: { row: Row<ProfileGroupItem> }) {
             onClick={() => setShowDeleteDialog(true)}
           >
             <RiDeleteBin7Line />
-            Delete
+            {t("nocProfileGroup.actions.delete", "Delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -74,14 +76,16 @@ export function ActionsCell({ row }: { row: Row<ProfileGroupItem> }) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("nocProfileGroup.actions.deleteConfirmTitle", "Are you absolutely sure?")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              profile group <span className="font-bold text-foreground">"{row.original.name}"</span> and remove it from our servers.
+              {t("nocProfileGroup.actions.deleteConfirmDesc", {
+                defaultValue: `This action cannot be undone. This will permanently delete the profile group "${row.original.name}" and remove it from our servers.`,
+                name: row.original.name,
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>{t("nocProfileGroup.actions.cancel", "Cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={(e) => {
@@ -90,7 +94,7 @@ export function ActionsCell({ row }: { row: Row<ProfileGroupItem> }) {
               }}
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete Profile Group"}
+              {isDeleting ? t("nocProfileGroup.actions.deleting", "Deleting...") : t("nocProfileGroup.actions.delete", "Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import { PopDetailHeader } from "./components/pop-detail-header";
@@ -16,6 +17,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
 
 export function PopDetailView() {
+    const { t } = useTranslation();
     const router = useRouter();
     const params = useParams();
     const popId = params?.id as string;
@@ -63,7 +65,7 @@ export function PopDetailView() {
         return (
             <div className="flex flex-col items-center justify-center h-full gap-4">
                 <RiLoader2Line className="w-8 h-8 animate-spin text-primary" />
-                <p className="text-muted-foreground font-medium">Loading POP data...</p>
+                <p className="text-muted-foreground font-medium">{t("odpPop.loadingPop", "Loading POP data...")}</p>
             </div>
         );
     }
@@ -71,10 +73,10 @@ export function PopDetailView() {
     if (!selectedPop) {
         return (
             <div className="flex flex-col items-center justify-center h-full gap-4">
-                <p className="text-muted-foreground font-medium text-lg">No POP data selected.</p>
+                <p className="text-muted-foreground font-medium text-lg">{t("odpPop.noPopSelected", "No POP data selected.")}</p>
                 <Button onClick={() => router.push(paths.dashboard.networkAndOrchestration.odpPop.manage.path)}>
                     <RiArrowLeftLine className="mr-2" />
-                    Back to List
+                    {t("odpPop.backToList", "Back to List")}
                 </Button>
             </div>
         );
@@ -85,14 +87,14 @@ export function PopDetailView() {
             <PageBreadcrumb
                 items={[
                     {
-                        title: "Network & Orchestration",
+                        title: t("menu.headings.networkOrchestration"),
                         path: paths.dashboard.networkAndOrchestration.root.getHref(),
                     },
                     {
-                        title: "ODP & POP",
+                        title: t("menu.odpPop"),
                         path: "/noc/odp-pop/manage"
                     },
-                    { title: `POP Detail (${selectedPop.name})` },
+                    { title: `${t("odpPop.popDetail", "POP Detail")} (${selectedPop.name})` },
                 ]}
                 className="mb-0"
             />

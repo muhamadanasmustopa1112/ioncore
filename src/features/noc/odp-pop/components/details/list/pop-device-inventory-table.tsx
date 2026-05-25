@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -34,6 +35,7 @@ import { RiServerLine } from "@remixicon/react";
 import { columns } from "./table/columns_device_inventory";
 
 export function PopDeviceInventoryTable({ popId }: { popId: string }) {
+  const { t } = useTranslation();
   const data = useMemo(() => DUMMY_DEVICE_DETAILS[popId] || [], [popId]);
 
   const [filter, setFilter] = useQueryStates({
@@ -89,7 +91,7 @@ export function PopDeviceInventoryTable({ popId }: { popId: string }) {
           <div className="flex items-center justify-between mb-4">
             <CardHeading className="flex items-center gap-3 text-lg font-black tracking-tight text-foreground uppercase">
               <RiServerLine className="size-5 text-primary" />
-              Device Inventory
+              {t("odpPop.deviceInventory", "Device Inventory")}
             </CardHeading>
           </div>
 
@@ -104,7 +106,7 @@ export function PopDeviceInventoryTable({ popId }: { popId: string }) {
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-3.5 -translate-y-1/2" />
                   <Input
-                    placeholder="Search Device..."
+                    placeholder={t("odpPop.searchDevice", "Search Device...")}
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
@@ -130,7 +132,7 @@ export function PopDeviceInventoryTable({ popId }: { popId: string }) {
                   trigger={
                     <Button variant="outline" size="sm" className="h-8">
                       <Settings2 className="size-3" />
-                      View
+                      {t("common.chartLabels.view")}
                     </Button>
                   }
                 />
@@ -139,7 +141,7 @@ export function PopDeviceInventoryTable({ popId }: { popId: string }) {
 
             <CollapsibleContent className="border-t border-border/50 mt-4 pt-4">
               <div className="text-xs text-muted-foreground italic">
-                Advanced filters coming soon...
+                {t("odpPop.advancedFiltersSoon", "Advanced filters coming soon...")}
               </div>
             </CollapsibleContent>
           </Collapsible>
