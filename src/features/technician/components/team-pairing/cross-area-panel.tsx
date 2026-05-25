@@ -2,6 +2,7 @@
 
 import { format } from "date-fns";
 import { Loader2, Network } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,8 +21,18 @@ function fmtDate(s: string | null | undefined) {
 }
 
 function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
+  const { t } = useTranslation();
   const approveMutation = useApproveCrossAreaRequest();
   const rejectMutation = useRejectCrossAreaRequest();
+
+  const translatedStatus = req.status === "approved"
+    ? t("workOrder.detail.modals.noc.approved")
+    : req.status === "rejected"
+      ? t("workOrder.detail.modals.noc.rejected")
+      : t("technician.status.pending");
+
+  const candidatesCount = Array.isArray(req.candidate_technician_ids) ? req.candidate_technician_ids.length : 0;
+  const candidatesText = t("workOrder.teamPairing.candidates", { count: candidatesCount });
 
   return (
     <div className="p-4 border-b border-slate-100 dark:border-slate-800 last:border-0">
@@ -29,17 +40,15 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
         <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <Badge variant={STATUS_VARIANT[req.status]} appearance="light" size="sm" className="uppercase">
-              {req.status}
+              {translatedStatus}
             </Badge>
             <span className="text-[10px] text-slate-400">{fmtDate(req.created_at)}</span>
           </div>
           <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-            {req.requesting_leader_name}
-            <span className="text-slate-400 font-normal"> requests to </span>
-            {req.lending_leader_name}
+            {t("workOrder.teamPairing.requestsTo", { requesting: req.requesting_leader_name, lending: req.lending_leader_name })}
           </p>
           <p className="text-[10px] text-slate-400 mt-0.5">
-            Area {req.lending_area_id} → {req.requesting_area_id} · {Array.isArray(req.candidate_technician_ids) ? req.candidate_technician_ids.length : 0} candidates
+            {t("workOrder.detail.area")} {req.lending_area_id} → {req.requesting_area_id} · {candidatesText}
           </p>
           {req.note && <p className="text-xs text-slate-500 mt-1 italic">{req.note}</p>}
         </div>
@@ -64,7 +73,7 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
             className="text-[10px] uppercase font-bold"
           >
             {approveMutation.isPending && <Loader2 className="size-3 animate-spin mr-1" />}
-            Approve All
+            {t("workOrder.teamPairing.approveAll")}
           </Button>
           <Button
             variant="destructive"
@@ -73,14 +82,14 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
             onClick={() =>
               rejectMutation.mutate({
                 id: req.id,
-                data: { note: "Rejected by team leader" },
+                data: { note: t("workOrder.teamPairing.rejectedByLeader") },
               })
             }
             disabled={approveMutation.isPending || rejectMutation.isPending}
             className="text-[10px] uppercase font-bold"
           >
             {rejectMutation.isPending && <Loader2 className="size-3 animate-spin mr-1" />}
-            Reject
+            {t("workOrder.teamPairing.reject")}
           </Button>
         </div>
       )}
@@ -89,6 +98,7 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
 }
 
 export function CrossAreaPanel({ requests }: { requests: CrossAreaRequest[] }) {
+  const { t } = useTranslation();
   const pending = requests.filter((r) => r.status === "pending");
 
   return (
@@ -96,15 +106,15 @@ export function CrossAreaPanel({ requests }: { requests: CrossAreaRequest[] }) {
       <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b">
         <CardTitle className="text-sm font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
           <Network className="size-4 text-primary" />
-          Cross-Area Requests
+          {t("workOrder.teamPairing.crossAreaRequests")}
           {pending.length > 0 && (
-            <Badge variant="warning" appearance="light" size="sm">{pending.length} pending</Badge>
+            <Badge variant="warning" appearance="light" size="sm">{t("workOrder.teamPairing.pendingCount", { count: pending.length })}</Badge>
           )}
         </CardTitle>
       </CardHeader>
       <CardContent className={`p-0 ${requests.length > 5 ? "max-h-[380px] overflow-y-auto scrollbar-thin" : ""}`}>
         {requests.length === 0 ? (
-          <p className="text-sm text-slate-400 italic p-4">No cross-area requests.</p>
+          <p className="text-sm text-slate-400 italic p-4">{t("workOrder.teamPairing.noCrossAreaRequests")}</p>
         ) : (
           requests.map((req) => <CrossAreaRow key={req.id} req={req} />)
         )}

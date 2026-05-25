@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import i18n from "@/i18n";
 import { services } from "@/config/constants";
 import { api } from "@/lib/api-client";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -26,14 +27,15 @@ export const useDeleteBandwidth = ({
     ...restConfig,
     mutationFn: deleteBandwidth,
     onSuccess: (data, variables, context) => {
-      toast.success("Bandwidth deleted successfully");
+      toast.success(i18n.t("nocBandwidth.toasts.deleteSuccess", "Bandwidth deleted successfully"));
       queryClient.invalidateQueries({
         queryKey: BANDWIDTH_KEYS.all(),
       });
       onSuccess?.(data, variables, context);
     },
     onError: (error: any, variables, context) => {
-      const msg = error?.response?.data?.response?.message_en || error.message || "Failed to delete bandwidth";
+      const backendMsg = i18n.language === "id" ? error?.response?.data?.response?.message_id : error?.response?.data?.response?.message_en;
+      const msg = backendMsg || error.message || i18n.t("nocBandwidth.toasts.deleteError", "Failed to delete bandwidth");
       toast.error(msg);
       mutationConfig?.onError?.(error, variables, context);
     },

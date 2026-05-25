@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { RiAddLine, RiDownloadLine, RiInformationLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import { useProfileGroupStore } from "../store/profile-group";
 import { ProfileGroupFormSheet } from "./form/profile-group-form-sheet";
 
 export function ProfileGroupListPage() {
+    const { t } = useTranslation();
     const { openProfileGroupFormSheet } = useProfileGroupStore();
 
     return (
@@ -23,30 +25,30 @@ export function ProfileGroupListPage() {
             <PageBreadcrumb
                 items={[
                     {
-                        title: "Network & Orchestration",
+                        title: t("menu.networkOrchestration", "Network & Orchestration"),
                         path: paths.dashboard.networkAndOrchestration.root.getHref(),
                     },
-                    { title: "ION Radius" },
-                    { title: "Service Plan" },
-                    { title: "Profile Group" },
+                    { title: t("menu.ionRadius", "ION Radius") },
+                    { title: t("menu.servicePlan", "Service Plan") },
+                    { title: t("nocProfileGroup.title", "Profile Group") },
                 ]}
             />
             <Toolbar className="mt-5 items-center">
                 <ToolbarHeading>
-                    <ToolbarTitle className="text-2xl font-extrabold tracking-tight">Profile Group</ToolbarTitle>
+                    <ToolbarTitle className="text-2xl font-extrabold tracking-tight">{t("nocProfileGroup.title", "Profile Group")}</ToolbarTitle>
                     <div className="mt-2.5 flex items-center gap-2.5 text-sm font-medium">
                         <Badge variant="info" appearance="light" className="h-6 px-2.5 gap-1.5 border-none font-semibold">
                             <RiInformationLine className="size-3.5" />
-                            Refresh Table: 1m
+                            {t("nocCustomer.refreshTable", "Refresh Table: 1m")}
                         </Badge>
                         <span className="text-muted-foreground/60">•</span>
-                        <span className="text-muted-foreground font-normal">Ping check every 5 minutes by system</span>
+                        <span className="text-muted-foreground font-normal">{t("nocCustomer.pingCheckText", "Ping check every 5 minutes by system")}</span>
                     </div>
                 </ToolbarHeading>
                 <ToolbarActions>
                     <Button variant="outline" className="h-11 px-5 font-semibold shadow-xs">
                         <RiDownloadLine className="size-4" />
-                        Export Data
+                        {t("nocProfileGroup.exportData", "Export Data")}
                     </Button>
                     <Button
                         variant="primary"
@@ -54,7 +56,7 @@ export function ProfileGroupListPage() {
                         onClick={() => openProfileGroupFormSheet("new")}
                     >
                         <RiAddLine className="size-5" />
-                        Add New Profile Group
+                        {t("nocProfileGroup.addNewProfileGroup", "Add New Profile Group")}
                     </Button>
                 </ToolbarActions>
             </Toolbar>

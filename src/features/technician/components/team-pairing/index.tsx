@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Loader2, AlertCircle, RefreshCw, Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { useTeamLeaderDashboard } from "../../api/team-leader";
@@ -16,20 +17,27 @@ import { QueueList } from "./queue-list";
 import { AvailabilityBoard } from "./availability-board";
 import { CrossAreaPanel } from "./cross-area-panel";
 import dynamic from "next/dynamic";
+import { STATE_I18N_KEY, TYPE_I18N_KEY } from "../technician-detail/shared";
 
-const TechnicianDispatchMap = dynamic<{ technicians?: TechnicianLatestLocation[] }>(() => import("./tech-map"), {
-  ssr: false,
-  loading: () => (
+function MapLoading() {
+  const { t } = useTranslation();
+  return (
     <div className="h-[320px] sm:h-[380px] w-full bg-slate-100 dark:bg-slate-800/50 animate-pulse rounded-xl flex items-center justify-center border border-dashed border-slate-200 dark:border-slate-700">
       <div className="flex flex-col items-center gap-2 text-slate-400 font-bold uppercase tracking-widest text-[10px]">
         <Loader2 className="size-5 animate-spin" />
-        Initializing Map Engine
+        {t("workOrder.teamPairing.initializingMap")}
       </div>
     </div>
-  ),
+  );
+}
+
+const TechnicianDispatchMap = dynamic<{ technicians?: TechnicianLatestLocation[] }>(() => import("./tech-map"), {
+  ssr: false,
+  loading: () => <MapLoading />,
 });
 
 export function TeamPairingDashboard() {
+  const { t } = useTranslation();
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [selectedState, setSelectedState] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
@@ -65,8 +73,6 @@ export function TeamPairingDashboard() {
     }
   );
 
-
-
   if (isLoading || !rawUser) {
     return (
       <div className="flex-1 p-6 flex items-center justify-center min-h-[60vh]">
@@ -79,8 +85,8 @@ export function TeamPairingDashboard() {
     return (
       <div className="flex-1 p-6 flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <AlertCircle className="size-10 text-rose-500" />
-        <p className="text-sm text-slate-600">Failed to load team pairing dashboard.</p>
-        <Button variant="outline" size="sm" onClick={() => refetch()}>Retry</Button>
+        <p className="text-sm text-slate-600">{t("workOrder.teamPairing.failedToLoad")}</p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>{t("workOrder.noc.retry")}</Button>
       </div>
     );
   }
@@ -94,39 +100,39 @@ export function TeamPairingDashboard() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-on-surface">Team Pairing</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Assign technician pairs to work orders</p>
+          <h1 className="text-2xl font-bold text-on-surface">{t("workOrder.teamPairing.title")}</h1>
+          <p className="text-sm text-slate-500 mt-0.5">{t("workOrder.teamPairing.subtitle")}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm py-2 px-3 text-slate-700 dark:text-slate-200"
+            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm py-2 px-3 text-slate-700 dark:text-slate-200 cursor-pointer"
           >
-            <option value="">All Types</option>
-            <option value="new_installation_broadband">Broadband Install</option>
-            <option value="new_installation_enterprise">Enterprise Install</option>
-            <option value="maintenance">Maintenance</option>
-            <option value="termination">Termination</option>
+            <option value="">{t("workOrder.types.allTypes")}</option>
+            <option value="new_installation_broadband">{t("workOrder.types.newInstallBroadband")}</option>
+            <option value="new_installation_enterprise">{t("workOrder.types.newInstallEnterprise")}</option>
+            <option value="maintenance">{t("workOrder.types.maintenance")}</option>
+            <option value="termination">{t("workOrder.types.termination")}</option>
           </select>
 
           <select
             value={selectedState}
             onChange={(e) => setSelectedState(e.target.value)}
-            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm py-2 px-3 text-slate-700 dark:text-slate-200"
+            className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-sm py-2 px-3 text-slate-700 dark:text-slate-200 cursor-pointer"
           >
-            <option value="">All States</option>
-            <option value="created">Created</option>
-            <option value="unassigned">Unassigned</option>
-            <option value="assigned">Assigned</option>
-            <option value="accepted">Accepted</option>
-            <option value="dispatched">Dispatched</option>
-            <option value="in_progress">In Progress</option>
-            <option value="paused">Paused</option>
-            <option value="pending_noc_verification">Pending NOC Verify</option>
-            <option value="completed">Completed</option>
-            <option value="rescheduled">Rescheduled</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="">{t("workOrder.states.allStatuses")}</option>
+            <option value="created">{t(STATE_I18N_KEY.created)}</option>
+            <option value="unassigned">{t(STATE_I18N_KEY.unassigned)}</option>
+            <option value="assigned">{t(STATE_I18N_KEY.assigned)}</option>
+            <option value="accepted">{t(STATE_I18N_KEY.accepted)}</option>
+            <option value="dispatched">{t(STATE_I18N_KEY.dispatched)}</option>
+            <option value="in_progress">{t(STATE_I18N_KEY.in_progress)}</option>
+            <option value="paused">{t("workOrder.states.paused") || "Paused"}</option>
+            <option value="pending_noc_verification">{t(STATE_I18N_KEY.pending_noc_verification)}</option>
+            <option value="completed">{t(STATE_I18N_KEY.completed)}</option>
+            <option value="rescheduled">{t(STATE_I18N_KEY.rescheduled)}</option>
+            <option value="cancelled">{t(STATE_I18N_KEY.cancelled)}</option>
           </select>
 
           <input
@@ -146,7 +152,7 @@ export function TeamPairingDashboard() {
             className="text-[10px] uppercase font-bold"
           >
             {isFetching ? <Loader2 className="size-3 animate-spin mr-1" /> : <RefreshCw className="size-3 mr-1" />}
-            Refresh
+            {t("workOrder.noc.refresh")}
           </Button>
           <Button
             variant="primary"
@@ -156,7 +162,7 @@ export function TeamPairingDashboard() {
             className="text-[10px] uppercase font-bold"
           >
             <Zap className="size-3 mr-1" />
-            Auto-Assign
+            {t("workOrder.detail.autoAssign")}
           </Button>
         </div>
       </div>

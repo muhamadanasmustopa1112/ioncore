@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import {
     RiUserLine,
     RiContactsLine,
@@ -20,6 +21,7 @@ import { useCustomerStore } from "../../../store/customer";
 import { useWorkOrderList } from "@/features/technician/api/dashboard";
 
 export function CustomerInfoSection() {
+    const { t } = useTranslation();
     const { formData, updateFormData, form } = useCustomerStore();
     const isDetailMode = form === "details";
 
@@ -59,16 +61,16 @@ export function CustomerInfoSection() {
                 <div className="space-y-4 pb-6 border-b border-border/50">
                     <div className="flex items-center gap-2 mb-4">
                         <RiStickyNoteLine className="size-4 text-blue-500" />
-                        <h3 className="text-sm font-bold uppercase tracking-wide">Link from Work Order</h3>
+                        <h3 className="text-sm font-bold uppercase tracking-wide">{t("nocCustomer.form.info.linkWorkOrder", "Link from Work Order")}</h3>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="wo_select" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Select Work Order</Label>
+                        <Label htmlFor="wo_select" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.selectWorkOrder", "Select Work Order")}</Label>
                         <Select
                             onValueChange={handleWOSelect}
                             disabled={isLoadingWO}
                         >
                             <SelectTrigger id="wo_select" className="h-11 border-2 border-primary/20 hover:border-primary/40 transition-colors">
-                                <SelectValue placeholder={isLoadingWO ? "Loading Work Orders..." : "Search and select work order..."} />
+                                <SelectValue placeholder={isLoadingWO ? t("nocCustomer.form.info.loadingWorkOrders", "Loading Work Orders...") : t("nocCustomer.form.info.searchSelectWorkOrder", "Search and select work order...")} />
                             </SelectTrigger>
                             <SelectContent>
                                 {workOrders.map((wo: any) => (
@@ -82,7 +84,7 @@ export function CustomerInfoSection() {
                             </SelectContent>
                         </Select>
                         <p className="text-[10px] text-muted-foreground italic">
-                            Selecting a Work Order will automatically fill the customer identity and contact details below.
+                            {t("nocCustomer.form.info.linkHint", "Selecting a Work Order will automatically fill the customer identity and contact details below.")}
                         </p>
                     </div>
                 </div>
@@ -92,12 +94,12 @@ export function CustomerInfoSection() {
             <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
                     <RiUserLine className="size-4 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">Identity Details</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wide">{t("nocCustomer.form.info.identityDetails", "Identity Details")}</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
                     <div className="md:col-span-2 space-y-2">
-                        <Label htmlFor="fullname" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Full Name</Label>
+                        <Label htmlFor="fullname" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.fullName", "Full Name")}</Label>
                         <Input
                             id="fullname"
                             placeholder="PPP Demo User"
@@ -114,12 +116,12 @@ export function CustomerInfoSection() {
             <div className="space-y-4 pt-4 border-t border-border/50">
                 <div className="flex items-center gap-2 mb-4">
                     <RiContactsLine className="size-4 text-emerald-500" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">Contact Information</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wide">{t("nocCustomer.form.info.contactInfo", "Contact Information")}</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
                     <div className="space-y-2">
-                        <Label htmlFor="phonenumber" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Phone Number</Label>
+                        <Label htmlFor="phonenumber" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.phoneNumber", "Phone Number")}</Label>
                         <Input
                             id="phonenumber"
                             placeholder="081298765432"
@@ -130,7 +132,7 @@ export function CustomerInfoSection() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="email" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Email</Label>
+                        <Label htmlFor="email" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.email", "Email")}</Label>
                         <Input
                             id="email"
                             type="email"
@@ -142,7 +144,7 @@ export function CustomerInfoSection() {
                         />
                     </div>
                     <div className="md:col-span-2 space-y-2">
-                        <Label htmlFor="address" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Address</Label>
+                        <Label htmlFor="address" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.address", "Address")}</Label>
                         <Textarea
                             id="address"
                             placeholder="Jl. Demo PPP No. 2"
@@ -159,12 +161,12 @@ export function CustomerInfoSection() {
             <div className="space-y-4 pt-4 border-t border-border/50">
                 <div className="flex items-center gap-2 mb-4">
                     <RiLockPasswordLine className="size-4 text-amber-500" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">Login Credentials</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wide">{t("nocCustomer.form.info.loginCredentials", "Login Credentials")}</h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
                     <div className="space-y-2">
-                        <Label htmlFor="method" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Login Method</Label>
+                        <Label htmlFor="method" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.loginMethod", "Login Method")}</Label>
                         <Select
                             value={formData.method || "pppoe"}
                             onValueChange={(v) => handleChange("method", v)}
@@ -181,7 +183,7 @@ export function CustomerInfoSection() {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="username" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Username</Label>
+                        <Label htmlFor="username" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.username", "Username")}</Label>
                         <Input
                             id="username"
                             placeholder="subscriber_username"
@@ -191,7 +193,7 @@ export function CustomerInfoSection() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="password" title="Password" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Password</Label>
+                        <Label htmlFor="password" title="Password" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.password", "Password")}</Label>
                         <Input
                             id="password"
                             type="password"
@@ -202,7 +204,7 @@ export function CustomerInfoSection() {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="owner_name" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Owner Name</Label>
+                        <Label htmlFor="owner_name" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.ownerName", "Owner Name")}</Label>
                         <Input
                             id="owner_name"
                             placeholder="radius_admin"
@@ -218,10 +220,10 @@ export function CustomerInfoSection() {
             <div className="space-y-4 pt-4 border-t border-border/50">
                 <div className="flex items-center gap-2 mb-4">
                     <RiStickyNoteLine className="size-4 text-slate-500" />
-                    <h3 className="text-sm font-bold uppercase tracking-wide">Additional Information</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wide">{t("nocCustomer.form.info.additionalInfo", "Additional Information")}</h3>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="note" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">Note — Optional</Label>
+                    <Label htmlFor="note" className="text-xs font-medium text-muted-foreground uppercase tracking-tight">{t("nocCustomer.form.info.noteOptional", "Note — Optional")}</Label>
                     <Textarea
                         id="note"
                         placeholder="created from Postman"

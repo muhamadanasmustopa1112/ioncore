@@ -1,6 +1,7 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { RiSettings4Line, RiGroupLine, RiShieldLine } from "@remixicon/react";
 import {
     FormControl,
@@ -27,6 +28,7 @@ type SectionProps = {
 };
 
 export function PlanConfigurationSection({ isDetailMode, isPending }: SectionProps) {
+    const { t } = useTranslation();
     const { control } = useFormContext<PPPProfileFormData>();
 
     const { data: profileGroupResponse, isLoading: isLoadingGroups } = useProfileGroups({
@@ -38,7 +40,7 @@ export function PlanConfigurationSection({ isDetailMode, isPending }: SectionPro
         <section className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                 <RiSettings4Line className="size-4 text-orange-500" />
-                <h3 className="text-sm font-semibold">Plan Configuration</h3>
+                <h3 className="text-sm font-semibold">{t("pppProfile.planConfiguration", "Plan Configuration")}</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4">
@@ -47,12 +49,12 @@ export function PlanConfigurationSection({ isDetailMode, isPending }: SectionPro
                     name="profile_group"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Profile Group</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.profileGroup", "Profile Group")}</FormLabel>
                             <Select disabled={isDetailMode || isPending || isLoadingGroups} onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                     <SelectTrigger className="h-10 pl-9">
                                         <RiGroupLine className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                                        <SelectValue placeholder={isLoadingGroups ? "Loading..." : "Select Group"} />
+                                        <SelectValue placeholder={isLoadingGroups ? t("common.loading") : t("pppProfile.selectGroup", "Select Group")} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
@@ -72,9 +74,9 @@ export function PlanConfigurationSection({ isDetailMode, isPending }: SectionPro
                     name="plan_validity"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Plan Validity</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.planValidity", "Plan Validity")}</FormLabel>
                             <FormControl>
-                                <Input {...field} disabled={isDetailMode || isPending} className="h-10" placeholder="e.g. 30 Days" />
+                                <Input {...field} disabled={isDetailMode || isPending} className="h-10" placeholder={t("pppProfile.planValidityPlaceholder", "e.g. 30 Days")} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -85,7 +87,7 @@ export function PlanConfigurationSection({ isDetailMode, isPending }: SectionPro
                     name="shared_users"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Shared Users</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.sharedUsers", "Shared Users")}</FormLabel>
                             <FormControl>
                                 <Input {...field} disabled={isDetailMode || isPending} className="h-10" />
                             </FormControl>
@@ -98,7 +100,7 @@ export function PlanConfigurationSection({ isDetailMode, isPending }: SectionPro
                     name="service_type"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Service Type</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.serviceType", "Service Type")}</FormLabel>
                             <FormControl>
                                 <Input {...field} disabled={isDetailMode || isPending} className="h-10" />
                             </FormControl>
@@ -111,7 +113,7 @@ export function PlanConfigurationSection({ isDetailMode, isPending }: SectionPro
                     name="privileges"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">Privileges</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.privileges", "Privileges")}</FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input {...field} disabled={isDetailMode || isPending} className="h-10 pl-9" />
@@ -127,7 +129,7 @@ export function PlanConfigurationSection({ isDetailMode, isPending }: SectionPro
                     name="vat"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs text-muted-foreground">VAT</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.vat", "VAT")}</FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input {...field} disabled={isDetailMode || isPending} className="h-10 pr-8 text-right" />
@@ -143,7 +145,7 @@ export function PlanConfigurationSection({ isDetailMode, isPending }: SectionPro
                     name="promo"
                     render={({ field }) => (
                         <FormItem className="md:col-span-3">
-                            <FormLabel className="text-xs text-muted-foreground">Promo</FormLabel>
+                            <FormLabel className="text-xs text-muted-foreground">{t("pppProfile.promo", "Promo")}</FormLabel>
                             <FormControl>
                                 <Input {...field} disabled={isDetailMode || isPending} className="h-10" />
                             </FormControl>

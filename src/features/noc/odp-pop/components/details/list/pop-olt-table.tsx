@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -28,7 +29,7 @@ import {
 } from "@/components/ui/collapsible";
 import { RiRouterLine } from "@remixicon/react";
 import { DataTableToolbar } from "../../list/table/data-table-toolbar";
-import { columns } from "./table/columns_olt";
+import { useOltColumns } from "./table/columns_olt";
 
 import { OltResponse, OltFilter } from "@/features/noc/odp-pop/types/olt";
 import { OltDialog } from "../../form/olt-dialog";
@@ -47,8 +48,10 @@ export function PopOltTable({
   filter,
   setFilter
 }: PopOltTableProps) {
+  const { t } = useTranslation();
   const { openOltFormSheet } = useOltStore();
   const data = useMemo(() => oltResponse?.data || [], [oltResponse]);
+  const columns = useOltColumns();
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
 
@@ -91,12 +94,12 @@ export function PopOltTable({
           <div className="flex items-center justify-between mb-4">
             <CardHeading className="flex items-center gap-3 text-lg font-black tracking-tight text-foreground uppercase">
               <RiRouterLine className="size-5 text-primary" />
-              OLT Infrastructure List
+              {t("odpPop.oltInfrastructureList", "OLT Infrastructure List")}
             </CardHeading>
             <div className="flex items-center gap-2">
               <Button size="sm" className="h-8" onClick={() => openOltFormSheet("new")}>
                 <Plus className="size-4" />
-                Add New OLT
+                {t("odpPop.addNewOlt", "Add New OLT")}
               </Button>
               <OltDialog />
             </div>
@@ -113,7 +116,7 @@ export function PopOltTable({
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-3.5 -translate-y-1/2" />
                   <Input
-                    placeholder="Search OLT..."
+                    placeholder={t("odpPop.searchOlt", "Search OLT...")}
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
@@ -138,7 +141,7 @@ export function PopOltTable({
 
             <CollapsibleContent className="border-t border-border/50 mt-4 pt-4">
               <div className="text-xs text-muted-foreground italic">
-                Advanced filters for OLT coming soon...
+                {t("odpPop.advancedFiltersOltSoon", "Advanced filters for OLT coming soon...")}
               </div>
             </CollapsibleContent>
           </Collapsible>

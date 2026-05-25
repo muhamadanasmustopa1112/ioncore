@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,7 @@ import { usePPPProfileStore } from "../../store/ppp-profile";
 import { PPPProfileForm, PPPProfileFormRef } from "./ppp-profile-form";
 
 export function PPPProfileFormSheet() {
+  const { t } = useTranslation();
   const { pppProfileSheetOpen, closePPPProfileFormSheet, form, selectedPPPProfile } = usePPPProfileStore();
   const formRef = useRef<PPPProfileFormRef>(null);
 
@@ -33,7 +35,7 @@ export function PPPProfileFormSheet() {
         {/* Header */}
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl">
-            {isNewMode ? "Add New PPP Profile" : isEditMode ? "Edit PPP Profile" : "PPP Profile Details"}
+            {isNewMode ? t("pppProfile.addNewTitle", "Add New PPP Profile") : isEditMode ? t("pppProfile.editTitle", "Edit PPP Profile") : t("pppProfile.detailsTitle", "PPP Profile Details")}
           </SheetTitle>
         </SheetHeader>
 
@@ -49,11 +51,11 @@ export function PPPProfileFormSheet() {
         {/* Footer */}
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
           <Button variant="ghost" onClick={closePPPProfileFormSheet}>
-            Close
+            {t("common.close")}
           </Button>
           <div className="flex-1" />
           <Button variant="outline" onClick={closePPPProfileFormSheet} className="mr-3">
-            Cancel
+            {t("common.cancel")}
           </Button>
           {!isDetailMode && (
             <Button
@@ -62,7 +64,7 @@ export function PPPProfileFormSheet() {
               className="font-semibold"
               disabled={formRef.current?.isPending}
             >
-              {isNewMode ? "Create PPP Profile" : "Save Changes"}
+              {isNewMode ? t("pppProfile.create", "Create PPP Profile") : t("common.save")}
             </Button>
           )}
         </SheetFooter>

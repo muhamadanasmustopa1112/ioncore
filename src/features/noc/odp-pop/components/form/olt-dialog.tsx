@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import { useOltStore } from "../../store/olt";
 import { OltForm, OltFormRef } from "./olt-form";
 
 export function OltDialog() {
+  const { t } = useTranslation();
   const { oltSheetOpen, setOltFormSheetOpen, closeOltFormSheet, form: formMode, selectedOlt } = useOltStore();
   const formRef = useRef<OltFormRef>(null);
 
@@ -31,14 +33,14 @@ export function OltDialog() {
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {isNewMode ? "Add New OLT" : isEditMode ? "Edit OLT" : "OLT Details"}
+            {isNewMode ? t("odpPop.addNewOlt") : isEditMode ? t("odpPop.editOlt", "Edit OLT") : t("odpPop.oltDetails", "OLT Details")}
           </DialogTitle>
           <DialogDescription>
-            {isNewMode 
-              ? "Fill in the details below to add a new OLT device to this POP." 
-              : isEditMode 
-                ? `Update details for OLT ${selectedOlt?.name}` 
-                : `Viewing details for OLT ${selectedOlt?.name}`}
+            {isNewMode
+              ? t("odpPop.addNewOltDesc", "Fill in the details below to add a new OLT device to this POP.")
+              : isEditMode
+                ? `${t("odpPop.editOltDesc", "Update details for OLT")} ${selectedOlt?.name}`
+                : `${t("odpPop.viewOltDesc", "Viewing details for OLT")} ${selectedOlt?.name}`}
           </DialogDescription>
         </DialogHeader>
 
@@ -58,14 +60,14 @@ export function OltDialog() {
             variant="outline"
             onClick={closeOltFormSheet}
           >
-            {isDetailMode ? "Close" : "Cancel"}
+            {isDetailMode ? t("common.close") : t("common.cancel")}
           </Button>
           {!isDetailMode && (
             <Button 
               onClick={handleSave} 
               disabled={formRef.current?.isPending}
             >
-              {formRef.current?.isPending ? "Saving..." : isNewMode ? "Save OLT" : "Save Changes"}
+              {formRef.current?.isPending ? t("odpPop.saving", "Saving...") : isNewMode ? t("odpPop.saveOlt", "Save OLT") : t("odpPop.saveChanges", "Save Changes")}
             </Button>
           )}
         </DialogFooter>

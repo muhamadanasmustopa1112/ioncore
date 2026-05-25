@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
     RiInformationLine,
     RiServiceLine,
@@ -32,27 +33,31 @@ const STEPS = [
     {
         id: 1,
         title: "Customer Info",
+        key: "customerInfo",
         icon: RiInformationLine,
     },
     {
         id: 2,
         title: "Service Plan",
+        key: "servicePlan",
         icon: RiServiceLine,
     },
     {
         id: 3,
         title: "Billing",
+        key: "billing",
         icon: RiMoneyDollarCircleLine,
     },
     {
         id: 4,
         title: "Networking",
+        key: "networking",
         icon: RiGlobalLine,
     },
 ];
 
 export function CustomerForm() {
-
+    const { t } = useTranslation();
     const { formData, form, selectedId, closeCustomerFormSheet, currentStep, setCurrentStep, updateFormData } = useCustomerStore();
     const isCreateMode = form === "new";
     const isEditMode = form === "edit";
@@ -165,11 +170,11 @@ export function CustomerForm() {
                         <TabsList variant="line" className="justify-start border-none">
                             <TabsTrigger value="customer-info" className="gap-2">
                                 <RiInformationLine className="size-4" />
-                                Customer Info
+                                {t("nocCustomer.form.steps.customerInfo", "Customer Info")}
                             </TabsTrigger>
                             <TabsTrigger value="service-plan" className="gap-2">
                                 <RiServiceLine className="size-4" />
-                                Service Plan
+                                {t("nocCustomer.form.steps.servicePlan", "Service Plan")}
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -201,11 +206,11 @@ export function CustomerForm() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         <span className="text-[10px] font-extrabold uppercase px-2 py-1 rounded bg-primary/10 text-primary leading-none tracking-wider">
-                            Step {currentStep} of {STEPS.length}
+                            {t("nocCustomer.form.stepIndicator", { current: currentStep, total: STEPS.length })}
                         </span>
                         <div className="h-4 w-px bg-border mx-1" />
                         <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                            {STEPS[currentStep - 1].title}
+                            {t(`nocCustomer.form.steps.${STEPS[currentStep - 1].key}`, STEPS[currentStep - 1].title)}
                         </span>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -259,12 +264,12 @@ export function CustomerForm() {
                     className="gap-2 h-10"
                 >
                     <RiArrowLeftLine className="size-4" />
-                    Previous
+                    {t("nocCustomer.form.previous", "Previous")}
                 </Button>
                 <div className="flex items-center gap-3">
                     {currentStep < STEPS.length ? (
                         <Button onClick={handleNext} className="gap-2 h-10 px-6 font-bold shadow-lg shadow-primary/20">
-                            Continue
+                            {t("nocCustomer.form.continue", "Continue")}
                             <RiArrowRightLine className="size-4" />
                         </Button>
                     ) : (
@@ -273,7 +278,7 @@ export function CustomerForm() {
                             disabled={createMutation.isPending}
                             className="gap-2 h-10 px-8 font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20"
                         >
-                            {createMutation.isPending ? "Creating..." : "Confirm & Create"}
+                            {createMutation.isPending ? t("nocCustomer.form.creating", "Creating...") : t("nocCustomer.form.confirmCreate", "Confirm & Create")}
                             <RiCheckLine className="size-4" />
                         </Button>
                     )}

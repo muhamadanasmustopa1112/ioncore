@@ -29,12 +29,14 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useTranslation } from "react-i18next";
 import { useProfileGroups } from "../../api/get-profile-groups";
-import { columns as columnsDef } from "./table/columns";
+import { useProfileGroupColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { ProfileGroupItem } from "../../types";
 
 export function ProfileGroupList() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -44,8 +46,8 @@ export function ProfileGroupList() {
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  // 1. Memoize Columns
-  const columns = useMemo(() => columnsDef, []);
+  // 1. Get Columns with i18n
+  const columns = useProfileGroupColumns();
 
   // 2. Memoize Request Params
   const params = useMemo(() => ({
@@ -111,14 +113,14 @@ export function ProfileGroupList() {
                   <CollapsibleTrigger asChild>
                     <Button variant="outline">
                       <Filter />
-                      Filter
+                      {t("nocProfileGroup.filter", "Filter")}
                     </Button>
                   </CollapsibleTrigger>
                 </div>
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
-                    placeholder="Search profile group..."
+                    placeholder={t("nocProfileGroup.searchPlaceholder", "Search profile group...")}
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
@@ -139,7 +141,7 @@ export function ProfileGroupList() {
               </div>
               <CollapsibleContent>
                 <div className="flex items-center gap-2 py-[5px] text-sm text-muted-foreground">
-                  No advanced filters defined yet.
+                  {t("nocProfileGroup.noFilters", "No advanced filters defined yet.")}
                 </div>
               </CollapsibleContent>
             </CardHeading>

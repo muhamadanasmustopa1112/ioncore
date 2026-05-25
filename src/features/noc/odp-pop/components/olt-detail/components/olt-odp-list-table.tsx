@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -30,7 +31,7 @@ import {
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { RiRouterLine } from "@remixicon/react";
-import { columns } from "../../details/list/table/columns_odp";
+import { useOdpColumns } from "../../details/list/table/columns_odp";
 import { OdpDialog } from "../../form/add-odp-dialog";
 import { useOdpStore } from "../../../store/odp";
 import { OdpResponse, OdpFilter } from "../../../types/odp";
@@ -50,12 +51,14 @@ export function OltOdpListTable({
   filter,
   setFilter
 }: OltOdpListTableProps) {
+  const { t } = useTranslation();
   const { openOdpFormSheet } = useOdpStore();
+  const columns = useOdpColumns();
   const data = useMemo(() => odpResponse?.data || [], [odpResponse]);
   const [openFilter, setOpenFilter] = useState<boolean>(false);
 
   const [columnOrder, setColumnOrder] = useState<string[]>(
-    columns.map((column) => column.id as string),
+    () => columns.map((column) => column.id as string),
   );
 
   const table = useReactTable({
@@ -100,12 +103,12 @@ export function OltOdpListTable({
           <div className="flex items-center justify-between mb-4">
             <CardHeading className="flex items-center gap-3 text-lg font-black tracking-tight text-foreground uppercase">
               <RiRouterLine className="size-5 text-primary" />
-              List ODP
+              {t("odpPop.listOdp", "List ODP")}
             </CardHeading>
             <div className="flex items-center gap-2">
               <Button size="sm" className="h-8" onClick={() => openOdpFormSheet("new")}>
                 <Plus className="size-4" />
-                Add ODP
+                {t("odpPop.addOdp", "Add ODP")}
               </Button>
               <OdpDialog />
             </div>
@@ -123,7 +126,7 @@ export function OltOdpListTable({
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-3.5 -translate-y-1/2" />
                   <Input
-                    placeholder="Search ODP..."
+                    placeholder={t("odpPop.searchOdp", "Search ODP...")}
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
@@ -149,7 +152,7 @@ export function OltOdpListTable({
                   trigger={
                     <Button variant="outline" size="sm" className="h-8">
                       <Settings2 className="size-3" />
-                      View
+                      {t("common.chartLabels.view")}
                     </Button>
                   }
                 />
@@ -158,7 +161,7 @@ export function OltOdpListTable({
 
             <CollapsibleContent className="border-t border-border/50 mt-4 pt-4">
               <div className="text-xs text-muted-foreground italic">
-                Advanced filters coming soon...
+                {t("odpPop.advancedFiltersSoon")}
               </div>
             </CollapsibleContent>
           </Collapsible>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import { useOdpStore } from "../../store/odp";
 import { OdpForm, OdpFormRef } from "./odp-form";
 
 export function OdpDialog() {
+  const { t } = useTranslation();
   const { odpSheetOpen, setOdpFormSheetOpen, closeOdpFormSheet, form: formMode, selectedOdp } = useOdpStore();
   const formRef = useRef<OdpFormRef>(null);
 
@@ -31,14 +33,14 @@ export function OdpDialog() {
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>
-            {isNewMode ? "Add New ODP" : isEditMode ? "Edit ODP" : "ODP Details"}
+            {isNewMode ? t("odpPop.addNewOdp", "Add New ODP") : isEditMode ? t("odpPop.editOdp", "Edit ODP") : t("odpPop.odpDetails", "ODP Details")}
           </DialogTitle>
           <DialogDescription>
-            {isNewMode 
-              ? "Fill in the details below to add a new ODP device to this infrastructure." 
-              : isEditMode 
-                ? `Update details for ODP ${selectedOdp?.name}` 
-                : `Viewing details for ODP ${selectedOdp?.name}`}
+            {isNewMode
+              ? t("odpPop.addNewOdpDesc", "Fill in the details below to add a new ODP device to this infrastructure.")
+              : isEditMode
+                ? `${t("odpPop.editOdpDesc", "Update details for ODP")} ${selectedOdp?.name}`
+                : `${t("odpPop.viewOdpDesc", "Viewing details for ODP")} ${selectedOdp?.name}`}
           </DialogDescription>
         </DialogHeader>
 
@@ -58,14 +60,14 @@ export function OdpDialog() {
             variant="outline"
             onClick={closeOdpFormSheet}
           >
-            {isDetailMode ? "Close" : "Cancel"}
+            {isDetailMode ? t("common.close") : t("common.cancel")}
           </Button>
           {!isDetailMode && (
             <Button 
               onClick={handleSave} 
               disabled={formRef.current?.isPending}
             >
-              {formRef.current?.isPending ? "Saving..." : isNewMode ? "Save ODP" : "Save Changes"}
+              {formRef.current?.isPending ? t("odpPop.saving") : isNewMode ? t("odpPop.saveOdp", "Save ODP") : t("odpPop.saveChanges")}
             </Button>
           )}
         </DialogFooter>

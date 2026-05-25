@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 
+import i18n from "@/i18n";
 import { services } from "@/config/constants";
 import { api } from "@/lib/api-client";
 import { getQueryClient } from "@/lib/get-query-client";
@@ -34,7 +35,7 @@ export const useUpdateBandwidth = ({
     mutationFn: updateBandwidth,
     onSuccess: (data, variables, context) => {
       // Automatic success feedback
-      toast.success("Bandwidth updated successfully");
+      toast.success(i18n.t("nocBandwidth.toasts.updateSuccess", "Bandwidth updated successfully"));
 
       // Robust table refresh logic
       queryClient.invalidateQueries({
@@ -48,7 +49,8 @@ export const useUpdateBandwidth = ({
     },
     onError: (error: any, variables, context) => {
       // Automatic error feedback
-      const msg = error?.response?.data?.response?.message_en || error.message || "Failed to update bandwidth";
+      const backendMsg = i18n.language === "id" ? error?.response?.data?.response?.message_id : error?.response?.data?.response?.message_en;
+      const msg = backendMsg || error.message || i18n.t("nocBandwidth.toasts.updateError", "Failed to update bandwidth");
       toast.error(msg);
       
       // Execute custom callback if provided

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useFormContext } from "react-hook-form";
 import {
     RiSignalTowerLine,
@@ -44,6 +45,7 @@ export function GeneralInfoSection({
     nextSuffix,
     mode,
 }: GeneralInfoSectionProps) {
+    const { t } = useTranslation();
     const { control, setValue, watch } = useFormContext<PopFormValues>();
     const codeValue = watch("code") || "";
 
@@ -81,7 +83,7 @@ export function GeneralInfoSection({
         <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                 <RiSignalTowerLine className="size-4 text-blue-500" />
-                <h3 className="text-sm font-semibold">General Information</h3>
+                <h3 className="text-sm font-semibold">{t("odpPop.generalInformation", "General Information")}</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
@@ -92,7 +94,7 @@ export function GeneralInfoSection({
                         <FormItem>
                             <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                                 <RiNodeTree className="size-3" />
-                                Branch (NOC)
+                                {t("odpPop.branchNoc", "Branch (NOC)")}
                             </FormLabel>
                             <FormControl>
                                 <SearchableSelect
@@ -102,7 +104,7 @@ export function GeneralInfoSection({
                                     })) || []}
                                     value={field.value}
                                     onSelect={(val) => field.onChange(val)}
-                                    placeholder={isLoadingBranches ? "Loading branches..." : "Select Branch"}
+                                    placeholder={isLoadingBranches ? t("common.loading") : t("odpPop.selectBranch", "Select Branch")}
                                     disabled={isLoadingBranches || readOnly || isPending}
                                 />
                             </FormControl>
@@ -118,14 +120,14 @@ export function GeneralInfoSection({
                         <FormItem>
                             <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                                 <RiHashtag className="size-3" />
-                                Code
+                                {t("common.code", "Code")}
                             </FormLabel>
                             <FormControl>
                                 <div className="flex items-center rounded-lg border border-input bg-background pl-3 focus-within:ring-1 focus-within:ring-ring h-10 w-full">
                                     <span className="text-sm font-semibold text-muted-foreground/60 select-none">POP-</span>
                                     <Input
                                         className="flex-1 border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-1 text-sm uppercase h-full bg-transparent font-medium"
-                                        placeholder="LOCATION"
+                                        placeholder={t("odpPop.locationPlaceholder", "LOCATION")}
                                         value={middle}
                                         onChange={(e) => handleMiddleChange(e.target.value)}
                                         disabled={readOnly || isPending || mode !== "new"}
@@ -143,9 +145,9 @@ export function GeneralInfoSection({
                     name="name"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-xs font-medium text-muted-foreground">POP Name</FormLabel>
+                            <FormLabel className="text-xs font-medium text-muted-foreground">{t("odpPop.popName", "POP Name")}</FormLabel>
                             <FormControl>
-                                <Input placeholder="POP JAKARTA PUSAT" {...field} disabled={readOnly || isPending} />
+                                <Input placeholder={t("odpPop.popNamePlaceholder", "POP JAKARTA PUSAT")} {...field} disabled={readOnly || isPending} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -159,7 +161,7 @@ export function GeneralInfoSection({
                         <FormItem>
                             <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                                 <RiInformationLine className="size-3" />
-                                Status
+                                {t("common.status")}
                             </FormLabel>
                             <Select
                                 onValueChange={field.onChange}
@@ -168,7 +170,7 @@ export function GeneralInfoSection({
                             >
                                 <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select Status" />
+                                        <SelectValue placeholder={t("odpPop.selectStatus", "Select Status")} />
                                     </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>

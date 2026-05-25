@@ -119,8 +119,8 @@ export const PopForm = forwardRef<PopFormRef, PopFormProps>(
 
         return (
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-[75vh]">
-                    <ScrollArea className="flex-1 w-full rounded-md border-t">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col h-full overflow-hidden">
+                    <ScrollArea className="h-full border-t">
                         <div className="px-6 py-6 space-y-8 pb-10">
                             <GeneralInfoSection
                                 branches={branches}

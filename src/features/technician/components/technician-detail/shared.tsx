@@ -40,11 +40,31 @@ export const STATE_LABEL: Record<WorkOrderState, string> = {
   cancelled: "Cancelled",
 };
 
+export const STATE_I18N_KEY: Record<WorkOrderState, string> = {
+  created: "workOrder.states.created",
+  unassigned: "workOrder.states.unassigned",
+  assigned: "workOrder.states.assigned",
+  accepted: "workOrder.states.accepted",
+  dispatched: "workOrder.states.dispatched",
+  in_progress: "workOrder.states.inProgress",
+  pending_noc_verification: "workOrder.states.pendingNoc",
+  completed: "workOrder.states.completed",
+  rescheduled: "workOrder.states.rescheduled",
+  cancelled: "workOrder.states.cancelled",
+};
+
 export const TYPE_LABEL: Record<WorkOrderType, string> = {
   new_installation_broadband: "New Installation (Broadband)",
   new_installation_enterprise: "New Installation (Enterprise)",
   maintenance: "Maintenance",
   termination: "Termination",
+};
+
+export const TYPE_I18N_KEY: Record<WorkOrderType, string> = {
+  new_installation_broadband: "workOrder.types.newInstallBroadband",
+  new_installation_enterprise: "workOrder.types.newInstallEnterprise",
+  maintenance: "workOrder.types.maintenance",
+  termination: "workOrder.types.termination",
 };
 
 export const PRIORITY_VARIANT: Record<WorkOrderPriority, "primary" | "warning" | "destructive" | "info"> = {

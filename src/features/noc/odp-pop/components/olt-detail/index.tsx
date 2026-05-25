@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { notFound } from "next/navigation";
 import { RiLoader2Line } from "@remixicon/react";
 import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
@@ -16,10 +17,11 @@ import dynamic from "next/dynamic";
 
 const OltOdpMap = dynamic(() => import("../map/olt-odp-map"), {
   ssr: false,
-  loading: () => <div className="h-[500px] w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center text-muted-foreground font-bold uppercase tracking-widest text-xs">Loading Infrastructure Map...</div>,
+  loading: () => <div className="h-[500px] w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center text-muted-foreground font-bold uppercase tracking-widest text-xs">Loading Map...</div>,
 });
 
 export function OltDetailContent({ oltId }: { oltId: string }) {
+  const { t } = useTranslation();
   const { data: oltResponse, isLoading } = useOltById({
     id: oltId
   });
@@ -58,7 +60,7 @@ export function OltDetailContent({ oltId }: { oltId: string }) {
     return (
       <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
         <RiLoader2Line className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-muted-foreground font-medium">Loading OLT data...</p>
+        <p className="text-muted-foreground font-medium">{t("odpPop.loadingOlt", "Loading OLT data...")}</p>
       </div>
     );
   }
@@ -72,14 +74,14 @@ export function OltDetailContent({ oltId }: { oltId: string }) {
       <PageBreadcrumb
         items={[
           {
-            title: "Network & Orchestration",
+            title: t("menu.headings.networkOrchestration"),
             path: paths.dashboard.networkAndOrchestration.root.getHref(),
           },
           {
-            title: "ODP & POP",
+            title: t("menu.odpPop"),
             path: paths.dashboard.networkAndOrchestration.odpPop.manage.getHref()
           },
-          { title: `OLT Detail (${olt.name})` },
+          { title: `${t("odpPop.oltDetail", "OLT Detail")} (${olt.name})` },
         ]}
         className="mb-0"
       />

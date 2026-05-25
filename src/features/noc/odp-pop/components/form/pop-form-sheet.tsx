@@ -1,4 +1,7 @@
+"use client";
+
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -12,6 +15,7 @@ import { usePopStore } from "../../store/pop";
 import { PopForm, PopFormRef } from "./pop-form";
 
 export function PopFormSheet() {
+    const { t } = useTranslation();
     const { popSheetOpen, closePopFormSheet, form: formMode, selectedPop } = usePopStore();
     const formRef = useRef<PopFormRef>(null);
 
@@ -29,7 +33,7 @@ export function PopFormSheet() {
                 {/* Header */}
                 <SheetHeader className="border-border border-b px-5 py-4">
                     <SheetTitle className="font-medium text-xl">
-                        {isNewMode ? "Add New POP" : isEditMode ? "Edit POP" : "POP Details"}
+                        {isNewMode ? t("odpPop.addNewPop", "Add New POP") : isEditMode ? t("odpPop.editPop", "Edit POP") : t("odpPop.popDetails", "POP Details")}
                     </SheetTitle>
                 </SheetHeader>
 
@@ -46,11 +50,11 @@ export function PopFormSheet() {
                 {/* Footer */}
                 <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
                     <Button variant="ghost" onClick={closePopFormSheet}>
-                        Close
+                        {t("common.close")}
                     </Button>
                     <div className="flex-1" />
                     <Button variant="outline" onClick={closePopFormSheet} className="mr-3">
-                        Cancel
+                        {t("common.cancel")}
                     </Button>
                     {!isDetailMode && (
                         <Button
@@ -59,7 +63,7 @@ export function PopFormSheet() {
                             className="font-semibold"
                             disabled={formRef.current?.isPending}
                         >
-                            {isNewMode ? "Create POP" : "Save Changes"}
+                            {isNewMode ? t("odpPop.createPop", "Create POP") : t("common.save")}
                         </Button>
                     )}
                 </SheetFooter>

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Camera, Clock, History, Maximize2, Building, Image as ImageIcon, FileText } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { AuditTrailEntry, WorkOrderDetailResponse } from "../../../types/technician-api";
 import { SectionCard, Row, Empty, fmtDate } from "../shared";
 import { TimelineEntry } from "../shared-widgets";
@@ -32,6 +33,7 @@ function formatAuditMetadataValue(val: string): string {
 }
 
 export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
+  const { t } = useTranslation();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const images = useMemo(() => {
@@ -69,18 +71,18 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
       {wo.assignment_sla && (
         <SectionCard
           icon={Clock}
-          title="Assignment SLA"
+          title={t("workOrder.detail.assignmentSla")}
           tone={wo.assignment_sla.breached_at ? "rose" : "default"}
         >
           <div className="space-y-2 text-sm">
-            <Row label="Due At" value={fmtDate(wo.assignment_sla.due_at)} />
-            <Row label="Window" value={`${wo.assignment_sla.window_minutes} min`} />
-            <Row label="Auto-assign" value={wo.assignment_sla.auto_assign_enabled ? "Enabled" : "Disabled"} />
+            <Row label={t("workOrder.detail.dueAt")} value={fmtDate(wo.assignment_sla.due_at)} />
+            <Row label={t("workOrder.detail.window")} value={`${wo.assignment_sla.window_minutes} min`} />
+            <Row label={t("workOrder.detail.autoAssign")} value={wo.assignment_sla.auto_assign_enabled ? t("workOrder.detail.yes") : t("workOrder.detail.no")} />
             {wo.assignment_sla.warning_triggered_at && (
-              <Row label="Warning" value={fmtDate(wo.assignment_sla.warning_triggered_at)} valueClass="text-amber-600" />
+              <Row label={t("workOrder.detail.warning")} value={fmtDate(wo.assignment_sla.warning_triggered_at)} valueClass="text-amber-600" />
             )}
             {wo.assignment_sla.breached_at && (
-              <Row label="Breached" value={fmtDate(wo.assignment_sla.breached_at)} valueClass="text-rose-600 font-bold" />
+              <Row label={t("workOrder.detail.breached")} value={fmtDate(wo.assignment_sla.breached_at)} valueClass="text-rose-600 font-bold" />
             )}
           </div>
         </SectionCard>
@@ -88,14 +90,14 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
 
       {/* Reschedule Info */}
       {wo.reschedule && (
-        <SectionCard icon={Clock} title="Reschedule" tone="amber">
+        <SectionCard icon={Clock} title={t("workOrder.detail.reschedule")} tone="amber">
           <div className="space-y-2 text-sm">
-            <Row label="New Date" value={fmtDate(wo.reschedule.rescheduled_to)} />
-            <Row label="Requested By" value={wo.reschedule.requested_by} />
-            <Row label="Requested At" value={fmtDate(wo.reschedule.requested_at)} />
+            <Row label={t("workOrder.detail.modals.reschedule.newScheduled")} value={fmtDate(wo.reschedule.rescheduled_to)} />
+            <Row label={t("workOrder.detail.reportedBy")} value={wo.reschedule.requested_by} />
+            <Row label={t("workOrder.detail.requestedAt")} value={fmtDate(wo.reschedule.requested_at)} />
             {wo.reschedule.reason && (
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400 mt-2">Reason</p>
+                <p className="text-[10px] font-bold uppercase tracking-tight text-slate-400 mt-2">{t("workOrder.detail.reasonCode")}</p>
                 <p className="text-xs text-slate-600">{wo.reschedule.reason}</p>
               </div>
             )}
@@ -104,7 +106,7 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
       )}
 
       {/* Photo Evidence */}
-      <SectionCard icon={ImageIcon} title="Photo Evidence">
+      <SectionCard icon={ImageIcon} title={t("workOrder.detail.photoEvidence")}>
         {images.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
             {images.map((src, i) => (
@@ -125,26 +127,26 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
             ))}
             <div className="aspect-square bg-slate-50 dark:bg-slate-800 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center">
               <Camera className="size-6 text-slate-400" />
-              <span className="text-[8px] font-bold text-slate-400 mt-1 uppercase">Upload</span>
+              <span className="text-[8px] font-bold text-slate-400 mt-1 uppercase">{t("workOrder.detail.upload")}</span>
             </div>
           </div>
         ) : (
-          <Empty>No photos uploaded yet.</Empty>
+          <Empty>{t("workOrder.detail.noPhotosUploaded")}</Empty>
         )}
       </SectionCard>
 
       {/* Branch & Area */}
-      <SectionCard icon={Building} title="Branch & Area">
+      <SectionCard icon={Building} title={`${t("workOrder.detail.branch")} & ${t("workOrder.detail.area")}`}>
         <div className="space-y-2 text-sm">
-          <Row label="Branch" value={wo.branch.name} />
-          <Row label="Area" value={wo.area_name || wo.area_id} />
-          <Row label="Sub Area" value={wo.sub_area_name || wo.sub_area_id} />
+          <Row label={t("workOrder.detail.branch")} value={wo.branch.name} />
+          <Row label={t("workOrder.detail.area")} value={wo.area_name || wo.area_id} />
+          <Row label={t("workOrder.detail.subArea")} value={wo.sub_area_name || wo.sub_area_id} />
         </div>
       </SectionCard>
 
       {/* Timeline */}
       {wo.timeline && wo.timeline.length > 0 && (
-        <SectionCard icon={History} title="Timeline">
+        <SectionCard icon={History} title={t("workOrder.detail.timeline")}>
           <ol className="relative border-l-2 border-slate-200 dark:border-slate-700 ml-2 space-y-4">
             {[...wo.timeline]
               .sort((a, b) => {
@@ -160,16 +162,16 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
       )}
 
       {/* Audit Trail */}
-      <SectionCard icon={FileText} title="Audit Trail">
+      <SectionCard icon={FileText} title={t("workOrder.detail.auditTrail")}>
         {/* Basic metadata */}
         <div className="space-y-2 text-sm mb-4 pb-4 border-b border-slate-100 dark:border-slate-800">
-          <Row label="Created" value={fmtDate(wo.created_at)} />
-          <Row label="Updated" value={fmtDate(wo.updated_at)} />
+          <Row label={t("workOrder.states.created")} value={fmtDate(wo.created_at)} />
+          <Row label={t("common.updatedAt")} value={fmtDate(wo.updated_at)} />
         </div>
 
         {/* Activity stream */}
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Activity Logs</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">{t("workOrder.detail.activityLogs")}</p>
           {wo.audit_trail && wo.audit_trail.length > 0 ? (
             <div className="space-y-3">
               {wo.audit_trail.map((item) => (
@@ -199,9 +201,15 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
                           key === "reassignment_mode"
                             ? raw.replace(/_/g, " ")
                             : formatAuditMetadataValue(raw);
+                        const translatedLabel = t(`workOrder.detail.audit.${
+                          key === "added_technician_names" ? "addedTechnician" :
+                          key === "removed_technician_names" ? "removedTechnician" :
+                          key === "original_pair_names" ? "originalPair" :
+                          key === "new_pair_names" ? "newPair" : "reassignmentMode"
+                        }`);
                         return (
                           <div key={key} className="flex flex-col">
-                            <span className="text-slate-400 uppercase text-[8px] font-bold tracking-wider">{label}</span>
+                            <span className="text-slate-400 uppercase text-[8px] font-bold tracking-wider">{translatedLabel}</span>
                             <span className="text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/30 px-1 py-0.5 rounded mt-0.5 border border-slate-100/50 dark:border-slate-800 capitalize">
                               {display}
                             </span>
@@ -214,7 +222,7 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
               ))}
             </div>
           ) : (
-            <Empty>No audit trail records found.</Empty>
+            <Empty>{t("workOrder.detail.noAuditTrail")}</Empty>
           )}
         </div>
       </SectionCard>
@@ -235,7 +243,7 @@ export function RightSections({ wo }: { wo: WorkOrderDetailResponse }) {
               className="absolute -top-12 right-0 text-white hover:text-primary text-sm font-semibold transition-colors"
               onClick={() => setPreviewImage(null)}
             >
-              Close [Esc]
+              {t("workOrder.detail.close")} [Esc]
             </button>
           </div>
         </div>

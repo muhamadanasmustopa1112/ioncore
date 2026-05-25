@@ -181,7 +181,7 @@ function StaticMap({ rings, pinLat, pinLng }: { rings: LngLat[][]; pinLat?: numb
   const center: LatLng | undefined = !bounds && pinPos ? pinPos : undefined;
 
   return (
-    <div className="rounded-md overflow-hidden border border-border" style={{ height: 240 }}>
+    <div className="relative rounded-md overflow-hidden border border-border" style={{ height: 240 }}>
       <MapContainer
         key={allPositions.map((p) => p.join()).join("|") || "empty"}
         bounds={bounds}
@@ -247,8 +247,8 @@ function PointPicker({
           <CheckCheck className="size-3" /> Save
         </Button>
       </div>
-      <div className="rounded-md overflow-hidden border border-border h-[320px]">
-        <MapContainer center={center} zoom={13} className="h-full w-full cursor-crosshair" scrollWheelZoom attributionControl={false}>
+      <div className="relative rounded-md overflow-hidden border border-border h-[320px]">
+        <MapContainer center={center} zoom={pinPos ? 17 : 13} className="h-full w-full cursor-crosshair" scrollWheelZoom attributionControl={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapResizeController />
           <MapSearch />
@@ -302,8 +302,8 @@ function PolygonPicker({
           <CheckCheck className="size-3" /> Save
         </Button>
       </div>
-      <div className="rounded-md overflow-hidden border border-border h-[240px] md:h-[300px]">
-        <MapContainer center={center} zoom={13} className="h-full w-full cursor-crosshair" scrollWheelZoom attributionControl={false}>
+      <div className="relative rounded-md overflow-hidden border border-border h-[240px] md:h-[300px]">
+        <MapContainer center={center} zoom={initial.length > 0 ? 16 : 13} className="h-full w-full cursor-crosshair" scrollWheelZoom attributionControl={false}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapResizeController />
           <MapSearch />

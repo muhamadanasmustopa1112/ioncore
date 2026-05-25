@@ -1,4 +1,7 @@
+"use client";
+
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { RiDeleteBin7Line, RiEditLine, RiEyeLine, RiPrinterLine, RiRefreshLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -15,6 +18,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 
 export function RenewPrintCell({ row }: { row: Row<PPPCustomer> }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex items-center gap-1">
       <TooltipProvider>
@@ -29,7 +34,7 @@ export function RenewPrintCell({ row }: { row: Row<PPPCustomer> }) {
               <RiRefreshLine className="size-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Renew</TooltipContent>
+          <TooltipContent>{t("nocCustomer.actions.renew", "Renew")}</TooltipContent>
         </Tooltip>
 
         <Tooltip>
@@ -43,7 +48,7 @@ export function RenewPrintCell({ row }: { row: Row<PPPCustomer> }) {
               <RiPrinterLine className="size-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Print invoice/receipt</TooltipContent>
+          <TooltipContent>{t("nocCustomer.actions.printInvoice", "Print invoice/receipt")}</TooltipContent>
         </Tooltip>
       </TooltipProvider>
     </div>
@@ -52,6 +57,7 @@ export function RenewPrintCell({ row }: { row: Row<PPPCustomer> }) {
 
 export function ActionsCell({ row }: { row: Row<PPPCustomer> }) {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleEditClick = () => {
     router.push(paths.dashboard.networkAndOrchestration.customer.edit.getHref(row.original.id));
@@ -72,11 +78,11 @@ export function ActionsCell({ row }: { row: Row<PPPCustomer> }) {
       <DropdownMenuContent side="bottom" align="end">
         <DropdownMenuItem className="cursor-pointer" onClick={handleDetailClick}>
           <RiEyeLine />
-          Detail
+          {t("nocCustomer.actions.detail", "Detail")}
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer" onClick={handleEditClick}>
           <RiEditLine />
-          Edit
+          {t("nocCustomer.actions.edit", "Edit")}
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"
@@ -84,7 +90,7 @@ export function ActionsCell({ row }: { row: Row<PPPCustomer> }) {
           onClick={() => { }}
         >
           <RiDeleteBin7Line />
-          Delete
+          {t("nocCustomer.actions.delete", "Delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

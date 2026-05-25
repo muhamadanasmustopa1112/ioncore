@@ -4,16 +4,12 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 import { useProcessNOCApproval } from "../../../api/noc";
 import { RadiusCredentialsPanel } from "../radius-credentials-panel";
 import { ModalShell, FieldLabel } from "./shell";
 
 type Decision = "approved" | "rejected";
-
-const DECISION_HINT: Record<Decision, string> = {
-  approved: "Triggers Billing & Radius activation. Service goes live.",
-  rejected: "Sends WO back to in-progress. Technician must re-execute.",
-};
 
 export function NOCApprovalModal({
   workOrderId,
@@ -24,6 +20,7 @@ export function NOCApprovalModal({
   workOrderNumber: string;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [decision, setDecision] = useState<Decision>("approved");
   const [note, setNote] = useState("");
 
@@ -36,16 +33,20 @@ export function NOCApprovalModal({
     );
   }
 
+  const hintText = decision === "approved"
+    ? t("workOrder.detail.modals.noc.approvedHint")
+    : t("workOrder.detail.modals.noc.rejectedHint");
+
   return (
     <ModalShell
-      title="NOC Verification"
+      title={t("workOrder.detail.modals.noc.title")}
       subtitle={workOrderNumber}
       onClose={onClose}
       widthClass="max-w-lg"
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose}>
-            Cancel
+            {t("common.cancel") || "Cancel"}
           </Button>
           <Button
             variant={decision === "rejected" ? "destructive" : "primary"}
@@ -54,7 +55,7 @@ export function NOCApprovalModal({
             disabled={mutation.isPending}
           >
             {mutation.isPending && <Loader2 className="size-3 animate-spin mr-2" />}
-            Submit Decision
+            {t("workOrder.detail.modals.noc.submitDecision")}
           </Button>
         </>
       }
@@ -63,7 +64,7 @@ export function NOCApprovalModal({
         <RadiusCredentialsPanel workOrderId={workOrderId} variant="compact" />
 
         <div>
-          <FieldLabel required>Decision</FieldLabel>
+          <FieldLabel required>{t("workOrder.detail.decision")}</FieldLabel>
           <div className="grid grid-cols-2 gap-2">
             {(["approved", "rejected"] as const).map((d) => {
               const active = decision === d;
@@ -71,6 +72,9 @@ export function NOCApprovalModal({
                 d === "approved"
                   ? "bg-emerald-50 border-emerald-500 text-emerald-700 dark:bg-emerald-900/20"
                   : "bg-rose-50 border-rose-500 text-rose-700 dark:bg-rose-900/20";
+              const buttonText = d === "approved"
+                ? t("workOrder.detail.modals.noc.approved")
+                : t("workOrder.detail.modals.noc.rejected");
               return (
                 <button
                   key={d}
@@ -81,20 +85,20 @@ export function NOCApprovalModal({
                       : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary"
                   }`}
                 >
-                  {d}
+                  {buttonText}
                 </button>
               );
             })}
           </div>
-          <p className="text-[10px] text-slate-400 mt-2">{DECISION_HINT[decision]}</p>
+          <p className="text-[10px] text-slate-400 mt-2">{hintText}</p>
         </div>
 
         <div>
-          <FieldLabel>Note</FieldLabel>
+          <FieldLabel>{t("workOrder.detail.note")}</FieldLabel>
           <Textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Reasoning, observations, or next steps..."
+            placeholder={t("workOrder.detail.modals.noc.placeholder")}
             className="min-h-[100px]"
           />
         </div>

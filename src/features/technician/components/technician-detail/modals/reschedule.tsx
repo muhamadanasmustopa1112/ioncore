@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useTranslation } from "react-i18next";
 import { useUpdateWorkOrder } from "../../../api/actions";
 import type { WorkOrderPriority } from "../../../types/technician-api";
 import { ModalShell, FieldLabel } from "./shell";
@@ -22,6 +23,7 @@ export function RescheduleModal({
   currentPriority: WorkOrderPriority | undefined;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const [scheduledAt, setScheduledAt] = useState(
     currentSchedule ? new Date(currentSchedule).toISOString().slice(0, 16) : ""
   );
@@ -45,15 +47,17 @@ export function RescheduleModal({
     );
   }
 
+  const isIndo = t("workOrder.detail.no").toLowerCase() === "tidak";
+
   return (
     <ModalShell
-      title="Reschedule Work Order"
+      title={t("workOrder.detail.modals.reschedule.title")}
       subtitle={workOrderNumber}
       onClose={onClose}
       footer={
         <>
           <Button variant="outline" size="sm" onClick={onClose}>
-            Cancel
+            {t("common.cancel") || "Cancel"}
           </Button>
           <Button
             variant="primary"
@@ -62,14 +66,14 @@ export function RescheduleModal({
             disabled={!scheduledAt || mutation.isPending}
           >
             {mutation.isPending && <Loader2 className="size-3 animate-spin mr-2" />}
-            Save
+            {t("common.save") || "Save"}
           </Button>
         </>
       }
     >
       <div className="space-y-4">
         <div>
-          <FieldLabel required>New Scheduled Date / Time</FieldLabel>
+          <FieldLabel required>{t("workOrder.detail.modals.reschedule.newScheduled")}</FieldLabel>
           <Input
             type="datetime-local"
             value={scheduledAt}
@@ -77,29 +81,34 @@ export function RescheduleModal({
           />
         </div>
         <div>
-          <FieldLabel>Priority</FieldLabel>
+          <FieldLabel>{t("workOrder.detail.modals.reschedule.priority")}</FieldLabel>
           <div className="grid grid-cols-4 gap-2">
-            {(["low", "medium", "high", "urgent"] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPriority(p)}
-                className={`px-2 py-2 rounded border text-[10px] font-bold uppercase tracking-wider transition-all ${
-                  priority === p
-                    ? "bg-primary text-white border-primary"
-                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary"
-                }`}
-              >
-                {p}
-              </button>
-            ))}
+            {(["low", "medium", "high", "urgent"] as const).map((p) => {
+              const priorityText = t(`technician.priority.${p}`).startsWith("technician.priority")
+                ? (p === "urgent" ? (isIndo ? "Mendesak" : "Urgent") : p)
+                : t(`technician.priority.${p}`);
+              return (
+                <button
+                  key={p}
+                  onClick={() => setPriority(p)}
+                  className={`px-2 py-2 rounded border text-[10px] font-bold uppercase tracking-wider transition-all ${
+                    priority === p
+                      ? "bg-primary text-white border-primary"
+                      : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-500 hover:border-primary"
+                  }`}
+                >
+                  {priorityText}
+                </button>
+              );
+            })}
           </div>
         </div>
         <div>
-          <FieldLabel>Note</FieldLabel>
+          <FieldLabel>{t("workOrder.detail.note")}</FieldLabel>
           <Textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Reason for reschedule..."
+            placeholder={t("workOrder.detail.modals.reschedule.reason")}
             className="min-h-[80px]"
           />
         </div>

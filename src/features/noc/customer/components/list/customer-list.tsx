@@ -29,13 +29,15 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useTranslation } from "react-i18next";
 import { usePPPCustomers } from "../../api/get-ppp-customers";
-import { columns } from "./table/columns";
+import { useCustomerColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { CustomerAdvancedFilter } from "./customer-advanced-filter";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export function CustomerList() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -53,6 +55,9 @@ export function CustomerList() {
 
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  const columns = useCustomerColumns();
+
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
@@ -99,13 +104,13 @@ export function CustomerList() {
                 <CollapsibleTrigger asChild>
                   <Button variant="outline">
                     <Filter />
-                    Filter
+                    {t("nocCustomer.filter", "Filter")}
                   </Button>
                 </CollapsibleTrigger>
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
-                    placeholder="Search router..."
+                    placeholder={t("nocCustomer.searchPlaceholder", "Search customer...")}
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })

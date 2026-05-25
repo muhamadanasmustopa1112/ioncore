@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useFormContext } from "react-hook-form";
 import {
   RiSignalTowerLine,
@@ -38,6 +39,7 @@ export function OdpGeneralInfoSection({
   nextSuffix,
   mode,
 }: OdpGeneralInfoSectionProps) {
+  const { t } = useTranslation();
   const { control, setValue, watch } = useFormContext<OdpFormValues>();
   const codeValue = watch("code") || "";
 
@@ -75,7 +77,7 @@ export function OdpGeneralInfoSection({
     <div className="space-y-4">
       <div className="flex items-center gap-2 pb-2 border-b border-border/50">
         <RiSignalTowerLine className="size-4 text-blue-500" />
-        <h3 className="text-sm font-semibold">General Information</h3>
+        <h3 className="text-sm font-semibold">{t("odpPop.generalInformation")}</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
@@ -86,14 +88,14 @@ export function OdpGeneralInfoSection({
             <FormItem>
               <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <RiHashtag className="size-3" />
-                Code
+                {t("common.code")}
               </FormLabel>
               <FormControl>
                 <div className="flex items-center rounded-lg border border-input bg-background pl-3 focus-within:ring-1 focus-within:ring-ring h-10 w-full">
                   <span className="text-sm font-semibold text-muted-foreground/60 select-none">ODP-</span>
                   <Input
                     className="flex-1 border-none shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 px-1 text-sm uppercase h-full bg-transparent font-medium"
-                    placeholder="LOCATION"
+                    placeholder={t("odpPop.locationPlaceholder")}
                     value={middle}
                     onChange={(e) => handleMiddleChange(e.target.value)}
                     disabled={readOnly || isPending || mode !== "new"}
@@ -111,9 +113,9 @@ export function OdpGeneralInfoSection({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-xs font-medium text-muted-foreground">ODP Name</FormLabel>
+              <FormLabel className="text-xs font-medium text-muted-foreground">{t("odpPop.odpName")}</FormLabel>
               <FormControl>
-                <Input placeholder="ODP LABUAN MAIN" {...field} disabled={readOnly || isPending} />
+                <Input placeholder={t("odpPop.odpNamePlaceholder", "ODP LABUAN MAIN")} {...field} disabled={readOnly || isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -127,7 +129,7 @@ export function OdpGeneralInfoSection({
             <FormItem>
               <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <RiStackLine className="size-3" />
-                Total Ports
+                {t("odpPop.totalPorts")}
               </FormLabel>
               <Select
                 onValueChange={(val) => field.onChange(Number(val))}
@@ -136,7 +138,7 @@ export function OdpGeneralInfoSection({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Ports" />
+                    <SelectValue placeholder={t("odpPop.selectPorts")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -162,7 +164,7 @@ export function OdpGeneralInfoSection({
             <FormItem>
               <FormLabel className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
                 <RiInformationLine className="size-3" />
-                Status
+                {t("common.status")}
               </FormLabel>
               <Select
                 onValueChange={field.onChange}
@@ -171,7 +173,7 @@ export function OdpGeneralInfoSection({
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Status" />
+                    <SelectValue placeholder={t("odpPop.selectStatus")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

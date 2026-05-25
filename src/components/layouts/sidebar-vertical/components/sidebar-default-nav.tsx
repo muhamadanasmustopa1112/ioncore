@@ -363,6 +363,33 @@ const MENU_KEY_MAP: Record<string, string> = {
   'Infrastructure': 'common.infrastructure',
   'Strategic': 'common.strategic',
   'Admin': 'common.admin',
+  // Network & Orchestration sub-items
+  'ION Radius': 'menu.ionRadius',
+  'Router [NAS]': 'menu.routerNas',
+  'PPP Users': 'menu.pppUsers',
+  'Service Plan': 'menu.servicePlan',
+  'Bandwidth': 'menu.bandwidth',
+  'Profile Group': 'menu.profileGroup',
+  'PPP Profile': 'menu.pppProfile',
+  'ODP | POP Data': 'menu.odpPopData',
+  'Manage ODP | POP': 'menu.manageOdpPop',
+  'View Map': 'menu.viewMap',
+  // Technician sub-items
+  'Team Pairing': 'menu.teamPairing',
+  'NOC Queue': 'menu.nocQueue',
+  // Administration sub-items
+  'Hierarchy': 'menu.hierarchy',
+  'Capability': 'menu.capability',
+  'Coverage': 'menu.coverage',
+  'Policy': 'menu.policy',
+  'Users & Roles': 'menu.usersAndRoles',
+  'User Management': 'menu.userManagement',
+  'Role Management': 'menu.roleManagement',
+  'Schema Builder': 'menu.schemaBuilder',
+  'Customer Types': 'menu.customerTypes',
+  'Products': 'menu.products',
+  'Audit Log': 'menu.auditLog',
+  'Access Policies': 'menu.accessPolicies',
 };
 
 function translateMenuItem(item: MenuItem, t: (key: string) => string): MenuItem {

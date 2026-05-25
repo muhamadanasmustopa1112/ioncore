@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RiDeleteBin7Line, RiEditLine, RiEyeLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -26,6 +27,7 @@ import { useBandwidthStore } from "../../../store/bandwidth";
 import { useDeleteBandwidth } from "../../../api/delete-bandwidth";
 
 export function ActionsCell({ row }: { row: Row<BandwidthItem> }) {
+  const { t } = useTranslation();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { openBandwidthFormSheet, setSelectedBandwidth } = useBandwidthStore();
 
@@ -68,11 +70,11 @@ export function ActionsCell({ row }: { row: Row<BandwidthItem> }) {
         <DropdownMenuContent side="bottom" align="end">
           <DropdownMenuItem className="cursor-pointer" onClick={handleEditClick}>
             <RiEditLine />
-            Edit
+            {t("nocBandwidth.actions.edit", "Edit")}
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" onClick={handleDetailClick}>
             <RiEyeLine />
-            Detail
+            {t("nocBandwidth.actions.detail", "Detail")}
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
@@ -80,7 +82,7 @@ export function ActionsCell({ row }: { row: Row<BandwidthItem> }) {
             onClick={handleDeleteClick}
           >
             <RiDeleteBin7Line />
-            Delete
+            {t("nocBandwidth.actions.delete", "Delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -88,19 +90,22 @@ export function ActionsCell({ row }: { row: Row<BandwidthItem> }) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>{t("nocBandwidth.actions.deleteConfirmTitle", "Are you sure?")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the bandwidth plan "{row.original.name}". This action cannot be undone.
+              {t("nocBandwidth.actions.deleteConfirmDesc", {
+                defaultValue: `This will permanently delete the bandwidth plan "${row.original.name}". This action cannot be undone.`,
+                name: row.original.name,
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>{t("nocBandwidth.actions.cancel", "Cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? t("nocBandwidth.actions.deleting", "Deleting...") : t("nocBandwidth.actions.delete", "Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

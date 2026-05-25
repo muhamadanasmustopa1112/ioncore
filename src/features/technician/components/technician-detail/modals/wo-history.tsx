@@ -3,11 +3,12 @@
 import { format } from "date-fns";
 import { Loader2, AlertCircle, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { paths } from "@/config/paths";
 import { ModalShell } from "./shell";
-import { STATE_VARIANT, STATE_LABEL, TYPE_LABEL } from "../shared";
+import { STATE_VARIANT, STATE_LABEL, TYPE_LABEL, STATE_I18N_KEY, TYPE_I18N_KEY } from "../shared";
 import type { WorkOrderHistoryItem } from "../../../types/technician-api";
 
 function fmtDate(s: string | undefined | null) {
@@ -23,6 +24,7 @@ const STATE_BORDER: Record<string, string> = {
 };
 
 function HistoryRow({ item }: { item: WorkOrderHistoryItem }) {
+  const { t } = useTranslation();
   const borderColor = STATE_BORDER[item.state] ?? "border-l-slate-300";
   return (
     <li className={`border-l-4 ${borderColor} pl-4 pr-3 py-3 bg-white dark:bg-slate-900 rounded-r-lg hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors`}>
@@ -37,17 +39,19 @@ function HistoryRow({ item }: { item: WorkOrderHistoryItem }) {
               <ExternalLink className="size-3 opacity-60" />
             </Link>
             <Badge variant={STATE_VARIANT[item.state] ?? "primary"} appearance="light" size="sm" className="uppercase text-[10px]">
-              {STATE_LABEL[item.state] ?? item.state}
+              {t(STATE_I18N_KEY[item.state]) || STATE_LABEL[item.state] || item.state}
             </Badge>
           </div>
           <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1">
-            {TYPE_LABEL[item.type] ?? item.type}
+            {t(TYPE_I18N_KEY[item.type]) || TYPE_LABEL[item.type] || item.type}
           </p>
           {item.summary && (
             <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed">{item.summary}</p>
           )}
           {item.technician_names?.length > 0 && (
-            <p className="text-[10px] text-slate-400 mt-1">Team: {item.technician_names.join(", ")}</p>
+            <p className="text-[10px] text-slate-400 mt-1">
+              {t("workOrder.noc.team") || "Team"}: {item.technician_names.join(", ")}
+            </p>
           )}
         </div>
         <span className="text-[10px] text-slate-400 whitespace-nowrap shrink-0 mt-0.5">{fmtDate(item.completed_at)}</span>
@@ -75,13 +79,14 @@ export function WOHistoryModal({
   onRetry: () => void;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <ModalShell
       title={title}
       subtitle={subtitle}
       onClose={onClose}
       widthClass="max-w-xl"
-      footer={<Button variant="outline" size="sm" onClick={onClose}>Close</Button>}
+      footer={<Button variant="outline" size="sm" onClick={onClose}>{t("common.close")}</Button>}
     >
       {isLoading && (
         <div className="flex items-center justify-center py-16">
@@ -92,18 +97,20 @@ export function WOHistoryModal({
       {isError && (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <AlertCircle className="size-8 text-rose-400" />
-          <p className="text-sm text-slate-500">Failed to load history.</p>
-          <Button variant="outline" size="sm" onClick={onRetry}>Retry</Button>
+          <p className="text-sm text-slate-500">{t("workOrder.detail.modals.history.failedToLoad")}</p>
+          <Button variant="outline" size="sm" onClick={onRetry}>{t("workOrder.noc.retry") || "Retry"}</Button>
         </div>
       )}
 
       {!isLoading && !isError && (
         <>
           {typeof total === "number" && (
-            <p className="text-xs text-slate-400 mb-3">{total} work order{total !== 1 ? "s" : ""} found</p>
+            <p className="text-xs text-slate-400 mb-3">
+              {t(total === 1 ? "workOrder.detail.modals.history.workOrderFound" : "workOrder.detail.modals.history.workOrdersFound", { count: total })}
+            </p>
           )}
           {items.length === 0 ? (
-            <p className="text-sm text-slate-400 italic text-center py-8">No work order history found.</p>
+            <p className="text-sm text-slate-400 italic text-center py-8">{t("workOrder.detail.modals.history.noHistory")}</p>
           ) : (
             <ol className="space-y-2">
               {items.map((item, index) => <HistoryRow key={item.id || item.work_order_id || index} item={item} />)}

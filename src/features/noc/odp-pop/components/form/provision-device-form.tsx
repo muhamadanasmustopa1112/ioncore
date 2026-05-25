@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ import { useProvisioningStore } from "../../store/provisioning";
 import { DEFAULT_PROVISIONING_VALUES, ProvisioningFormValues, provisioningSchema } from "../../types/provisioning";
 
 export function ProvisionDeviceForm() {
+  const { t } = useTranslation();
   const { closeProvisioningSheet } = useProvisioningStore();
 
   const form = useForm<ProvisioningFormValues>({
@@ -55,7 +57,7 @@ export function ProvisionDeviceForm() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                 <RiInformationLine className="size-4 text-blue-500" />
-                <h3 className="text-sm font-semibold">Device Identification</h3>
+                <h3 className="text-sm font-semibold">{t("odpPop.deviceIdentification", "Device Identification")}</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -64,11 +66,11 @@ export function ProvisionDeviceForm() {
                   name="deviceType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">Device Type</FormLabel>
+                      <FormLabel className="text-xs text-muted-foreground">{t("odpPop.deviceType", "Device Type")}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
+                            <SelectValue placeholder={t("odpPop.selectType", "Select type")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -89,7 +91,7 @@ export function ProvisionDeviceForm() {
                   name="serialNumber"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">Serial Number (Warehouse)</FormLabel>
+                      <FormLabel className="text-xs text-muted-foreground">{t("odpPop.serialNumberWarehouse", "Serial Number (Warehouse)")}</FormLabel>
                       <Select onValueChange={(val) => {
                         field.onChange(val);
                         // Mock auto-filling name and model based on SN
@@ -103,7 +105,7 @@ export function ProvisionDeviceForm() {
                       }} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select from Warehouse" />
+                            <SelectValue placeholder={t("odpPop.selectFromWarehouse", "Select from Warehouse")} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -124,9 +126,9 @@ export function ProvisionDeviceForm() {
                   name="deviceName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">Device Name</FormLabel>
+                      <FormLabel className="text-xs text-muted-foreground">{t("odpPop.deviceName", "Device Name")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. OLT-JKT-01" {...field} />
+                        <Input placeholder={t("odpPop.deviceNamePlaceholder", "e.g. OLT-JKT-01")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -137,9 +139,9 @@ export function ProvisionDeviceForm() {
                   name="deviceModel"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">Model</FormLabel>
+                      <FormLabel className="text-xs text-muted-foreground">{t("odpPop.model", "Model")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Raisecom ISCOM5508" {...field} />
+                        <Input placeholder={t("odpPop.modelPlaceholder", "e.g. Raisecom ISCOM5508")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -152,7 +154,7 @@ export function ProvisionDeviceForm() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                 <RiSettings4Line className="size-4 text-purple-500" />
-                <h3 className="text-sm font-semibold">Network Configuration</h3>
+                <h3 className="text-sm font-semibold">{t("odpPop.networkConfiguration", "Network Configuration")}</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -161,7 +163,7 @@ export function ProvisionDeviceForm() {
                   name="ipAddress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">IP Address</FormLabel>
+                      <FormLabel className="text-xs text-muted-foreground">{t("odpPop.ipAddress", "IP Address")}</FormLabel>
                       <FormControl>
                         <Input placeholder="10.1.x.x" {...field} />
                       </FormControl>
@@ -174,7 +176,7 @@ export function ProvisionDeviceForm() {
                   name="macAddress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs text-muted-foreground">MAC Address</FormLabel>
+                      <FormLabel className="text-xs text-muted-foreground">{t("odpPop.macAddress", "MAC Address")}</FormLabel>
                       <FormControl>
                         <Input placeholder="AA:BB:CC:DD:EE:FF" {...field} />
                       </FormControl>
@@ -189,7 +191,7 @@ export function ProvisionDeviceForm() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                 <RiPulseLine className="size-4 text-emerald-500" />
-                <h3 className="text-sm font-semibold">Operational Status</h3>
+                <h3 className="text-sm font-semibold">{t("odpPop.operationalStatus", "Operational Status")}</h3>
               </div>
 
               <FormField
@@ -197,11 +199,11 @@ export function ProvisionDeviceForm() {
                 name="status"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs text-muted-foreground">Initial Status</FormLabel>
+                    <FormLabel className="text-xs text-muted-foreground">{t("odpPop.initialStatus", "Initial Status")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder={t("odpPop.selectStatus")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

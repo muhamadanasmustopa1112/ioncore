@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Loader2, AlertCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { paths } from "@/config/paths";
 import {
   Breadcrumb,
@@ -31,11 +32,14 @@ import {
   STATE_LABEL,
   TYPE_LABEL,
   PRIORITY_VARIANT,
+  STATE_I18N_KEY,
+  TYPE_I18N_KEY,
   humanize,
   fmtDate,
 } from "./shared";
 
 export function TechnicianWorkOrderDetail({ id }: { id: string }) {
+  const { t } = useTranslation();
   const { data: wo, isLoading, isError, error } = useWorkOrder({ id });
 
   const [showPairing, setShowPairing] = useState(false);
@@ -57,13 +61,13 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
       <div className="flex-1 p-4 sm:p-6 lg:p-8 flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <AlertCircle className="size-10 text-rose-500" />
         <p className="text-sm text-slate-600">
-          Failed to load work order: {(error as Error)?.message ?? "unknown error"}
+          {t("workOrder.detail.failedToLoad")} {(error as Error)?.message ?? "unknown error"}
         </p>
         <Link
           href={paths.dashboard.technician.root.getHref()}
           className="text-xs text-primary font-bold uppercase tracking-widest hover:underline"
         >
-          Back to list
+          {t("workOrder.detail.backToList")}
         </Link>
       </div>
     );
@@ -79,13 +83,13 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={paths.dashboard.root.getHref()}>Home</Link>
+              <Link href={paths.dashboard.root.getHref()}>{t("common.home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={paths.dashboard.technician.root.getHref()}>Technician &amp; Field</Link>
+              <Link href={paths.dashboard.technician.root.getHref()}>{t("technician.title")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -108,10 +112,10 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
           </div>
           <div className="flex-1 min-w-0 py-0.5">
             <h3 className="font-bold text-base tracking-tight uppercase">
-              {false /* Forced FALSE */ ? "CRITICAL: SLA Breached" : `SLA Warning (${wo.assignment_sla.warning_at_percent || 80}% Limit Reached)`}
+              {false /* Forced FALSE */ ? t("workOrder.detail.slaCritical") : t("workOrder.detail.slaWarning", { percent: wo.assignment_sla.warning_at_percent || 80 })}
             </h3>
             <p className="text-sm mt-0.5 opacity-90 font-medium">
-              This Work Order requires urgent attention. System detected {wo.assignment_sla.warning_at_percent || 80}% assignment SLA utilization threshold crossed.
+              {t("workOrder.detail.slaDescription", { percent: wo.assignment_sla.warning_at_percent || 80 })}
             </p>
           </div>
           {!hasTeam && (
@@ -121,7 +125,7 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
                 }`}
               onClick={() => setShowPairing(true)}
             >
-              Assign Pairing Now
+              {t("workOrder.detail.assignPairingNow")}
             </Button>
           )}
         </div>
@@ -138,21 +142,26 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
                   <>
                     <span className="text-slate-300">·</span>
                     <span className="text-[10px] sm:text-xs text-slate-500 font-semibold uppercase tracking-wider">
-                      {TYPE_LABEL[wo.type] ?? humanize(wo.type)}
+                      {t(TYPE_I18N_KEY[wo.type]) || TYPE_LABEL[wo.type] || humanize(wo.type)}
                     </span>
                   </>
                 )}
                 {wo.priority && (
                   <Badge variant={PRIORITY_VARIANT[wo.priority] ?? "primary"} appearance="light" size="sm" className="uppercase">
-                    {wo.priority}
+                    {(() => {
+                      const priorityLower = wo.priority?.toLowerCase();
+                      return t(`technician.priority.${priorityLower}`) && !t(`technician.priority.${priorityLower}`).startsWith("technician.priority")
+                        ? t(`technician.priority.${priorityLower}`)
+                        : wo.priority;
+                    })()}
                   </Badge>
                 )}
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-on-surface line-clamp-2 mb-1">{wo.title || "—"}</h2>
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs sm:text-sm text-slate-500">
-                <span>Scheduled: <span className="font-semibold text-slate-700 dark:text-slate-300">{fmtDate(wo.requested_installation)}</span></span>
+                <span>{t("workOrder.detail.scheduled")} <span className="font-semibold text-slate-700 dark:text-slate-300">{fmtDate(wo.requested_installation)}</span></span>
                 {wo.requested_at && (
-                  <span>Requested: <span className="font-semibold text-slate-700 dark:text-slate-300">{fmtDate(wo.requested_at)}</span></span>
+                  <span>{t("workOrder.detail.requested")} <span className="font-semibold text-slate-700 dark:text-slate-300">{fmtDate(wo.requested_at)}</span></span>
                 )}
               </div>
             </div>
@@ -161,28 +170,28 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               {wo.state && (
                 <Badge variant={STATE_VARIANT[wo.state] ?? "primary"} appearance="light" size="lg" className="uppercase tracking-widest font-bold">
-                  {STATE_LABEL[wo.state] ?? humanize(wo.state)}
+                  {t(STATE_I18N_KEY[wo.state]) || STATE_LABEL[wo.state] || humanize(wo.state)}
                 </Badge>
               )}
               {!isDone && (
                 <>
                   <Button variant="outline" size="sm" onClick={() => setShowPairing(true)} className="text-[10px] uppercase font-bold">
-                    {hasTeam ? "Reassign" : "Assign"} Pairing
+                    {hasTeam ? t("workOrder.detail.reassignPairing") : t("workOrder.detail.assignPairing")}
                   </Button>
 
                   <Button variant="outline" size="sm" onClick={() => setShowCrossArea(true)} className="text-[10px] uppercase font-bold">
-                    Cross-Area
+                    {t("workOrder.detail.crossArea")}
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => setShowReschedule(true)} className="text-[10px] uppercase font-bold">
-                    Reschedule
+                    {t("workOrder.detail.reschedule")}
                   </Button>
                   {wo.state === "pending_noc_verification" && (
                     <Button variant="primary" size="sm" onClick={() => setShowNOC(true)} className="text-[10px] uppercase font-bold">
-                      NOC Verify
+                      {t("workOrder.detail.nocVerify")}
                     </Button>
                   )}
                   <Button variant="destructive" appearance="ghost" size="sm" onClick={() => setShowCancel(true)} className="text-[10px] uppercase font-bold">
-                    Cancel WO
+                    {t("workOrder.detail.cancelWo")}
                   </Button>
                 </>
               )}

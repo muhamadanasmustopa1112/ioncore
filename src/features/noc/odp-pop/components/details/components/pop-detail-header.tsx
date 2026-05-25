@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { RiMapPinLine, RiPencilLine, RiAddLine, RiSignalTowerLine } from "@remixicon/react";
@@ -8,6 +9,7 @@ import { useProvisioningStore } from "../../../store/provisioning";
 import { ProvisionDeviceFormSheet } from "../../form/provision-device-form-sheet";
 
 export function PopDetailHeader({ pop }: { pop: PopData }) {
+  const { t } = useTranslation();
   const { openProvisioningSheet } = useProvisioningStore();
 
   return (
@@ -26,7 +28,7 @@ export function PopDetailHeader({ pop }: { pop: PopData }) {
               appearance="light"
               className="px-3 py-1 text-[10px] font-black uppercase tracking-widest"
             >
-              Active
+              {t("common.active")}
             </Badge>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground font-medium">
@@ -39,14 +41,14 @@ export function PopDetailHeader({ pop }: { pop: PopData }) {
       <div className="flex items-center gap-3 shrink-0">
         <Button variant="outline" className="h-11 px-6 font-bold gap-2 hover:bg-muted/50 border-2">
           <RiPencilLine className="size-5 text-muted-foreground" />
-          Edit Details
+          {t("odpPop.editDetails", "Edit Details")}
         </Button>
         <Button
           className="h-11 px-8 font-bold gap-2 bg-primary hover:bg-primary/80 shadow-md"
           onClick={openProvisioningSheet}
         >
           <RiAddLine className="size-5" />
-          Provision Device
+          {t("odpPop.provisionDevice", "Provision Device")}
         </Button>
       </div>
 
