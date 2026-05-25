@@ -1,6 +1,7 @@
 "use client";
 
 import { UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { RiPriceTag3Line, RiFileTextLine } from "@remixicon/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ interface PricingContractSectionProps {
 }
 
 export function PricingContractSection({ form, disabled }: PricingContractSectionProps) {
+  const { t } = useTranslation();
   const { register, watch, setValue, formState: { errors } } = form;
 
   const earlyTerminationEnabled = watch("early_termination_enabled");
@@ -30,11 +32,11 @@ export function PricingContractSection({ form, disabled }: PricingContractSectio
       <div className="space-y-4 pt-2">
         <div className="flex items-center gap-2 pb-2 border-b border-border/50">
           <RiPriceTag3Line className="size-4 text-orange-500" />
-          <h3 className="text-sm font-semibold">Pricing</h3>
+          <h3 className="text-sm font-semibold">{t("administration.schema.pricing")}</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">Pricing Type</Label>
+            <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.pricingType")}</Label>
             <Select
               value={watch("pricing_type")}
               onValueChange={(v) =>
@@ -46,13 +48,13 @@ export function PricingContractSection({ form, disabled }: PricingContractSectio
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="flat_rate">Flat Rate</SelectItem>
-                <SelectItem value="negotiated">Negotiated</SelectItem>
+                <SelectItem value="flat_rate">{t("administration.schema.pricingFlatRate")}</SelectItem>
+                <SelectItem value="negotiated">{t("administration.schema.pricingNegotiated")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">Tax Rate (%)</Label>
+            <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.taxRate")}</Label>
             <Input
               type="number"
               min={0}
@@ -65,7 +67,7 @@ export function PricingContractSection({ form, disabled }: PricingContractSectio
             )}
           </div>
           <div className="flex items-center justify-between md:col-span-2">
-            <Label className="text-xs font-medium text-muted-foreground">Tax Included</Label>
+            <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.taxIncluded")}</Label>
             <Switch
               size="lg"
               checked={watch("tax_included")}
@@ -80,11 +82,11 @@ export function PricingContractSection({ form, disabled }: PricingContractSectio
       <div className="space-y-4 pt-2">
         <div className="flex items-center gap-2 pb-2 border-b border-border/50">
           <RiFileTextLine className="size-4 text-red-500" />
-          <h3 className="text-sm font-semibold">Contract</h3>
+          <h3 className="text-sm font-semibold">{t("administration.schema.contract")}</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label className="text-xs font-medium text-muted-foreground">Lock-in Months</Label>
+            <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.lockInMonths")}</Label>
             <Input
               type="number"
               min={0}
@@ -96,7 +98,7 @@ export function PricingContractSection({ form, disabled }: PricingContractSectio
             )}
           </div>
           <div className="flex items-center justify-between">
-            <Label className="text-xs font-medium text-muted-foreground">Early Termination Enabled</Label>
+            <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.earlyTerminationEnabled")}</Label>
             <Switch
               size="lg"
               checked={earlyTerminationEnabled}
@@ -107,7 +109,7 @@ export function PricingContractSection({ form, disabled }: PricingContractSectio
           {earlyTerminationEnabled && (
             <>
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Termination Type</Label>
+                <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.terminationType")}</Label>
                 <Select
                   value={watch("early_termination_type") ?? "fixed_amount"}
                   onValueChange={(v) =>
@@ -119,13 +121,13 @@ export function PricingContractSection({ form, disabled }: PricingContractSectio
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
-                    <SelectItem value="percentage_of_remaining">Percentage of Remaining</SelectItem>
+                    <SelectItem value="fixed_amount">{t("administration.schema.terminationFixed")}</SelectItem>
+                    <SelectItem value="percentage_of_remaining">{t("administration.schema.terminationPercentage")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Termination Value</Label>
+                <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.terminationValue")}</Label>
                 <Input
                   type="number"
                   min={0}

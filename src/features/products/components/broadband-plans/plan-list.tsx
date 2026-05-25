@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { getCoreRowModel, getSortedRowModel, useReactTable, RowSelectionState } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
 import { RiAddLine } from "@remixicon/react";
@@ -24,10 +25,11 @@ import {
   useSetBroadbandPlanVisibility,
 } from "../../api/products-queries";
 import type { BroadbandPlan } from "../../types/products";
-import { getPlanColumns } from "./plan-columns";
+import { usePlanColumns } from "./plan-columns";
 import { PlanSheet } from "./plan-sheet";
 
 export function PlanList() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useQueryStates({
     search: parseAsString,
     branch: parseAsString,
@@ -72,19 +74,15 @@ export function PlanList() {
     setFilter({ page: next.page, limit: next.limit });
   };
 
-  const columns = useMemo(
-    () => getPlanColumns(
-      openEdit,
-      openDetail,
-      (id) => deletePlan.mutate(id),
-      (id) => submitReview.mutate(id),
-      (id) => approvePlan.mutate(id),
-      (id, notes) => rejectPlan.mutate({ id, notes }),
-      (id, status) => setVisibility.mutate({ id, status }),
-      (row) => updatePlan.mutate({ id: row.id, payload: { name: row.name, speed_download_mbps: row.speed_download_mbps, speed_upload_mbps: row.speed_upload_mbps, price: row.price, one_time_charge: row.one_time_charge, customer_type: row.customer_type, is_active: row.is_active } }),
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+  const columns = usePlanColumns(
+    openEdit,
+    openDetail,
+    (id) => deletePlan.mutate(id),
+    (id) => submitReview.mutate(id),
+    (id) => approvePlan.mutate(id),
+    (id, notes) => rejectPlan.mutate({ id, notes }),
+    (id, status) => setVisibility.mutate({ id, status }),
+    (row) => updatePlan.mutate({ id: row.id, payload: { name: row.name, speed_download_mbps: row.speed_download_mbps, speed_upload_mbps: row.speed_upload_mbps, price: row.price, one_time_charge: row.one_time_charge, customer_type: row.customer_type, is_active: row.is_active } }),
   );
 
   const table = useReactTable({
@@ -113,7 +111,7 @@ export function PlanList() {
                 <div className="relative flex-1 min-w-[150px]">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
-                    placeholder="Search plan..."
+                    placeholder={t("administration.productsPage.planSearch")}
                     value={filter.search || ""}
                     onChange={(e) => setFilter({ search: e.target.value || null, page: 1 })}
                     className="ps-9 w-full"
@@ -129,10 +127,10 @@ export function PlanList() {
                   onValueChange={(v) => setFilter({ branch: v === "all" ? null : v, page: 1 })}
                 >
                   <SelectTrigger className="h-9 w-[180px]">
-                    <SelectValue placeholder="All branches" />
+                    <SelectValue placeholder={t("administration.productsPage.planAllBranches")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All branches</SelectItem>
+                    <SelectItem value="all">{t("administration.productsPage.planAllBranches")}</SelectItem>
                     {branches.map((b) => (
                       <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                     ))}
@@ -143,20 +141,20 @@ export function PlanList() {
                   onValueChange={(v) => setFilter({ status: v === "all" ? null : v, page: 1 })}
                 >
                   <SelectTrigger className="h-9 w-[140px]">
-                    <SelectValue placeholder="All statuses" />
+                    <SelectValue placeholder={t("administration.productsPage.planAllStatuses")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="in_review">In Review</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="published">Published</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="all">{t("administration.productsPage.planAllStatuses")}</SelectItem>
+                    <SelectItem value="draft">{t("administration.productsPage.planStatusDraft")}</SelectItem>
+                    <SelectItem value="in_review">{t("administration.productsPage.planStatusInReview")}</SelectItem>
+                    <SelectItem value="rejected">{t("administration.productsPage.planStatusRejected")}</SelectItem>
+                    <SelectItem value="approved">{t("administration.productsPage.planStatusApproved")}</SelectItem>
+                    <SelectItem value="published">{t("administration.productsPage.planStatusPublished")}</SelectItem>
+                    <SelectItem value="inactive">{t("administration.productsPage.planStatusInactive")}</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button variant="primary" className="h-9 px-4 text-sm font-semibold" onClick={openNew}>
-                  <RiAddLine className="size-4" /> Add Plan
+                  <RiAddLine className="size-4" /> {t("administration.productsPage.planAddBtn")}
                 </Button>
               </div>
             </CardHeading>

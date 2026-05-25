@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RiInformationLine, RiSettings3Line } from "@remixicon/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,15 +18,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCapabilityStore } from "../../../store/capability";
 import { CapabilityJson, CapabilityPayload } from "../../../types/capability-api";
 
-const CAPABILITY_LABELS: Record<keyof CapabilityJson, string> = {
-  sales: "Sales",
-  helpdesk: "Helpdesk",
-  dispatch: "Dispatch",
-  stock_holding: "Stock Holding",
-  monitoring: "Monitoring",
-  collection: "Collection",
-  approval: "Approval",
-  auto_assignment: "Auto Assignment",
+const CAPABILITY_KEYS: Record<keyof CapabilityJson, string> = {
+  sales: "sales",
+  helpdesk: "helpdesk",
+  dispatch: "dispatch",
+  stock_holding: "stockHolding",
+  monitoring: "monitoring",
+  collection: "collection",
+  approval: "approval",
+  auto_assignment: "autoAssignment",
 };
 
 const DEFAULT_JSON: CapabilityJson = {
@@ -44,6 +45,7 @@ interface CapabilityFormProps {
 }
 
 export function CapabilityForm({ onSubmit }: CapabilityFormProps) {
+  const { t } = useTranslation();
   const { form, selectedCapability } = useCapabilityStore();
   const isDetailMode = form === "details";
 
@@ -87,19 +89,18 @@ export function CapabilityForm({ onSubmit }: CapabilityFormProps) {
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
-          {/* General */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
               <RiInformationLine className="size-4 text-blue-500" />
-              <h3 className="text-sm font-semibold">General Information</h3>
+              <h3 className="text-sm font-semibold">{t("administration.branch.capability.generalInformation")}</h3>
             </div>
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
-                Name <span className="text-red-500">*</span>
+                {t("administration.branch.capability.name")} <span className="text-red-500">*</span>
               </Label>
               <Input
-                placeholder="e.g. Full Capability"
+                placeholder={t("administration.branch.capability.namePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isDetailMode}
@@ -108,10 +109,10 @@ export function CapabilityForm({ onSubmit }: CapabilityFormProps) {
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
-                Description
+                {t("administration.branch.capability.description")}
               </Label>
               <Textarea
-                placeholder="Describe what this capability set enables for the branch..."
+                placeholder={t("administration.branch.capability.descriptionPlaceholder")}
                 className="min-h-[72px] resize-none"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -121,11 +122,11 @@ export function CapabilityForm({ onSubmit }: CapabilityFormProps) {
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
-                Status
+                {t("administration.branch.capability.status")}
               </Label>
               {isDetailMode ? (
                 <Input
-                  value={isActive === "true" ? "Active" : "Inactive"}
+                  value={isActive === "true" ? t("administration.branch.capability.active") : t("administration.branch.capability.inactive")}
                   disabled
                 />
               ) : (
@@ -134,30 +135,29 @@ export function CapabilityForm({ onSubmit }: CapabilityFormProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="true">Active</SelectItem>
-                    <SelectItem value="false">Inactive</SelectItem>
+                    <SelectItem value="true">{t("administration.branch.capability.active")}</SelectItem>
+                    <SelectItem value="false">{t("administration.branch.capability.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               )}
             </div>
           </div>
 
-          {/* Capability Flags */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 pb-1 border-b border-border/50">
               <RiSettings3Line className="size-4 text-violet-500" />
-              <h3 className="text-sm font-semibold">Feature Flags</h3>
+              <h3 className="text-sm font-semibold">{t("administration.branch.capability.featureFlags")}</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-3">
-              {(Object.keys(CAPABILITY_LABELS) as Array<keyof CapabilityJson>).map(
+              {(Object.keys(CAPABILITY_KEYS) as Array<keyof CapabilityJson>).map(
                 (key) => (
                   <div
                     key={key}
                     className="flex items-center justify-between rounded-lg border border-border/60 px-4 py-3 bg-muted/20"
                   >
                     <span className="text-sm font-medium">
-                      {CAPABILITY_LABELS[key]}
+                      {t(`administration.branch.capability.${CAPABILITY_KEYS[key]}`)}
                     </span>
                     <Switch
                       checked={capJson[key]}

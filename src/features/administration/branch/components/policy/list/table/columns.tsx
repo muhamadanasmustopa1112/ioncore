@@ -5,13 +5,15 @@ import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { PolicyData } from "../../../../types/policy";
 import { ActionsCell } from "./actions-cell";
 
-export const columns: ColumnDef<PolicyData>[] = [
+export const getPolicyColumns = (
+  t: (key: string) => string
+): ColumnDef<PolicyData>[] => [
   {
     id: "name",
     accessorFn: (row) => row.name,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Name"
+        title={t("administration.branch.policy.name")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -27,7 +29,7 @@ export const columns: ColumnDef<PolicyData>[] = [
     accessorFn: (row) => row.description,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Description"
+        title={t("administration.branch.policy.description")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -51,7 +53,7 @@ export const columns: ColumnDef<PolicyData>[] = [
     accessorFn: (row) => row.policyJson.sla_hours,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="SLA (hrs)"
+        title={t("administration.branch.policy.slaHrs")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -68,7 +70,7 @@ export const columns: ColumnDef<PolicyData>[] = [
     id: "working_hours",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Working Hours"
+        title={t("administration.branch.policy.workingHours")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -91,7 +93,7 @@ export const columns: ColumnDef<PolicyData>[] = [
     accessorFn: (row) => row.policyJson.timezone,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Timezone"
+        title={t("administration.branch.policy.timezone")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -109,7 +111,7 @@ export const columns: ColumnDef<PolicyData>[] = [
     accessorFn: (row) => row.policyJson.tax_default,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Tax"
+        title={t("administration.branch.policy.tax")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -130,7 +132,7 @@ export const columns: ColumnDef<PolicyData>[] = [
     accessorFn: (row) => row.isActive,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Status"
+        title={t("administration.branch.policy.status")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -138,11 +140,11 @@ export const columns: ColumnDef<PolicyData>[] = [
     cell: ({ row }) =>
       row.original.isActive ? (
         <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-          Active
+          {t("administration.branch.policy.active")}
         </span>
       ) : (
         <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-          Inactive
+          {t("administration.branch.policy.inactive")}
         </span>
       ),
     enableSorting: true,
@@ -152,7 +154,7 @@ export const columns: ColumnDef<PolicyData>[] = [
     id: "actions",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Actions"
+        title={t("administration.branch.policy.actions")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -162,3 +164,5 @@ export const columns: ColumnDef<PolicyData>[] = [
     size: 75,
   },
 ];
+
+export const columns: ColumnDef<PolicyData>[] = [];

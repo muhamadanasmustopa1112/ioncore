@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getCoreRowModel, getSortedRowModel, useReactTable } from "@tanstack/react-table";
 import { Search } from "lucide-react";
 import { RiAddLine, RiUserSettingsLine } from "@remixicon/react";
@@ -23,10 +24,11 @@ import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import { useCustomerTypeList, useDeleteCustomerType } from "../api/customer-types-queries";
 import type { CustomerType } from "../types";
-import { getColumns } from "./list/columns";
+import { useCustomerTypeColumns } from "./list/columns";
 import { CustomerTypeFormSheet } from "./form/customer-type-form-sheet";
 
 export function CustomerTypesPage() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useQueryStates({
     search: parseAsString,
     page: parseAsInteger.withDefault(1),
@@ -57,11 +59,7 @@ export function CustomerTypesPage() {
   const openEdit = (row: CustomerType) => { setMode("edit"); setSelected(row); setSheetOpen(true); };
   const handleClose = () => { setSheetOpen(false); setSelected(null); };
 
-  const columns = useMemo(
-    () => getColumns(openEdit, (id) => deleteType.mutate(id)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+  const columns = useCustomerTypeColumns(openEdit, (id) => deleteType.mutate(id));
 
   const table = useReactTable({
     columns,
@@ -78,20 +76,20 @@ export function CustomerTypesPage() {
     <div className="relative h-full w-full overflow-hidden">
       <PageBreadcrumb
         items={[
-          { title: "Administration", path: paths.dashboard.administration.branch.root.getHref() },
-          { title: "Customer Types" },
+          { title: t("administration.customerTypesPage.breadcrumbAdmin"), path: paths.dashboard.administration.branch.root.getHref() },
+          { title: t("administration.customerTypesPage.breadcrumbTitle") },
         ]}
       />
 
       <Toolbar className="mt-5 items-start sm:items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Customer Types
+            {t("administration.customerTypesPage.title")}
           </ToolbarTitle>
           <div className="mt-2 flex items-center gap-2">
             <Badge variant="info" appearance="light" className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs">
               <RiUserSettingsLine className="size-3.5" />
-              {total} Types
+              {total} {t("administration.customerTypesPage.totalTypes")}
             </Badge>
           </div>
         </ToolbarHeading>
@@ -102,7 +100,7 @@ export function CustomerTypesPage() {
             onClick={openNew}
           >
             <RiAddLine className="size-4 sm:size-5" />
-            New Type
+            {t("administration.customerTypesPage.newType")}
           </Button>
         </ToolbarActions>
       </Toolbar>
@@ -116,7 +114,7 @@ export function CustomerTypesPage() {
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
                     className="ps-9"
-                    placeholder="Search by name or label…"
+                    placeholder={t("administration.customerTypesPage.searchPlaceholder")}
                     value={filter.search ?? ""}
                     onChange={(e) =>
                       setFilter({ search: e.target.value || null, page: 1, limit: filter.limit })

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   RiInformationLine,
   RiShieldLine,
@@ -36,6 +37,7 @@ interface PolicyFormProps {
 }
 
 export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
+  const { t } = useTranslation();
   const isNoc = branchType?.toLowerCase() === "noc";
   const { form, selectedPolicy } = usePolicyStore();
   const isDetailMode = form === "details";
@@ -152,19 +154,18 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
-          {/* General */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
               <RiInformationLine className="size-4 text-blue-500" />
-              <h3 className="text-sm font-semibold">General Information</h3>
+              <h3 className="text-sm font-semibold">{t("administration.branch.policy.generalInformation")}</h3>
             </div>
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
-                Name <span className="text-red-500">*</span>
+                {t("administration.branch.policy.name")} <span className="text-red-500">*</span>
               </Label>
               <Input
-                placeholder="e.g. Default SLA Policy"
+                placeholder={t("administration.branch.policy.namePlaceholder")}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isDetailMode}
@@ -173,10 +174,10 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
-                Description
+                {t("administration.branch.policy.description")}
               </Label>
               <Textarea
-                placeholder="Describe this policy..."
+                placeholder={t("administration.branch.policy.descriptionPlaceholder")}
                 className="min-h-[72px] resize-none"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -186,11 +187,11 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
-                Status
+                {t("administration.branch.policy.status")}
               </Label>
               {isDetailMode ? (
                 <Input
-                  value={isActive === "true" ? "Active" : "Inactive"}
+                  value={isActive === "true" ? t("administration.branch.policy.active") : t("administration.branch.policy.inactive")}
                   disabled
                 />
               ) : (
@@ -199,25 +200,24 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="true">Active</SelectItem>
-                    <SelectItem value="false">Inactive</SelectItem>
+                    <SelectItem value="true">{t("administration.branch.policy.active")}</SelectItem>
+                    <SelectItem value="false">{t("administration.branch.policy.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               )}
             </div>
           </div>
 
-          {/* SLA & Working Hours */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 pb-1 border-b border-border/50">
               <RiTimeLine className="size-4 text-amber-500" />
-              <h3 className="text-sm font-semibold">SLA & Working Hours</h3>
+              <h3 className="text-sm font-semibold">{t("administration.branch.policy.slaWorkingHours")}</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  SLA Hours
+                  {t("administration.branch.policy.slaHours")}
                 </Label>
                 <Input
                   type="number"
@@ -231,14 +231,14 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Timezone
+                  {t("administration.branch.policy.timezone")}
                 </Label>
                 {isDetailMode ? (
                   <Input value={timezone} disabled />
                 ) : (
                   <Select value={timezone} onValueChange={setTimezone}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select Timezone" />
+                      <SelectValue placeholder={t("administration.branch.policy.selectTimezone")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Asia/Jakarta">Asia/Jakarta (WIB)</SelectItem>
@@ -251,7 +251,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Work Hours Start
+                  {t("administration.branch.policy.workHoursStart")}
                 </Label>
                 <Input
                   type="time"
@@ -262,7 +262,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Work Hours End
+                  {t("administration.branch.policy.workHoursEnd")}
                 </Label>
                 <Input
                   type="time"
@@ -275,7 +275,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
-                Tax Default
+                {t("administration.branch.policy.taxDefault")}
               </Label>
               <div className="flex items-center gap-2">
                 <Input
@@ -295,17 +295,16 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
             </div>
           </div>
 
-          {/* Cable Configuration — NOC only */}
           {isNoc && <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 pb-1 border-b border-border/50">
               <RiInformationLine className="size-4 text-emerald-500" />
-              <h3 className="text-sm font-semibold">Cable Configuration</h3>
+              <h3 className="text-sm font-semibold">{t("administration.branch.policy.cableConfiguration")}</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Excess Cable Price
+                  {t("administration.branch.policy.excessCablePrice")}
                 </Label>
                 <div className="relative flex items-center">
                   <span className="absolute left-3 text-sm text-muted-foreground select-none">Rp</span>
@@ -324,7 +323,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Cable Threshold (meter)
+                  {t("administration.branch.policy.cableThresholdMeter")}
                 </Label>
                 <Input
                   type="text"
@@ -339,7 +338,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Cable Route Factor
+                  {t("administration.branch.policy.cableRouteFactor")}
                 </Label>
                 <Input
                   type="text"
@@ -354,7 +353,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Max Cable Run (meter)
+                  {t("administration.branch.policy.maxCableRunMeter")}
                 </Label>
                 <Input
                   type="text"
@@ -370,16 +369,15 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
             </div>
           </div>}
 
-          {/* ODP Selection Strategy — NOC only */}
           {isNoc && (
             <div className="space-y-4 pt-2">
               <div className="flex items-center gap-2 pb-1 border-b border-border/50">
                 <RiRouteLine className="size-4 text-orange-500" />
-                <h3 className="text-sm font-semibold">ODP Selection Strategy</h3>
+                <h3 className="text-sm font-semibold">{t("administration.branch.policy.odpSelectionStrategy")}</h3>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Strategy Type</Label>
+                <Label className="text-xs font-medium text-muted-foreground">{t("administration.branch.policy.strategyType")}</Label>
                 {isDetailMode ? (
                   <Input value={odpStrategy} disabled />
                 ) : (
@@ -399,8 +397,8 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-xs font-medium text-muted-foreground">
-                    Weight — Distance
-                    <span className="ml-1 text-muted-foreground/60 font-normal">(0–10)</span>
+                    {t("administration.branch.policy.weightDistance")}
+                    <span className="ml-1 text-muted-foreground/60 font-normal">{t("administration.branch.policy.weightHint")}</span>
                   </Label>
                   <Input
                     type="number"
@@ -415,8 +413,8 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-xs font-medium text-muted-foreground">
-                    Weight — Available Capacity
-                    <span className="ml-1 text-muted-foreground/60 font-normal">(0–10)</span>
+                    {t("administration.branch.policy.weightAvailableCapacity")}
+                    <span className="ml-1 text-muted-foreground/60 font-normal">{t("administration.branch.policy.weightHint")}</span>
                   </Label>
                   <Input
                     type="number"
@@ -433,18 +431,15 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
             </div>
           )}
 
-          {/* Notifications & Approval */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 pb-1 border-b border-border/50">
               <RiShieldLine className="size-4 text-violet-500" />
-              <h3 className="text-sm font-semibold">
-                Notifications & Approval Matrix
-              </h3>
+              <h3 className="text-sm font-semibold">{t("administration.branch.policy.notificationsApproval")}</h3>
             </div>
 
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
-                Notification Contacts
+                {t("administration.branch.policy.notificationContacts")}
               </Label>
               <Textarea
                 placeholder="e.g. ops@example.com, manager@example.com"
@@ -455,7 +450,7 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               />
               {!isDetailMode && (
                 <p className="text-[11px] text-muted-foreground">
-                  Comma-separated email addresses.
+                  {t("administration.branch.policy.notificationContactsHint")}
                 </p>
               )}
             </div>
@@ -463,10 +458,10 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Approval Level 1
+                  {t("administration.branch.policy.approvalLevel1")}
                 </Label>
                 <Input
-                  placeholder="e.g. manager"
+                  placeholder={t("administration.branch.policy.approvalLevel1Placeholder")}
                   value={approvalL1}
                   onChange={(e) => setApprovalL1(e.target.value)}
                   disabled={isDetailMode}
@@ -474,10 +469,10 @@ export function PolicyForm({ onSubmit, branchType }: PolicyFormProps) {
               </div>
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Approval Level 2
+                  {t("administration.branch.policy.approvalLevel2")}
                 </Label>
                 <Input
-                  placeholder="e.g. director"
+                  placeholder={t("administration.branch.policy.approvalLevel2Placeholder")}
                   value={approvalL2}
                   onChange={(e) => setApprovalL2(e.target.value)}
                   disabled={isDetailMode}

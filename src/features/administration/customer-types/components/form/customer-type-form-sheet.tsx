@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,8 +22,8 @@ import { useCreateCustomerType, useUpdateCustomerType } from "../../api/customer
 import type { CustomerType } from "../../types";
 
 const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  label: z.string().min(1, "Label is required"),
+  name: z.string().min(1),
+  label: z.string().min(1),
   description: z.string().optional(),
   is_active: z.boolean(),
 });
@@ -49,6 +50,7 @@ function Field({ label, error, children, required }: { label: string; error?: st
 }
 
 export function CustomerTypeFormSheet({ open, mode, selected, onClose }: Props) {
+  const { t } = useTranslation();
   const create = useCreateCustomerType();
   const update = useUpdateCustomerType();
   const isPending = create.isPending || update.isPending;
@@ -92,25 +94,25 @@ export function CustomerTypeFormSheet({ open, mode, selected, onClose }: Props) 
       <SheetContent className="inset-y-8 lg:end-10 start-auto h-full max-h-[calc(100vh-64px)] gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[480px] flex flex-col shadow-2xl">
         <SheetHeader className="border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl">
-            {mode === "edit" ? "Edit Customer Type" : "New Customer Type"}
+            {mode === "edit" ? t("administration.customerTypesPage.sheetTitleEdit") : t("administration.customerTypesPage.sheetTitleNew")}
           </SheetTitle>
         </SheetHeader>
 
         <SheetBody className="flex-1 overflow-y-auto p-5">
           <form id="customer-type-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <Field label="Name" required error={errors.name?.message}>
-              <Input {...register("name")} placeholder="e.g. residential" />
+            <Field label={t("administration.customerTypesPage.fieldName")} required error={errors.name?.message}>
+              <Input {...register("name")} placeholder={t("administration.customerTypesPage.fieldNamePlaceholder")} />
             </Field>
-            <Field label="Label" required error={errors.label?.message}>
-              <Input {...register("label")} placeholder="e.g. Residential" />
+            <Field label={t("administration.customerTypesPage.fieldLabel")} required error={errors.label?.message}>
+              <Input {...register("label")} placeholder={t("administration.customerTypesPage.fieldLabelPlaceholder")} />
             </Field>
-            <Field label="Description" error={errors.description?.message}>
-              <Textarea {...register("description")} placeholder="Optional description" rows={3} />
+            <Field label={t("administration.customerTypesPage.fieldDescription")} error={errors.description?.message}>
+              <Textarea {...register("description")} placeholder={t("administration.customerTypesPage.fieldDescriptionPlaceholder")} rows={3} />
             </Field>
             <div className="flex items-center justify-between rounded-lg border px-4 py-3">
               <div>
-                <p className="text-sm font-medium">Active</p>
-                <p className="text-xs text-muted-foreground">Available for selection in products and forms</p>
+                <p className="text-sm font-medium">{t("administration.customerTypesPage.fieldActive")}</p>
+                <p className="text-xs text-muted-foreground">{t("administration.customerTypesPage.fieldActiveDesc")}</p>
               </div>
               <Switch
                 checked={watch("is_active")}
@@ -122,10 +124,10 @@ export function CustomerTypeFormSheet({ open, mode, selected, onClose }: Props) 
 
         <SheetFooter className="border-t px-5 py-4 flex gap-2">
           <Button variant="outline" onClick={onClose} disabled={isPending} className="flex-1">
-            Cancel
+            {t("administration.customerTypesPage.cancel")}
           </Button>
           <Button variant="primary" type="submit" form="customer-type-form" disabled={isPending} className="flex-1">
-            {isPending ? "Saving…" : mode === "edit" ? "Save Changes" : "Create"}
+            {isPending ? t("administration.customerTypesPage.saving") : mode === "edit" ? t("administration.customerTypesPage.saveChanges") : t("administration.customerTypesPage.create")}
           </Button>
         </SheetFooter>
       </SheetContent>

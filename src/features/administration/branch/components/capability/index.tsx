@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { RiAddLine, RiSettings3Line } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import { CapabilityFormSheet } from "./form/capability-form-sheet";
 
 
 export function BranchCapabilityPage() {
+  const { t } = useTranslation();
   const { branches, isLoading, onSearchChange, onTypeChange, branchType } = useBranchSelect();
   const openSheet = useCapabilityStore((s) => s.openSheet);
   const selectedBranchId = useCapabilityStore((s) => s.selectedBranchId);
@@ -31,21 +33,21 @@ export function BranchCapabilityPage() {
       <PageBreadcrumb
         items={[
           {
-            title: "Administration",
+            title: t("menu.administration"),
             path: paths.dashboard.administration.branch.root.getHref(),
           },
           {
-            title: "Branch Management",
+            title: t("administration.branch.branchManagement"),
             path: paths.dashboard.administration.branch.root.getHref(),
           },
-          { title: "Capability Configuration" },
+          { title: t("administration.branch.capability.title") },
         ]}
       />
 
       <Toolbar className="mt-5 items-start sm:items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Branch Capability Configuration
+            {t("administration.branch.capability.title")}
           </ToolbarTitle>
           <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
             <Badge
@@ -54,11 +56,11 @@ export function BranchCapabilityPage() {
               className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs"
             >
               <RiSettings3Line className="size-3.5" />
-              Feature Capabilities
+              {t("administration.branch.capability.featureCapabilities")}
             </Badge>
             <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
             <span className="text-muted-foreground font-normal text-xs sm:text-sm">
-              Configure which features are enabled per branch
+              {t("administration.branch.capability.configureFeatures")}
             </span>
           </div>
         </ToolbarHeading>
@@ -70,15 +72,14 @@ export function BranchCapabilityPage() {
             onClick={() => openSheet("new")}
           >
             <RiAddLine className="size-4 sm:size-5" />
-            Add Capability
+            {t("administration.branch.capability.addCapability")}
           </Button>
         </ToolbarActions>
       </Toolbar>
 
-      {/* Branch Selector */}
       <div className="mt-4 flex flex-col gap-2 rounded-lg border bg-card px-4 py-3 sm:flex-row sm:items-center sm:gap-3">
         <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">
-          Select Branch:
+          {t("administration.branch.capability.selectBranch")}:
         </span>
         <BranchCombobox
           branches={branches}
@@ -96,7 +97,6 @@ export function BranchCapabilityPage() {
         )}
       </div>
 
-      {/* List — only shown when branch is selected */}
       {selectedBranchId ? (
         <div className="flex-1 overflow-auto mt-2">
           <CapabilityList branchId={selectedBranchId} />
@@ -104,9 +104,9 @@ export function BranchCapabilityPage() {
       ) : (
         <div className="mt-10 flex flex-col items-center justify-center text-center text-muted-foreground gap-2">
           <RiSettings3Line className="size-10 opacity-30" />
-          <p className="text-sm font-medium">Select a branch to view capabilities</p>
+          <p className="text-sm font-medium">{t("administration.branch.capability.selectBranchToView")}</p>
           <p className="text-xs opacity-70">
-            Choose a Regional, Area, or Sub Area branch from the selector above.
+            {t("administration.branch.capability.chooseBranchType")}
           </p>
         </div>
       )}

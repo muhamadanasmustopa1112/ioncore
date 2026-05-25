@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -15,6 +16,7 @@ import { CapabilityForm } from "./capability-form";
 import { CapabilityPayload } from "../../../types/capability-api";
 
 export function CapabilityFormSheet() {
+  const { t } = useTranslation();
   const sheetOpen = useCapabilityStore((s) => s.sheetOpen);
   const closeSheet = useCapabilityStore((s) => s.closeSheet);
   const form = useCapabilityStore((s) => s.form);
@@ -54,16 +56,24 @@ export function CapabilityFormSheet() {
     if (typeof submit === "function") (submit as () => void)();
   };
 
+  const getTitle = () => {
+    if (isNewMode) return t("administration.branch.capability.addNewCapability");
+    if (isEditMode) return t("administration.branch.capability.editCapability");
+    return t("administration.branch.capability.capabilityDetails");
+  };
+
+  const getSaveButtonText = () => {
+    if (isPending) return t("administration.branch.capability.saving");
+    if (isNewMode) return t("administration.branch.capability.addCapabilityButton");
+    return t("administration.branch.capability.saveChanges");
+  };
+
   return (
     <Sheet open={sheetOpen} onOpenChange={(open) => !open && closeSheet()}>
       <SheetContent className="inset-y-0 sm:inset-y-8 lg:end-10 start-auto h-full sm:max-h-[calc(100vh-64px)] gap-0 sm:rounded-lg border p-0 sm:max-w-none w-full md:w-[520px] lg:w-[600px] flex flex-col [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5 shadow-2xl">
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl">
-            {isNewMode
-              ? "Add Capability"
-              : isEditMode
-                ? "Edit Capability"
-                : "Capability Details"}
+            {getTitle()}
           </SheetTitle>
         </SheetHeader>
 
@@ -73,7 +83,7 @@ export function CapabilityFormSheet() {
 
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
           <Button variant="ghost" onClick={closeSheet}>
-            Close
+            {t("administration.branch.capability.close")}
           </Button>
           <div className="flex-1" />
           <Button
@@ -82,7 +92,7 @@ export function CapabilityFormSheet() {
             className="mr-3"
             disabled={isPending}
           >
-            Cancel
+            {t("administration.branch.capability.cancel")}
           </Button>
           <Button
             variant="primary"
@@ -90,11 +100,7 @@ export function CapabilityFormSheet() {
             className="font-semibold"
             disabled={isDetailMode || isPending}
           >
-            {isPending
-              ? "Saving..."
-              : isNewMode
-                ? "Add Capability"
-                : "Save Changes"}
+            {getSaveButtonText()}
           </Button>
         </SheetFooter>
       </SheetContent>

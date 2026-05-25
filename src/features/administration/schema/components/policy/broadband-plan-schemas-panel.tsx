@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import {
   RiAddLine,
@@ -53,6 +54,7 @@ function schemaTypeColor(type: string) {
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];
 
 export function BroadbandPlanSchemasPanel() {
+  const { t } = useTranslation();
   const [formOpen, setFormOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -109,7 +111,7 @@ export function BroadbandPlanSchemasPanel() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Assign rule schemas to broadband plans. The system applies these schemas when processing orders, billing, and service changes for each plan.
+        {t("administration.schema.bpsDesc")}
       </p>
 
       {/* Toolbar */}
@@ -117,7 +119,7 @@ export function BroadbandPlanSchemasPanel() {
         <div className="relative w-full sm:w-60">
           <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
-            placeholder="Search schema or plan..."
+            placeholder={t("administration.schema.bpsSearch")}
             className="pl-9 h-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -126,10 +128,10 @@ export function BroadbandPlanSchemasPanel() {
 
         <Select value={filterPlanId} onValueChange={setFilterPlanId}>
           <SelectTrigger className="h-9 w-full sm:w-56">
-            <SelectValue placeholder="All plans" />
+            <SelectValue placeholder={t("administration.schema.bpsAllPlans")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All plans</SelectItem>
+            <SelectItem value="all">{t("administration.schema.bpsAllPlans")}</SelectItem>
             {plans.map((p) => (
               <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
             ))}
@@ -145,7 +147,7 @@ export function BroadbandPlanSchemasPanel() {
           onClick={() => setFormOpen(true)}
         >
           <RiAddLine className="size-4 mr-1.5" />
-          Assign Schema
+          {t("administration.schema.bpsAssignSchema")}
         </Button>
       </div>
 
@@ -153,16 +155,16 @@ export function BroadbandPlanSchemasPanel() {
       {isLoading ? (
         <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
           <RiLoader4Line className="size-4 animate-spin" />
-          Loading...
+          {t("administration.schema.bpsLoading")}
         </div>
       ) : isError ? (
-        <p className="py-12 text-center text-sm text-destructive">Failed to load assignments.</p>
+        <p className="py-12 text-center text-sm text-destructive">{t("administration.schema.bpsError")}</p>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
           <RiWifiLine className="size-8 text-muted-foreground/40" />
-          <p className="text-sm text-muted-foreground">No schema assignments found.</p>
+          <p className="text-sm text-muted-foreground">{t("administration.schema.bpsEmpty")}</p>
           <Button variant="outline" size="sm" onClick={() => setFormOpen(true)}>
-            <RiAddLine className="size-4 mr-1" /> Assign first schema
+            <RiAddLine className="size-4 mr-1" /> {t("administration.schema.bpsAssignFirst")}
           </Button>
         </div>
       ) : (
@@ -203,7 +205,7 @@ export function BroadbandPlanSchemasPanel() {
       {!isLoading && !isError && total > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-2 border-t border-border">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Rows per page</span>
+            <span>{t("administration.schema.bpsRowsPerPage")}</span>
             <Select value={String(size)} onValueChange={(v) => setSize(Number(v))}>
               <SelectTrigger className="w-fit" size="sm">
                 <SelectValue />
@@ -218,7 +220,7 @@ export function BroadbandPlanSchemasPanel() {
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             <span className="text-sm text-muted-foreground text-nowrap">
-              {(page - 1) * size + 1} - {Math.min(page * size, total)} of {total}
+              {(page - 1) * size + 1} - {Math.min(page * size, total)} {t("administration.schema.bpsOf")} {total}
             </span>
             {totalPages > 1 && (
               <div className="flex items-center gap-1">
@@ -262,13 +264,13 @@ export function BroadbandPlanSchemasPanel() {
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove schema assignment?</AlertDialogTitle>
+            <AlertDialogTitle>{t("administration.schema.bpsRemoveTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will unlink <span className="font-semibold text-foreground">{deleteTarget?.name}</span> from the plan. The schema itself will not be deleted.
+              {t("administration.schema.bpsRemoveDesc")} <span className="font-semibold text-foreground">{deleteTarget?.name}</span> {t("administration.schema.bpsRemoveDesc2")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteSchema.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteSchema.isPending}>{t("administration.schema.bpsRemoveCancel")}</AlertDialogCancel>
             <AlertDialogAction
               disabled={deleteSchema.isPending}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -278,7 +280,7 @@ export function BroadbandPlanSchemasPanel() {
                 }
               }}
             >
-              {deleteSchema.isPending ? "Removing..." : "Remove"}
+              {deleteSchema.isPending ? t("administration.schema.bpsRemoving") : t("administration.schema.bpsRemove")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -8,7 +8,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
-import { useQueryStates, parseAsInteger, parseAsString } from "nuqs";
+import { parseAsInteger, parseAsString, useQueryStates } from "nuqs";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,17 +24,19 @@ import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useBranchListPaginated } from "../../api/branch-queries";
-import { columns } from "./table/columns";
+import { getBranchColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 
 const BRANCH_TYPES = [
-  { value: "all",       label: "All" },
-  { value: "office",    label: "Office" },
-  { value: "noc",       label: "NOC" },
-  { value: "warehouse", label: "Warehouse" },
+  { value: "all", labelKey: "all" },
+  { value: "office", labelKey: "office" },
+  { value: "noc", labelKey: "noc" },
+  { value: "warehouse", labelKey: "warehouse" },
 ] as const;
 
 export function BranchList() {
+  const { t } = useTranslation();
+
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -60,17 +63,20 @@ export function BranchList() {
   const limit = filter.limit || 10;
   const activeType = filter.branch_type || "all";
 
-  const { data: result = { items: [], total: 0 }, isLoading } = useBranchListPaginated({
-    page,
-    per_page: limit,
-    search: filter.search ?? undefined,
-    branch_type: activeType !== "all" ? activeType : undefined,
-  });
+  const { data: result = { items: [], total: 0 }, isLoading } =
+    useBranchListPaginated({
+      page,
+      per_page: limit,
+      search: filter.search ?? undefined,
+      branch_type: activeType !== "all" ? activeType : undefined,
+    });
 
   const branches = result.items;
   const total = result.total;
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  const columns = useMemo(() => getBranchColumns(t), [t]);
 
   const table = useReactTable({
     columns,
@@ -111,21 +117,27 @@ export function BranchList() {
       isLoading={isLoading}
     >
       <div className="mt-[10px] space-y-0">
-        {/* Type tabs */}
-        <div className="flex items-center gap-1 border-b border-border px-1">
-          {BRANCH_TYPES.map((t) => (
+        <div className="border-border flex items-center gap-1 border-b px-1">
+          {BRANCH_TYPES.map((branchType) => (
             <button
-              key={t.value}
-              onClick={() => setFilter({ ...filter, branch_type: t.value === "all" ? null : t.value, page: 1 })}
+              key={branchType.value}
+              onClick={() =>
+                setFilter({
+                  ...filter,
+                  branch_type:
+                    branchType.value === "all" ? null : branchType.value,
+                  page: 1,
+                })
+              }
               className={[
                 "relative px-4 py-2.5 text-sm font-medium transition-colors",
                 "after:absolute after:inset-x-0 after:bottom-[-1px] after:h-[2px] after:rounded-full after:transition-all",
-                activeType === t.value
+                activeType === branchType.value
                   ? "text-primary after:bg-primary"
                   : "text-muted-foreground hover:text-foreground after:bg-transparent",
               ].join(" ")}
             >
-              {t.label}
+              {t(`administration.branch.${branchType.labelKey}`)}
             </button>
           ))}
         </div>
@@ -136,7 +148,7 @@ export function BranchList() {
               <div className="relative">
                 <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                 <Input
-                  placeholder="Search branch..."
+                  placeholder={t("administration.branch.searchPlaceholder")}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   className="w-64 ps-9"

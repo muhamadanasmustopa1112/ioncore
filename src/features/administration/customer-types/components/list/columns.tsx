@@ -1,20 +1,22 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import type { CustomerType } from "../../types";
 import { ActionsCell } from "./actions-cell";
 
-export function getColumns(
+export function useCustomerTypeColumns(
   onEdit: (row: CustomerType) => void,
   onDelete: (id: string) => void,
 ): ColumnDef<CustomerType>[] {
+  const { t } = useTranslation();
   return [
     {
       id: "name",
       accessorFn: (row) => row.name,
       header: ({ column }) => (
-        <DataGridColumnHeader title="Name" column={column} className="text-foreground font-semibold" />
+        <DataGridColumnHeader title={t("administration.customerTypesPage.colName")} column={column} className="text-foreground font-semibold" />
       ),
       cell: ({ row }) => (
         <div>
@@ -29,7 +31,7 @@ export function getColumns(
       id: "description",
       accessorFn: (row) => row.description,
       header: ({ column }) => (
-        <DataGridColumnHeader title="Description" column={column} className="text-foreground font-semibold" />
+        <DataGridColumnHeader title={t("administration.customerTypesPage.colDescription")} column={column} className="text-foreground font-semibold" />
       ),
       cell: ({ row }) => (
         <span className="text-sm text-muted-foreground">{row.original.description || "—"}</span>
@@ -41,7 +43,7 @@ export function getColumns(
       id: "is_active",
       accessorFn: (row) => row.is_active,
       header: ({ column }) => (
-        <DataGridColumnHeader title="Status" column={column} className="text-foreground font-semibold" />
+        <DataGridColumnHeader title={t("administration.customerTypesPage.colStatus")} column={column} className="text-foreground font-semibold" />
       ),
       cell: ({ row }) => (
         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -49,7 +51,7 @@ export function getColumns(
             ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
             : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
         }`}>
-          {row.original.is_active ? "Active" : "Inactive"}
+          {row.original.is_active ? t("administration.customerTypesPage.statusActive") : t("administration.customerTypesPage.statusInactive")}
         </span>
       ),
       enableSorting: true,
@@ -58,7 +60,7 @@ export function getColumns(
     {
       id: "actions",
       header: ({ column }) => (
-        <DataGridColumnHeader title="Actions" column={column} className="text-foreground font-semibold" />
+        <DataGridColumnHeader title={t("administration.customerTypesPage.colActions")} column={column} className="text-foreground font-semibold" />
       ),
       cell: ({ row }) => <ActionsCell row={row} onEdit={onEdit} onDelete={onDelete} />,
       enableSorting: false,

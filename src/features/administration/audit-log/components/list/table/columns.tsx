@@ -1,6 +1,7 @@
 "use client";
 
 import { type ColumnDef } from "@tanstack/react-table";
+import type { TFunction } from "i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
@@ -28,7 +29,7 @@ interface ActionsCellProps {
   onView: (log: AuditLog) => void;
 }
 
-function ActionsCell({ row, onView }: ActionsCellProps) {
+function ActionsCell({ row, onView, t }: ActionsCellProps & { t: TFunction }) {
   return (
     <Button
       variant="ghost"
@@ -37,17 +38,17 @@ function ActionsCell({ row, onView }: ActionsCellProps) {
       onClick={() => onView(row.original)}
     >
       <Eye className="size-3.5 mr-1" />
-      View
+      {t("administration.auditLogPage.actionView")}
     </Button>
   );
 }
 
-export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLog>[] {
+export function buildColumns(onView: (log: AuditLog) => void, t: TFunction): ColumnDef<AuditLog>[] {
   return [
     {
       id: "timestamp",
       accessorFn: (row) => row.timestamp,
-      header: "Time",
+      header: t("administration.auditLogPage.colTime"),
       cell: ({ row }) => (
         <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">
           {new Date(row.original.timestamp).toLocaleString("id-ID", {
@@ -61,7 +62,7 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
     {
       id: "user",
       accessorFn: (row) => row.user?.name,
-      header: "User",
+      header: t("administration.auditLogPage.colUser"),
       cell: ({ row }) => {
         const user = row.original.user;
         const name = user?.name || row.original.userName || "—";
@@ -81,7 +82,7 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
     {
       id: "activity",
       accessorFn: (row) => row.actionType,
-      header: "Activity",
+      header: t("administration.auditLogPage.colActivity"),
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="text-sm font-medium">{row.original.actionType}</span>
@@ -98,7 +99,7 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
     {
       id: "ipAddress",
       accessorFn: (row) => row.ipAddress,
-      header: "IP Address",
+      header: t("administration.auditLogPage.colIp"),
       cell: ({ row }) => (
         <span className="text-xs font-mono text-muted-foreground">
           {row.original.ipAddress || "—"}
@@ -109,7 +110,7 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
     {
       id: "status",
       accessorFn: (row) => row.status,
-      header: "Status",
+      header: t("administration.auditLogPage.colStatus"),
       cell: ({ row }) => (
         <Badge
           variant={STATUS_VARIANTS[row.original.status] ?? "secondary"}
@@ -124,7 +125,7 @@ export function buildColumns(onView: (log: AuditLog) => void): ColumnDef<AuditLo
     {
       id: "actions",
       header: "",
-      cell: ({ row }) => <ActionsCell row={row} onView={onView} />,
+      cell: ({ row }) => <ActionsCell row={row} onView={onView} t={t} />,
       size: 80,
       enableSorting: false,
     },

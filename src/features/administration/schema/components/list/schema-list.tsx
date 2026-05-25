@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -28,19 +29,21 @@ import { SchemaRecord, SchemaType } from "../../types";
 import { useSchemaStore } from "../../store/schema";
 import { useSchemaList } from "../../api/schema-queries";
 import { getPageCount } from "@/lib/pagination";
-import { columns } from "./table/columns";
-
-const SCHEMA_TABS: { value: SchemaType; label: string }[] = [
-  { value: "billing", label: "Billing" },
-  { value: "onboarding", label: "Onboarding" },
-  { value: "service", label: "Service" },
-  { value: "commission", label: "Commission" },
-  { value: "suspension", label: "Suspension" },
-  { value: "work_order", label: "Work Order" },
-];
+import { useSchemaColumns } from "./table/columns";
 
 export function SchemaList() {
+  const { t } = useTranslation();
+  const columns = useSchemaColumns();
   const { setActiveSchemaType } = useSchemaStore();
+
+  const SCHEMA_TABS: { value: SchemaType; label: string }[] = [
+    { value: "billing", label: t("administration.schema.tabBilling") },
+    { value: "onboarding", label: t("administration.schema.tabOnboarding") },
+    { value: "service", label: t("administration.schema.tabService") },
+    { value: "commission", label: t("administration.schema.tabCommission") },
+    { value: "suspension", label: t("administration.schema.tabSuspension") },
+    { value: "work_order", label: t("administration.schema.tabWorkOrder") },
+  ];
 
   const [urlParams, setUrlParams] = useQueryStates({
     sc_type:   parseAsString.withDefault("billing"),
@@ -148,7 +151,7 @@ export function SchemaList() {
             <div className="relative w-full sm:w-52">
               <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
               <Input
-                placeholder="Search schemas..."
+                placeholder={t("administration.schema.searchSchemas")}
                 value={search}
                 onChange={(e) => setUrlParams({ sc_search: e.target.value || null, sc_page: 1 })}
                 className="w-full ps-9"

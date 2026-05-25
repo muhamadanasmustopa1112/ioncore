@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { RiDeleteBin7Line, RiEditLine, RiEyeLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -15,6 +16,7 @@ import { useCapabilityStore } from "../../../../store/capability";
 import { useDeleteCapability } from "../../../../api/capability-queries";
 
 export function ActionsCell({ row }: { row: Row<CapabilityData> }) {
+  const { t } = useTranslation();
   const { openSheet, selectedBranchId } = useCapabilityStore();
   const deleteCapability = useDeleteCapability();
   const capability = row.original;
@@ -39,14 +41,14 @@ export function ActionsCell({ row }: { row: Row<CapabilityData> }) {
           onClick={() => openSheet("edit", capability)}
         >
           <RiEditLine />
-          Edit
+          {t("administration.branch.capability.edit")}
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer"
           onClick={() => openSheet("details", capability)}
         >
           <RiEyeLine />
-          Detail
+          {t("administration.branch.capability.detail")}
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"
@@ -55,7 +57,7 @@ export function ActionsCell({ row }: { row: Row<CapabilityData> }) {
           onClick={handleDelete}
         >
           <RiDeleteBin7Line />
-          Delete
+          {t("administration.branch.capability.delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

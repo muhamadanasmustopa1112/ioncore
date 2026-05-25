@@ -1,6 +1,7 @@
 "use client";
 
 import { UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { RiMoneyDollarCircleLine } from "@remixicon/react";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,17 +20,18 @@ interface OtcSectionProps {
 }
 
 export function OtcSection({ form, disabled }: OtcSectionProps) {
+  const { t } = useTranslation();
   const { watch, setValue } = form;
 
   return (
     <div className="space-y-4 pt-2">
       <div className="flex items-center gap-2 pb-2 border-b border-border/50">
         <RiMoneyDollarCircleLine className="size-4 text-green-500" />
-        <h3 className="text-sm font-semibold">One-Time Charge (OTC)</h3>
+        <h3 className="text-sm font-semibold">{t("administration.schema.otc")}</h3>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label className="text-xs font-medium text-muted-foreground">OTC Type</Label>
+          <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.otcType")}</Label>
           <Select
             value={watch("otc.type")}
             onValueChange={(v) =>
@@ -41,14 +43,14 @@ export function OtcSection({ form, disabled }: OtcSectionProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="free">Free</SelectItem>
-              <SelectItem value="prepaid">Prepaid</SelectItem>
-              <SelectItem value="postpaid">Postpaid</SelectItem>
+              <SelectItem value="free">{t("administration.schema.otcFree")}</SelectItem>
+              <SelectItem value="prepaid">{t("administration.schema.otcPrepaid")}</SelectItem>
+              <SelectItem value="postpaid">{t("administration.schema.otcPostpaid")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label className="text-xs font-medium text-muted-foreground">Invoice Trigger</Label>
+          <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.invoiceTrigger")}</Label>
           <Select
             value={watch("otc.invoice_trigger")}
             onValueChange={(v) =>
@@ -60,14 +62,14 @@ export function OtcSection({ form, disabled }: OtcSectionProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="before_wo_dispatch">Before WO Dispatch</SelectItem>
-              <SelectItem value="after_noc_verification">After NOC Verification</SelectItem>
-              <SelectItem value="none">None</SelectItem>
+              <SelectItem value="before_wo_dispatch">{t("administration.schema.triggerBeforeWo")}</SelectItem>
+              <SelectItem value="after_noc_verification">{t("administration.schema.triggerAfterNoc")}</SelectItem>
+              <SelectItem value="none">{t("administration.schema.triggerNone")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="flex items-center justify-between">
-          <Label className="text-xs font-medium text-muted-foreground">Payment Required Before WO</Label>
+          <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.paymentRequiredBeforeWo")}</Label>
           <Switch
             size="lg"
             checked={watch("otc.payment_required_before_wo")}
@@ -76,7 +78,7 @@ export function OtcSection({ form, disabled }: OtcSectionProps) {
           />
         </div>
         <div className="flex items-center justify-between">
-          <Label className="text-xs font-medium text-muted-foreground">Generate Faktur Pajak</Label>
+          <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.generateFakturPajak")}</Label>
           <Switch
             size="lg"
             checked={watch("otc.generate_faktur_pajak")}

@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
 import { AlertCircle, RefreshCw, Search, Settings2, X } from "lucide-react";
@@ -25,29 +27,31 @@ import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useCoverageList } from "../../../api/coverage-queries";
-import { columns } from "./table/columns";
+import { getCoverageColumns } from "./table/columns";
 
 interface CoverageListProps {
   branchId: string;
 }
 
 export function CoverageList({ branchId }: CoverageListProps) {
-  const { data: coverages = [], isLoading, isError, refetch } = useCoverageList(branchId);
+  const { t } = useTranslation();
+  const { data: coverageAreas = [], isLoading, isError, refetch } = useCoverageList(branchId);
 
   const [search, setSearch] = useState("");
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const filteredData = useMemo(() => {
-    if (!search) return coverages;
+    if (!search) return coverageAreas;
     const q = search.toLowerCase();
-    return coverages.filter(
+    return coverageAreas.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
-        c.description.toLowerCase().includes(q) ||
-        c.coverageJson.network_scope.toLowerCase().includes(q) ||
-        c.coverageJson.service_area.some((a) => a.toLowerCase().includes(q))
+        c.description.toLowerCase().includes(q)
     );
-  }, [coverages, search]);
+  }, [coverageAreas, search]);
+
+  const columns = useMemo(() => getCoverageColumns(t), [t]);
 
   const table = useReactTable({
     columns,
@@ -55,8 +59,11 @@ export function CoverageList({ branchId }: CoverageListProps) {
     pageCount: Math.ceil(filteredData.length / pagination.limit),
     getRowId: (row) => row.id,
     state: {
+      rowSelection,
       pagination: { pageIndex: pagination.page - 1, pageSize: pagination.limit },
     },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
     onPaginationChange: (updater) => {
       const next = typeof updater === "function"
         ? updater({ pageIndex: pagination.page - 1, pageSize: pagination.limit })
@@ -86,21 +93,21 @@ export function CoverageList({ branchId }: CoverageListProps) {
           <div className="flex flex-col items-center gap-2 py-4">
             <AlertCircle className="size-8 text-destructive opacity-70" />
             <p className="text-sm font-medium text-destructive">
-              Failed to load coverage areas
+              {t("administration.branch.coverage.failedToLoad")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Something went wrong. Please try again.
+              {t("administration.branch.coverage.somethingWentWrong")}
             </p>
             <button
               onClick={() => refetch()}
               className="mt-1 flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"
             >
               <RefreshCw className="size-3.5" />
-              Retry
+              {t("administration.branch.coverage.retry")}
             </button>
           </div>
         ) : (
-          "No coverage areas found"
+          t("administration.branch.coverage.noCoverageAreasFound")
         )
       }
     >
@@ -110,7 +117,7 @@ export function CoverageList({ branchId }: CoverageListProps) {
             <div className="relative w-full sm:w-56">
               <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
               <Input
-                placeholder="Search coverage areas..."
+                placeholder={t("administration.branch.coverage.searchCoverageAreas")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full ps-9"
@@ -133,7 +140,7 @@ export function CoverageList({ branchId }: CoverageListProps) {
               trigger={
                 <Button variant="outline">
                   <Settings2 />
-                  View
+                  {t("administration.branch.coverage.view")}
                 </Button>
               }
             />

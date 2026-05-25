@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import type { CustomerTypeListParams, CreateCustomerTypePayload, UpdateCustomerTypePayload } from "../types";
 import {
   listCustomerTypes,
@@ -43,37 +44,40 @@ export function useActiveCustomerTypes() {
 
 export function useCreateCustomerType() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (payload: CreateCustomerTypePayload) => createCustomerType(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEYS.all });
-      toast.success("Customer type created.");
+      toast.success(t("administration.customerTypesPage.toastCreated"));
     },
-    onError: () => toast.error("Failed to create customer type."),
+    onError: () => toast.error(t("administration.customerTypesPage.toastCreateFailed")),
   });
 }
 
 export function useUpdateCustomerType() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateCustomerTypePayload }) =>
       updateCustomerType(id, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEYS.all });
-      toast.success("Customer type updated.");
+      toast.success(t("administration.customerTypesPage.toastUpdated"));
     },
-    onError: () => toast.error("Failed to update customer type."),
+    onError: () => toast.error(t("administration.customerTypesPage.toastUpdateFailed")),
   });
 }
 
 export function useDeleteCustomerType() {
   const qc = useQueryClient();
+  const { t } = useTranslation();
   return useMutation({
     mutationFn: (id: string) => deleteCustomerType(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEYS.all });
-      toast.success("Customer type deleted.");
+      toast.success(t("administration.customerTypesPage.toastDeleted"));
     },
-    onError: () => toast.error("Failed to delete customer type."),
+    onError: () => toast.error(t("administration.customerTypesPage.toastDeleteFailed")),
   });
 }

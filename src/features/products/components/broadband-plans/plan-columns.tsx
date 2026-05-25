@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal, Pencil, Eye, Trash2, SendHorizonal, CheckCircle, XCircle, Globe, EyeOff, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ interface ActionsProps {
 }
 
 function ActionsCell({ row, onEdit, onDetail, onDelete, onSubmitReview, onApprove, onReject, onVisibility, onSave }: ActionsProps) {
+  const { t } = useTranslation();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
   const [rejectNotes, setRejectNotes] = useState("");
@@ -69,57 +71,57 @@ function ActionsCell({ row, onEdit, onDetail, onDelete, onSubmitReview, onApprov
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => onDetail(row)}>
-            <Eye className="size-4 mr-2" /> Detail
+            <Eye className="size-4 mr-2" /> {t("administration.productsPage.actionDetail")}
           </DropdownMenuItem>
           {status !== "in_review" && (
             <DropdownMenuItem onClick={() => onEdit(row)}>
-              <Pencil className="size-4 mr-2" /> Edit
+              <Pencil className="size-4 mr-2" /> {t("administration.productsPage.actionEdit")}
             </DropdownMenuItem>
           )}
           {(status !== "in_review" || canApprove) && <DropdownMenuSeparator />}
           {status === "draft" && (
-            <DropdownMenuItem onClick={() => confirm("Submit for Review?", `Submit "${row.name}" for review? It will move to In Review.`, () => onSubmitReview(row.id))}>
-              <SendHorizonal className="size-4 mr-2" /> Submit for Review
+            <DropdownMenuItem onClick={() => confirm(t("administration.productsPage.confirmSubmitReview"), `"${row.name}" ${t("administration.productsPage.confirmSubmitReviewDesc")}`, () => onSubmitReview(row.id))}>
+              <SendHorizonal className="size-4 mr-2" /> {t("administration.productsPage.actionSubmitReview")}
             </DropdownMenuItem>
           )}
           {status === "rejected" && (
             <>
               <DropdownMenuItem onClick={() => setRejectDetailOpen(true)}>
-                <Info className="size-4 mr-2" /> Reject Detail
+                <Info className="size-4 mr-2" /> {t("administration.productsPage.actionRejectDetail")}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => confirm("Back to Draft?", `Save "${row.name}" as draft?`, () => onSave(row))}>
-                <SendHorizonal className="size-4 mr-2" /> Back to Draft
+              <DropdownMenuItem onClick={() => confirm(t("administration.productsPage.confirmBackToDraft"), t("administration.productsPage.confirmBackToDraftDesc"), () => onSave(row))}>
+                <SendHorizonal className="size-4 mr-2" /> {t("administration.productsPage.actionBackToDraft")}
               </DropdownMenuItem>
             </>
           )}
           {status === "in_review" && canApprove && (
             <>
-              <DropdownMenuItem onClick={() => confirm("Approve Plan?", `Approve "${row.name}"? Status will change to Approved.`, () => onApprove(row.id))}>
-                <CheckCircle className="size-4 mr-2" /> Approve
+              <DropdownMenuItem onClick={() => confirm(t("administration.productsPage.confirmApprove"), `"${row.name}" — ${t("administration.productsPage.confirmApproveDesc")}`, () => onApprove(row.id))}>
+                <CheckCircle className="size-4 mr-2" /> {t("administration.productsPage.actionApprove")}
               </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setRejectOpen(true)}>
-                <XCircle className="size-4 mr-2" /> Reject
+                <XCircle className="size-4 mr-2" /> {t("administration.productsPage.actionReject")}
               </DropdownMenuItem>
             </>
           )}
           {status === "approved" && (
-            <DropdownMenuItem onClick={() => confirm("Publish Plan?", `Publish "${row.name}"? It will be visible to customers.`, () => onVisibility(row.id, "published"))}>
-              <Globe className="size-4 mr-2" /> Publish
+            <DropdownMenuItem onClick={() => confirm(t("administration.productsPage.confirmPublish"), `"${row.name}" ${t("administration.productsPage.confirmPublishDesc")}`, () => onVisibility(row.id, "published"))}>
+              <Globe className="size-4 mr-2" /> {t("administration.productsPage.actionPublish")}
             </DropdownMenuItem>
           )}
           {status === "published" && (
-            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => confirm("Deactivate Plan?", `Deactivate "${row.name}"? It will be hidden from customers.`, () => onVisibility(row.id, "inactive"))}>
-              <EyeOff className="size-4 mr-2" /> Deactivate
+            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => confirm(t("administration.productsPage.confirmDeactivate"), `"${row.name}" ${t("administration.productsPage.confirmDeactivateDesc")}`, () => onVisibility(row.id, "inactive"))}>
+              <EyeOff className="size-4 mr-2" /> {t("administration.productsPage.actionDeactivate")}
             </DropdownMenuItem>
           )}
           {status === "inactive" && (
-            <DropdownMenuItem onClick={() => confirm("Submit Draft?", `Save "${row.name}" as draft?`, () => onSave(row))}>
-              <SendHorizonal className="size-4 mr-2" /> Submit Draft
+            <DropdownMenuItem onClick={() => confirm(t("administration.productsPage.confirmSubmitDraft"), t("administration.productsPage.confirmSubmitDraftDesc"), () => onSave(row))}>
+              <SendHorizonal className="size-4 mr-2" /> {t("administration.productsPage.actionSubmitDraft")}
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
           <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setConfirmOpen(true)}>
-            <Trash2 className="size-4 mr-2" /> Delete
+            <Trash2 className="size-4 mr-2" /> {t("administration.productsPage.actionDelete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -127,15 +129,15 @@ function ActionsCell({ row, onEdit, onDetail, onDelete, onSubmitReview, onApprov
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Broadband Plan?</AlertDialogTitle>
+            <AlertDialogTitle>{t("administration.productsPage.confirmDeletePlanTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              &ldquo;{row.name}&rdquo; will be permanently deleted. This action cannot be undone.
+              &ldquo;{row.name}&rdquo; {t("administration.productsPage.confirmDeletePlanDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("administration.productsPage.confirmCancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={() => onDelete(row.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {t("administration.productsPage.confirmDelete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -144,20 +146,20 @@ function ActionsCell({ row, onEdit, onDetail, onDelete, onSubmitReview, onApprov
       <AlertDialog open={rejectOpen} onOpenChange={(o) => { setRejectOpen(o); if (!o) setRejectNotes(""); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Reject Plan?</AlertDialogTitle>
-            <AlertDialogDescription>Optionally provide a reason for rejection.</AlertDialogDescription>
+            <AlertDialogTitle>{t("administration.productsPage.rejectTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("administration.productsPage.rejectDesc")}</AlertDialogDescription>
           </AlertDialogHeader>
           <Textarea
-            placeholder="Reason (optional)"
+            placeholder={t("administration.productsPage.rejectPlaceholder")}
             value={rejectNotes}
             onChange={(e) => setRejectNotes(e.target.value)}
             className="mx-6 w-auto"
             rows={3}
           />
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("administration.productsPage.confirmCancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={() => { onReject(row.id, rejectNotes || undefined); setRejectOpen(false); setRejectNotes(""); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Reject
+              {t("administration.productsPage.actionReject")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -166,13 +168,13 @@ function ActionsCell({ row, onEdit, onDetail, onDelete, onSubmitReview, onApprov
       <AlertDialog open={rejectDetailOpen} onOpenChange={setRejectDetailOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Rejection Detail</AlertDialogTitle>
+            <AlertDialogTitle>{t("administration.productsPage.rejectDetailTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {row.rejection_notes || "No rejection notes provided."}
+              {row.rejection_notes || t("administration.productsPage.rejectNoNotes")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Close</AlertDialogCancel>
+            <AlertDialogCancel>{t("administration.productsPage.rejectClose")}</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -184,9 +186,9 @@ function ActionsCell({ row, onEdit, onDetail, onDelete, onSubmitReview, onApprov
             <AlertDialogDescription>{actionConfirm?.description}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("administration.productsPage.confirmCancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={() => { actionConfirm?.onConfirm(); setActionConfirm(null); }}>
-              Confirm
+              {t("administration.productsPage.confirmConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -195,7 +197,7 @@ function ActionsCell({ row, onEdit, onDetail, onDelete, onSubmitReview, onApprov
   );
 }
 
-export function getPlanColumns(
+export function usePlanColumns(
   onEdit: (row: BroadbandPlan) => void,
   onDetail: (row: BroadbandPlan) => void,
   onDelete: (id: string) => void,
@@ -205,17 +207,18 @@ export function getPlanColumns(
   onVisibility: (id: string, status: "published" | "inactive") => void,
   onSave: (row: BroadbandPlan) => void,
 ): ColumnDef<BroadbandPlan>[] {
+  const { t } = useTranslation();
   return [
     {
       id: "name",
       accessorFn: (r) => r.name,
-      header: ({ column }) => <DataGridColumnHeader title="Name" column={column} className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader title={t("administration.productsPage.colName")} column={column} className="font-semibold" />,
       cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
       size: 200,
     },
     {
       id: "speed",
-      header: ({ column }) => <DataGridColumnHeader title="Speed" column={column} className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader title={t("administration.productsPage.colSpeed")} column={column} className="font-semibold" />,
       cell: ({ row }) => (
         <span className="font-mono text-xs">
           ↓ {row.original.speed_download_mbps} / ↑ {row.original.speed_upload_mbps} Mbps
@@ -226,21 +229,21 @@ export function getPlanColumns(
     {
       id: "price",
       accessorFn: (r) => r.price,
-      header: ({ column }) => <DataGridColumnHeader title="Price / mo" column={column} className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader title={t("administration.productsPage.colPrice")} column={column} className="font-semibold" />,
       cell: ({ row }) => <span>{idr(row.original.price)}</span>,
       size: 150,
     },
     {
       id: "one_time_charge",
       accessorFn: (r) => r.one_time_charge,
-      header: ({ column }) => <DataGridColumnHeader title="OTC" column={column} className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader title={t("administration.productsPage.colOTC")} column={column} className="font-semibold" />,
       cell: ({ row }) => <span>{idr(row.original.one_time_charge)}</span>,
       size: 150,
     },
     {
       id: "customer_type",
       accessorFn: (r) => r.customer_type,
-      header: ({ column }) => <DataGridColumnHeader title="Customer Type" column={column} className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader title={t("administration.productsPage.colCustomerType")} column={column} className="font-semibold" />,
       cell: ({ row }) => {
         const cfg = customerTypeBadge[row.original.customer_type] ?? customerTypeBadge.broadband;
         return <span className={cfg.className}>{cfg.label}</span>;
@@ -250,7 +253,7 @@ export function getPlanColumns(
     {
       id: "status",
       accessorFn: (r) => r.status,
-      header: ({ column }) => <DataGridColumnHeader title="Status" column={column} className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader title={t("administration.productsPage.colStatus")} column={column} className="font-semibold" />,
       cell: ({ row }) => {
         const cfg = statusBadge[row.original.status] ?? statusBadge.draft;
         return <span className={cfg.className}>{cfg.label}</span>;
@@ -259,7 +262,7 @@ export function getPlanColumns(
     },
     {
       id: "actions",
-      header: () => <span className="font-semibold text-foreground text-sm">Actions</span>,
+      header: () => <span className="font-semibold text-foreground text-sm">{t("administration.productsPage.colActions")}</span>,
       cell: ({ row }) => <ActionsCell row={row.original} onEdit={onEdit} onDetail={onDetail} onDelete={onDelete} onSubmitReview={onSubmitReview} onApprove={onApprove} onReject={onReject} onVisibility={onVisibility} onSave={onSave} />,
       size: 75,
       enableSorting: false,

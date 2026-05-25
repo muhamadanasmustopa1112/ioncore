@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { RiDeleteBin7Line, RiEditLine, RiEyeLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -15,19 +16,20 @@ import { useCoverageStore } from "../../../../store/coverage";
 import { useDeleteCoverage } from "../../../../api/coverage-queries";
 
 export function ActionsCell({ row }: { row: Row<CoverageData> }) {
+  const { t } = useTranslation();
   const { openSheet, selectedBranchId } = useCoverageStore();
   const deleteCoverage = useDeleteCoverage();
-  const coverage = row.original;
+  const coverageArea = row.original;
 
   const handleDelete = () => {
     deleteCoverage.mutate({
       branchId: selectedBranchId,
-      coverageId: coverage.id,
+      coverageId: coverageArea.id,
     });
   };
 
   return (
-    <DropdownMenu modal={false}>
+    <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button className="size-7" mode="icon" variant="ghost">
           <EllipsisVertical />
@@ -36,17 +38,17 @@ export function ActionsCell({ row }: { row: Row<CoverageData> }) {
       <DropdownMenuContent side="bottom" align="end">
         <DropdownMenuItem
           className="cursor-pointer"
-          onClick={() => openSheet("edit", coverage)}
+          onClick={() => openSheet("edit", coverageArea)}
         >
           <RiEditLine />
-          Edit
+          {t("administration.branch.coverage.edit")}
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer"
-          onClick={() => openSheet("details", coverage)}
+          onClick={() => openSheet("details", coverageArea)}
         >
           <RiEyeLine />
-          Detail
+          {t("administration.branch.coverage.detail")}
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"
@@ -55,7 +57,7 @@ export function ActionsCell({ row }: { row: Row<CoverageData> }) {
           onClick={handleDelete}
         >
           <RiDeleteBin7Line />
-          Delete
+          {t("administration.branch.coverage.delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

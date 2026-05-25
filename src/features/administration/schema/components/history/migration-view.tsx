@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronsUpDown } from "lucide-react";
 import { RiExchangeLine, RiLoader4Line, RiRefreshLine } from "@remixicon/react";
 import { toast } from "sonner";
@@ -40,6 +41,7 @@ import {
 import type { CustomerSchema } from "@/features/rule-schema";
 
 function CustomerRow({ item }: { item: CustomerSchema }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center justify-between px-4 py-3 gap-4">
       <div className="min-w-0">
@@ -51,7 +53,7 @@ function CustomerRow({ item }: { item: CustomerSchema }) {
       <div className="flex items-center gap-2 shrink-0">
         {item.is_overridden && (
           <Badge variant="warning" appearance="light" className="text-[10px] px-1.5">
-            Overridden
+            {t("administration.schema.migrationOverridden")}
           </Badge>
         )}
         <span className="font-mono text-[10px] text-muted-foreground">
@@ -232,6 +234,7 @@ function MigrationConfirmDialog({
   customerCount,
   isPending,
   onConfirm,
+  t,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
@@ -242,6 +245,7 @@ function MigrationConfirmDialog({
   customerCount: number;
   isPending: boolean;
   onConfirm: () => void;
+  t: (key: string, opts?: Record<string, unknown>) => string;
 }) {
   const rows = fromContent && toContent ? computeDiff(fromContent, toContent) : [];
   const added    = rows.filter((r) => r.kind === "added")    as Extract<DiffRow, { kind: "added" }>[];
@@ -254,28 +258,28 @@ function MigrationConfirmDialog({
         <DialogHeader className="px-6 pt-6 pb-4 border-b border-border shrink-0">
           <DialogTitle className="flex items-center gap-2 text-base">
             <RiExchangeLine className="size-4 text-primary" />
-            Confirm Migration
+            {t("administration.schema.migrationConfirmTitle")}
           </DialogTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            {customerCount} customer(s) will move from{" "}
+            {customerCount} {t("administration.schema.migrationConfirmDesc")}{" "}
             <span className="font-mono font-semibold text-foreground">{fromVersion}</span>
             {" → "}
             <span className="font-mono font-semibold text-foreground">{toVersion}</span>.
-            Each migration is logged to the audit trail.
+            {" "}{t("administration.schema.migrationConfirmDesc2")}
           </p>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {rows.length === 0 ? (
             <p className="text-center text-sm text-muted-foreground py-6">
-              No differences detected between versions.
+              {t("administration.schema.migrationNoDiff")}
             </p>
           ) : (
             <div className="space-y-4">
               {added.length > 0 && (
                 <div className="space-y-1.5">
                   <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600">
-                    Added ({added.length})
+                    {t("administration.schema.migrationAdded")} ({added.length})
                   </p>
                   <div className="space-y-1.5">
                     {added.map((r, i) => <AddedRow key={i} row={r} />)}
@@ -285,7 +289,7 @@ function MigrationConfirmDialog({
               {removed.length > 0 && (
                 <div className="space-y-1.5">
                   <p className="text-xs font-semibold uppercase tracking-widest text-destructive">
-                    Removed ({removed.length})
+                    {t("administration.schema.migrationRemoved")} ({removed.length})
                   </p>
                   <div className="space-y-1.5">
                     {removed.map((r, i) => <RemovedRow key={i} row={r} />)}
@@ -295,7 +299,7 @@ function MigrationConfirmDialog({
               {modified.length > 0 && (
                 <div className="space-y-1.5">
                   <p className="text-xs font-semibold uppercase tracking-widest text-amber-600">
-                    Modified ({modified.length})
+                    {t("administration.schema.migrationModified")} ({modified.length})
                   </p>
                   <div className="space-y-1.5">
                     {modified.map((r, i) => <ModifiedRow key={i} row={r} />)}
@@ -308,19 +312,19 @@ function MigrationConfirmDialog({
 
         <DialogFooter className="px-6 py-4 border-t border-border shrink-0 flex items-center justify-between sm:justify-between gap-3">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><span className="text-emerald-600 font-bold">+</span> Added</span>
+            <span className="inline-flex items-center gap-1"><span className="text-emerald-600 font-bold">+</span> {t("administration.schema.migrationLegendAdded")}</span>
             <span className="text-border mx-1">·</span>
-            <span className="inline-flex items-center gap-1"><span className="text-destructive font-bold">−</span> Removed</span>
+            <span className="inline-flex items-center gap-1"><span className="text-destructive font-bold">−</span> {t("administration.schema.migrationLegendRemoved")}</span>
             <span className="text-border mx-1">·</span>
-            <span className="inline-flex items-center gap-1"><span className="text-amber-500 font-bold">~</span> Modified</span>
+            <span className="inline-flex items-center gap-1"><span className="text-amber-500 font-bold">~</span> {t("administration.schema.migrationLegendModified")}</span>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => onOpenChange(false)} disabled={isPending}>
-              Cancel
+              {t("administration.schema.migrationCancel")}
             </Button>
             <Button variant="primary" size="sm" disabled={isPending} onClick={onConfirm}>
               <RiExchangeLine className="size-4" />
-              {isPending ? "Migrating…" : `Migrate ${customerCount} Customer(s)`}
+              {isPending ? t("administration.schema.migrationMigrating") : `${t("administration.schema.migrationBtn")} ${customerCount} ${t("administration.schema.migrationCustomers")}`}
             </Button>
           </div>
         </DialogFooter>
@@ -330,6 +334,7 @@ function MigrationConfirmDialog({
 }
 
 export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?: string }) {
+  const { t } = useTranslation();
   const [schemaId, setSchemaId] = useState(initialSchemaId);
   const [schemaOpen, setSchemaOpen] = useState(false);
   const [fromVersionId, setFromVersionId] = useState("");
@@ -395,11 +400,11 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
       {
         onSuccess: () => {
           setConfirmOpen(false);
-          toast.success(`Migration triggered for ${rows.length} customer(s).`);
+          toast.success(`${t("administration.schema.migrationSuccessToast")} ${rows.length} ${t("administration.schema.migrationCustomers")}`);
           setTimeout(() => refetchCustomers(), 2000);
         },
         onError: (err: unknown) =>
-          toast.error(err instanceof Error ? err.message : "Migration failed"),
+          toast.error(err instanceof Error ? err.message : t("administration.schema.migrationFailedToast")),
       },
     );
   }
@@ -415,29 +420,28 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
   return (
     <div className="space-y-5">
       <p className="text-sm text-muted-foreground">
-        Migrate customers from one schema version to another. Select a schema, choose the source
-        and target versions, then confirm.
+        {t("administration.schema.migrationDesc")}
       </p>
 
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1 space-y-1.5">
-          <Label className="text-xs text-muted-foreground">Schema</Label>
+          <Label className="text-xs text-muted-foreground">{t("administration.schema.migrationSchemaLabel")}</Label>
           <Popover open={schemaOpen} onOpenChange={setSchemaOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
                 <span className="truncate">
                   {schemaId
-                    ? schemas.find((s) => s.id === schemaId)?.name ?? "Select schema…"
-                    : "Select schema…"}
+                    ? schemas.find((s) => s.id === schemaId)?.name ?? t("administration.schema.migrationSchemaPlaceholder")
+                    : t("administration.schema.migrationSchemaPlaceholder")}
                 </span>
                 <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="p-0 w-[300px]" align="start">
               <Command>
-                <CommandInput placeholder="Search schema…" />
+                <CommandInput placeholder={t("administration.schema.migrationSchemaSearch")} />
                 <CommandList>
-                  <CommandEmpty>No schemas found.</CommandEmpty>
+                  <CommandEmpty>{t("administration.schema.migrationSchemaEmpty")}</CommandEmpty>
                   <CommandGroup>
                     {schemas.map((s) => (
                       <CommandItem
@@ -464,10 +468,10 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
         </div>
 
         <div className="flex-1 space-y-1.5">
-          <Label className="text-xs text-muted-foreground">From Version</Label>
+          <Label className="text-xs text-muted-foreground">{t("administration.schema.migrationFromVersion")}</Label>
           <Select value={fromVersionId} onValueChange={handleFromChange} disabled={!schemaId}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select source version…" />
+              <SelectValue placeholder={t("administration.schema.migrationFromPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {fromOptions.map((v) => (
@@ -480,10 +484,10 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
         </div>
 
         <div className="flex-1 space-y-1.5">
-          <Label className="text-xs text-muted-foreground">To Version</Label>
+          <Label className="text-xs text-muted-foreground">{t("administration.schema.migrationToVersion")}</Label>
           <Select value={toVersionId} onValueChange={setToVersionId} disabled={!fromVersionId}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select target version…" />
+              <SelectValue placeholder={t("administration.schema.migrationToPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
               {toOptions.map((v) => (
@@ -500,7 +504,7 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
         <div className="rounded-xl border border-border overflow-hidden">
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-muted/30">
             <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Affected Customers
+              {t("administration.schema.migrationAffectedCustomers")}
             </span>
             {!customersLoading && (
               <Badge variant="info" appearance="light" className="text-[10px]">
@@ -516,18 +520,18 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
               onClick={refetchCustomers}
             >
               <RiRefreshLine className={`size-3.5 ${customersLoading ? "animate-spin" : ""}`} />
-              Refresh
+              {t("administration.schema.migrationRefresh")}
             </Button>
           </div>
 
           {customersLoading ? (
             <div className="flex items-center gap-2 py-8 px-4 text-sm text-muted-foreground">
               <RiLoader4Line className="size-4 animate-spin" />
-              Loading customers…
+              {t("administration.schema.migrationLoadingCustomers")}
             </div>
           ) : rows.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              No customers found on this schema version.
+              {t("administration.schema.migrationNoCustomers")}
             </p>
           ) : (
             <div className="divide-y divide-border/50">
@@ -543,7 +547,7 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
         <div className="flex justify-end">
           <Button variant="primary" onClick={() => setConfirmOpen(true)}>
             <RiExchangeLine className="size-4" />
-            {`Migrate ${rows.length} Customer(s)`}
+            {`${t("administration.schema.migrationBtn")} ${rows.length} ${t("administration.schema.migrationCustomers")}`}
           </Button>
         </div>
       )}
@@ -558,6 +562,7 @@ export function SchemaMigrationView({ initialSchemaId = "" }: { initialSchemaId?
         customerCount={rows.length}
         isPending={migrate.isPending}
         onConfirm={executeMigrate}
+        t={t}
       />
     </div>
   );

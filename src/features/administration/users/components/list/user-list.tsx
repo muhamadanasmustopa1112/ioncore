@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useUsers } from "@/features/user-service/api/users";
 import { getPageCount } from "@/lib/pagination";
 import { mapAuthUserToUserData } from "../../mappers";
@@ -34,10 +35,11 @@ import {
 } from "@/components/ui/select";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UserData } from "../../types";
-import { columns } from "./table/columns";
+import { getUserColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 
 export function UserList() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useQueryStates({
     search: parseAsString,
     status: parseAsString,
@@ -84,6 +86,8 @@ export function UserList() {
     return result;
   }, [data, filter.status]);
 
+  const columns = useMemo(() => getUserColumns(t), [t]);
+
   const table = useReactTable({
     columns,
     data: filteredData,
@@ -127,7 +131,7 @@ export function UserList() {
               <div className="relative">
                 <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                 <Input
-                  placeholder="Search users..."
+                  placeholder={t("administration.users.searchUsers")}
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   className="w-52 ps-9"
@@ -148,13 +152,13 @@ export function UserList() {
                 onValueChange={(val) => setFilter({ ...filter, status: val === "all" ? null : val })}
               >
                 <SelectTrigger className="w-36">
-                  <SelectValue placeholder="All Status" />
+                  <SelectValue placeholder={t("administration.users.status")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="locked">Locked</SelectItem>
+                  <SelectItem value="all">{t("administration.users.all")}</SelectItem>
+                  <SelectItem value="active">{t("administration.users.active")}</SelectItem>
+                  <SelectItem value="inactive">{t("administration.users.inactive")}</SelectItem>
+                  <SelectItem value="locked">{t("administration.users.locked")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -170,14 +174,7 @@ export function UserList() {
           </ScrollArea>
         </CardTable>
         <CardFooter>
-          <DataGridPagination
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setFilter={(updater: any) => {
-              const next = typeof updater === "function" ? updater(pagination) : updater;
-              void setPagination(next);
-            }}
-            filter={pagination}
-          />
+          <DataGridPagination setFilter={setPagination} filter={pagination} />
         </CardFooter>
       </Card>
     </DataGrid>

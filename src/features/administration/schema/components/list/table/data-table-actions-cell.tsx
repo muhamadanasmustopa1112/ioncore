@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import {
   RiEyeLine,
   RiEditLine,
@@ -22,6 +23,7 @@ import { SchemaRecord } from "../../../types";
 import { useSchemaStore } from "../../../store/schema";
 
 export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
+  const { t } = useTranslation();
   const { setSelectedSchemaId, openSchemaSheet, openApprovalPanel, openHistoryPanel } =
     useSchemaStore();
   const canApprove = useCan("schema.approve");
@@ -62,7 +64,7 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
           }}
         >
           <RiEyeLine />
-          View Details
+          {t("administration.schema.actionViewDetails")}
         </DropdownMenuItem>
 
         {canEdit && (
@@ -74,7 +76,7 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
             }}
           >
             <RiEditLine />
-            Edit
+            {t("administration.schema.actionEdit")}
           </DropdownMenuItem>
         )}
 
@@ -87,7 +89,7 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
             }}
           >
             <RiFileCopyLine />
-            Clone
+            {t("administration.schema.actionClone")}
           </DropdownMenuItem>
         )}
 
@@ -99,7 +101,7 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
             onClick={() => openApprovalPanel(schema.id)}
           >
             <RiSendPlaneLine />
-            {isDraft ? "Submit for Review" : isReview ? "Review Status" : isRejected ? "Review Rejected" : "Publish"}
+            {isDraft ? t("administration.schema.actionSubmitReview") : isReview ? t("administration.schema.actionReviewStatus") : isRejected ? t("administration.schema.actionReviewRejected") : t("administration.schema.actionPublish")}
           </DropdownMenuItem>
         )}
 
@@ -108,7 +110,7 @@ export function ActionsCell({ row }: { row: Row<SchemaRecord> }) {
           onClick={() => openHistoryPanel(schema.id)}
         >
           <RiHistoryLine />
-          Version History
+          {t("administration.schema.actionVersionHistory")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

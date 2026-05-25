@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { RiDeleteBin7Line, RiEditLine, RiEyeLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -15,6 +16,7 @@ import { usePolicyStore } from "../../../../store/policy";
 import { useDeletePolicy } from "../../../../api/policy-queries";
 
 export function ActionsCell({ row }: { row: Row<PolicyData> }) {
+  const { t } = useTranslation();
   const { openSheet, selectedBranchId } = usePolicyStore();
   const deletePolicy = useDeletePolicy();
   const policy = row.original;
@@ -36,14 +38,14 @@ export function ActionsCell({ row }: { row: Row<PolicyData> }) {
           onClick={() => openSheet("edit", policy)}
         >
           <RiEditLine />
-          Edit
+          {t("administration.branch.policy.edit")}
         </DropdownMenuItem>
         <DropdownMenuItem
           className="cursor-pointer"
           onClick={() => openSheet("details", policy)}
         >
           <RiEyeLine />
-          Detail
+          {t("administration.branch.policy.detail")}
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"
@@ -52,7 +54,7 @@ export function ActionsCell({ row }: { row: Row<PolicyData> }) {
           onClick={handleDelete}
         >
           <RiDeleteBin7Line />
-          Delete
+          {t("administration.branch.policy.delete")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
