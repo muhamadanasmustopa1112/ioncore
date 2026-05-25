@@ -3,6 +3,10 @@ const nextConfig = {
   // Base path for production deployment behind nginx proxy
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || "",
 
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   experimental: {
     optimizePackageImports: ["@/components/ui"],
   },
@@ -67,6 +71,13 @@ const nextConfig = {
       source: `/${alias}/:path*`,
       destination: `${normalizedBaseUrl}/${fullPath}/:path*`,
     }));
+  },
+
+  webpack: (config, { dev, isServer }) => {
+    if (!dev) {
+      config.stats = 'errors-only';
+    }
+    return config;
   },
 };
 

@@ -47,6 +47,11 @@ const EMPTY = {
   ktp_entry_mode: 'ocr' as const,
 };
 
+type Props = {
+  open: boolean;
+  onClose: () => void;
+};
+
 export function CreateCustomerSheet({ open, onClose }: Props) {
   const { t } = useTranslation();
   const [form, setForm] = useState(EMPTY);
