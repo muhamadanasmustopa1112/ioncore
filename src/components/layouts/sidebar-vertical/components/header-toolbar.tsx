@@ -39,6 +39,7 @@ import { useLayout } from "./context";
 import { Badge } from "@/components/ui/badge";
 import { ConfigSelector } from "@/components/shared/dialogs/config-selector";
 import { NotificationPopover } from "@/features/administration/notification/components/notification-popover";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export function HeaderToolbar() {
   const { isMobile } = useLayout();
@@ -125,6 +126,9 @@ export function HeaderToolbar() {
         <div className="flex items-center gap-1">
           <NotificationPopover />
         </div>
+
+        {/* Language Switcher */}
+        <LanguageSwitcher />
 
         <div className="hidden sm:flex items-center gap-2">
           <ConfigSelector buttonMode="icon" buttonVariant="ghost" buttonClassName="size-10 rounded-lg" />

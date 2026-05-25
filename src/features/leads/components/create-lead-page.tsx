@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -100,6 +101,7 @@ function FieldRow({ label, required, children }: { label: string; required?: boo
 }
 
 export function CreateLeadPage() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const [leadName, setLeadName] = useState("");
@@ -149,7 +151,7 @@ export function CreateLeadPage() {
   async function handleSubmit() {
     if (!canSubmit) return;
     if (covered !== true) {
-      toast.error("Please check coverage at the installation point before creating the lead.");
+      toast.error(t("customers.checkCoverageFirst"));
       return;
     }
     try {
@@ -167,7 +169,7 @@ export function CreateLeadPage() {
       });
       router.push(paths.dashboard.crmAndSales.leads.root.getHref());
     } catch (err) {
-      toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? "Failed to create lead");
+      toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? t("common.error"));
     }
   }
 
@@ -178,19 +180,19 @@ export function CreateLeadPage() {
           <ToolbarHeading>
             <PageBreadcrumb
               items={[
-                { title: "CRM & Sales", path: paths.dashboard.crmAndSales.root.getHref() },
-                { title: "Leads", path: paths.dashboard.crmAndSales.leads.root.getHref() },
-                { title: "Create Lead" },
+                { title: t("menu.crmAndSales"), path: paths.dashboard.crmAndSales.root.getHref() },
+                { title: t("menu.leads"), path: paths.dashboard.crmAndSales.leads.root.getHref() },
+                { title: t("leads.createLead") },
               ]}
             />
             <ToolbarTitle className="text-2xl font-extrabold tracking-tight mt-1">
-              Create Lead
+              {t("leads.createLead")}
             </ToolbarTitle>
           </ToolbarHeading>
           <ToolbarActions>
             <Button variant="outline" onClick={() => router.back()} size="sm" disabled={createLead.isPending}>
               <ArrowLeft className="size-4" />
-              Back
+              {t("common.back")}
             </Button>
           </ToolbarActions>
         </Toolbar>
@@ -200,42 +202,40 @@ export function CreateLeadPage() {
         <div className="space-y-5">
           <Card>
             <CardContent className="p-6 space-y-5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lead Info</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("leads.leadInfo", "Lead Info")}</p>
 
-              <FieldRow label="Lead Name" required>
+              <FieldRow label={t("leads.leadName", "Lead Name")} required>
                 <input
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   value={leadName}
                   onChange={(e) => setLeadName(e.target.value)}
-                  placeholder="Prospect name"
+                  placeholder={t("leads.prospectNamePlaceholder", "Prospect name")}
                 />
               </FieldRow>
 
               <div className="grid grid-cols-2 gap-4">
-                <FieldRow label="Lead Type" required>
+                <FieldRow label={t("leads.leadType", "Lead Type")} required>
                   <Select value={leadType} onValueChange={(v) => setLeadType(v as LeadType)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {LEAD_TYPES.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                      ))}
+                      <SelectItem value="broadband">{t("leads.types.broadband", "Broadband")}</SelectItem>
+                      <SelectItem value="enterprise">{t("leads.types.enterprise", "Enterprise")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </FieldRow>
 
-                <FieldRow label="Sub Type" required>
+                <FieldRow label={t("leads.subType", "Sub Type")} required>
                   <Select value={subType} onValueChange={(v) => setSubType(v as CustomerSubType)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {SUB_TYPES.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                      ))}
+                      <SelectItem value="residential">{t("customers.residential")}</SelectItem>
+                      <SelectItem value="business">{t("customers.business")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </FieldRow>
               </div>
 
-              <FieldRow label="Source" required>
+              <FieldRow label={t("customers.source")} required>
                 <Select
                   value={source}
                   onValueChange={(v) => {
@@ -246,15 +246,23 @@ export function CreateLeadPage() {
                 >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {SOURCES.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                    ))}
+                    <SelectItem value="referral">{t("customers.sources.referral")}</SelectItem>
+                    <SelectItem value="cold_call">{t("customers.sources.coldCall")}</SelectItem>
+                    <SelectItem value="website">{t("customers.sources.website")}</SelectItem>
+                    <SelectItem value="whatsapp">{t("customers.sources.whatsapp")}</SelectItem>
+                    <SelectItem value="social_media_dm">{t("customers.sources.socialMediaDm")}</SelectItem>
+                    <SelectItem value="voip_call">{t("customers.sources.voipCall")}</SelectItem>
+                    <SelectItem value="line_call">{t("customers.sources.lineCall")}</SelectItem>
+                    <SelectItem value="walk_in">{t("customers.sources.walkIn")}</SelectItem>
+                    <SelectItem value="event">{t("customers.sources.event")}</SelectItem>
+                    <SelectItem value="partner">{t("customers.sources.partner")}</SelectItem>
+                    <SelectItem value="cs_referral">{t("customers.sources.csReferral")}</SelectItem>
                   </SelectContent>
                 </Select>
               </FieldRow>
 
               {source === "referral" && (
-                <FieldRow label="Referrer Customer" required>
+                <FieldRow label={t("customers.referrerCustomer")} required>
                   <Popover open={customerPickerOpen} onOpenChange={setCustomerPickerOpen}>
                     <PopoverTrigger asChild>
                       <button
@@ -264,7 +272,7 @@ export function CreateLeadPage() {
                         <span className={selectedCustomer ? "text-foreground flex items-center gap-2" : "text-muted-foreground"}>
                           {selectedCustomer ? (
                             <>{selectedCustomer.full_name}<StatusBadge status={selectedCustomer.status} /></>
-                          ) : "Search customer…"}
+                          ) : t("customers.searchCustomer")}
                         </span>
                         <ChevronsUpDown className="size-4 opacity-50 shrink-0 ml-2" />
                       </button>
@@ -272,18 +280,18 @@ export function CreateLeadPage() {
                     <PopoverContent className="w-[320px] p-0" align="start">
                       <Command shouldFilter={false}>
                         <CommandInput
-                          placeholder="Search by name…"
+                          placeholder={t("customers.searchByName")}
                           value={customerSearch}
                           onValueChange={setCustomerSearch}
                         />
                         <CommandList>
                           {customersLoading && (
                             <div className="flex items-center justify-center py-6 gap-2 text-sm text-muted-foreground">
-                              <Loader2 className="size-4 animate-spin" /> Loading…
+                              <Loader2 className="size-4 animate-spin" /> {t("common.loading")}
                             </div>
                           )}
                           {!customersLoading && customerOptions.length === 0 && (
-                            <CommandEmpty>No customers found.</CommandEmpty>
+                            <CommandEmpty>{t("customers.noCustomerFound")}</CommandEmpty>
                           )}
                           {!customersLoading && customerOptions.length > 0 && (
                             <CommandGroup>
@@ -320,14 +328,14 @@ export function CreateLeadPage() {
                 </FieldRow>
               )}
 
-              <FieldRow label="Branch" required>
+              <FieldRow label={t("customers.branch")} required>
                 <Select
                   value={branchId}
                   onValueChange={setBranchId}
                   disabled={branchesLoading}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={branchesLoading ? "Loading…" : "Select branch"} />
+                    <SelectValue placeholder={branchesLoading ? t("common.loading") : t("customers.selectBranch")} />
                   </SelectTrigger>
                   <SelectContent>
                     {activeBranches.map((b) => {
@@ -352,33 +360,37 @@ export function CreateLeadPage() {
               </FieldRow>
 
 
-              <FieldRow label="Status" required>
+              <FieldRow label={t("common.status")} required>
                 <Select value={status} onValueChange={(v) => setStatus(v as LeadStatus)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {STATUSES.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                    ))}
+                    <SelectItem value="new">{t("common.chartLabels.new")}</SelectItem>
+                    <SelectItem value="potential">{t("common.chartLabels.potential")}</SelectItem>
+                    <SelectItem value="warm">{t("common.chartLabels.warm")}</SelectItem>
+                    <SelectItem value="hot">{t("common.leadStatus.hot")}</SelectItem>
+                    <SelectItem value="active">{t("common.chartLabels.active")}</SelectItem>
+                    <SelectItem value="converted">{t("common.chartLabels.converted")}</SelectItem>
+                    <SelectItem value="lost">{t("common.chartLabels.lost")}</SelectItem>
                   </SelectContent>
                 </Select>
               </FieldRow>
 
               <div className="grid grid-cols-2 gap-4">
-                <FieldRow label="NIK">
+                <FieldRow label={t("customers.nik")}>
                   <input
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     value={nik}
                     onChange={(e) => setNik(e.target.value)}
-                    placeholder="16-digit NIK"
+                    placeholder={t("customers.nikPlaceholder")}
                     maxLength={16}
                   />
                 </FieldRow>
-                <FieldRow label="Phone Number">
+                <FieldRow label={t("common.phone")}>
                   <input
                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+62812..."
+                    placeholder={t("customers.phonePlaceholder")}
                     type="tel"
                   />
                 </FieldRow>
@@ -398,16 +410,16 @@ export function CreateLeadPage() {
         <div className="space-y-4 xl:sticky xl:top-6">
           <Card>
             <CardContent className="p-5 space-y-4">
-              <p className="text-sm font-semibold">Summary</p>
+              <p className="text-sm font-semibold">{t("customers.summary")}</p>
               <div className="text-sm space-y-2 divide-y divide-border/40">
                 {([
-                  { label: "Type", value: `${leadType} · ${subType}` },
-                  { label: "Name", value: leadName || null },
-                  { label: "NIK", value: nik || null },
-                  { label: "Source", value: source.replace("_", " ") },
-                  { label: "Status", value: STATUSES.find((s) => s.value === status)?.label ?? status },
+                  { label: t("common.type"), value: `${leadType} · ${subType}` },
+                  { label: t("common.name"), value: leadName || null },
+                  { label: t("customers.nik"), value: nik || null },
+                  { label: t("customers.source"), value: source.replace("_", " ") },
+                  { label: t("common.status"), value: t(`common.chartLabels.${status}`, { defaultValue: status }) },
                   {
-                    label: "Branch",
+                    label: t("customers.branch"),
                     value: (() => {
                       const selectedBranch = activeBranches.find((b) => b.id === branchId);
                       if (!selectedBranch) return null;
@@ -419,8 +431,8 @@ export function CreateLeadPage() {
                       return selectedBranch.name;
                     })()
                   },
-                  { label: "Referrer", value: selectedCustomer?.full_name ?? null },
-                  { label: "Coords", value: pinMoved ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : null },
+                  { label: t("customers.referrerCustomer"), value: selectedCustomer?.full_name ?? null },
+                  { label: t("customers.latitude") + "/" + t("customers.longitude"), value: pinMoved ? `${lat.toFixed(4)}, ${lng.toFixed(4)}` : null },
                 ] as { label: string; value: string | null }[]).map(({ label, value }) => value ? (
                   <div key={label} className="flex justify-between py-1.5 first:pt-0">
                     <span className="text-muted-foreground shrink-0">{label}</span>
@@ -431,10 +443,10 @@ export function CreateLeadPage() {
 
               <div className="space-y-2 pt-1">
                 <Button variant="primary" className="w-full font-semibold" onClick={handleSubmit} disabled={!canSubmit}>
-                  {createLead.isPending ? <><Loader2 className="size-4 animate-spin" /> Creating…</> : "Create Lead"}
+                  {createLead.isPending ? <><Loader2 className="size-4 animate-spin" /> {t("common.creating")}</> : t("leads.createLead")}
                 </Button>
                 <Button variant="outline" className="w-full" onClick={() => router.back()} disabled={createLead.isPending}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               </div>
             </CardContent>

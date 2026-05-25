@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -35,6 +36,7 @@ function fmt(d?: string | null) {
 }
 
 export function CustomerProfile() {
+  const { t } = useTranslation();
   const params = useParams<{ customerId: string }>();
   const id = params?.customerId ?? "";
   const { data: customer, isLoading } = useCustomer(id);
@@ -46,7 +48,7 @@ export function CustomerProfile() {
     : [];
 
   function handleDeactivate() {
-    if (!window.confirm("Deactivate this customer's service? This will set their status to suspended.")) return;
+    if (!window.confirm(t("customers.deactivateConfirm", "Deactivate this customer's service? This will set their status to suspended."))) return;
     updateStatus.mutate("suspended");
   }
 
@@ -55,16 +57,16 @@ export function CustomerProfile() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            <BreadcrumbLink href="/">{t("common.home")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink href="/crm-and-sales">CRM &amp; Sales</BreadcrumbLink>
+            <BreadcrumbLink href="/crm-and-sales">{t("menu.crmAndSales")}</BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage>
-              {customer?.full_name ?? (isLoading ? "Loading…" : "Customer")}
+              {customer?.full_name ?? (isLoading ? t("common.loading") : t("customers.title"))}
             </BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
@@ -96,31 +98,31 @@ export function CustomerProfile() {
           {/* Profile Details */}
           <Card>
             <CardHeader className="border-b">
-              <CardTitle className="text-sm">Profile Details</CardTitle>
+              <CardTitle className="text-sm">{t("customers.profileDetails", "Profile Details")}</CardTitle>
             </CardHeader>
             <CardContent className="pt-2 pb-4 px-6">
-              <DetailRow label="NIK" value={customer?.nik} />
-              <DetailRow label="Full Name" value={customer?.full_name} />
-              <DetailRow label="Phone" value={customer?.phone} />
-              <DetailRow label="Email" value={customer?.email} />
-              <DetailRow label="Company Name" value={customer?.company_name} />
-              <DetailRow label="Customer Type" value={customer?.customer_type} />
-              <DetailRow label="Status" value={customer?.status} />
-              <DetailRow label="Account Manager" value={customer?.account_manager_id} />
+              <DetailRow label={t("customers.nik")} value={customer?.nik} />
+              <DetailRow label={t("customers.fullName")} value={customer?.full_name} />
+              <DetailRow label={t("common.phone")} value={customer?.phone} />
+              <DetailRow label={t("common.email")} value={customer?.email} />
+              <DetailRow label={t("customers.companyName")} value={customer?.company_name} />
+              <DetailRow label={t("customers.customerType")} value={customer?.customer_type} />
+              <DetailRow label={t("common.status")} value={customer?.status} />
+              <DetailRow label={t("customers.accountManagerId")} value={customer?.account_manager_id} />
             </CardContent>
           </Card>
 
           {/* Schema Versions */}
           <Card>
             <CardHeader className="border-b">
-              <CardTitle className="text-sm">Schema Versions</CardTitle>
+              <CardTitle className="text-sm">{t("customers.schemaVersions")}</CardTitle>
             </CardHeader>
             <CardContent className="pt-2 pb-4 px-6">
-              <DetailRow label="Onboarding Schema" value={customer?.onboarding_schema_version_id} />
-              <DetailRow label="Billing Schema" value={customer?.billing_schema_version_id} />
-              <DetailRow label="Service Schema" value={customer?.service_schema_version_id} />
-              <DetailRow label="Commission Schema" value={customer?.commission_schema_version_id} />
-              <DetailRow label="Suspension Schema" value={customer?.suspension_schema_version_id} />
+              <DetailRow label={t("customers.onboardingSchema")} value={customer?.onboarding_schema_version_id} />
+              <DetailRow label={t("customers.billingSchema")} value={customer?.billing_schema_version_id} />
+              <DetailRow label={t("customers.serviceSchema")} value={customer?.service_schema_version_id} />
+              <DetailRow label={t("customers.commissionSchema")} value={customer?.commission_schema_version_id} />
+              <DetailRow label={t("customers.suspensionSchema")} value={customer?.suspension_schema_version_id} />
             </CardContent>
           </Card>
 
@@ -129,14 +131,14 @@ export function CustomerProfile() {
           {/* Timestamps */}
           <Card>
             <CardHeader className="border-b">
-              <CardTitle className="text-sm">Timestamps</CardTitle>
+              <CardTitle className="text-sm">{t("customers.timestamps", "Timestamps")}</CardTitle>
             </CardHeader>
             <CardContent className="pt-2 pb-4 px-6">
-              <DetailRow label="Activation Date" value={fmt(customer?.activation_date)} />
-              <DetailRow label="Created At" value={fmt(customer?.created_at)} />
-              <DetailRow label="Updated At" value={fmt(customer?.updated_at)} />
-              <DetailRow label="Created By" value={customer?.created_by} />
-              <DetailRow label="Updated By" value={customer?.updated_by} />
+              <DetailRow label={t("common.activationDate", "Activation Date")} value={fmt(customer?.activation_date)} />
+              <DetailRow label={t("common.createdAt")} value={fmt(customer?.created_at)} />
+              <DetailRow label={t("common.updatedAt")} value={fmt(customer?.updated_at)} />
+              <DetailRow label={t("common.createdBy", "Created By")} value={customer?.created_by} />
+              <DetailRow label={t("common.updatedBy", "Updated By")} value={customer?.updated_by} />
             </CardContent>
           </Card>
 
@@ -144,7 +146,7 @@ export function CustomerProfile() {
           {attrEntries.length > 0 && (
             <Card>
               <CardHeader className="border-b">
-                <CardTitle className="text-sm">Custom Attributes</CardTitle>
+                <CardTitle className="text-sm">{t("customers.customAttributes", "Custom Attributes")}</CardTitle>
               </CardHeader>
               <CardContent className="pt-2 pb-4 px-6">
                 {attrEntries.map(([key, val]) => (
@@ -168,7 +170,7 @@ export function CustomerProfile() {
           {(customer?.lat || customer?.location) && (
             <Card>
               <CardHeader className="border-b pb-3">
-                <CardTitle className="text-sm">Location</CardTitle>
+                <CardTitle className="text-sm">{t("customers.location", "Location")}</CardTitle>
               </CardHeader>
               <CardContent className="pt-3 text-sm space-y-1">
                 {customer.location?.address && <p>{customer.location.address}</p>}
@@ -184,11 +186,11 @@ export function CustomerProfile() {
           {/* Documents */}
           <Card>
             <CardHeader className="border-b pb-3">
-              <CardTitle className="text-sm">Documents</CardTitle>
+              <CardTitle className="text-sm">{t("customers.documents", "Documents")}</CardTitle>
             </CardHeader>
             <CardContent className="pt-3">
               {(customer?.documents ?? []).length === 0 ? (
-                <p className="text-sm text-muted-foreground">No documents</p>
+                <p className="text-sm text-muted-foreground">{t("customers.noDocuments", "No documents")}</p>
               ) : (
                 <div className="flex flex-col gap-3">
                   {(customer?.documents ?? []).map((doc) => (
@@ -220,7 +222,7 @@ export function CustomerProfile() {
                         rel="noopener noreferrer"
                         className="text-xs text-primary hover:underline block truncate"
                       >
-                        View file
+                        {t("customers.viewFile", "View file")}
                       </a>
                       <p className="text-xs text-muted-foreground">
                         {new Date(doc.created_at).toLocaleDateString()}
@@ -236,7 +238,7 @@ export function CustomerProfile() {
           {(customer?.work_orders ?? []).length > 0 && (
             <Card>
               <CardHeader className="border-b pb-3">
-                <CardTitle className="text-sm">Work Orders</CardTitle>
+                <CardTitle className="text-sm">{t("menu.workOrders")}</CardTitle>
               </CardHeader>
               <CardContent className="pt-3">
                 <div className="flex flex-col divide-y text-sm">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Loader2, CheckCircle2, AlertCircle, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { services } from "@/config/constants";
 import { userServiceApi } from "@/features/user-service/api/client";
+import "@/i18n";
 
 export const INSTALL_DEFAULT: [number, number] = [-6.2, 106.816];
 
@@ -49,6 +51,7 @@ export interface InstallationSectionProps {
 }
 
 export function InstallationSection({ lat, lng, onLatLngChange, onAddressChange, onCoverageChange }: InstallationSectionProps) {
+  const { t } = useTranslation();
   const [mapKey] = useState(0);
   const [flyTrigger, setFlyTrigger] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -120,7 +123,7 @@ export function InstallationSection({ lat, lng, onLatLngChange, onAddressChange,
     <Card>
       <CardContent className="p-6 space-y-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Installation Point
+          {t("customers.installationPoint")}
         </p>
 
         <div className="relative">
@@ -128,7 +131,7 @@ export function InstallationSection({ lat, lng, onLatLngChange, onAddressChange,
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               className="pl-9"
-              placeholder="Search address…"
+              placeholder={t("customers.searchAddress")}
               value={searchQuery}
               onChange={(e) => handleSearchInput(e.target.value)}
             />
@@ -173,16 +176,16 @@ export function InstallationSection({ lat, lng, onLatLngChange, onAddressChange,
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          Click the map or drag the pin to set the installation point
+          {t("customers.mapInstruction")}
         </p>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-lg border bg-muted/30 px-3 py-2">
-            <p className="text-xs text-muted-foreground mb-0.5">Latitude</p>
+            <p className="text-xs text-muted-foreground mb-0.5">{t("customers.latitude")}</p>
             <p className="text-sm font-mono font-semibold">{lat.toFixed(6)}</p>
           </div>
           <div className="rounded-lg border bg-muted/30 px-3 py-2">
-            <p className="text-xs text-muted-foreground mb-0.5">Longitude</p>
+            <p className="text-xs text-muted-foreground mb-0.5">{t("customers.longitude")}</p>
             <p className="text-sm font-mono font-semibold">{lng.toFixed(6)}</p>
           </div>
         </div>
@@ -195,18 +198,18 @@ export function InstallationSection({ lat, lng, onLatLngChange, onAddressChange,
             disabled={coverage === "checking"}
           >
             {coverage === "checking" && <Loader2 className="size-4 animate-spin" />}
-            {coverage === "idle" ? "Check Coverage" : coverage === "checking" ? "Checking…" : "Re-check Coverage"}
+            {coverage === "idle" ? t("customers.checkCoverage") : coverage === "checking" ? t("customers.checking") : t("customers.recheckCoverage")}
           </Button>
           {coverage === "available" && (
             <div className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
               <CheckCircle2 className="size-4 shrink-0" />
-              {coverageMsg || "Coverage available at this location"}
+              {coverageMsg || t("customers.coverageAvailable")}
             </div>
           )}
           {coverage === "unavailable" && (
             <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               <AlertCircle className="size-4 shrink-0" />
-              {coverageMsg || "No coverage at this location"}
+              {coverageMsg || t("customers.noCoverage")}
             </div>
           )}
         </div>

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import {
   Users, FileText, Wrench, ShoppingCart, Network, Building2,
   MapPin, Boxes, ClipboardList, TrendingUp, Radio, BarChart3,
@@ -20,65 +21,67 @@ import { useAdminLeads } from "@/features/leads/api/leads-queries";
 import { useCustomerList } from "@/features/customers/api/customers-queries";
 import { useWorkOrderList } from "@/features/operations/work-orders/api/work-order-queries";
 import { useUsers } from "@/features/user-service/api/users";
+import "@/i18n";
 
-const STATS = (t: { customers: number; leads: number; workOrders: number; users: number }) => [
-  { label: "Total Customers", value: t.customers, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10", badge: "CRM" },
-  { label: "Active Leads", value: t.leads, icon: TrendingUp, color: "text-violet-500", bg: "bg-violet-500/10", badge: "Sales" },
-  { label: "Work Orders", value: t.workOrders, icon: ClipboardList, color: "text-orange-500", bg: "bg-orange-500/10", badge: "Ops" },
-  { label: "System Users", value: t.users, icon: FileText, color: "text-emerald-500", bg: "bg-emerald-500/10", badge: "Admin" },
+const STATS = (t: (key: string) => string, totals: { customers: number; leads: number; workOrders: number; users: number }) => [
+  { label: t("dashboard.stats.totalCustomers"), value: totals.customers, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10", badge: t("dashboard.statBadges.crm") },
+  { label: t("dashboard.stats.activeLeads"), value: totals.leads, icon: TrendingUp, color: "text-violet-500", bg: "bg-violet-500/10", badge: t("dashboard.statBadges.sales") },
+  { label: t("dashboard.stats.workOrders"), value: totals.workOrders, icon: ClipboardList, color: "text-orange-500", bg: "bg-orange-500/10", badge: t("dashboard.statBadges.ops") },
+  { label: t("dashboard.stats.systemUsers"), value: totals.users, icon: FileText, color: "text-emerald-500", bg: "bg-emerald-500/10", badge: t("dashboard.statBadges.admin") },
 ];
 
-const MENU_GROUPS = [
+const MENU_GROUPS = (t: (key: string) => string) => [
   {
-    group: "CRM & Sales",
+    group: t("dashboard.crmAndSales"),
     color: "from-blue-500/10 to-violet-500/10",
     accent: "border-blue-500/20",
     items: [
-      { icon: Users, label: "Customers", description: "Manage customer records", href: paths.dashboard.crmAndSales.customer.root.getHref(), iconColor: "bg-blue-500" },
-      { icon: TrendingUp, label: "Leads", description: "Track & convert leads", href: paths.dashboard.crmAndSales.leads.root.getHref(), iconColor: "bg-violet-500" },
+      { icon: Users, label: t("menu.customers"), description: t("dashboard.menuDescriptions.manageCustomerRecords"), href: paths.dashboard.crmAndSales.customer.root.getHref(), iconColor: "bg-blue-500" },
+      { icon: TrendingUp, label: t("menu.leads"), description: t("dashboard.menuDescriptions.trackConvertLeads"), href: paths.dashboard.crmAndSales.leads.root.getHref(), iconColor: "bg-violet-500" },
     ],
   },
   {
-    group: "Operations",
+    group: t("dashboard.operations"),
     color: "from-orange-500/10 to-rose-500/10",
     accent: "border-orange-500/20",
     items: [
-      { icon: ClipboardList, label: "Work Orders", description: "Field dispatch & tracking", href: paths.dashboard.operations.workOrders.root.getHref(), iconColor: "bg-orange-500" },
-      { icon: ShoppingCart, label: "Orders", description: "Order management", href: paths.dashboard.operations.orders.root.getHref(), iconColor: "bg-yellow-500" },
-      { icon: Wrench, label: "Technicians", description: "Field team management", href: paths.dashboard.technician.root.getHref(), iconColor: "bg-rose-500" },
+      { icon: ClipboardList, label: t("menu.workOrders"), description: t("dashboard.menuDescriptions.fieldDispatchTracking"), href: paths.dashboard.operations.workOrders.root.getHref(), iconColor: "bg-orange-500" },
+      { icon: ShoppingCart, label: t("menu.orders"), description: t("dashboard.menuDescriptions.orderManagement"), href: paths.dashboard.operations.orders.root.getHref(), iconColor: "bg-yellow-500" },
+      { icon: Wrench, label: t("menu.technicians"), description: t("dashboard.menuDescriptions.fieldTeamManagement"), href: paths.dashboard.technician.root.getHref(), iconColor: "bg-rose-500" },
     ],
   },
   {
-    group: "Network & Infrastructure",
+    group: t("dashboard.network"),
     color: "from-teal-500/10 to-indigo-500/10",
     accent: "border-teal-500/20",
     items: [
-      { icon: MapPin, label: "ODP & POP Map", description: "Infrastructure map view", href: paths.dashboard.networkAndOrchestration.odpPop.map.getHref(), iconColor: "bg-teal-500" },
-      { icon: Network, label: "ODP & POP", description: "Topology management", href: paths.dashboard.networkAndOrchestration.odpPop.root.getHref(), iconColor: "bg-cyan-500" },
-      { icon: Radio, label: "RADIUS", description: "Network radius dashboard", href: paths.dashboard.networkAndOrchestration.radius.dashboard.getHref(), iconColor: "bg-indigo-500" },
+      { icon: MapPin, label: t("menu.odpPopMap"), description: t("dashboard.menuDescriptions.infrastructureMapView"), href: paths.dashboard.networkAndOrchestration.odpPop.map.getHref(), iconColor: "bg-teal-500" },
+      { icon: Network, label: t("menu.odpPop"), description: t("dashboard.menuDescriptions.topologyManagement"), href: paths.dashboard.networkAndOrchestration.odpPop.root.getHref(), iconColor: "bg-cyan-500" },
+      { icon: Radio, label: t("menu.radius"), description: t("dashboard.menuDescriptions.networkRadiusDashboard"), href: paths.dashboard.networkAndOrchestration.radius.dashboard.getHref(), iconColor: "bg-indigo-500" },
     ],
   },
   {
-    group: "Administration",
+    group: t("dashboard.administration"),
     color: "from-amber-500/10 to-emerald-500/10",
     accent: "border-amber-500/20",
     items: [
-      { icon: Building2, label: "Branch", description: "Branch management", href: paths.dashboard.administration.branch.root.getHref(), iconColor: "bg-amber-500" },
-      { icon: FileText, label: "Users", description: "User & role management", href: paths.dashboard.user.root.getHref(), iconColor: "bg-emerald-500" },
-      { icon: Boxes, label: "Warehouse", description: "Stock & inventory", href: paths.dashboard.warehouse.root.getHref(), iconColor: "bg-pink-500" },
-      { icon: BarChart3, label: "Schema", description: "Data schema config", href: "/administration/schema", iconColor: "bg-slate-500" },
+      { icon: Building2, label: t("menu.branch"), description: t("dashboard.menuDescriptions.branchManagement"), href: paths.dashboard.administration.branch.root.getHref(), iconColor: "bg-amber-500" },
+      { icon: FileText, label: t("menu.users"), description: t("dashboard.menuDescriptions.userRoleManagement"), href: paths.dashboard.user.root.getHref(), iconColor: "bg-emerald-500" },
+      { icon: Boxes, label: t("menu.warehouse"), description: t("dashboard.menuDescriptions.stockInventory"), href: paths.dashboard.warehouse.root.getHref(), iconColor: "bg-pink-500" },
+      { icon: BarChart3, label: t("menu.schema"), description: t("dashboard.menuDescriptions.dataSchemaConfig"), href: "/administration/schema", iconColor: "bg-slate-500" },
     ],
   },
 ];
 
-function getGreeting() {
+function getGreeting(t: (key: string) => string) {
   const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
+  if (h < 12) return t("dashboard.greeting.morning");
+  if (h < 17) return t("dashboard.greeting.afternoon");
+  return t("dashboard.greeting.evening");
 }
 
 export function Dashboard() {
+  const { t } = useTranslation();
   const router = useRouter();
   const user = useAuthStore((s) => s.user);
 
@@ -88,10 +91,10 @@ export function Dashboard() {
 
   useEffect(() => {
     if (isTechnician) {
-      toast.error("Access denied. Technician accounts cannot access the dashboard.");
+      toast.error(t("common.error"));
       router.replace(paths.dashboard.technician.root.getHref());
     }
-  }, [isTechnician, router]);
+  }, [isTechnician, router, t]);
 
   const { data: leadsData } = useAdminLeads({ per_page: 1 });
   const { data: customersData } = useCustomerList({ size: 1 });
@@ -123,23 +126,23 @@ export function Dashboard() {
   };
 
   const woChartData = [
-    { name: "Created", value: woCreated?.total ?? 0, color: "#f59e0b" },
-    { name: "In Progress", value: woInProgress?.total ?? 0, color: "#3b82f6" },
-    { name: "Done", value: woDone?.total ?? 0, color: "#22c55e" },
+    { name: t("dashboard.chartLabels.created"), value: woCreated?.total ?? 0, color: "#f59e0b" },
+    { name: t("dashboard.chartLabels.inProgress"), value: woInProgress?.total ?? 0, color: "#3b82f6" },
+    { name: t("dashboard.chartLabels.done"), value: woDone?.total ?? 0, color: "#22c55e" },
   ];
 
   const leadsChartData = [
-    { name: "New", value: (leadsNew as any)?.metadata?.total ?? 0, color: "#8b5cf6" },
-    { name: "Active", value: (leadsActive as any)?.metadata?.total ?? 0, color: "#3b82f6" },
-    { name: "Warm", value: (leadsWarm as any)?.metadata?.total ?? 0, color: "#f59e0b" },
-    { name: "Potential", value: (leadsPotential as any)?.metadata?.total ?? 0, color: "#94a3b8" },
-    { name: "Converted", value: (leadsConverted as any)?.metadata?.total ?? 0, color: "#22c55e" },
-    { name: "Lost", value: (leadsLost as any)?.metadata?.total ?? 0, color: "#ef4444" },
+    { name: t("dashboard.chartLabels.new"), value: (leadsNew as any)?.metadata?.total ?? 0, color: "#8b5cf6" },
+    { name: t("dashboard.chartLabels.active"), value: (leadsActive as any)?.metadata?.total ?? 0, color: "#3b82f6" },
+    { name: t("dashboard.chartLabels.warm"), value: (leadsWarm as any)?.metadata?.total ?? 0, color: "#f59e0b" },
+    { name: t("dashboard.chartLabels.potential"), value: (leadsPotential as any)?.metadata?.total ?? 0, color: "#94a3b8" },
+    { name: t("dashboard.chartLabels.converted"), value: (leadsConverted as any)?.metadata?.total ?? 0, color: "#22c55e" },
+    { name: t("dashboard.chartLabels.lost"), value: (leadsLost as any)?.metadata?.total ?? 0, color: "#ef4444" },
   ];
 
   if (isTechnician) return <ScreenLoader />;
 
-  const stats = STATS(totals);
+  const stats = STATS(t, totals);
 
   return (
     <div className="flex flex-col gap-8 p-6 max-w-screen-2xl mx-auto">
@@ -152,11 +155,11 @@ export function Dashboard() {
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="success" appearance="light" className="gap-1 text-[10px] uppercase tracking-widest font-black">
                 <Wifi className="size-2.5" />
-                Live
+                {t("dashboard.live")}
               </Badge>
             </div>
             <h1 className="text-3xl font-black tracking-tight text-foreground">
-              {getGreeting()}, <span className="text-primary">{user?.fullName?.split(" ")[0]}</span>
+              {getGreeting(t)}, <span className="text-primary">{user?.fullName?.split(" ")[0]}</span>
             </h1>
             <p className="text-sm text-muted-foreground mt-1.5">
               {user?.primaryRole} · {user?.primaryBranch}
@@ -164,14 +167,14 @@ export function Dashboard() {
           </div>
           <div className="text-right text-xs text-muted-foreground font-mono">
             <p className="font-bold text-foreground text-sm">{new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
-            <p className="mt-0.5 uppercase tracking-widest text-[10px]">ION Broadband Platform</p>
+            <p className="mt-0.5 uppercase tracking-widest text-[10px]">{t("dashboard.platform")}</p>
           </div>
         </div>
       </div>
 
       {/* Stats */}
       <div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">Overview</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">{t("dashboard.overview")}</p>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {stats.map(({ label, value, icon: Icon, color, bg, badge }) => (
             <Card key={label} className="overflow-hidden">
@@ -196,9 +199,9 @@ export function Dashboard() {
 
       {/* Quick Access */}
       <div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">Quick Access</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">{t("dashboard.quickAccess")}</p>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {MENU_GROUPS.map(({ group, color, accent, items }) => (
+          {MENU_GROUPS(t).map(({ group, color, accent, items }) => (
             <Card key={group} className={`overflow-hidden border ${accent}`}>
               <div className={`bg-gradient-to-br ${color} px-5 pt-4 pb-3 border-b border-border/40`}>
                 <p className="text-[10px] font-black uppercase tracking-widest text-foreground/70">{group}</p>
@@ -228,13 +231,13 @@ export function Dashboard() {
 
       {/* Charts */}
       <div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">Analytics</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">{t("dashboard.analytics")}</p>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {/* WO by Status */}
           <Card>
             <CardHeader className="px-5 pt-5 pb-3">
               <CardHeading className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                <ClipboardList className="size-4 text-orange-500" /> Work Orders by Status
+                <ClipboardList className="size-4 text-orange-500" /> {t("menu.workOrders")}
               </CardHeading>
             </CardHeader>
             <CardContent className="px-5 pb-5">
@@ -268,7 +271,7 @@ export function Dashboard() {
           <Card>
             <CardHeader className="px-5 pt-5 pb-3">
               <CardHeading className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                <TrendingUp className="size-4 text-violet-500" /> Leads by Status
+                <TrendingUp className="size-4 text-violet-500" /> {t("menu.leads")}
               </CardHeading>
             </CardHeader>
             <CardContent className="px-5 pb-5">
@@ -302,23 +305,23 @@ export function Dashboard() {
 
       {/* Recent Tables */}
       <div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">Recent Activity</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3">{t("dashboard.recentActivity")}</p>
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {/* Recent Work Orders */}
           <Card>
             <CardHeader className="px-5 pt-5 pb-3 border-b border-border/40">
               <div className="flex items-center justify-between">
                 <CardHeading className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                  <ClipboardList className="size-4 text-orange-500" /> Recent Work Orders
+                  <ClipboardList className="size-4 text-orange-500" /> {t("technician.workOrders")}
                 </CardHeading>
                 <Link href={paths.dashboard.operations.workOrders.root.getHref()} className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
-                  View all
+                  {t("dashboard.viewAll")}
                 </Link>
               </div>
             </CardHeader>
             <CardContent className="p-0 overflow-x-auto">
               {(recentWO?.workOrders ?? []).length === 0 ? (
-                <p className="text-[11px] text-muted-foreground text-center py-8">No work orders</p>
+                <p className="text-[11px] text-muted-foreground text-center py-8">{t("dashboard.noData")}</p>
               ) : (
                 (recentWO?.workOrders ?? []).map((wo: any) => (
                   <div key={wo.id} className="flex items-center gap-3 px-5 py-3 border-b border-border/30 last:border-0 hover:bg-muted/50 transition-colors duration-150 cursor-pointer">
@@ -332,7 +335,7 @@ export function Dashboard() {
                       appearance="light"
                       className="text-[9px] font-black uppercase tracking-widest shrink-0"
                     >
-                      {wo.status === "IN_PROGRESS" ? "In Progress" : wo.status === "DONE" ? "Done" : "Created"}
+                      {wo.status === "IN_PROGRESS" ? t("technician.status.inProgress") : wo.status === "DONE" ? t("technician.status.done") : t("technician.status.created")}
                     </Badge>
                   </div>
                 ))
@@ -345,16 +348,16 @@ export function Dashboard() {
             <CardHeader className="px-5 pt-5 pb-3 border-b border-border/40">
               <div className="flex items-center justify-between">
                 <CardHeading className="text-sm font-black uppercase tracking-widest flex items-center gap-2">
-                  <TrendingUp className="size-4 text-violet-500" /> Recent Leads
+                  <TrendingUp className="size-4 text-violet-500" /> {t("menu.leads")}
                 </CardHeading>
                 <Link href={paths.dashboard.crmAndSales.leads.root.getHref()} className="text-[10px] font-black uppercase tracking-widest text-primary hover:underline">
-                  View all
+                  {t("dashboard.viewAll")}
                 </Link>
               </div>
             </CardHeader>
             <CardContent className="p-0 overflow-x-auto">
               {((recentLeads as any)?.leads ?? []).length === 0 ? (
-                <p className="text-[11px] text-muted-foreground text-center py-8">No leads</p>
+                <p className="text-[11px] text-muted-foreground text-center py-8">{t("dashboard.noData")}</p>
               ) : (
                 ((recentLeads as any)?.leads ?? []).map((lead: any) => (
                   <div key={lead.id} className="flex items-center gap-3 px-5 py-3 border-b border-border/30 last:border-0 hover:bg-muted/50 transition-colors duration-150 cursor-pointer">
@@ -369,7 +372,7 @@ export function Dashboard() {
                       <p className="text-[10px] text-muted-foreground capitalize">{lead.source ?? "—"}</p>
                     </div>
                     <Badge variant="secondary" appearance="light" className="text-[9px] font-black uppercase tracking-widest shrink-0 capitalize">
-                      {lead.status}
+                      {t(`dashboard.leadStatus.${lead.status}`)}
                     </Badge>
                   </div>
                 ))

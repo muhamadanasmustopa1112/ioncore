@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "react-i18next";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Eye, MoreHorizontal, Plus, Search, Settings2, X } from "lucide-react";
 import { RiArrowRightUpLine } from "@remixicon/react";
@@ -78,6 +79,7 @@ const LEAD_SOURCES: { value: LeadSource; label: string }[] = [
 ];
 
 function LeadsViewToggle() {
+  const { t } = useTranslation();
   const { table } = useDataGrid();
   return (
     <DataGridColumnVisibility
@@ -85,7 +87,7 @@ function LeadsViewToggle() {
       trigger={
         <Button variant="outline">
           <Settings2 className="size-4" />
-          View
+          {t("common.view")}
         </Button>
       }
     />
@@ -105,6 +107,7 @@ const STATUS_VARIANT: Record<LeadStatus, "primary" | "success" | "warning" | "de
 const PAGE_SIZE = 25;
 
 export function LeadsList() {
+  const { t } = useTranslation();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
   const [statusFilter, setStatusFilter] = useQueryState("status", parseAsString.withDefault(""));
@@ -267,21 +270,21 @@ export function LeadsList() {
     <div className="flex flex-col gap-5 p-4">
       <PageBreadcrumb
         items={[
-          { title: "CRM & Sales", path: paths.dashboard.crmAndSales.root.getHref() },
-          { title: "Leads" },
+          { title: t("menu.crmAndSales"), path: paths.dashboard.crmAndSales.root.getHref() },
+          { title: t("menu.leads") },
         ]}
       />
 
       <Toolbar className="items-start sm:items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Leads
+            {t("menu.leads")}
           </ToolbarTitle>
         </ToolbarHeading>
         <ToolbarActions>
           <Button variant="primary" onClick={() => router.push(paths.dashboard.crmAndSales.leads.create.getHref())} className="font-semibold">
             <Plus className="size-4" />
-            Create Lead
+            {t("leads.createLead", "Create Lead")}
           </Button>
         </ToolbarActions>
       </Toolbar>
@@ -295,7 +298,7 @@ export function LeadsList() {
                   <div className="relative">
                     <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
-                      placeholder="Search by name…"
+                      placeholder={t("customers.searchByName")}
                       value={searchInput}
                       onChange={(e) => setSearchInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && applySearch()}

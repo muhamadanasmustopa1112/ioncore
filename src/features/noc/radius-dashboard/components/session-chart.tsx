@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import dynamic from "next/dynamic";
 import { 
   Card, 
@@ -21,6 +22,7 @@ import { ApexOptions } from "apexcharts";
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export function RadiusSessionChart() {
+  const { t } = useTranslation();
   const chartOptions: ApexOptions = useMemo(() => ({
     chart: {
       id: "radius-session-trend",
@@ -68,23 +70,23 @@ export function RadiusSessionChart() {
     tooltip: {
       theme: 'dark',
       y: {
-        formatter: (val) => val.toLocaleString() + ' Active Sessions'
+        formatter: (val) => `${val.toLocaleString()} ${t("radius.activeSessions", "Active Sessions")}`
       }
     },
     colors: ['#3b82f6'],
     dataLabels: { enabled: false }
-  }), []);
+  }), [t]);
 
   const series = useMemo(() => [{
-    name: "Sessions",
+    name: t("radius.sessions", "Sessions"),
     data: RADIUS_SESSION_TRENDS.map(t => t.count)
-  }], []);
+  }], [t]);
 
   return (
     <Card className="border-none shadow-md bg-card rounded-3xl overflow-hidden">
       <CardHeader className="pb-2 flex-row justify-between items-center">
         <CardHeading className="text-sm font-black uppercase tracking-widest text-foreground">
-          Session Activity (24h)
+          {t("radius.sessionActivity", "Session Activity (24h)")}
         </CardHeading>
         <TooltipProvider delayDuration={100}>
           <Tooltip>
@@ -94,7 +96,7 @@ export function RadiusSessionChart() {
               </button>
             </TooltipTrigger>
             <TooltipContent variant="dark">
-              Grafik ini menunjukkan fluktuasi jumlah pelanggan yang online secara bersamaan di seluruh wilayah
+              {t("radius.sessionActivityTooltip", "This chart shows the fluctuation of customers online simultaneously across all regions")}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

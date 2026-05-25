@@ -44,11 +44,14 @@ export function HierarchicalFilter({ onFilterChange, popData, value }: Hierarchi
 
   // 2. Get POPs based on Area
   const popOptions = useMemo(() => {
-    const filtered = selectedArea
-      ? pops.filter((p) => p.branch?.id === selectedArea)
+    // If popData exists (from API), use all as API already filtered by area
+    // If using dummy data, filter by area
+    const isApiData = !!popData?.data;
+    const filtered = (selectedArea && !isApiData)
+      ? pops.filter((p) => p.area === selectedArea || p.branch?.id === selectedArea)
       : pops;
     return filtered.map((p) => ({ value: p.id, label: p.name }));
-  }, [selectedArea, pops]);
+  }, [selectedArea, pops, popData]);
 
   // 3. Get ODPs based on POP
   const odpOptions = useMemo(() => {

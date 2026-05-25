@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,23 +23,24 @@ const salesDeals = [
   { id: "#S-400", customer: "Quantum Lab", amount: "$25,000", date: "Oct 22, 2023" },
 ];
 export function CrmSalesTable() {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Sales Deals</CardTitle>
+        <CardTitle>{t("crm.salesDeals", "Recent Sales Deals")}</CardTitle>
         <CardToolbar>
-          <Button variant="ghost" mode="link">View All</Button>
+          <Button variant="ghost" mode="link">{t("common.viewAll")}</Button>
         </CardToolbar>
       </CardHeader>
       <CardTable>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>{t("common.id")}</TableHead>
+              <TableHead>{t("common.customer", "Customer")}</TableHead>
+              <TableHead>{t("common.amount", "Amount")}</TableHead>
+              <TableHead>{t("common.date")}</TableHead>
+              <TableHead>{t("common.action")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,6 +30,7 @@ const STATUS_VARIANT: Record<CustomerStatus, "success" | "warning" | "destructiv
 };
 
 export function CrmCustomersTable() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, error } = useCustomerList({
     order_by: "created_at",
     order_direction: "desc",
@@ -40,38 +42,38 @@ const customers = Array.isArray(data?.items) ? data.items : [];
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Latest Customers Activated</CardTitle>
+        <CardTitle>{t("common.latestCustomersActivated")}</CardTitle>
         <CardToolbar>
-          <Button variant="ghost" mode="link">View All</Button>
+          <Button variant="ghost" mode="link">{t("common.viewAll")}</Button>
         </CardToolbar>
       </CardHeader>
       <CardTable>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>{t("common.id")}</TableHead>
+              <TableHead>{t("common.name")}</TableHead>
+              <TableHead>{t("common.status")}</TableHead>
+              <TableHead>{t("common.date")}</TableHead>
+              <TableHead>{t("common.action")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-6">Loading…</TableCell>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-6">{t("common.loading")}</TableCell>
               </TableRow>
             )}
             {isError && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-destructive py-6">
-                  {(error as Error)?.message ?? "Failed to load customers"}
+                  {(error as Error)?.message ?? t("common.error")}
                 </TableCell>
               </TableRow>
             )}
             {!isLoading && !isError && customers.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground py-6">No customers found</TableCell>
+                <TableCell colSpan={5} className="text-center text-muted-foreground py-6">{t("common.noData")}</TableCell>
               </TableRow>
             )}
             {customers.map((row) => (

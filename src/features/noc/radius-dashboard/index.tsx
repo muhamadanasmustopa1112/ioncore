@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import {
@@ -27,6 +28,7 @@ import { RADIUS_DASHBOARD_KEYS } from "./api/key";
 import { GATE_ALERTS, RETRY_QUEUE } from "./data/mock-radius-data";
 
 export function RadiusDashboard() {
+  const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { refreshData, isLoading: isStoreLoading } = useRadiusDashboardStore();
   const queryClient = useQueryClient();
@@ -48,11 +50,11 @@ export function RadiusDashboard() {
       <PageBreadcrumb
         items={[
           {
-            title: "Network & Orchestration",
+            title: t("menu.headings.networkOrchestration"),
             path: paths.dashboard.networkAndOrchestration.root.getHref(),
           },
-          { title: "ION Radius" },
-          { title: "Dashboard" },
+          { title: t("menu.radius") },
+          { title: t("common.dashboard") },
         ]}
         className="mb-8"
       />
@@ -60,10 +62,10 @@ export function RadiusDashboard() {
       <Toolbar className="mb-8 items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-3xl font-black tracking-widest">
-            DASHBOARD
+            {t("radius.dashboardTitle", "DASHBOARD")}
           </ToolbarTitle>
           <p className="text-muted-foreground text-sm font-medium mt-1">
-            Real-time AAA monitoring and authentication statistics
+            {t("radius.dashboardSubtitle", "Real-time AAA monitoring and authentication statistics")}
           </p>
         </ToolbarHeading>
         <ToolbarActions>
@@ -73,7 +75,7 @@ export function RadiusDashboard() {
             onClick={() => setIsDrawerOpen(true)}
           >
             <RiAlarmWarningLine className="size-5 text-amber-500" />
-            Gate Alerts
+            {t("radius.gateAlerts", "Gate Alerts")}
             {pendingCount > 0 && (
               <Badge variant="destructive" className="absolute -top-2 -right-2 size-6 p-0 flex items-center justify-center rounded-full text-[10px]">
                 {pendingCount}
@@ -85,7 +87,7 @@ export function RadiusDashboard() {
             className="h-12 px-6 font-bold shadow-sm rounded-2xl border-2"
           >
             <RiDownloadLine className="size-5" />
-            Report Export
+            {t("common.exportReport")}
           </Button>
           <Button
             variant="primary"
@@ -93,7 +95,7 @@ export function RadiusDashboard() {
             onClick={handleRefresh}
           >
             <RiRefreshLine className={`size-5 ${isLoading ? 'animate-spin' : ''}`} />
-            Sync Data
+            {t("radius.syncData", "Sync Data")}
           </Button>
         </ToolbarActions>
       </Toolbar>

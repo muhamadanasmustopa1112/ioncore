@@ -26,12 +26,18 @@ export default function Page() {
         odp_id: parseAsString,
     });
 
+    const popParams = {
+        limit: 100,
+        page: 1,
+        search: filters.area_id ? "" : "", // Search kosong
+        area_id: filters.area_id || undefined,
+    };
+
     const { data: popData, isLoading } = usePop({
-        params: {
-            limit: 100,
-            page: 1,
-            search: "",
-            ...(filters.area_id ? { area_id: filters.area_id } : {}),
+        params: popParams,
+        queryConfig: {
+            staleTime: 0, // Selalu fetch fresh data
+            gcTime: 0,    // Jangan cache lama
         }
     });
 
@@ -60,7 +66,7 @@ export default function Page() {
             />
 
             {/* Map Section */}
-            <div className="h-[800px] flex-none">
+            <div className="h-[800px] min-h-[800px] relative" style={{ height: '800px' }}>
                 <OdpPopMap
                     data={popData}
                     isLoading={isLoading}
