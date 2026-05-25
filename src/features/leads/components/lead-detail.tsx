@@ -1,6 +1,7 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { RiArrowRightUpLine, RiUserAddLine, RiMapPinLine, RiRouteLine, RiCheckboxCircleLine, RiUserReceivedLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +56,7 @@ const STATUS_INDEX: Record<LeadStatus, number> = Object.fromEntries(
 const ACTIVITY_TYPES: LeadActivityType[] = ["call", "visit", "note", "email"];
 
 export function LeadDetail() {
+  const { t } = useTranslation();
   const params = useParams<{ id: string }>();
   const id = params?.id ?? "";
   const { data: lead, isLoading } = useLead(id);
@@ -79,20 +81,20 @@ export function LeadDetail() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24 text-muted-foreground">
-        <Loader2 className="size-5 animate-spin mr-2" /> Loading lead…
+        <Loader2 className="size-5 animate-spin mr-2" /> {t("common.loading")}
       </div>
     );
   }
   if (!lead) {
-    return <div className="p-8 text-center text-muted-foreground text-sm">Lead not found</div>;
+    return <div className="p-8 text-center text-muted-foreground text-sm">{t("leads.leadNotFound", "Lead not found")}</div>;
   }
 
   return (
     <div className="flex flex-col gap-6 p-4">
       <PageBreadcrumb
         items={[
-          { title: "CRM & Sales", path: paths.dashboard.crmAndSales.root.getHref() },
-          { title: "Leads", path: paths.dashboard.crmAndSales.leads.root.getHref() },
+          { title: t("menu.crmAndSales"), path: paths.dashboard.crmAndSales.root.getHref() },
+          { title: t("menu.leads"), path: paths.dashboard.crmAndSales.leads.root.getHref() },
           { title: lead.lead_name },
         ]}
       />
@@ -114,12 +116,12 @@ export function LeadDetail() {
         <ToolbarActions>
           <Button variant="outline" size="sm" onClick={() => setRerouteOpen(true)} className="gap-1.5">
             <RiArrowRightUpLine className="size-4" />
-            Reroute
+            {t("leads.reroute", "Reroute")}
           </Button>
           {lead.status !== "converted" && (
             <Button variant="primary" size="sm" onClick={() => router.push(paths.dashboard.crmAndSales.leads.convert.getHref(id))} className="gap-1.5">
               <RiUserAddLine className="size-4" />
-              Convert
+              {t("leads.convert", "Convert")}
             </Button>
           )}
         </ToolbarActions>
@@ -127,11 +129,11 @@ export function LeadDetail() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Cable Distance", value: `${lead.cable_distance_meters} m`, icon: <RiRouteLine className="size-4 text-muted-foreground" /> },
-          { label: "Excess Cable", value: lead.is_excess_cable_accepted ? "Accepted" : "Not accepted", icon: <RiCheckboxCircleLine className="size-4 text-muted-foreground" /> },
-          { label: "Coords", value: lead.installation_point_lat ? `${lead.installation_point_lat?.toFixed(4)}, ${lead.installation_point_lng?.toFixed(4)}` : "—", icon: <RiMapPinLine className="size-4 text-muted-foreground" /> },
+          { label: t("leads.cableDistance", "Cable Distance"), value: `${lead.cable_distance_meters} m`, icon: <RiRouteLine className="size-4 text-muted-foreground" /> },
+          { label: t("leads.excessCable", "Excess Cable"), value: lead.is_excess_cable_accepted ? t("leads.accepted", "Accepted") : t("leads.notAccepted", "Not accepted"), icon: <RiCheckboxCircleLine className="size-4 text-muted-foreground" /> },
+          { label: t("leads.coords", "Coords"), value: lead.installation_point_lat ? `${lead.installation_point_lat?.toFixed(4)}, ${lead.installation_point_lng?.toFixed(4)}` : "—", icon: <RiMapPinLine className="size-4 text-muted-foreground" /> },
           {
-            label: "Referrer",
+            label: t("customers.referrerCustomer"),
             value: lead.referrer_customer_id ? (
               <a
                 href={paths.dashboard.crmAndSales.customer.detail.getHref(lead.referrer_customer_id)}
@@ -153,17 +155,17 @@ export function LeadDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
         <Card>
-          <CardHeader><CardTitle>Status</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("common.status")}</CardTitle></CardHeader>
           <CardContent className="flex flex-col gap-3">
             {(lead.status === "converted" || lead.status === "lost") ? (() => {
               const lastEntry = [...(lead.status_timeline ?? [])].reverse().find((t) => t.status === lead.status);
               return (
                 <div className="flex flex-col gap-3">
                   <Badge variant={STATUS_VARIANT[lead.status]} appearance="light" size="md" className="w-fit">
-                    {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
+                    {t(`common.chartLabels.${lead.status}`, { defaultValue: lead.status })}
                   </Badge>
                   <div className="rounded-lg border bg-muted/40 px-3 py-2.5 space-y-1">
-                    <p className="text-xs font-medium text-muted-foreground">Notes</p>
+                    <p className="text-xs font-medium text-muted-foreground">{t("leads.notes", "Notes")}</p>
                     {lastEntry?.notes ? (
                       <>
                         <p className="text-sm text-foreground">{lastEntry.notes}</p>
@@ -172,7 +174,7 @@ export function LeadDetail() {
                         </p>
                       </>
                     ) : (
-                      <p className="text-sm text-muted-foreground italic">No notes recorded for this status change.</p>
+                      <p className="text-sm text-muted-foreground italic">{t("leads.noNotes", "No notes recorded for this status change.")}</p>
                     )}
                   </div>
                 </div>
@@ -185,7 +187,7 @@ export function LeadDetail() {
                     {STATUSES.filter((s) => STATUS_INDEX[s] >= STATUS_INDEX[lead.status]).map((s) => (
                       <SelectItem key={s} value={s}>
                         <div className="flex items-center gap-2">
-                          <Badge variant={STATUS_VARIANT[s]} appearance="light" size="sm">{s.charAt(0).toUpperCase() + s.slice(1)}</Badge>
+                          <Badge variant={STATUS_VARIANT[s]} appearance="light" size="sm">{t(`common.chartLabels.${s}`, { defaultValue: s })}</Badge>
                         </div>
                       </SelectItem>
                     ))}
@@ -193,13 +195,13 @@ export function LeadDetail() {
                 </Select>
                 <div className="flex flex-col gap-1">
                   <Textarea
-                    placeholder={statusDraft === "lost" ? "Reason required for Lost status…" : "Notes (optional)"}
+                    placeholder={statusDraft === "lost" ? t("leads.reasonRequired", "Reason required for Lost status...") : t("leads.notesOptional", "Notes (optional)")}
                     value={statusNote}
                     onChange={(e) => setStatusNote(e.target.value)}
                     className={statusDraft === "lost" && !statusNote.trim() ? "border-destructive focus-visible:ring-destructive" : ""}
                   />
                   {statusDraft === "lost" && !statusNote.trim() && (
-                    <p className="text-xs text-destructive">Reason is required when marking as Lost.</p>
+                    <p className="text-xs text-destructive">{t("leads.reasonRequiredLost", "Reason is required when marking as Lost.")}</p>
                   )}
                 </div>
                 <Button
@@ -212,7 +214,7 @@ export function LeadDetail() {
                   }
                 >
                   {updateStatus.isPending && <Loader2 className="size-4 animate-spin" />}
-                  Save Status
+                  {t("common.save", "Save")}
                 </Button>
               </>
             )}
@@ -266,10 +268,10 @@ export function LeadDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
-          <CardHeader><CardTitle>Activities</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("leads.activities", "Activities")}</CardTitle></CardHeader>
           <CardContent className="flex flex-col gap-3">
             {(lead.activities ?? []).length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">No activities yet</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t("leads.noActivities", "No activities yet")}</p>
             )}
             {(lead.activities ?? []).map((a) => (
               <div key={a.id} className="border-b pb-3 last:border-0 last:pb-0">
@@ -284,18 +286,18 @@ export function LeadDetail() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Status Timeline</CardTitle></CardHeader>
+          <CardHeader><CardTitle>{t("leads.statusTimeline", "Status Timeline")}</CardTitle></CardHeader>
           <CardContent className="flex flex-col gap-3">
             {(lead.status_timeline ?? []).length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">No transitions yet</p>
+              <p className="text-sm text-muted-foreground text-center py-4">{t("leads.noTransitions", "No transitions yet")}</p>
             )}
-            {(lead.status_timeline ?? []).map((t) => (
-              <div key={t.id} className="border-b pb-3 last:border-0 last:pb-0">
+            {(lead.status_timeline ?? []).map((item) => (
+              <div key={item.id} className="border-b pb-3 last:border-0 last:pb-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge variant={STATUS_VARIANT[t.status]} appearance="light" size="sm">{t.status.charAt(0).toUpperCase() + t.status.slice(1)}</Badge>
-                  <span className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleString()}</span>
+                  <Badge variant={STATUS_VARIANT[item.status]} appearance="light" size="sm">{t(`common.chartLabels.${item.status}`, { defaultValue: item.status })}</Badge>
+                  <span className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleString()}</span>
                 </div>
-                {t.notes && <p className="text-sm text-muted-foreground">{t.notes}</p>}
+                {item.notes && <p className="text-sm text-muted-foreground">{item.notes}</p>}
               </div>
             ))}
           </CardContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { 
   RiUserVoiceLine, 
   RiBaseStationLine, 
@@ -20,46 +21,47 @@ import {
 import { useRadiusDashboardStore } from "../store/use-radius-dashboard-store";
 
 export function RadiusKpiCards() {
+  const { t } = useTranslation();
   const { kpi } = useRadiusDashboardStore();
 
   const items = useMemo(() => [
     {
-      label: "Total Sessions",
+      label: t("radius.totalSessions", "Total Sessions"),
       value: kpi.totalSessions.toLocaleString(),
       icon: RiUserVoiceLine,
       color: "text-primary",
       bgColor: "bg-primary/10",
       trend: kpi.trend.sessions,
-      dataSource: "Data diambil dari akumulasi Log RADIUS Accounting (Riwayat koneksi PPP Users)"
+      dataSource: t("radius.totalSessionsTooltip", "Data from RADIUS Accounting log accumulation (PPP Users connection history)")
     },
     {
-      label: "Active Users",
+      label: t("radius.activeUsers", "Active Users"),
       value: kpi.activeUsers.toLocaleString(),
       icon: RiBaseStationLine,
       color: "text-emerald-600",
       bgColor: "bg-emerald-500/10",
       trend: kpi.trend.users,
-      dataSource: "Data diambil dari sesi aktif yang sedang terhubung di seluruh Router [NAS]"
+      dataSource: t("radius.activeUsersTooltip", "Data from active sessions currently connected across all Routers [NAS]")
     },
     {
-      label: "Auth Success Rate",
+      label: t("radius.authSuccessRate", "Auth Success Rate"),
       value: `${kpi.authSuccessRate}%`,
       icon: RiShieldFlashLine,
       color: "text-purple-600",
       bgColor: "bg-purple-500/10",
       trend: 2.4,
-      dataSource: "Tingkat keberhasilan PPP Users saat berupaya melakukan koneksi/login"
+      dataSource: t("radius.authSuccessRateTooltip", "PPP Users success rate when attempting to connect/login")
     },
     {
-      label: "Total Traffic",
+      label: t("radius.totalTraffic", "Total Traffic"),
       value: kpi.totalTraffic,
       icon: RiExchangeBoxLine,
       color: "text-amber-600",
       bgColor: "bg-amber-500/10",
       trend: -1.2,
-      dataSource: "Akumulasi pemakaian kuota data (Upload/Download) dari seluruh pelanggan"
+      dataSource: t("radius.totalTrafficTooltip", "Accumulated data quota usage (Upload/Download) from all customers")
     }
-  ], [kpi]);
+  ], [kpi, t]);
 
   return (
     <TooltipProvider delayDuration={100}>

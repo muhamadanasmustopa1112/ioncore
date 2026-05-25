@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -30,11 +31,12 @@ import {
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useRouters } from "../../api/get-routers";
-import { columns as columnsDef } from "./table/columns";
+import { useRouterColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { RouterItem } from "../../types";
 
 export function RouterList() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
@@ -44,8 +46,8 @@ export function RouterList() {
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  // 1. Memoize Columns
-  const columns = useMemo(() => columnsDef, []);
+  // 1. Get Columns with i18n
+  const columns = useRouterColumns();
 
   // 2. Memoize Request Params
   const params = useMemo(() => ({
@@ -112,14 +114,14 @@ export function RouterList() {
                   <CollapsibleTrigger asChild>
                     <Button variant="outline">
                       <Filter />
-                      Filter
+                      {t("common.filter")}
                     </Button>
                   </CollapsibleTrigger>
                 </div>
                 <div className="relative">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
-                    placeholder="Search router..."
+                    placeholder={t("router.searchPlaceholder", "Search router...")}
                     value={filter.search || ""}
                     onChange={(e) =>
                       setFilter({ ...filter, search: e.target.value })
@@ -140,7 +142,7 @@ export function RouterList() {
               </div>
               <CollapsibleContent>
                 <div className="flex items-center gap-2 py-[5px] text-sm text-muted-foreground">
-                  No advanced filters defined yet.
+                  {t("router.noFilters", "No advanced filters defined yet.")}
                 </div>
               </CollapsibleContent>
             </CardHeading>

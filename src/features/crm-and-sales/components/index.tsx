@@ -2,6 +2,7 @@
 import React from 'react';
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { Download, Calendar, ChevronDown } from "lucide-react";
@@ -27,6 +28,7 @@ import { paths } from "@/config/paths";
 // Main Component
 // ---------------------------------------------------------------------------
 export function CrmAndSales() {
+  const { t } = useTranslation();
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(2026, 3, 1),
     to: new Date(2026, 3, 30),
@@ -38,12 +40,12 @@ export function CrmAndSales() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href={paths.dashboard.root.getHref()}>Home</Link>
+              <Link href={paths.dashboard.root.getHref()}>{t("common.home", "Home")}</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>CRM &amp; Sales</BreadcrumbPage>
+            <BreadcrumbPage>{t("menu.crmAndSales", "CRM & Sales")}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -63,7 +65,7 @@ export function CrmAndSales() {
                   format(date.from, "LLL dd, y")
                 )
               ) : (
-                <span>Pick a date</span>
+                <span>{t("common.pickDate", "Pick a date")}</span>
               )}
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
@@ -82,7 +84,7 @@ export function CrmAndSales() {
         
         <Button variant="primary">
           <Download className="mr-2 h-4 w-4" />
-          Export Report
+          {t("common.exportReport", "Export Report")}
         </Button>
       </div>
       <CrmKpiCards />

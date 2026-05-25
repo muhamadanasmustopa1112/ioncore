@@ -1,6 +1,9 @@
+'use client';
+
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, Ellipsis, Pin, PinOff, Plus, StickyNote } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -338,15 +341,52 @@ function RecursiveNavContent({
   );
 }
 
+const MENU_KEY_MAP: Record<string, string> = {
+  'Dashboard': 'menu.dashboard',
+  'CRM & Sales': 'menu.crmAndSales',
+  'Overview': 'menu.overview',
+  'Customers': 'menu.customers',
+  'Leads': 'menu.leads',
+  'Network & Orchestration': 'menu.networkOrchestration',
+  'ODP & POP Map': 'menu.odpPopMap',
+  'ODP & POP': 'menu.odpPop',
+  'RADIUS': 'menu.radius',
+  'Technician & Field': 'menu.technicianField',
+  'Work Orders': 'menu.workOrders',
+  'Orders': 'menu.orders',
+  'Administration': 'menu.administration',
+  'Branch': 'menu.branch',
+  'Users': 'menu.users',
+  'Warehouse': 'menu.warehouse',
+  'Schema': 'menu.schema',
+  'General': 'common.general',
+  'Infrastructure': 'common.infrastructure',
+  'Strategic': 'common.strategic',
+  'Admin': 'common.admin',
+};
+
+function translateMenuItem(item: MenuItem, t: (key: string) => string): MenuItem {
+  const key = MENU_KEY_MAP[item.title] || item.title;
+  const translatedTitle = t(key) !== key ? t(key) : item.title;
+
+  return {
+    ...item,
+    title: translatedTitle,
+    heading: item.heading ? (MENU_KEY_MAP[item.heading] ? t(MENU_KEY_MAP[item.heading]) : item.heading) : undefined,
+    children: item.children?.map(child => translateMenuItem(child, t)),
+  };
+}
+
 export function SidebarDefaultNav() {
   const pathname = usePathname();
   const { getSidebarNavItems, sidebarCollapse } = useLayout();
+  const { t } = useTranslation();
 
   // Memoize the filtered nav items to prevent unnecessary re-computations
   const filteredNavItems = useMemo(() => {
     const navItems = getSidebarNavItems();
-    return navItems;
-  }, [getSidebarNavItems]);
+    return navItems.map(item => translateMenuItem(item, t));
+  }, [getSidebarNavItems, t]);
 
   const groupedNavItems = useMemo(() => {
     const groups = new Map<string, typeof filteredNavItems>();

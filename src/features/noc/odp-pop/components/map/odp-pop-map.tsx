@@ -58,12 +58,30 @@ function MapFocusController({ selectedPopId, selectedOdpId, markerRefs, pops }: 
 
 /**
  * Fixes Leaflet "size" calculation issues in flex/dynamic layouts.
+ * Includes Firefox-specific fixes with multiple invalidateSize calls.
  */
 function MapResizeController() {
   const map = useMap();
   useEffect(() => {
-    const timer = setTimeout(() => map.invalidateSize(), 300);
-    return () => clearTimeout(timer);
+    // Multiple delays for Firefox compatibility
+    const timers = [
+      setTimeout(() => map.invalidateSize(), 100),
+      setTimeout(() => map.invalidateSize(), 300),
+      setTimeout(() => map.invalidateSize(), 600),
+      setTimeout(() => map.invalidateSize(), 1000),
+      setTimeout(() => map.invalidateSize(), 2000),
+    ];
+
+    // Handle window resize
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      timers.forEach(clearTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [map]);
   return null;
 }
@@ -99,11 +117,8 @@ export default function OdpPopMap({
 
   const pops = useMemo(() => popResponse?.data || [], [popResponse]);
 
-  // Filter POPs based on area
-  const filteredPops = useMemo(() => {
-    if (!selectedArea) return pops;
-    return pops.filter(pop => pop.area === selectedArea);
-  }, [selectedArea, pops]);
+  // API already filters by area_id, use data as-is
+  const filteredPops = pops;
 
   const { data: odpResponse } = useOdp({
     params: {
@@ -155,8 +170,9 @@ export default function OdpPopMap({
 
   if (!isMounted) {
     return (
-      <div className="h-full w-full bg-muted animate-pulse rounded-3xl flex items-center justify-center text-muted-foreground uppercase font-black text-xs tracking-widest">
-        Initializing Base Map...
+      <div className="h-full w-full bg-muted animate-pulse rounded-3xl flex flex-col items-center justify-center text-muted-foreground font-black text-xs tracking-widest gap-2">
+        <span>Initializing Map...</span>
+        <span className="text-[10px] font-normal normal-case opacity-70">If map doesn't load, try Ctrl+F5 to hard refresh</span>
       </div>
     );
   }
@@ -182,12 +198,24 @@ export default function OdpPopMap({
         </div>
       </CardHeader>
 
-      <CardContent className="p-0 flex-1 relative overflow-hidden">
-        <MapContainer center={defaultCenter} zoom={10} className="h-full w-full z-0" scrollWheelZoom={false}>
+      <CardContent className="p-0 flex-1 relative overflow-hidden" style={{ minHeight: 0 }}>
+        <MapContainer
+          center={defaultCenter}
+          zoom={10}
+          className="h-full w-full z-0"
+          style={{ height: '100%', minHeight: '600px' }}
+          scrollWheelZoom={false}
+        >
           <TileLayer
-            attribution='&copy; Google Maps'
-            url="https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
-            subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+            attribution='&copy; OpenStreetMap contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maxZoom={19}
+            crossOrigin={true}
+            eventHandlers={{
+              tileerror: (e) => {
+                console.warn('Tile load error:', e);
+              }
+            }}
           />
 
           <MapResizeController />

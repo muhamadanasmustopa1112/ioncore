@@ -2,6 +2,7 @@
 
 import { useRef, useState, useMemo } from "react";
 import { AlertCircle, Loader2, Upload, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import Image from "next/image";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -18,11 +19,12 @@ import {
 import type { CustomerType } from "../types/customers-api";
 import type { BranchData } from "@/features/administration/branch/types/branch";
 import { BranchCombobox } from "@/features/administration/branch/components/branch-combobox";
+import "@/i18n";
 
-const CUSTOMER_TYPES: { value: CustomerType; label: string }[] = [
-  { value: "residential", label: "Residential" },
-  { value: "business", label: "Business" },
-  { value: "enterprise", label: "Enterprise" },
+const CUSTOMER_TYPES = (t: (key: string) => string): { value: CustomerType; label: string }[] => [
+  { value: "residential", label: t("customers.residential") },
+  { value: "business", label: t("customers.business") },
+  { value: "enterprise", label: t("customers.enterprise") },
 ];
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -84,6 +86,7 @@ export function IdentitySection({
   ktpPreview, ktpScanning, ktpFileSelected, ktpError,
   onFileChange, onClearPhoto,
 }: IdentitySectionProps) {
+  const { t } = useTranslation();
   const fileRef = useRef<HTMLInputElement>(null);
 
   function clearInput() {
@@ -94,30 +97,30 @@ export function IdentitySection({
   return (
     <Card>
       <CardContent className="p-6">
-        <SectionTitle>Identity</SectionTitle>
+        <SectionTitle>{t("customers.identity")}</SectionTitle>
 
-        <FieldRow label="Customer Type" required>
+        <FieldRow label={t("customers.customerType")} required>
           <Select value={customerType} onValueChange={(v) => setCustomerType(v as CustomerType)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              {CUSTOMER_TYPES.map((t) => (
-                <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+              {CUSTOMER_TYPES(t).map((type) => (
+                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </FieldRow>
 
-        <FieldRow label="Full Name" required>
-          <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name as on KTP" />
+        <FieldRow label={t("customers.fullName")} required>
+          <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={t("customers.fullNamePlaceholder")} />
         </FieldRow>
 
         {needsCompany && (
-          <FieldRow label="Company Name" required>
-            <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="PT / CV / UD" />
+          <FieldRow label={t("customers.companyName")} required>
+            <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder={t("customers.companyPlaceholder")} />
           </FieldRow>
         )}
 
-        <FieldRow label="KTP Photo" required>
+        <FieldRow label={t("customers.ktpPhoto")} required>
             <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={onFileChange} />
             {ktpPreview ? (
               <div className="space-y-2">
@@ -127,7 +130,7 @@ export function IdentitySection({
                     <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm">
                       <div className="flex items-center gap-2 text-sm">
                         <Loader2 className="size-4 animate-spin" />
-                        Scanning KTP…
+                        {t("customers.scanning")}
                       </div>
                     </div>
                   )}
@@ -140,7 +143,7 @@ export function IdentitySection({
                 {ktpFileSelected && !ktpScanning && (
                   <p className="text-xs text-success flex items-center gap-1">
                     <span className="inline-block size-1.5 rounded-full bg-success" />
-                    Scanned
+                    {t("customers.scanned")}
                   </p>
                 )}
               </div>
@@ -152,8 +155,8 @@ export function IdentitySection({
               >
                 <Upload className="size-7 text-muted-foreground" />
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Click to upload KTP photo</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">JPG, PNG, WEBP</p>
+                  <p className="text-sm text-muted-foreground">{t("customers.ktpUpload")}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t("customers.ktpFormats")}</p>
                 </div>
               </button>
             )}
@@ -165,17 +168,17 @@ export function IdentitySection({
             )}
           </FieldRow>
 
-        <FieldRow label="NIK" required hint="Fill manually — OCR may not be accurate">
+        <FieldRow label={t("customers.nik")} required hint={t("customers.nikHint")}>
           <Input
             value={nik}
             onChange={(e) => setNik(e.target.value)}
-            placeholder="3271xxxxxxxxxxxxxxxx"
+            placeholder={t("customers.nikPlaceholder")}
             maxLength={16}
           />
         </FieldRow>
 
-        <FieldRow label="KTP Address" hint="Address as printed on KTP">
-          <Input value={ktpAddress} onChange={(e) => setKtpAddress(e.target.value)} placeholder="Same as or different from domicile" />
+        <FieldRow label={t("customers.ktpAddress")} hint={t("customers.ktpAddressHint")}>
+          <Input value={ktpAddress} onChange={(e) => setKtpAddress(e.target.value)} placeholder={t("customers.ktpAddressPlaceholder")} />
         </FieldRow>
 
       </CardContent>
@@ -190,14 +193,15 @@ export interface ContactSectionProps {
 }
 
 export function ContactSection({ email, setEmail, phone, setPhone, address, setAddress }: ContactSectionProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardContent className="p-6">
-        <SectionTitle>Contact</SectionTitle>
-        <FieldRow label="Email">
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="customer@email.com" />
+        <SectionTitle>{t("customers.contact")}</SectionTitle>
+        <FieldRow label={t("common.email")}>
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("customers.emailPlaceholder")} />
         </FieldRow>
-        <FieldRow label="Phone">
+        <FieldRow label={t("common.phone")}>
           <div className="flex">
             <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-input bg-muted text-sm text-muted-foreground select-none shrink-0">
               +62
@@ -206,12 +210,12 @@ export function ContactSection({ email, setEmail, phone, setPhone, address, setA
               className="rounded-l-none"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="812xxxxxxxx"
+              placeholder={t("customers.phonePlaceholder")}
             />
           </div>
         </FieldRow>
-        <FieldRow label="Address">
-          <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Domicile address" />
+        <FieldRow label={t("common.address")}>
+          <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder={t("customers.domicileAddress")} />
         </FieldRow>
       </CardContent>
     </Card>
@@ -228,6 +232,7 @@ export interface AssignmentSectionProps {
 }
 
 export function AssignmentSection({ branchId, setBranchId, accountManagerId, setAccountManagerId, activeBranches, branchesLoading }: AssignmentSectionProps) {
+  const { t } = useTranslation();
   const [branchType, setBranchType] = useState("all");
   const filteredBranches = useMemo(
     () => branchType === "all" ? activeBranches : activeBranches.filter((b) => b.branchType === branchType),
@@ -237,8 +242,8 @@ export function AssignmentSection({ branchId, setBranchId, accountManagerId, set
   return (
     <Card>
       <CardContent className="p-6">
-        <SectionTitle>Assignment</SectionTitle>
-        <FieldRow label="Branch" required>
+        <SectionTitle>{t("customers.assignment")}</SectionTitle>
+        <FieldRow label={t("customers.branch")} required>
           <BranchCombobox
             branches={filteredBranches}
             value={branchId}
@@ -249,11 +254,11 @@ export function AssignmentSection({ branchId, setBranchId, accountManagerId, set
             className="w-full"
           />
         </FieldRow>
-        <FieldRow label="Account Manager ID" hint="Optional — UUID">
+        <FieldRow label={t("customers.accountManagerId")} hint={t("customers.accountManagerHint")}>
           <Input
             value={accountManagerId}
             onChange={(e) => setAccountManagerId(e.target.value)}
-            placeholder="00000000-0000-0000-0000-000000000000"
+            placeholder={t("customers.accountManagerPlaceholder")}
             className="font-mono text-xs"
           />
         </FieldRow>

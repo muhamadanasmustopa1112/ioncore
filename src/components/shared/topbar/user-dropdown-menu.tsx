@@ -31,37 +31,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
+import { useTranslation } from "react-i18next";
 
 const I18N_LANGUAGES = [
+  {
+    label: "Bahasa Indonesia",
+    code: "id",
+    direction: "ltr",
+    flag: toAbsoluteUrl("/media/flags/indonesia.svg"),
+  },
   {
     label: "English",
     code: "en",
     direction: "ltr",
     flag: toAbsoluteUrl("/media/flags/united-states.svg"),
   },
-  {
-    label: "Arabic (Saudi)",
-    code: "ar",
-    direction: "rtl",
-    flag: toAbsoluteUrl("/media/flags/saudi-arabia.svg"),
-  },
-  {
-    label: "French",
-    code: "fr",
-    direction: "ltr",
-    flag: toAbsoluteUrl("/media/flags/france.svg"),
-  },
-  {
-    label: "Chinese",
-    code: "zh",
-    direction: "ltr",
-    flag: toAbsoluteUrl("/media/flags/china.svg"),
-  },
 ];
 
 export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
-  const currenLanguage = I18N_LANGUAGES[0];
+  const { t, i18n: i18nInstance } = useTranslation();
+  const currentLanguage = I18N_LANGUAGES.find((lang) => lang.code === i18nInstance.language) || I18N_LANGUAGES[0];
   const { theme, setTheme } = useTheme();
+
+  const handleLanguageChange = (code: string) => {
+    i18nInstance.changeLanguage(code);
+  };
 
   const handleThemeToggle = (checked: boolean) => {
     setTheme(checked ? "dark" : "light");
@@ -181,17 +175,17 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
                 variant="outline"
                 className="absolute end-0 top-1/2 -translate-y-1/2"
               >
-                {currenLanguage.label}
+                {currentLanguage.label}
                 <img
-                  src={currenLanguage.flag}
+                  src={currentLanguage.flag}
                   className="h-3.5 w-3.5 rounded-full"
-                  alt={currenLanguage.label}
+                  alt={currentLanguage.label}
                 />
               </Badge>
             </span>
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-48">
-            <DropdownMenuRadioGroup value={currenLanguage.code}>
+            <DropdownMenuRadioGroup value={currentLanguage.code} onValueChange={handleLanguageChange}>
               {I18N_LANGUAGES.map((item) => (
                 <DropdownMenuRadioItem
                   key={item.code}

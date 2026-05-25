@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +37,7 @@ const STATUS_VARIANT: Record<
 };
 
 export function CrmLeadsTable() {
+  const { t } = useTranslation();
   const { data, isLoading, isError } = useAdminLeads({
     sort_by: "created_at",
     sort_dir: "desc",
@@ -46,11 +48,11 @@ export function CrmLeadsTable() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Potential Leads</CardTitle>
+        <CardTitle>{t("common.potentialLeads")}</CardTitle>
         <CardToolbar>
           <Button variant="ghost" mode="link" asChild>
             <Link href={paths.dashboard.crmAndSales.leads.root.getHref()}>
-              View All
+              {t("common.viewAll")}
             </Link>
           </Button>
         </CardToolbar>
@@ -59,32 +61,32 @@ export function CrmLeadsTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Source</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>{t("common.name")}</TableHead>
+              <TableHead>{t("common.source")}</TableHead>
+              <TableHead>{t("common.status")}</TableHead>
+              <TableHead>{t("common.type")}</TableHead>
+              <TableHead>{t("common.action")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && (
               <TableRow>
                 <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
-                  Loading…
+                  {t("common.loading")}
                 </TableCell>
               </TableRow>
             )}
             {isError && (
               <TableRow>
                 <TableCell colSpan={5} className="py-6 text-center text-destructive">
-                  Failed to load leads
+                  {t("common.error")}
                 </TableCell>
               </TableRow>
             )}
             {!isLoading && !isError && leads.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="py-6 text-center text-muted-foreground">
-                  No leads found
+                  {t("common.noData")}
                 </TableCell>
               </TableRow>
             )}

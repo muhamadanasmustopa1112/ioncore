@@ -1,6 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import type { ApexOptions } from "apexcharts";
+import { useTranslation } from "react-i18next";
 import { TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,17 +45,18 @@ const leadsChartSeries = [
   { name: "Potential Leads", data: [42, 38, 45, 55, 50, 68, 60, 78, 72, 95, 85, 110] },
 ];
 export function CrmLeadsChart() {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-col gap-1">
-          <CardTitle>Monthly Potential Leads</CardTitle>
-          <CardDescription>Lead generation trend over the last 12 months</CardDescription>
+          <CardTitle>{t("common.monthlyPotentialLeads")}</CardTitle>
+          <CardDescription>{t("common.leadGenerationTrend")}</CardDescription>
         </div>
         <CardToolbar>
           <Button variant="ghost" mode="link">
             <TrendingUp />
-            View Report
+            {t("common.viewReport")}
           </Button>
         </CardToolbar>
       </CardHeader>

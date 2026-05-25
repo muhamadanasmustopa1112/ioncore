@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Plus, Search, Settings2, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -36,8 +37,10 @@ import {
 import { paths } from "@/config/paths";
 import { useCustomerList } from "../api/customers-queries";
 import type { CustomerDto, CustomerStatus } from "../types/customers-api";
+import "@/i18n";
 
 function CustomersViewToggle() {
+  const { t } = useTranslation();
   const { table } = useDataGrid();
   return (
     <DataGridColumnVisibility
@@ -45,12 +48,13 @@ function CustomersViewToggle() {
       trigger={
         <Button variant="outline">
           <Settings2 className="size-4" />
-          View
+          {t("common.view")}
         </Button>
       }
     />
   );
 }
+
 
 const STATUS_VARIANT: Record<CustomerStatus, "primary" | "success" | "warning" | "destructive" | "secondary"> = {
   pending: "warning",
@@ -63,6 +67,7 @@ const STATUS_VARIANT: Record<CustomerStatus, "primary" | "success" | "warning" |
 const PAGE_SIZE = 25;
 
 export function CustomersList() {
+  const { t } = useTranslation();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
   const [searchInput, setSearchInput] = useState(search);
@@ -81,7 +86,7 @@ export function CustomersList() {
     {
       id: "full_name",
       accessorKey: "full_name",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Full Name" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("customers.fullName")} className="font-semibold" />,
       cell: ({ row }) => (
         <Button asChild variant="ghost" mode="link" size="sm" className="font-medium text-foreground">
           <Link href={paths.dashboard.crmAndSales.customer.detail.getHref(row.original.id)}>
@@ -94,7 +99,7 @@ export function CustomersList() {
     {
       id: "customer_type",
       accessorKey: "customer_type",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Type" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("common.type")} className="font-semibold" />,
       cell: ({ row }) => {
         const type = row.original.customer_type;
         const cls =
@@ -110,7 +115,7 @@ export function CustomersList() {
     {
       id: "nik",
       accessorKey: "nik",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="NIK" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("customers.nik")} className="font-semibold" />,
       cell: ({ row }) => (
         <span className={row.original.nik ? "font-mono text-xs" : "text-muted-foreground/40"}>
           {row.original.nik ?? "—"}
@@ -121,18 +126,22 @@ export function CustomersList() {
     {
       id: "status",
       accessorKey: "status",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Status" className="font-semibold" />,
-      cell: ({ row }) => (
-        <Badge variant={STATUS_VARIANT[row.original.status] ?? "secondary"} appearance="light" size="md">
-          {row.original.status}
-        </Badge>
-      ),
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("common.status")} className="font-semibold" />,
+      cell: ({ row }) => {
+        const statusKey = row.original.status;
+        const translatedStatus = t(`customers.statusLabels.${statusKey}`, { defaultValue: statusKey });
+        return (
+          <Badge variant={STATUS_VARIANT[row.original.status] ?? "secondary"} appearance="light" size="md">
+            {translatedStatus}
+          </Badge>
+        );
+      },
       size: 110,
     },
     {
       id: "branch_id",
       accessorKey: "branch_id",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Branch" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("customers.branch")} className="font-semibold" />,
       cell: ({ row }) => (
         <span className="text-sm">
           {row.original.branch_name ?? row.original.branch_id}
@@ -143,7 +152,7 @@ export function CustomersList() {
     {
       id: "created_at",
       accessorKey: "created_at",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Created" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("common.createdAt")} className="font-semibold" />,
       cell: ({ row }) => (
         <span className="text-muted-foreground text-sm">
           {new Date(row.original.created_at).toLocaleDateString()}
@@ -153,18 +162,18 @@ export function CustomersList() {
     },
     {
       id: "actions",
-      header: () => <span className="text-[0.8125rem] font-semibold text-accent-foreground">Action</span>,
+      header: () => <span className="text-[0.8125rem] font-semibold text-accent-foreground">{t("common.action")}</span>,
       cell: ({ row }) => (
         <Button asChild variant="ghost" mode="link" size="sm">
           <Link href={paths.dashboard.crmAndSales.customer.detail.getHref(row.original.id)}>
-            Detail
+            {t("common.details")}
           </Link>
         </Button>
       ),
       size: 80,
       enableSorting: false,
     },
-  ], []);
+  ], [t]);
 
   const table = useReactTable({
     columns,
@@ -196,15 +205,15 @@ export function CustomersList() {
     <div className="flex flex-col gap-5 p-4">
       <PageBreadcrumb
         items={[
-          { title: "CRM & Sales", path: paths.dashboard.crmAndSales.root.getHref() },
-          { title: "Customers" },
+          { title: t("menu.crmAndSales"), path: paths.dashboard.crmAndSales.root.getHref() },
+          { title: t("customers.title") },
         ]}
       />
 
       <Toolbar className="items-start sm:items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Customers
+            {t("customers.title")}
           </ToolbarTitle>
         </ToolbarHeading>
         {/* <ToolbarActions>
@@ -223,7 +232,7 @@ export function CustomersList() {
                 <div className="relative">
                   <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="Search by name…"
+                    placeholder={t("customers.searchByName")}
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && applySearch()}

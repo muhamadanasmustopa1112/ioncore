@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { RiUserAddLine } from "@remixicon/react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,16 +25,12 @@ import {
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
 import { useCreateCustomer } from "../api/customers-queries";
 import type { CreateCustomerPayload, CustomerType } from "../types/customers-api";
+import "@/i18n";
 
-interface Props {
-  open: boolean;
-  onClose: () => void;
-}
-
-const TYPES: { value: CustomerType; label: string }[] = [
-  { value: "residential", label: "Residential" },
-  { value: "business", label: "Business" },
-  { value: "enterprise", label: "Enterprise" },
+const TYPES = (t: (key: string) => string): { value: CustomerType; label: string }[] => [
+  { value: "residential", label: t("customers.residential") },
+  { value: "business", label: t("customers.business") },
+  { value: "enterprise", label: t("customers.enterprise") },
 ];
 
 const EMPTY = {
@@ -51,6 +48,7 @@ const EMPTY = {
 };
 
 export function CreateCustomerSheet({ open, onClose }: Props) {
+  const { t } = useTranslation();
   const [form, setForm] = useState(EMPTY);
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList({ level: "sub_area" });
@@ -94,7 +92,7 @@ export function CreateCustomerSheet({ open, onClose }: Props) {
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl flex items-center gap-2">
             <RiUserAddLine className="size-5 text-primary" />
-            Create Customer
+            {t("customers.createCustomer")}
           </SheetTitle>
         </SheetHeader>
 
@@ -103,12 +101,12 @@ export function CreateCustomerSheet({ open, onClose }: Props) {
             <div className="space-y-5">
               {/* ── Core fields ── */}
               <div className="space-y-2">
-                <Label className="text-xs">Customer Type *</Label>
+                <Label className="text-xs">{t("customers.customerType")} *</Label>
                 <Select value={form.customerType} onValueChange={set("customerType")}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {TYPES.map((t) => (
-                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    {TYPES(t).map((type) => (
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -116,33 +114,33 @@ export function CreateCustomerSheet({ open, onClose }: Props) {
 
               <div className="space-y-2">
                 <Label className="text-xs">
-                  Full Name <span className="text-destructive">*</span>
+                  {t("customers.fullName")} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   value={form.fullName}
                   onChange={(e) => set("fullName")(e.target.value)}
-                  placeholder="Full name as on KTP"
+                  placeholder={t("customers.fullNamePlaceholder")}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label className="text-xs">
-                  Company Name {needsCompany && <span className="text-destructive">*</span>}
+                  {t("customers.companyName")} {needsCompany && <span className="text-destructive">*</span>}
                 </Label>
                 <Input
                   value={form.companyName}
                   onChange={(e) => set("companyName")(e.target.value)}
-                  placeholder="PT / CV / UD"
+                  placeholder={t("customers.companyPlaceholder")}
                 />
               </div>
 
               <div className="space-y-2">
                 <Label className="text-xs">
-                  Branch <span className="text-destructive">*</span>
+                  {t("customers.branch")} <span className="text-destructive">*</span>
                 </Label>
                 <Select value={form.branchId} onValueChange={set("branchId")} disabled={branchesLoading}>
                   <SelectTrigger>
-                    <SelectValue placeholder={branchesLoading ? "Loading…" : "Select branch"} />
+                    <SelectValue placeholder={branchesLoading ? t("common.loading") : t("customers.selectBranch")} />
                   </SelectTrigger>
                   <SelectContent>
                     {activeBranches.map((b) => (
@@ -158,64 +156,64 @@ export function CreateCustomerSheet({ open, onClose }: Props) {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs">Account Manager ID</Label>
+                <Label className="text-xs">{t("customers.accountManagerId")}</Label>
                 <Input
                   value={form.accountManagerId}
                   onChange={(e) => set("accountManagerId")(e.target.value)}
-                  placeholder="UUID (optional)"
+                  placeholder={t("customers.uuidOptional")}
                 />
               </div>
 
               {/* ── Schema version IDs ── */}
               <div className="border-t pt-4 space-y-4">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Schema Versions (optional)</p>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t("customers.schemaVersions")}</p>
 
                 <div className="space-y-2">
-                  <Label className="text-xs">Onboarding Schema Version ID</Label>
+                  <Label className="text-xs">{t("customers.onboardingSchema")}</Label>
                   <Input
                     value={form.onboardingSchemaVersionId}
                     onChange={(e) => set("onboardingSchemaVersionId")(e.target.value)}
-                    placeholder="UUID"
+                    placeholder={t("customers.uuidPlaceholder")}
                     className="font-mono text-xs"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs">Billing Schema Version ID</Label>
+                  <Label className="text-xs">{t("customers.billingSchema")}</Label>
                   <Input
                     value={form.billingSchemaVersionId}
                     onChange={(e) => set("billingSchemaVersionId")(e.target.value)}
-                    placeholder="UUID"
+                    placeholder={t("customers.uuidPlaceholder")}
                     className="font-mono text-xs"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs">Service Schema Version ID</Label>
+                  <Label className="text-xs">{t("customers.serviceSchema")}</Label>
                   <Input
                     value={form.serviceSchemaVersionId}
                     onChange={(e) => set("serviceSchemaVersionId")(e.target.value)}
-                    placeholder="UUID"
+                    placeholder={t("customers.uuidPlaceholder")}
                     className="font-mono text-xs"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs">Commission Schema Version ID</Label>
+                  <Label className="text-xs">{t("customers.commissionSchema")}</Label>
                   <Input
                     value={form.commissionSchemaVersionId}
                     onChange={(e) => set("commissionSchemaVersionId")(e.target.value)}
-                    placeholder="UUID"
+                    placeholder={t("customers.uuidPlaceholder")}
                     className="font-mono text-xs"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs">Suspension Schema Version ID</Label>
+                  <Label className="text-xs">{t("customers.suspensionSchema")}</Label>
                   <Input
                     value={form.suspensionSchemaVersionId}
                     onChange={(e) => set("suspensionSchemaVersionId")(e.target.value)}
-                    placeholder="UUID"
+                    placeholder={t("customers.uuidPlaceholder")}
                     className="font-mono text-xs"
                   />
                 </div>
@@ -225,9 +223,9 @@ export function CreateCustomerSheet({ open, onClose }: Props) {
         </SheetBody>
 
         <SheetFooter className="border-border flex-row gap-2 border-t p-5 pb-4 mt-auto justify-end">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button variant="outline" onClick={onClose}>{t("common.cancel")}</Button>
           <Button variant="primary" onClick={handleSubmit} disabled={!canSubmit} className="font-semibold">
-            {createCustomer.isPending ? "Creating…" : "Create Customer"}
+            {createCustomer.isPending ? t("customers.creating") : t("customers.createCustomer")}
           </Button>
         </SheetFooter>
       </SheetContent>

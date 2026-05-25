@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Provider from "@/components/layouts/context/provider";
 import "@/styles/globals.css";
+import { I18nProvider } from "@/components/i18n-provider";
 import { ReactNode, Suspense } from "react";
 import { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -48,9 +49,11 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             <TooltipProvider delayDuration={0}>
-              <Suspense>
-                <Provider>{children}</Provider>
-              </Suspense>
+              <I18nProvider>
+                <Suspense>
+                  <Provider>{children}</Provider>
+                </Suspense>
+              </I18nProvider>
               <Toaster />
             </TooltipProvider>
           </ThemeProvider>

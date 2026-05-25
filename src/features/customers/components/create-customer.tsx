@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -37,19 +38,20 @@ import { uploadImageToS3 } from "@/lib/s3-upload";
 import { paths } from "@/config/paths";
 import { useCreateCustomer, useReferrerCustomers } from "../api/customers-queries";
 import type { CreateCustomerPayload, CustomerType } from "../types/customers-api";
+import "@/i18n";
 
-const SOURCES: { value: LeadSource; label: string }[] = [
-  { value: "referral", label: "Referral" },
-  { value: "cold_call", label: "Cold Call" },
-  { value: "website", label: "Website" },
-  { value: "whatsapp", label: "WhatsApp" },
-  { value: "social_media_dm", label: "Social Media DM" },
-  { value: "voip_call", label: "VoIP Call" },
-  { value: "line_call", label: "Line Call" },
-  { value: "walk_in", label: "Walk In" },
-  { value: "event", label: "Event" },
-  { value: "partner", label: "Partner" },
-  { value: "cs_referral", label: "CS Referral" },
+const SOURCES = (t: (key: string) => string): { value: LeadSource; label: string }[] => [
+  { value: "referral", label: t("customers.sources.referral") },
+  { value: "cold_call", label: t("customers.sources.coldCall") },
+  { value: "website", label: t("customers.sources.website") },
+  { value: "whatsapp", label: t("customers.sources.whatsapp") },
+  { value: "social_media_dm", label: t("customers.sources.socialMediaDm") },
+  { value: "voip_call", label: t("customers.sources.voipCall") },
+  { value: "line_call", label: t("customers.sources.lineCall") },
+  { value: "walk_in", label: t("customers.sources.walkIn") },
+  { value: "event", label: t("customers.sources.event") },
+  { value: "partner", label: t("customers.sources.partner") },
+  { value: "cs_referral", label: t("customers.sources.csReferral") },
 ];
 import {
   AssignmentSection,
@@ -67,6 +69,7 @@ function formatPhone(raw: string): string {
 }
 
 export function CreateCustomer() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const [customerType, setCustomerType] = useState<CustomerType>("residential");
@@ -174,7 +177,7 @@ export function CreateCustomer() {
   async function handleSubmit() {
     if (!canSubmit) return;
     if (covered !== true) {
-      toast.error("Please check coverage at the installation point before creating the customer.");
+      toast.error(t("customers.checkCoverageFirst"));
       return;
     }
 
@@ -189,7 +192,7 @@ export function CreateCustomer() {
           ktpPhotoUrl = url;
           setKtpUploadedUrl(url);
         } catch (err) {
-          toast.error(err instanceof Error ? err.message : "KTP upload failed");
+          toast.error(err instanceof Error ? err.message : t("customers.ktpUploadFailed"));
           setIsUploading(false);
           return;
         }
@@ -239,36 +242,36 @@ export function CreateCustomer() {
       await createCustomer.mutateAsync(payload);
       router.push(paths.dashboard.crmAndSales.customer.root.getHref());
     } catch (err) {
-      toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? "Failed to create customer");
+      toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? t("customers.createFailed"));
     }
   }
 
   const submitLabel = isUploading
-    ? <><Loader2 className="size-4 animate-spin" /> Uploading KTP…</>
+    ? <><Loader2 className="size-4 animate-spin" /> {t("customers.uploadingKtp")}</>
     : createCustomer.isPending
-      ? <><Loader2 className="size-4 animate-spin" /> Creating…</>
-      : "Create Customer";
+      ? <><Loader2 className="size-4 animate-spin" /> {t("customers.creating")}</>
+      : t("customers.createCustomer");
 
   return (
     <div className="flex flex-col">
       <div className="px-6 pt-4 pb-2">
         <Toolbar>
           <ToolbarHeading>
-            <PageBreadcrumb
-              items={[
-                { title: "CRM & Sales", path: paths.dashboard.crmAndSales.root.getHref() },
-                { title: "Customers", path: paths.dashboard.crmAndSales.customer.root.getHref() },
-                { title: "Create Customer" },
-              ]}
-            />
-            <ToolbarTitle className="text-2xl font-extrabold tracking-tight mt-1">
-              Create Customer
-            </ToolbarTitle>
+        <PageBreadcrumb
+          items={[
+            { title: t("menu.crmAndSales"), path: paths.dashboard.crmAndSales.root.getHref() },
+            { title: t("customers.title"), path: paths.dashboard.crmAndSales.customer.root.getHref() },
+            { title: t("customers.createCustomer") },
+          ]}
+        />
+        <ToolbarTitle className="text-2xl font-extrabold tracking-tight mt-1">
+          {t("customers.createCustomer")}
+        </ToolbarTitle>
           </ToolbarHeading>
           <ToolbarActions>
             <Button variant="outline" onClick={() => router.back()} size="sm" disabled={isBusy}>
               <ArrowLeft className="size-4" />
-              Back
+              {t("common.back")}
             </Button>
           </ToolbarActions>
         </Toolbar>
@@ -301,14 +304,14 @@ export function CreateCustomer() {
 
           <Card>
             <CardContent className="p-5 space-y-4">
-              <p className="text-sm font-semibold">Lead Source</p>
+              <p className="text-sm font-semibold">{t("customers.leadSource")}</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs font-medium text-muted-foreground">Source</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">{t("customers.source")}</Label>
                   <Select value={source} onValueChange={(v) => { setSource(v as LeadSource); setReferrerCustomerId(null); }}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {SOURCES.map((s) => (
+                      {SOURCES(t).map((s) => (
                         <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                       ))}
                     </SelectContent>
@@ -316,21 +319,21 @@ export function CreateCustomer() {
                 </div>
                 {source === "referral" && (
                   <div className="space-y-2">
-                    <Label className="text-xs font-medium text-muted-foreground">Referrer Customer</Label>
+                    <Label className="text-xs font-medium text-muted-foreground">{t("customers.referrerCustomer")}</Label>
                     <Popover open={referrerOpen} onOpenChange={setReferrerOpen}>
                       <PopoverTrigger asChild>
                         <Button variant="outline" role="combobox" className="w-full justify-between font-normal">
                           {referrerCustomerId
-                            ? referrerOptions.find((c) => c.id === referrerCustomerId)?.full_name ?? "Select customer"
-                            : "Select customer"}
+                            ? referrerOptions.find((c) => c.id === referrerCustomerId)?.full_name ?? t("customers.selectCustomer")
+                            : t("customers.selectCustomer")}
                           <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-[300px] p-0" align="start">
                         <Command>
-                          <CommandInput placeholder="Search customer…" value={referrerSearch} onValueChange={setReferrerSearch} />
+                          <CommandInput placeholder={t("customers.searchCustomer")} value={referrerSearch} onValueChange={setReferrerSearch} />
                           <CommandList>
-                            <CommandEmpty>No customer found.</CommandEmpty>
+                            <CommandEmpty>{t("customers.noCustomerFound")}</CommandEmpty>
                             <CommandGroup>
                               {referrerOptions.map((c) => (
                                 <CommandItem key={c.id} value={c.id} onSelect={() => { setReferrerCustomerId(c.id); setReferrerOpen(false); }}>
@@ -362,16 +365,16 @@ export function CreateCustomer() {
         <div className="space-y-4 xl:sticky xl:top-6">
           <Card>
             <CardContent className="p-5 space-y-4">
-              <p className="text-sm font-semibold">Summary</p>
+              <p className="text-sm font-semibold">{t("customers.summary")}</p>
               <div className="text-sm space-y-2 divide-y divide-border/40">
                 {([
-                  { label: "Type", value: customerType },
-                  { label: "Name", value: fullName || null },
-                  { label: "NIK", value: nik || null },
-                  { label: "Email", value: email || null },
-                  { label: "Phone", value: phone || null },
-                  { label: "Branch", value: activeBranches.find((b) => b.id === branchId)?.name ?? null },
-                  { label: "KTP photo", value: ktpFile ? (ktpScanning ? "Scanning…" : "✓ Ready") : null },
+                  { label: t("common.type"), value: customerType },
+                  { label: t("common.name"), value: fullName || null },
+                  { label: t("customers.nik"), value: nik || null },
+                  { label: t("common.email"), value: email || null },
+                  { label: t("common.phone"), value: phone || null },
+                  { label: t("customers.branch"), value: activeBranches.find((b) => b.id === branchId)?.name ?? null },
+                  { label: t("customers.ktpPhotoLabel"), value: ktpFile ? (ktpScanning ? t("customers.scanning") : `✓ ${t("customers.ready")}`) : null },
                 ] as { label: string; value: string | null }[]).map(({ label, value }) => value ? (
                   <div key={label} className="flex justify-between py-1.5 first:pt-0">
                     <span className="text-muted-foreground shrink-0">{label}</span>
@@ -385,7 +388,7 @@ export function CreateCustomer() {
                   {submitLabel}
                 </Button>
                 <Button variant="outline" className="w-full" onClick={() => router.back()} disabled={isBusy}>
-                  Cancel
+                  {t("common.cancel")}
                 </Button>
               </div>
             </CardContent>

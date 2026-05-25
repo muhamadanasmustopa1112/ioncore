@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { RiUserAddLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
@@ -103,6 +104,7 @@ function resetState() {
 }
 
 export function CreateLeadSheet({ open, onClose }: Props) {
+  const { t } = useTranslation();
   const initial = resetState();
   const [leadName, setLeadName] = useState(initial.leadName);
   const [leadType, setLeadType] = useState<LeadType>(initial.leadType);
@@ -195,7 +197,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl flex items-center gap-2">
             <RiUserAddLine className="size-5 text-primary" />
-            Create Lead
+            {t("leads.createLead")}
           </SheetTitle>
         </SheetHeader>
 
@@ -204,44 +206,42 @@ export function CreateLeadSheet({ open, onClose }: Props) {
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label className="text-xs">
-                  Lead Name <span className="text-destructive">*</span>
+                  {t("leads.leadName", "Lead Name")} <span className="text-destructive">*</span>
                 </Label>
                 <input
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   value={leadName}
                   onChange={(e) => setLeadName(e.target.value)}
-                  placeholder="Prospect name"
+                  placeholder={t("leads.prospectNamePlaceholder", "Prospect name")}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label className="text-xs">Lead Type *</Label>
+                  <Label className="text-xs">{t("leads.leadType", "Lead Type")} *</Label>
                   <Select value={leadType} onValueChange={(v) => setLeadType(v as LeadType)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {LEAD_TYPES.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                      ))}
+                      <SelectItem value="broadband">{t("leads.types.broadband", "Broadband")}</SelectItem>
+                      <SelectItem value="enterprise">{t("leads.types.enterprise", "Enterprise")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-xs">Sub Type *</Label>
+                  <Label className="text-xs">{t("leads.subType", "Sub Type")} *</Label>
                   <Select value={subType} onValueChange={(v) => setSubType(v as CustomerSubType)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {SUB_TYPES.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
-                      ))}
+                      <SelectItem value="residential">{t("customers.residential")}</SelectItem>
+                      <SelectItem value="business">{t("customers.business")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs">Source *</Label>
+                <Label className="text-xs">{t("customers.source")} *</Label>
                 <Select
                   value={source}
                   onValueChange={(v) => {
@@ -252,9 +252,17 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                 >
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {SOURCES.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                    ))}
+                    <SelectItem value="referral">{t("customers.sources.referral")}</SelectItem>
+                    <SelectItem value="cold_call">{t("customers.sources.coldCall")}</SelectItem>
+                    <SelectItem value="website">{t("customers.sources.website")}</SelectItem>
+                    <SelectItem value="whatsapp">{t("customers.sources.whatsapp")}</SelectItem>
+                    <SelectItem value="social_media_dm">{t("customers.sources.socialMediaDm")}</SelectItem>
+                    <SelectItem value="voip_call">{t("customers.sources.voipCall")}</SelectItem>
+                    <SelectItem value="line_call">{t("customers.sources.lineCall")}</SelectItem>
+                    <SelectItem value="walk_in">{t("customers.sources.walkIn")}</SelectItem>
+                    <SelectItem value="event">{t("customers.sources.event")}</SelectItem>
+                    <SelectItem value="partner">{t("customers.sources.partner")}</SelectItem>
+                    <SelectItem value="cs_referral">{t("customers.sources.csReferral")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -262,7 +270,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
               {source === "referral" && (
                 <div className="space-y-2">
                   <Label className="text-xs">
-                    Referrer Customer <span className="text-destructive">*</span>
+                    {t("customers.referrerCustomer")} <span className="text-destructive">*</span>
                   </Label>
                   <Popover open={customerPickerOpen} onOpenChange={setCustomerPickerOpen}>
                     <PopoverTrigger asChild>
@@ -276,7 +284,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                               {selectedCustomer.full_name}
                               <StatusBadge status={selectedCustomer.status} />
                             </>
-                          ) : "Search customer…"}
+                          ) : t("customers.searchCustomer")}
                         </span>
                         <ChevronsUpDown className="size-4 opacity-50 shrink-0 ml-2" />
                       </button>
@@ -284,7 +292,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                     <PopoverContent className="w-[320px] p-0" align="start">
                       <Command shouldFilter={false}>
                         <CommandInput
-                          placeholder="Search by name…"
+                          placeholder={t("customers.searchByName")}
                           value={customerSearch}
                           onValueChange={setCustomerSearch}
                         />
@@ -292,11 +300,11 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                           {customersLoading && (
                             <div className="flex items-center justify-center py-6 gap-2 text-sm text-muted-foreground">
                               <Loader2 className="size-4 animate-spin" />
-                              Loading…
+                              {t("common.loading")}
                             </div>
                           )}
                           {!customersLoading && customerOptions.length === 0 && (
-                            <CommandEmpty>No customers found.</CommandEmpty>
+                            <CommandEmpty>{t("customers.noCustomerFound")}</CommandEmpty>
                           )}
                           {!customersLoading && customerOptions.length > 0 && (
                             <CommandGroup>
@@ -334,12 +342,12 @@ export function CreateLeadSheet({ open, onClose }: Props) {
               )}
 
               <div className="space-y-2">
-                <Label className="text-xs">NIK</Label>
+                <Label className="text-xs">{t("customers.nik")}</Label>
                 <input
                   className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   value={nik}
                   onChange={(e) => setNik(e.target.value)}
-                  placeholder="16-digit NIK"
+                  placeholder={t("customers.nikPlaceholder")}
                   maxLength={16}
                 />
               </div>
@@ -353,7 +361,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
 
               <div className="space-y-2">
                 <Label className="text-xs">
-                  Branch <span className="text-destructive">*</span>
+                  {t("customers.branch")} <span className="text-destructive">*</span>
                 </Label>
                 <BranchCombobox
                   branches={activeBranches}
@@ -372,9 +380,9 @@ export function CreateLeadSheet({ open, onClose }: Props) {
         </SheetBody>
 
         <SheetFooter className="border-border flex-row gap-2 border-t p-5 pb-4 mt-auto justify-end">
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>{t("common.cancel")}</Button>
           <Button variant="primary" onClick={handleSubmit} disabled={!canSubmit} className="font-semibold">
-            {createLead.isPending ? "Creating…" : "Create Lead"}
+            {createLead.isPending ? t("common.creating") : t("leads.createLead")}
           </Button>
         </SheetFooter>
       </SheetContent>
