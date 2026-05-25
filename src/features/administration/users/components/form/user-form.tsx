@@ -155,11 +155,7 @@ export function UserForm() {
               userOptions={userOptions}
             />
             <AccountSection
-              isDetailMode={isDetailMode}
-              selectedUser={selectedUser}
-              sessions={sessions}
-              isRevoking={isRevoking}
-              revokeSessions={revokeSessions}
+              onPasswordChange={(pw) => form.setValue("password", pw)}
             />
           </div>
         </ScrollArea>
