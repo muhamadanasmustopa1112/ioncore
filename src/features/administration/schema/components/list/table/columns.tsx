@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { SchemaRecord } from "../../../types";
@@ -25,13 +26,15 @@ function SchemaStatusBadge({ status }: { status: string }) {
   );
 }
 
-export const columns: ColumnDef<SchemaRecord>[] = [
+export function useSchemaColumns(): ColumnDef<SchemaRecord>[] {
+  const { t } = useTranslation();
+  return [
   {
     id: "name",
     accessorFn: (row) => row.name,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Schema"
+        title={t("administration.schema.colSchema")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -80,7 +83,7 @@ export const columns: ColumnDef<SchemaRecord>[] = [
     accessorFn: (row) => row.customer_type,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Customer Type"
+        title={t("administration.schema.colCustomerType")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -98,7 +101,7 @@ export const columns: ColumnDef<SchemaRecord>[] = [
     accessorFn: (row) => row.schema_type,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Type"
+        title={t("administration.schema.colType")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -116,7 +119,7 @@ export const columns: ColumnDef<SchemaRecord>[] = [
     accessorFn: (row) => row.schema_status,
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Status"
+        title={t("administration.schema.colStatus")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -129,7 +132,7 @@ export const columns: ColumnDef<SchemaRecord>[] = [
     id: "actions",
     header: ({ column }) => (
       <DataGridColumnHeader
-        title="Actions"
+        title={t("administration.schema.colActions")}
         column={column}
         className="text-foreground font-semibold"
       />
@@ -138,4 +141,5 @@ export const columns: ColumnDef<SchemaRecord>[] = [
     enableSorting: false,
     size: 75,
   },
-];
+  ];
+}

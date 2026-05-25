@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { RiEditLine, RiEyeLine, RiArchiveLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -12,6 +13,7 @@ import { RoleData } from "../../../types";
 import { useRoleStore } from "../../../store/role";
 
 export function ActionsCell({ row }: { row: Row<RoleData> }) {
+  const { t } = useTranslation();
   const { openRoleDialog } = useRoleStore();
 
   return (
@@ -24,16 +26,16 @@ export function ActionsCell({ row }: { row: Row<RoleData> }) {
       <DropdownMenuContent side="bottom" align="end">
         <DropdownMenuItem className="cursor-pointer" onClick={() => openRoleDialog("edit", row.original)}>
           <RiEditLine />
-          Edit
+          {t("administration.roles.edit")}
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer" onClick={() => openRoleDialog("details", row.original)}>
           <RiEyeLine />
-          Detail
+          {t("administration.roles.detail")}
         </DropdownMenuItem>
         {!row.original.isSystem && (
           <DropdownMenuItem variant="destructive" className="cursor-pointer" onClick={() => {}}>
             <RiArchiveLine />
-            Archive
+            {t("administration.roles.archive")}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

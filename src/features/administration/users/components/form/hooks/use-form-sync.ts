@@ -55,8 +55,11 @@ export function useFormSync({ form, branches, roles, isDetailMode }: UseFormSync
     }
   }, [assignedBranches, homeBranchId, activeBranchId, form, isDetailMode]);
 
-  const homeBranchOptions = isDetailMode ? branches : assignedBranches;
-  const activeBranchOptions = isDetailMode ? branches : assignedBranches;
+  const toOptions = (list: BranchData[]) =>
+    list.filter((b) => b.id).map((b) => ({ value: b.id, label: b.name }));
+
+  const homeBranchOptions = toOptions(isDetailMode ? branches : assignedBranches);
+  const activeBranchOptions = toOptions(isDetailMode ? branches : assignedBranches);
 
   const workingScope = form.watch("workingScope");
 

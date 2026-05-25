@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
   RiAddLine,
   RiArrowLeftRightLine,
@@ -35,23 +36,26 @@ import { UpgradeEligibilityPanel } from "./policy/upgrade-eligibility-panel";
 import { ChangeMatrixPanel } from "./policy/change-matrix-panel";
 import { BroadbandPlanSchemasPanel } from "./policy/broadband-plan-schemas-panel";
 
-const VIEWS: { value: SchemaView; label: string; icon: React.ReactNode }[] = [
-  { value: "schemas", label: "Schema Library", icon: <RiFileTextLine className="size-3.5" /> },
-  { value: "customer-overrides", label: "Customer Overrides", icon: <RiUserSettingsLine className="size-3.5" /> },
-  { value: "broadband-plan-schemas", label: "Broadband Plan Schemas", icon: <RiWifiLine className="size-3.5" /> },
-  { value: "schema-migration", label: "Schema Migration", icon: <RiArrowLeftRightLine className="size-3.5" /> },
-];
-
-const VIEW_TITLES: Record<SchemaView, string> = {
-  "schemas": "Schema Library",
-  "assignment-rules": "Assignment Rules Manager",
-  "customer-overrides": "Per-Customer Schema Override",
-  "broadband-plan-schemas": "Broadband Plan Schema Assignments",
-  "change-policies": "Service Change Policy",
-  "upgrade-rules": "Package Upgrade Eligibility",
-  "change-matrix": "Instant vs WO-based Change Matrix",
-  "schema-migration": "Bulk Schema Migration",
-};
+function useSchemaViews() {
+  const { t } = useTranslation();
+  const VIEWS: { value: SchemaView; label: string; icon: React.ReactNode }[] = [
+    { value: "schemas", label: t("administration.schema.viewSchemaLibrary"), icon: <RiFileTextLine className="size-3.5" /> },
+    { value: "customer-overrides", label: t("administration.schema.viewCustomerOverrides"), icon: <RiUserSettingsLine className="size-3.5" /> },
+    { value: "broadband-plan-schemas", label: t("administration.schema.viewBroadbandPlanSchemas"), icon: <RiWifiLine className="size-3.5" /> },
+    { value: "schema-migration", label: t("administration.schema.viewSchemaMigration"), icon: <RiArrowLeftRightLine className="size-3.5" /> },
+  ];
+  const VIEW_TITLES: Record<SchemaView, string> = {
+    "schemas": t("administration.schema.viewTitleSchemas"),
+    "assignment-rules": t("administration.schema.viewTitleAssignmentRules"),
+    "customer-overrides": t("administration.schema.viewTitleCustomerOverrides"),
+    "broadband-plan-schemas": t("administration.schema.viewTitleBroadbandPlanSchemas"),
+    "change-policies": t("administration.schema.viewTitleChangePolicies"),
+    "upgrade-rules": t("administration.schema.viewTitleUpgradeRules"),
+    "change-matrix": t("administration.schema.viewTitleChangeMatrix"),
+    "schema-migration": t("administration.schema.viewTitleSchemaMigration"),
+  };
+  return { VIEWS, VIEW_TITLES };
+}
 
 function ViewContent({ view, migrationSchemaId }: { view: SchemaView; migrationSchemaId?: string }) {
   switch (view) {
@@ -78,6 +82,8 @@ const ALL_PANEL_PARAMS = {
 };
 
 export function SchemaManagementPage() {
+  const { t } = useTranslation();
+  const { VIEWS, VIEW_TITLES } = useSchemaViews();
   const { openSchemaSheet, setView, activeSchemaType } = useSchemaStore();
   const [urlParams, setPanelParams] = useQueryStates(ALL_PANEL_PARAMS);
 
@@ -102,21 +108,21 @@ export function SchemaManagementPage() {
       <PageBreadcrumb
         items={[
           {
-            title: "Administration",
+            title: t("menu.administration"),
             path: paths.dashboard.administration.branch.root.getHref(),
           },
-          { title: "Schema Management" },
+          { title: t("administration.schema.title") },
         ]}
       />
       <Toolbar className="mt-5 items-start sm:items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Schema Management
+            {t("administration.schema.title")}
           </ToolbarTitle>
           <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
             <Badge variant="info" appearance="light" className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs">
               <RiFileTextLine className="size-3.5" />
-              {schemaCount} Schemas
+              {schemaCount} {t("administration.schema.schemas")}
             </Badge>
             <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
             <span className="text-muted-foreground font-normal text-xs sm:text-sm">
@@ -129,7 +135,7 @@ export function SchemaManagementPage() {
             <>
               <Button variant="outline" className="h-9 px-3 text-sm font-semibold shadow-xs sm:h-11 sm:px-5">
                 <RiDownloadLine className="size-4" />
-                <span className="hidden sm:inline">Export</span>
+                <span className="hidden sm:inline">{t("administration.schema.export")}</span>
               </Button>
               <Button
                 variant="primary"
@@ -137,7 +143,7 @@ export function SchemaManagementPage() {
                 onClick={() => openSchemaSheet("new")}
               >
                 <RiAddLine className="size-4 sm:size-5" />
-                New Schema
+                {t("administration.schema.newSchema")}
               </Button>
             </>
           )}

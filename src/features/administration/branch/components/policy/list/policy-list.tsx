@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -26,13 +27,14 @@ import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { usePolicyList } from "../../../api/policy-queries";
-import { columns } from "./table/columns";
+import { getPolicyColumns } from "./table/columns";
 
 interface PolicyListProps {
   branchId: string;
 }
 
 export function PolicyList({ branchId }: PolicyListProps) {
+  const { t } = useTranslation();
   const { data: policies = [], isLoading, isError, refetch } = usePolicyList(branchId);
 
   const [search, setSearch] = useState("");
@@ -49,6 +51,8 @@ export function PolicyList({ branchId }: PolicyListProps) {
         p.policyJson.timezone.toLowerCase().includes(q)
     );
   }, [policies, search]);
+
+  const columns = useMemo(() => getPolicyColumns(t), [t]);
 
   const table = useReactTable({
     columns,
@@ -90,21 +94,21 @@ export function PolicyList({ branchId }: PolicyListProps) {
           <div className="flex flex-col items-center gap-2 py-4">
             <AlertCircle className="size-8 text-destructive opacity-70" />
             <p className="text-sm font-medium text-destructive">
-              Failed to load policies
+              {t("administration.branch.policy.failedToLoad")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Something went wrong. Please try again.
+              {t("administration.branch.policy.somethingWentWrong")}
             </p>
             <button
               onClick={() => refetch()}
               className="mt-1 flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"
             >
               <RefreshCw className="size-3.5" />
-              Retry
+              {t("administration.branch.policy.retry")}
             </button>
           </div>
         ) : (
-          "No policies found"
+          t("administration.branch.policy.noPoliciesFound")
         )
       }
     >
@@ -114,7 +118,7 @@ export function PolicyList({ branchId }: PolicyListProps) {
             <div className="relative w-full sm:w-56">
               <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
               <Input
-                placeholder="Search policies..."
+                placeholder={t("administration.branch.policy.searchPolicies")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full ps-9"
@@ -137,7 +141,7 @@ export function PolicyList({ branchId }: PolicyListProps) {
               trigger={
                 <Button variant="outline">
                   <Settings2 />
-                  View
+                  {t("administration.branch.policy.view")}
                 </Button>
               }
             />

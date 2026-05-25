@@ -1,17 +1,20 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { RoleData } from "../../../types";
 import { ActionsCell } from "./data-table-actions-cell";
 
-export const columns: ColumnDef<RoleData>[] = [
+export function useRoleColumns(): ColumnDef<RoleData>[] {
+  const { t } = useTranslation();
+  return [
   {
     id: "name",
     accessorFn: (row) => row.name,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Role Name" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title={t("administration.roles.roleName")} column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
@@ -30,7 +33,7 @@ export const columns: ColumnDef<RoleData>[] = [
     id: "description",
     accessorFn: (row) => row.description,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Description" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title={t("administration.roles.description")} column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <div className="text-muted-foreground text-sm truncate max-w-full" title={row.original.description}>
@@ -44,7 +47,7 @@ export const columns: ColumnDef<RoleData>[] = [
     id: "createdAt",
     accessorFn: (row) => row.createdAt,
     header: ({ column }) => (
-      <DataGridColumnHeader title="Created" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title={t("administration.roles.created")} column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => (
       <span className="text-xs text-muted-foreground">
@@ -59,10 +62,12 @@ export const columns: ColumnDef<RoleData>[] = [
   {
     id: "actions",
     header: ({ column }) => (
-      <DataGridColumnHeader title="Actions" column={column} className="text-foreground font-semibold" />
+      <DataGridColumnHeader title={t("administration.roles.actions")} column={column} className="text-foreground font-semibold" />
     ),
     cell: ({ row }) => <ActionsCell row={row} />,
     enableSorting: false,
     size: 75,
   },
-];
+  ];
+}
+

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RiDeleteBin7Line, RiEditLine, RiEyeLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -27,6 +28,7 @@ import { useBranchStore } from "../../../store/branch";
 import { useDeleteBranch } from "../../../api/branch-queries";
 
 export function ActionsCell({ row }: { row: Row<BranchData> }) {
+  const { t } = useTranslation();
   const { openBranchFormSheet } = useBranchStore();
   const deleteBranch = useDeleteBranch();
   const branch = row.original;
@@ -41,7 +43,7 @@ export function ActionsCell({ row }: { row: Row<BranchData> }) {
         areaId: branch._areaId,
       },
       {
-        onSuccess: () => toast.success(`"${branch.name}" deleted`),
+        onSuccess: () => toast.success(`"${branch.name}" ${t("common.deleted")}`),
       },
     );
   };
@@ -60,14 +62,14 @@ export function ActionsCell({ row }: { row: Row<BranchData> }) {
             onClick={() => openBranchFormSheet("edit", branch)}
           >
             <RiEditLine />
-            Edit
+            {t("common.edit")}
           </DropdownMenuItem>
           <DropdownMenuItem
             className="cursor-pointer"
             onClick={() => openBranchFormSheet("details", branch)}
           >
             <RiEyeLine />
-            Detail
+            {t("common.details")}
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
@@ -76,7 +78,7 @@ export function ActionsCell({ row }: { row: Row<BranchData> }) {
             onClick={() => setConfirmOpen(true)}
           >
             <RiDeleteBin7Line />
-            Delete
+            {t("common.delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -84,19 +86,18 @@ export function ActionsCell({ row }: { row: Row<BranchData> }) {
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Branch</AlertDialogTitle>
+            <AlertDialogTitle>{t("common.delete")} {t("menu.branch")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <span className="font-semibold text-foreground">{branch.name}</span>?
-              This action cannot be undone.
+              {t("common.confirmDeleteMessage", { name: branch.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={handleConfirmDelete}
             >
-              Delete
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

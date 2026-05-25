@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RiInformationLine, RiShieldLine } from "@remixicon/react";
 import { Check, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
@@ -45,6 +46,7 @@ function errMessage(err: unknown, fallback: string) {
 }
 
 export function RoleDialog() {
+  const { t } = useTranslation();
   const { roleDialogOpen, closeRoleDialog, form, selectedRole } = useRoleStore();
   const isNewMode = form === "new";
   const isEditMode = form === "edit";
@@ -67,7 +69,7 @@ export function RoleDialog() {
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      toast.error("Role name is required");
+      toast.error(t("administration.roles.roleNameRequired"));
       return;
     }
     try {
@@ -91,17 +93,17 @@ export function RoleDialog() {
         setCreatingPolicies(false);
         if (failed > 0) {
           toast.warning(
-            `Role created. ${drafts.length - failed}/${drafts.length} permissions assigned.`,
+            `${t("administration.roles.roleCreated")}. ${drafts.length - failed}/${drafts.length} permissions assigned.`,
           );
         } else {
-          toast.success(`Role created with ${drafts.length} permission${drafts.length > 1 ? "s" : ""}`);
+          toast.success(t("administration.roles.roleCreated"));
         }
       } else {
-        toast.success("Role created");
+        toast.success(t("administration.roles.roleCreated"));
       }
       closeRoleDialog();
     } catch (err) {
-      toast.error(errMessage(err, "Failed to create role"));
+      toast.error(errMessage(err, t("administration.roles.failedToCreate")));
     }
   };
 
@@ -112,7 +114,7 @@ export function RoleDialog() {
       <DialogContent className="sm:max-w-[640px] max-h-[90vh] flex flex-col p-0">
         <DialogHeader className="px-6 pt-5 pb-3 border-b">
           <DialogTitle className="text-xl font-semibold">
-            {isNewMode ? "Add New Role" : isEditMode ? "Edit Role" : "Role Details"}
+            {isNewMode ? t("administration.roles.addNewRoleTitle") : isEditMode ? t("administration.roles.editRoleTitle") : t("administration.roles.roleDetailsTitle")}
           </DialogTitle>
         </DialogHeader>
 
@@ -121,15 +123,15 @@ export function RoleDialog() {
             <section className="space-y-4">
               <div className="flex items-center gap-2 pb-1 border-b border-border/50">
                 <RiInformationLine className="size-4 text-blue-500" />
-                <h3 className="text-sm font-semibold">General Information</h3>
+                <h3 className="text-sm font-semibold">{t("administration.roles.generalInformation")}</h3>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="roleName" className="text-xs font-medium text-muted-foreground">
-                  Role Name <span className="text-red-500">*</span>
+                  {t("administration.roles.roleNameLabel")} <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="roleName"
-                  placeholder="e.g. NOC Engineer"
+                  placeholder={t("administration.roles.roleNamePlaceholder")}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={isDetailMode || !isNewMode || busy}
@@ -137,11 +139,11 @@ export function RoleDialog() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="roleDescription" className="text-xs font-medium text-muted-foreground">
-                  Description
+                  {t("administration.roles.descriptionLabel")}
                 </Label>
                 <Textarea
                   id="roleDescription"
-                  placeholder="What does this role do?"
+                  placeholder={t("administration.roles.descriptionPlaceholder")}
                   className="min-h-[72px] resize-none"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -164,7 +166,7 @@ export function RoleDialog() {
 
         <DialogFooter className="px-6 py-4 border-t">
           <Button variant="outline" onClick={closeRoleDialog} disabled={busy}>
-            {isDetailMode ? "Close" : "Cancel"}
+            {isDetailMode ? t("administration.roles.close") : t("administration.roles.cancel")}
           </Button>
           {isNewMode && (
             <Button
@@ -174,7 +176,7 @@ export function RoleDialog() {
               className="font-semibold"
             >
               {busy && <Loader2 className="size-4 animate-spin" />}
-              {creatingPolicies ? "Assigning permissions..." : "Create Role"}
+              {creatingPolicies ? t("administration.roles.assigningPermissions") : t("administration.roles.createRole")}
             </Button>
           )}
         </DialogFooter>
@@ -194,6 +196,7 @@ function PermissionsListUI({
   pendingKey,
   footerNote,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   permissions: Permission[];
   isLoading: boolean;
   title: string;
@@ -204,6 +207,7 @@ function PermissionsListUI({
   pendingKey?: string | null;
   footerNote?: string;
 }) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const filtered = useMemo(() => {
     if (!search.trim()) return permissions;
@@ -225,14 +229,14 @@ function PermissionsListUI({
         <RiShieldLine className="size-4 text-purple-500" />
         <h3 className="text-sm font-semibold">{title}</h3>
         <span className="text-[11px] text-muted-foreground ml-auto">
-          {assignedCount} assigned
+          {assignedCount} {t("administration.roles.assigned")}
         </span>
       </div>
 
       <div className="relative">
         <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
         <Input
-          placeholder="Search permissions..."
+          placeholder={t("administration.roles.searchPermissions")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="ps-9 h-9"
@@ -241,11 +245,11 @@ function PermissionsListUI({
 
       {isLoading ? (
         <div className="flex items-center justify-center py-6 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin mr-2" /> Loading permissions...
+          <Loader2 className="size-4 animate-spin mr-2" /> {t("administration.roles.loadingPermissions")}
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-6 text-center text-sm text-muted-foreground">
-          No permissions found.
+          {t("administration.roles.noPermissionsFound")}
         </div>
       ) : (
         <ul className="divide-y border rounded-md max-h-[320px] overflow-auto">
@@ -289,7 +293,7 @@ function PermissionsListUI({
                       ) : (
                         <Check className="size-3" />
                       )}
-                      Allow
+                      {t("administration.roles.allow")}
                     </Button>
                     <Button
                       size="sm"
@@ -303,7 +307,7 @@ function PermissionsListUI({
                       ) : (
                         <X className="size-3" />
                       )}
-                      Deny
+                      {t("administration.roles.deny")}
                     </Button>
                   </div>
                 )}
@@ -343,16 +347,18 @@ function DraftPoliciesPicker({
     onChange(next);
   };
 
+  const { t } = useTranslation();
+
   return (
     <PermissionsListUI
       permissions={permissions}
       isLoading={isLoading}
-      title="Access Permissions"
+      title={t("administration.roles.accessPermissions")}
       assignedCount={assignedCount}
       effectOf={(id) => effects[id]}
       onSet={handleSet}
       disabled={disabled}
-      footerNote="Selected permissions will be assigned after the role is created. Click the same effect again to clear it."
+      footerNote={t("administration.roles.draftFooterNote")}
     />
   );
 }
@@ -398,11 +404,13 @@ function AccessPoliciesPicker({
     );
   };
 
+  const { t } = useTranslation();
+
   return (
     <PermissionsListUI
       permissions={permissions}
       isLoading={loadingPerms || loadingPolicies}
-      title="Access Permissions"
+      title={t("administration.roles.accessPermissions")}
       assignedCount={effectByPermId.size}
       effectOf={(id) => effectByPermId.get(id)}
       onSet={readOnly ? undefined : setEffect}
@@ -411,7 +419,7 @@ function AccessPoliciesPicker({
       footerNote={
         readOnly
           ? undefined
-          : "Once assigned, an access policy cannot be removed (no delete endpoint). Switching between Allow/Deny creates a new policy."
+          : t("administration.roles.policyFooterNote")
       }
     />
   );

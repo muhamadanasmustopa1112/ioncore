@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RiInformationLine } from "@remixicon/react";
@@ -65,6 +66,7 @@ const DEFAULT_BILLING: BillingFormValues = {
 };
 
 export function BillingForm() {
+  const { t } = useTranslation();
   const { form, activeSchemaType, selectedSchemaId, setFormSubmitter, setSheetLoading, overrideCustomerSchema, closeSchemaSheet, openOverrideConfirm, overrideConfirmTrigger } = useSchemaStore();
   const isDetailMode = form === "details" || form === "view_override";
   const isOverride = form === "override" || form === "view_override";
@@ -286,7 +288,7 @@ export function BillingForm() {
           {isLoadingData ? (
             <div className="flex items-center justify-center gap-2 py-20 text-sm text-muted-foreground">
               <div className="size-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
-              Loading schema...
+              {t("administration.schema.loadingSchema")}
             </div>
           ) : (
           <div className="space-y-8 pb-6">
@@ -295,15 +297,15 @@ export function BillingForm() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 pb-2 border-b border-border/50">
                   <RiInformationLine className="size-4 text-blue-500" />
-                  <h3 className="text-sm font-semibold">Basic Info</h3>
+                  <h3 className="text-sm font-semibold">{t("administration.schema.basicInfo")}</h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="text-xs font-medium text-muted-foreground">
-                      Schema Name <span className="text-red-500">*</span>
+                      {t("administration.schema.schemaName")} <span className="text-red-500">*</span>
                     </Label>
                     <Input
-                      placeholder="e.g. Residential Monthly Billing"
+                      placeholder={t("administration.schema.schemaNamePlaceholder")}
                       disabled={isDetailMode}
                       {...register("name")}
                     />
@@ -313,7 +315,7 @@ export function BillingForm() {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs font-medium text-muted-foreground">
-                      Customer Type
+                      {t("administration.schema.customerType")}
                     </Label>
                     <Select
                       value={watch("customer_type")}

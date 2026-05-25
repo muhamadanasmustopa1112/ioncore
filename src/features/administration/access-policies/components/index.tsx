@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ColumnDef,
   getCoreRowModel,
@@ -46,7 +47,7 @@ import { useRoles } from "@/features/user-service/api/roles";
 import { usePermissions } from "@/features/user-service/api/permissions";
 import type { AccessPolicy, CreateAccessPolicyRequest } from "@/features/user-service/types";
 
-const columns: ColumnDef<AccessPolicy>[] = [
+const _unusedColumns: ColumnDef<AccessPolicy>[] = [
   {
     id: "role",
     header: "Role",
@@ -102,6 +103,63 @@ const columns: ColumnDef<AccessPolicy>[] = [
 ];
 
 export function AccessPoliciesPage() {
+  const { t } = useTranslation();
+
+  const columns = useMemo<ColumnDef<AccessPolicy>[]>(() => [
+    {
+      id: "role",
+      header: t("administration.accessPoliciesPage.colRole"),
+      accessorFn: (r) => r.role?.name ?? "—",
+      cell: ({ row }) => <span className="font-medium">{row.original.role?.name ?? "—"}</span>,
+    },
+    {
+      id: "permission",
+      header: t("administration.accessPoliciesPage.colPermission"),
+      accessorFn: (r) => r.permission?.name ?? "—",
+    },
+    {
+      id: "resource",
+      header: t("administration.accessPoliciesPage.colResource"),
+      accessorFn: (r) => r.permission?.resource ?? "—",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-xs">{row.original.permission?.resource ?? "—"}</span>
+      ),
+    },
+    {
+      id: "action",
+      header: t("administration.accessPoliciesPage.colAction"),
+      accessorFn: (r) => r.permission?.action ?? "—",
+      cell: ({ row }) => (
+        <span className="text-muted-foreground text-xs">{row.original.permission?.action ?? "—"}</span>
+      ),
+    },
+    {
+      id: "effect",
+      header: t("administration.accessPoliciesPage.colEffect"),
+      accessorFn: (r) => r.effect,
+      cell: ({ row }) => (
+        <Badge
+          variant={row.original.effect === "allow" ? "success" : "destructive"}
+          appearance="light"
+          size="sm"
+          className="capitalize"
+        >
+          {row.original.effect}
+        </Badge>
+      ),
+    },
+    {
+      id: "created",
+      header: t("administration.accessPoliciesPage.colCreated"),
+      accessorFn: (r) => r.created_at ?? "",
+      cell: ({ row }) => (
+        <span className="text-xs text-muted-foreground">
+          {row.original.created_at ? new Date(row.original.created_at).toLocaleDateString() : "—"}
+        </span>
+      ),
+    },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [t]);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<Partial<CreateAccessPolicyRequest>>({ effect: "allow" });
   const [pagination, setPagination] = useState({ page: 1, limit: 10 });
@@ -123,7 +181,7 @@ export function AccessPoliciesPage() {
   const total = policiesResp?.metadata?.total ?? policies.length;
 
   const table = useReactTable({
-    columns,
+    columns: columns,
     data: policies,
     manualPagination: true,
     pageCount: getPageCount(policiesResp?.metadata, pagination.limit) || 1,
@@ -143,16 +201,16 @@ export function AccessPoliciesPage() {
 
   const handleCreate = async () => {
     if (!form.role_id || !form.permission_id || !form.effect) {
-      toast.error("Role, permission, and effect are required");
+      toast.error(t("administration.accessPoliciesPage.toastValidation"));
       return;
     }
     try {
       await createPolicy(form as CreateAccessPolicyRequest);
-      toast.success("Access policy created");
+      toast.success(t("administration.accessPoliciesPage.toastSuccess"));
       setSheetOpen(false);
       setForm({ effect: "allow" });
     } catch {
-      toast.error("Failed to create access policy");
+      toast.error(t("administration.accessPoliciesPage.toastFailed"));
     }
   };
 
@@ -160,22 +218,22 @@ export function AccessPoliciesPage() {
     <div className="relative h-full w-full overflow-hidden">
       <PageBreadcrumb
         items={[
-          { title: "Administration", path: paths.dashboard.administration.branch.root.getHref() },
-          { title: "Access Policies" },
+          { title: t("administration.accessPoliciesPage.breadcrumbAdmin"), path: paths.dashboard.administration.branch.root.getHref() },
+          { title: t("administration.accessPoliciesPage.breadcrumbTitle") },
         ]}
       />
 
       <Toolbar className="mt-5 items-start sm:items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Access Policies
+            {t("administration.accessPoliciesPage.title")}
           </ToolbarTitle>
           <p className="text-sm text-muted-foreground mt-1">
-            Role ↔ permission bindings with allow / deny effect
+            {t("administration.accessPoliciesPage.desc")}
           </p>
         </ToolbarHeading>
         <Button variant="primary" onClick={() => setSheetOpen(true)}>
-          <Plus className="size-4" /> New Policy
+          <Plus className="size-4" /> {t("administration.accessPoliciesPage.newPolicyBtn")}
         </Button>
       </Toolbar>
 
@@ -184,13 +242,13 @@ export function AccessPoliciesPage() {
         recordCount={total}
         tableLayout={{ cellBorder: true }}
         isLoading={isLoading}
-        emptyMessage="No policies defined yet"
+        emptyMessage={t("administration.accessPoliciesPage.empty")}
       >
         <Card className="mt-5">
           <CardHeader>
             <CardHeading>
               <Shield className="size-4 text-muted-foreground" />
-              <span className="text-sm font-medium">{total} policies</span>
+              <span className="text-sm font-medium">{total} {t("administration.accessPoliciesPage.policiesCount")}</span>
             </CardHeading>
             <CardToolbar />
           </CardHeader>
@@ -211,14 +269,14 @@ export function AccessPoliciesPage() {
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent className="sm:max-w-md">
           <SheetHeader>
-            <SheetTitle>New Access Policy</SheetTitle>
+            <SheetTitle>{t("administration.accessPoliciesPage.sheetTitle")}</SheetTitle>
           </SheetHeader>
           <div className="space-y-5 mt-6 px-1">
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Role</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("administration.accessPoliciesPage.labelRole")}</Label>
               <Select value={form.role_id ?? ""} onValueChange={(v) => setForm({ ...form, role_id: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
+                  <SelectValue placeholder={t("administration.accessPoliciesPage.placeholderRole")} />
                 </SelectTrigger>
                 <SelectContent>
                   {roles.map((r) => (
@@ -229,10 +287,10 @@ export function AccessPoliciesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Permission</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("administration.accessPoliciesPage.labelPermission")}</Label>
               <Select value={form.permission_id ?? ""} onValueChange={(v) => setForm({ ...form, permission_id: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select permission" />
+                  <SelectValue placeholder={t("administration.accessPoliciesPage.placeholderPermission")} />
                 </SelectTrigger>
                 <SelectContent>
                   {permissions.map((p) => (
@@ -245,22 +303,22 @@ export function AccessPoliciesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Effect</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("administration.accessPoliciesPage.labelEffect")}</Label>
               <Select value={form.effect ?? "allow"} onValueChange={(v) => setForm({ ...form, effect: v as "allow" | "deny" })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="allow">Allow</SelectItem>
-                  <SelectItem value="deny">Deny</SelectItem>
+                  <SelectItem value="allow">{t("administration.accessPoliciesPage.effectAllow")}</SelectItem>
+                  <SelectItem value="deny">{t("administration.accessPoliciesPage.effectDeny")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex gap-2 pt-2">
-              <Button variant="outline" onClick={() => setSheetOpen(false)} className="flex-1">Cancel</Button>
+              <Button variant="outline" onClick={() => setSheetOpen(false)} className="flex-1">{t("administration.accessPoliciesPage.cancel")}</Button>
               <Button variant="primary" onClick={handleCreate} disabled={isPending} className="flex-1">
-                Create Policy
+                {t("administration.accessPoliciesPage.createBtn")}
               </Button>
             </div>
           </div>

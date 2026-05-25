@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -27,10 +28,12 @@ import { useRoles } from "@/features/user-service/api/roles";
 import { getPageCount } from "@/lib/pagination";
 import { RoleData } from "../../types";
 import { mapRoleToRoleData } from "../../mappers";
-import { columns } from "./table/columns";
+import { useRoleColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 
 export function RoleList() {
+  const { t } = useTranslation();
+  const columns = useRoleColumns();
   const [filter, setFilter] = useQueryStates({
     search: parseAsString,
   });
@@ -99,7 +102,7 @@ export function RoleList() {
               <div className="relative">
                 <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                 <Input
-                  placeholder="Search roles..."
+                  placeholder={t("administration.roles.searchRoles")}
                   value={filter.search || ""}
                   onChange={(e) => setFilter({ ...filter, search: e.target.value })}
                   className="w-48 ps-9"

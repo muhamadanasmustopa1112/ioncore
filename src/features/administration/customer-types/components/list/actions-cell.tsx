@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
 import { RiEditLine, RiDeleteBinLine } from "@remixicon/react";
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function ActionsCell({ row, onEdit, onDelete }: Props) {
+  const { t } = useTranslation();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
@@ -44,7 +46,7 @@ export function ActionsCell({ row, onEdit, onDelete }: Props) {
         <DropdownMenuContent side="bottom" align="end">
           <DropdownMenuItem className="cursor-pointer" onClick={() => onEdit(row.original)}>
             <RiEditLine />
-            Edit
+            {t("administration.customerTypesPage.actionEdit")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -53,7 +55,7 @@ export function ActionsCell({ row, onEdit, onDelete }: Props) {
             onClick={() => setConfirmOpen(true)}
           >
             <RiDeleteBinLine />
-            Delete
+            {t("administration.customerTypesPage.actionDelete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -61,18 +63,18 @@ export function ActionsCell({ row, onEdit, onDelete }: Props) {
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete &quot;{row.original.name}&quot;?</AlertDialogTitle>
+            <AlertDialogTitle>{t("administration.customerTypesPage.deleteTitle")} &quot;{row.original.name}&quot;?</AlertDialogTitle>
             <AlertDialogDescription>
-              This customer type will be permanently deleted. Products using this type may be affected.
+              {t("administration.customerTypesPage.deleteDesc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("administration.customerTypesPage.deleteCancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => { onDelete(row.original.id); setConfirmOpen(false); }}
             >
-              Delete
+              {t("administration.customerTypesPage.deleteConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

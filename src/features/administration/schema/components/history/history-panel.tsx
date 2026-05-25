@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { RiHistoryLine, RiGitMergeLine, RiArrowGoBackLine } from "@remixicon/react";
 import { useRouter } from "next/navigation";
@@ -33,6 +34,7 @@ import {
 const ROLLBACK_ELIGIBLE = ["deprecated"];
 
 export function HistoryPanel() {
+  const { t } = useTranslation();
   const {
     historyPanelOpen,
     closeHistoryPanel,
@@ -121,20 +123,20 @@ export function HistoryPanel() {
           <SheetHeader className="border-border border-b px-5 py-4">
             <div className="flex items-center gap-2">
               <RiHistoryLine className="h-5 w-5 text-muted-foreground" />
-              <SheetTitle className="font-medium text-xl">Version History</SheetTitle>
+              <SheetTitle className="font-medium text-xl">{t("administration.schema.historyTitle")}</SheetTitle>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              Select up to 2 versions to compare. Rollback restores an older version as a new draft.
+              {t("administration.schema.historyDesc")}
             </p>
           </SheetHeader>
 
           <SheetBody className="flex-1 overflow-y-auto p-5 space-y-4">
             <div className="space-y-2">
               {versionsLoading && (
-                <p className="text-sm text-muted-foreground">Loading versions...</p>
+                <p className="text-sm text-muted-foreground">{t("administration.schema.historyLoading")}</p>
               )}
               {!versionsLoading && versions.length === 0 && (
-                <p className="text-sm text-muted-foreground">No version history found.</p>
+                <p className="text-sm text-muted-foreground">{t("administration.schema.historyEmpty")}</p>
               )}
               {(() => {
                 const hasPublished = versions.some((v) => v.status.toLowerCase() === "published");
@@ -162,12 +164,12 @@ export function HistoryPanel() {
                           </span>
                           {isLatest && (
                             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                              Latest
+                              {t("administration.schema.historyLatest")}
                             </span>
                           )}
                           {currentVersion && ver.version === currentVersion && (
                             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                              Current
+                              {t("administration.schema.historyCurrent")}
                             </span>
                           )}
                         </div>
@@ -191,7 +193,7 @@ export function HistoryPanel() {
                           onClick={(e) => { e.stopPropagation(); setRollbackTarget({ id: ver.id, version: ver.version }); }}
                         >
                           <RiArrowGoBackLine className="size-3.5" />
-                          Rollback to {ver.version}
+                          {t("administration.schema.historyRollbackTo")} {ver.version}
                         </Button>
                       </div>
                     )}
@@ -206,7 +208,7 @@ export function HistoryPanel() {
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-muted/30">
                   <RiGitMergeLine className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-semibold">
-                    Diff: {selectedVersions[0].version} → {selectedVersions[1].version}
+                    {t("administration.schema.historyDiff")}: {selectedVersions[0].version} → {selectedVersions[1].version}
                   </span>
                 </div>
                 <div className="p-4 font-mono text-xs">
@@ -215,7 +217,7 @@ export function HistoryPanel() {
                       {JSON.stringify(diffResult.data, null, 2)}
                     </pre>
                   ) : (
-                    <p className="text-muted-foreground text-xs">Loading diff...</p>
+                    <p className="text-muted-foreground text-xs">{t("administration.schema.historyDiffLoading")}</p>
                   )}
                 </div>
               </div>
@@ -230,7 +232,7 @@ export function HistoryPanel() {
                   router.push(`/administration/schema?sc_view=schema-migration&sc_migration_schema=${selectedSchemaId}`);
                 }}
               >
-                Open Migration Tool
+                {t("administration.schema.historyOpenMigration")}
               </Button>
             </div>
           </SheetBody>
@@ -240,20 +242,20 @@ export function HistoryPanel() {
       <AlertDialog open={!!rollbackTarget} onOpenChange={(o) => !o && setRollbackTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Rollback to {rollbackTarget?.version}?</AlertDialogTitle>
+            <AlertDialogTitle>{t("administration.schema.historyRollbackTitle")} {rollbackTarget?.version}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will create a new draft based on{" "}
+              {t("administration.schema.historyRollbackDesc")}{" "}
               <span className="font-semibold text-foreground">{rollbackTarget?.version}</span>.
-              The current version is not deleted. You will need to submit and publish the new draft.
+              {" "}{t("administration.schema.historyRollbackDesc2")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={rollback.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={rollback.isPending}>{t("administration.schema.historyRollbackCancel")}</AlertDialogCancel>
             <AlertDialogAction
               disabled={rollback.isPending}
               onClick={handleConfirmRollback}
             >
-              {rollback.isPending ? "Rolling back…" : "Confirm Rollback"}
+              {rollback.isPending ? t("administration.schema.historyRollingBack") : t("administration.schema.historyRollbackConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -32,6 +33,7 @@ interface AuditListProps {
 }
 
 export function AuditList({ filters, onViewDetail }: AuditListProps) {
+  const { t } = useTranslation();
   const [search, setSearch] = useState(filters.search ?? "");
   const [pagination, setPagination] = useState({
     pageIndex: (filters.page ?? 1) - 1,
@@ -57,7 +59,7 @@ export function AuditList({ filters, onViewDetail }: AuditListProps) {
   const { data, isLoading, isError, refetch } = useAuditLogList(queryFilters);
   const logs = data?.logs ?? [];
 
-  const columns = useMemo(() => buildColumns(onViewDetail), [onViewDetail]);
+  const columns = useMemo(() => buildColumns(onViewDetail, t), [onViewDetail, t]);
 
   const table = useReactTable({
     columns,
@@ -86,16 +88,16 @@ export function AuditList({ filters, onViewDetail }: AuditListProps) {
         isError ? (
           <div className="flex flex-col items-center gap-2 py-4">
             <AlertCircle className="size-8 text-destructive opacity-70" />
-            <p className="text-sm font-medium text-destructive">Failed to load audit logs</p>
+            <p className="text-sm font-medium text-destructive">{t("administration.auditLogPage.errorLoad")}</p>
             <button
               onClick={() => refetch()}
               className="mt-1 flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"
             >
-              Retry
+              {t("administration.auditLogPage.errorRetry")}
             </button>
           </div>
         ) : (
-          "No audit log entries found"
+          t("administration.auditLogPage.empty")
         )
       }
     >
@@ -105,7 +107,7 @@ export function AuditList({ filters, onViewDetail }: AuditListProps) {
             <div className="relative w-full sm:w-72">
               <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
               <Input
-                placeholder="Search by activity, user, or email..."
+                placeholder={t("administration.auditLogPage.searchPlaceholder")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full ps-9"
@@ -125,7 +127,7 @@ export function AuditList({ filters, onViewDetail }: AuditListProps) {
           <CardToolbar>
             <Button variant="outline" size="sm">
               <Download className="size-4" />
-              Export CSV
+              {t("administration.auditLogPage.exportCsv")}
             </Button>
           </CardToolbar>
         </CardHeader>

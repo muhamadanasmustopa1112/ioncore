@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RiWifiLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -31,6 +32,7 @@ interface Props {
 }
 
 export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId }: Props) {
+  const { t } = useTranslation();
   const [planId, setPlanId] = useState(defaultPlanId ?? "");
   const [schemaType, setSchemaType] = useState("");
   const [schemaId, setSchemaId] = useState("");
@@ -78,22 +80,22 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl flex items-center gap-2">
             <RiWifiLine className="size-5 text-muted-foreground" />
-            Assign Schema to Plan
+            {t("administration.schema.bpsFormTitle")}
           </SheetTitle>
         </SheetHeader>
 
         <SheetBody className="flex-1 px-6 py-5 space-y-5">
           <p className="text-sm text-muted-foreground">
-            Link a rule schema to a broadband plan. The system will apply this schema when processing orders or billing for that plan.
+            {t("administration.schema.bpsFormDesc")}
           </p>
 
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
-              Broadband Plan <span className="text-red-500">*</span>
+              {t("administration.schema.bpsPlan")} <span className="text-red-500">*</span>
             </Label>
             <Select value={planId} onValueChange={(v) => { setPlanId(v); setSchemaType(""); setSchemaId(""); }}>
               <SelectTrigger>
-                <SelectValue placeholder="Select plan..." />
+                <SelectValue placeholder={t("administration.schema.bpsPlanPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {plans.map((p) => (
@@ -107,11 +109,11 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
 
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
-              Schema Type <span className="text-red-500">*</span>
+              {t("administration.schema.bpsSchemaType")} <span className="text-red-500">*</span>
             </Label>
             {planId && availableTypes.length === 0 ? (
               <p className="text-xs text-muted-foreground rounded-md border border-dashed px-3 py-2.5">
-                All schema types have already been assigned to this plan.
+                {t("administration.schema.bpsSchemaTypeAllAssigned")}
               </p>
             ) : (
               <Select
@@ -120,7 +122,7 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
                 disabled={!!planId && availableTypes.length === 0}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type..." />
+                  <SelectValue placeholder={t("administration.schema.bpsSchemaTypePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {availableTypes.map((t) => (
@@ -135,7 +137,7 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
 
           <div className="space-y-1.5">
             <Label className="text-xs font-medium text-muted-foreground">
-              Schema <span className="text-red-500">*</span>
+              {t("administration.schema.bpsSchema")} <span className="text-red-500">*</span>
             </Label>
             <Select
               value={schemaId}
@@ -143,7 +145,7 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
               disabled={!schemaType}
             >
               <SelectTrigger>
-                <SelectValue placeholder={schemaType ? "Select schema..." : "Choose type first"} />
+                <SelectValue placeholder={schemaType ? t("administration.schema.bpsSchemaPlaceholder") : t("administration.schema.bpsSchemaChooseTypeFirst")} />
               </SelectTrigger>
               <SelectContent>
                 {schemas.map((s) => (
@@ -157,10 +159,10 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
         </SheetBody>
 
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 mt-auto">
-          <Button variant="ghost" onClick={handleClose}>Close</Button>
+          <Button variant="ghost" onClick={handleClose}>{t("administration.schema.bpsClose")}</Button>
           <div className="flex-1" />
           <Button variant="outline" onClick={handleClose} className="mr-3" disabled={create.isPending}>
-            Cancel
+            {t("administration.schema.bpsCancel")}
           </Button>
           <Button
             variant="primary"
@@ -168,7 +170,7 @@ export function BroadbandPlanSchemaFormSheet({ open, onOpenChange, defaultPlanId
             disabled={!valid || create.isPending}
             className="font-semibold"
           >
-            {create.isPending ? "Assigning..." : "Assign Schema"}
+            {create.isPending ? t("administration.schema.bpsAssigning") : t("administration.schema.bpsAssign")}
           </Button>
         </SheetFooter>
       </SheetContent>

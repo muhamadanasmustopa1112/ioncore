@@ -1,6 +1,7 @@
 "use client";
 
 import { UseFormReturn } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { RiBankCardLine } from "@remixicon/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,8 +27,10 @@ const PAYMENT_METHOD_OPTIONS = [
   { value: "credit_card", label: "Credit Card" },
   { value: "convenience_store", label: "Convenience Store" },
 ];
+// Note: payment method labels kept in English as they are proper names
 
 export function PaymentSection({ form, disabled }: PaymentSectionProps) {
+  const { t } = useTranslation();
   const { register, watch, setValue, formState: { errors } } = form;
 
   const lateFeeEnabled = watch("recurring_payment.late_fee_enabled");
@@ -47,11 +50,11 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
     <div className="space-y-4 pt-2">
       <div className="flex items-center gap-2 pb-2 border-b border-border/50">
         <RiBankCardLine className="size-4 text-purple-500" />
-        <h3 className="text-sm font-semibold">Payment</h3>
+        <h3 className="text-sm font-semibold">{t("administration.schema.payment")}</h3>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label className="text-xs font-medium text-muted-foreground">Payment Terms</Label>
+          <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.paymentTerms")}</Label>
           <Select
             value={watch("payment_terms")}
             onValueChange={(v) =>
@@ -72,7 +75,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
         </div>
         <div className="space-y-2">
           <Label className="text-xs font-medium text-muted-foreground">
-            Recurring Grace Period (days)
+            {t("administration.schema.recurringGracePeriod")}
           </Label>
           <Input
             type="number"
@@ -85,7 +88,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
           )}
         </div>
         <div className="space-y-2 md:col-span-2">
-          <Label className="text-xs font-medium text-muted-foreground">Payment Methods</Label>
+          <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.paymentMethods")}</Label>
           <div className="flex flex-wrap gap-4">
             {PAYMENT_METHOD_OPTIONS.map((opt) => (
               <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
@@ -103,7 +106,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
           )}
         </div>
         <div className="flex items-center justify-between md:col-span-2">
-          <Label className="text-xs font-medium text-muted-foreground">Late Fee Enabled</Label>
+          <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.lateFeeEnabled")}</Label>
           <Switch
             size="lg"
             checked={lateFeeEnabled}
@@ -114,7 +117,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
         {lateFeeEnabled && (
           <>
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Late Fee Type</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.lateFeeType")}</Label>
               <Select
                 value={watch("recurring_payment.late_fee_type") ?? "percentage"}
                 onValueChange={(v) =>
@@ -126,13 +129,13 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="percentage">Percentage</SelectItem>
-                  <SelectItem value="fixed_amount">Fixed Amount</SelectItem>
+                  <SelectItem value="percentage">{t("administration.schema.lateFeePercentage")}</SelectItem>
+                  <SelectItem value="fixed_amount">{t("administration.schema.lateFeeFixed")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Late Fee Value</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.lateFeeValue")}</Label>
               <Input
                 type="number"
                 min={0}
@@ -141,7 +144,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Apply After Days</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.applyAfterDays")}</Label>
               <Input
                 type="number"
                 min={0}
@@ -152,7 +155,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
           </>
         )}
         <div className="flex items-center justify-between md:col-span-2">
-          <Label className="text-xs font-medium text-muted-foreground">Suspension Automatic</Label>
+          <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.suspensionAutomatic")}</Label>
           <Switch
             size="lg"
             checked={suspensionAutomatic}
@@ -163,7 +166,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
         {suspensionAutomatic && (
           <>
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium text-muted-foreground">Requires Manual Approval</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.requiresManualApproval")}</Label>
               <Switch
                 size="lg"
                 checked={watch("recurring_payment.suspension_requires_manual_approval")}
@@ -174,7 +177,7 @@ export function PaymentSection({ form, disabled }: PaymentSectionProps) {
               />
             </div>
             <div className="flex items-center justify-between">
-              <Label className="text-xs font-medium text-muted-foreground">Requires Executive Approval</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("administration.schema.requiresExecutiveApproval")}</Label>
               <Switch
                 size="lg"
                 checked={watch("recurring_payment.suspension_requires_executive_approval")}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { schemaKeys } from "../../api/schema-queries";
 import { format } from "date-fns";
@@ -31,6 +32,7 @@ import {
 } from "../../api/schema-queries";
 
 export function ApprovalPanel() {
+  const { t } = useTranslation();
   const { approvalPanelOpen, closeApprovalPanel, selectedSchemaId } = useSchemaStore();
   const currentUserId = useAuthStore((s) => s.user?.id ?? "");
   const currentUserName = useAuthStore((s) => s.user?.fullName ?? "");
@@ -155,7 +157,7 @@ export function ApprovalPanel() {
       <SheetContent className="inset-y-8 lg:end-10 start-auto h-full max-h-[calc(100vh-64px)] gap-0 rounded-lg border p-0 sm:max-w-none lg:w-[560px] flex flex-col [&_[data-slot=sheet-close]]:end-5 [&_[data-slot=sheet-close]]:top-4.5 shadow-2xl">
         <SheetHeader className="border-border border-b px-5 py-4">
           <SheetTitle className="font-medium text-xl">
-            {isRollback ? "Rollback" : isDraft ? "Draft" : isInReview ? "In Review" : isRejected ? "Rejected" : "Approval"} — {schema?.name ?? "Schema"}
+            {isRollback ? t("administration.schema.approvalTitleRollback") : isDraft ? t("administration.schema.approvalTitleDraft") : isInReview ? t("administration.schema.approvalTitleInReview") : isRejected ? t("administration.schema.approvalTitleRejected") : t("administration.schema.approvalTitle")} — {schema?.name ?? "Schema"}
           </SheetTitle>
         </SheetHeader>
 
@@ -163,15 +165,15 @@ export function ApprovalPanel() {
           {isLoadingData ? (
             <div className="flex items-center justify-center gap-2 py-20 text-sm text-muted-foreground">
               <div className="size-5 animate-spin rounded-full border-2 border-muted border-t-foreground" />
-              Loading schema...
+              {t("administration.schema.approvalLoading")}
             </div>
           ) : (<>
           {/* Progress — shown when there are decisions (including in-review partial approvals) */}
           {!isRollback && (isApproved || isRejected || (isInReview && decisions.length > 0)) && (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Approval Progress</span>
-                <span className="font-medium">{approvedCount} / {minRequired} required</span>
+                <span className="text-muted-foreground">{t("administration.schema.approvalProgress")}</span>
+                <span className="font-medium">{approvedCount} / {minRequired} {t("administration.schema.approvalRequired")}</span>
               </div>
               <div className="h-2 w-full rounded-full bg-zinc-100 dark:bg-zinc-800">
                 <div className="h-2 rounded-full bg-emerald-500 transition-all" style={{ width: `${progressPercent}%` }} />
@@ -182,7 +184,7 @@ export function ApprovalPanel() {
           {/* Approver decisions list — shown when decisions exist (including partial in-review) */}
           {!isRollback && (isApproved || isRejected || (isInReview && decisions.length > 0)) && (
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-foreground">Approval Decisions</h3>
+              <h3 className="text-sm font-semibold text-foreground">{t("administration.schema.approvalDecisions")}</h3>
               {decisions.length > 0 ? decisions.map((d) => {
                 const isDecisionApproved = d.decision?.toUpperCase() === "APPROVED";
                 const isDecisionRejected = d.decision?.toUpperCase() === "REJECTED";
@@ -222,7 +224,7 @@ export function ApprovalPanel() {
                   </div>
                 );
               }) : (
-                <p className="text-sm text-muted-foreground">No decisions recorded.</p>
+                <p className="text-sm text-muted-foreground">{t("administration.schema.approvalNoDecisions")}</p>
               )}
             </div>
           )}
@@ -231,13 +233,13 @@ export function ApprovalPanel() {
           {isDraft && decisions.some((d) => d.decision?.toUpperCase() === "REJECTED") && (
             <div className="rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50/60 dark:bg-amber-950/20 p-3 space-y-1.5">
               <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
-                Previously Rejected
+                {t("administration.schema.approvalPreviouslyRejected")}
               </p>
               {(() => {
                 const lastReject = [...decisions].reverse().find((d) => d.decision?.toUpperCase() === "REJECTED");
                 return lastReject ? (
                   <p className="text-xs text-foreground/80 italic">
-                    &ldquo;{lastReject.comment || "(no reason given)"}&rdquo; — {lastReject.approver_user_id}
+                    &ldquo;{lastReject.comment || t("administration.schema.approvalNoReason")}&rdquo; — {lastReject.approver_user_id}
                   </p>
                 ) : null;
               })()}
@@ -247,13 +249,13 @@ export function ApprovalPanel() {
           {/* Submit for Review */}
           {canSubmitForReview && (
             <div className="space-y-3 border-t pt-5">
-              <h3 className="text-sm font-semibold text-foreground">Submit for Review</h3>
+              <h3 className="text-sm font-semibold text-foreground">{t("administration.schema.submitForReview")}</h3>
               <p className="text-xs text-muted-foreground">
-                Send this draft version to approvers for review.
+                {t("administration.schema.submitForReviewDesc")}
               </p>
               <div className="space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">
-                  Minimum approvals required
+                  {t("administration.schema.minApprovalsRequired")}
                 </label>
                 <Input
                   type="number"
@@ -284,7 +286,7 @@ export function ApprovalPanel() {
                   },
                 })}
               >
-                <RiSendPlaneLine className="mr-2 size-4" /> Submit for Review
+                <RiSendPlaneLine className="mr-2 size-4" /> {t("administration.schema.submitForReviewBtn")}
               </Button>
             </div>
           )}
@@ -296,21 +298,21 @@ export function ApprovalPanel() {
               fallback={
                 <div className="border-t pt-5">
                   <p className="text-sm text-muted-foreground">
-                    Awaiting approver. You don&apos;t have permission to approve or reject this schema.
+                    {t("administration.schema.awaitingApprover")}
                   </p>
                 </div>
               }
             >
             <div className="space-y-3 border-t pt-5">
-              <h3 className="text-sm font-semibold text-foreground">Your Decision</h3>
+              <h3 className="text-sm font-semibold text-foreground">{t("administration.schema.yourDecision")}</h3>
               {!canDecide ? (
                 <p className="text-sm text-muted-foreground">
-                  {"You have already submitted a decision for this version."}
+                  {t("administration.schema.alreadyDecided")}
                 </p>
               ) : (
                 <>
                   <Textarea
-                    placeholder="Add a comment (optional)..."
+                    placeholder={t("administration.schema.commentPlaceholder")}
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
                     className="min-h-[80px] resize-none"
@@ -334,7 +336,7 @@ export function ApprovalPanel() {
                         }
                       }}
                     >
-                      {addDecision.isPending ? "Submitting..." : "Reject"}
+                      {addDecision.isPending ? t("administration.schema.submitting") : t("administration.schema.reject")}
                     </Button>
                     <Button
                       variant="primary"
@@ -353,7 +355,7 @@ export function ApprovalPanel() {
                         }
                       }}
                     >
-                      {addDecision.isPending ? "Submitting..." : "Approve"}
+                      {addDecision.isPending ? t("administration.schema.submitting") : t("administration.schema.approve")}
                     </Button>
                   </div>
                 </>
@@ -367,10 +369,10 @@ export function ApprovalPanel() {
             <div className="rounded-lg border border-red-200 dark:border-red-900 bg-red-50/50 dark:bg-red-950/20 p-4 space-y-3">
               <div>
                 <p className="text-sm font-medium text-red-700 dark:text-red-400">
-                  Version Rejected
+                  {t("administration.schema.versionRejected")}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Edit the schema and resubmit a new draft for review.
+                  {t("administration.schema.versionRejectedDesc")}
                 </p>
               </div>
               <Button
@@ -382,7 +384,7 @@ export function ApprovalPanel() {
                   useSchemaStore.setState({ approvalPanelOpen: false, schemaSheetOpen: true, form: "edit" });
                 }}
               >
-                <RiEditLine className="mr-2 size-4" /> Edit Schema
+                <RiEditLine className="mr-2 size-4" /> {t("administration.schema.editSchema")}
               </Button>
             </div>
           )}
@@ -391,9 +393,9 @@ export function ApprovalPanel() {
           {isRollback && rollbackVersion && (
             <Can permission="master.manage">
               <div className="space-y-3 border-t border-border/50 pt-4">
-                <p className="text-sm font-semibold">Publish Rollback</p>
+                <p className="text-sm font-semibold">{t("administration.schema.publishRollback")}</p>
                 <p className="text-xs text-muted-foreground">
-                  This version was restored via rollback. It can be published directly without approval.
+                  {t("administration.schema.publishRollbackDesc")}
                 </p>
                 <Button
                   variant="primary"
@@ -401,7 +403,7 @@ export function ApprovalPanel() {
                   disabled={publishVersion.isPending}
                   onClick={() => publishVersion.mutate(rollbackVersion.id)}
                 >
-                  <RiCheckboxCircleLine className="mr-2 size-4" /> Publish Rollback Version
+                  <RiCheckboxCircleLine className="mr-2 size-4" /> {t("administration.schema.publishRollbackBtn")}
                 </Button>
               </div>
             </Can>
@@ -411,12 +413,12 @@ export function ApprovalPanel() {
           <Can permission="master.manage">
             {!isRollback && canPublish && (
               <div className="space-y-3 border-t border-border/50 pt-4">
-                <p className="text-sm font-semibold">Publish Schema</p>
+                <p className="text-sm font-semibold">{t("administration.schema.publishSchema")}</p>
                 <p className="text-xs text-muted-foreground">
-                  All required approvals received. Add a change reason if needed, then publish.
+                  {t("administration.schema.publishSchemaDesc")}
                 </p>
                 <Input
-                  placeholder="Change reason (optional)"
+                  placeholder={t("administration.schema.changeReasonPlaceholder")}
                   value={changeReason}
                   onChange={(e) => setChangeReason(e.target.value)}
                 />
@@ -428,7 +430,7 @@ export function ApprovalPanel() {
                     if (latestDraftVersion) publishVersion.mutate(latestDraftVersion.id);
                   }}
                 >
-                  <RiCheckboxCircleLine className="mr-2 size-4" /> Publish Schema
+                  <RiCheckboxCircleLine className="mr-2 size-4" /> {t("administration.schema.publishSchemaBtn")}
                 </Button>
               </div>
             )}
@@ -438,7 +440,7 @@ export function ApprovalPanel() {
 
         <SheetFooter className="border-border border-t p-5 pb-4">
           <Button variant="ghost" onClick={closeApprovalPanel} className="w-full">
-            Close
+            {t("administration.schema.close")}
           </Button>
         </SheetFooter>
       </SheetContent>

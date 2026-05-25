@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,6 +16,7 @@ import { AuditDetailSheet } from "./detail/audit-detail-sheet";
 import type { AuditLog, AuditLogFilters } from "../types/audit-log";
 
 export function AuditLogPage() {
+  const { t } = useTranslation();
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -33,17 +35,17 @@ export function AuditLogPage() {
       <PageBreadcrumb
         items={[
           {
-            title: "Administration",
+            title: t("administration.auditLogPage.breadcrumbAdmin"),
             path: paths.dashboard.administration.branch.root.getHref(),
           },
-          { title: "Audit Log" },
+          { title: t("administration.auditLogPage.breadcrumbTitle") },
         ]}
       />
 
       <Toolbar className="mt-5 items-start sm:items-center">
         <ToolbarHeading>
           <ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
-            Global Audit Log
+            {t("administration.auditLogPage.title")}
           </ToolbarTitle>
           <div className="mt-2 flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2.5 sm:mt-2.5">
             <Badge
@@ -52,11 +54,11 @@ export function AuditLogPage() {
               className="h-6 w-fit px-2.5 gap-1.5 border-none font-semibold text-xs"
             >
               <ScrollText className="size-3.5" />
-              Immutable · Append-only
+              {t("administration.auditLogPage.badge")}
             </Badge>
             <span className="hidden sm:inline text-muted-foreground/60 text-sm">•</span>
             <span className="text-muted-foreground font-normal text-xs sm:text-sm">
-              Complete history of all administration changes
+              {t("administration.auditLogPage.desc")}
             </span>
           </div>
         </ToolbarHeading>

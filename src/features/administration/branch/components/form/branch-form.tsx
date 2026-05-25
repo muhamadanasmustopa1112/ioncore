@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { RiInformationLine, RiMapPinLine } from "@remixicon/react";
@@ -20,10 +21,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useBranchStore } from "../../store/branch";
 import { useAreaList, useRegionalList } from "../../api/branch-queries";
 import { BranchData, BranchLevel, GeographicPolygon } from "../../types";
-
-// ─── Code Generator ───────────────────────────────────────────────────────────
-
-// ─── Schema ───────────────────────────────────────────────────────────────────
 
 const branchSchema = z
   .object({
@@ -86,8 +83,6 @@ const toPolygonString = (value?: GeographicPolygon | string | null) => {
   }
 };
 
-// ─── Props ────────────────────────────────────────────────────────────────────
-
 interface BranchFormProps {
   branchData?: BranchData | null;
   onSubmit?: (payload: {
@@ -105,9 +100,8 @@ interface BranchFormProps {
   }) => void;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
+  const { t } = useTranslation();
   const formMode = useBranchStore((s) => s.form);
   const storedBranch = useBranchStore((s) => s.selectedBranch);
   const defaultNewType = useBranchStore((s) => s.defaultNewType);
@@ -171,7 +165,6 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
 
   const isSubArea = level === "sub_area";
 
-  // Auto-fill code from name for regional/area (user can override)
   useEffect(() => {
     if (isEditMode || isDetailMode || isSubArea) return;
     const firstWord = name.trim().split(/\s+/)[0] ?? "";
@@ -219,26 +212,26 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
     };
   }, []);
 
-  const levelDisplayName = (l: BranchLevel) =>
-    l === "sub_area" ? "Sub Area" : l.charAt(0).toUpperCase() + l.slice(1);
+  const levelDisplayName = (l: BranchLevel) => {
+    const key = l === "sub_area" ? "subArea" : l;
+    return t(`administration.branch.${key}`);
+  };
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
       <ScrollArea className="flex-1 px-6 py-6">
         <div className="space-y-8 pb-6">
 
-          {/* General Information */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 pb-2 border-b border-border/50">
               <RiInformationLine className="size-4 text-blue-500" />
-              <h3 className="text-sm font-semibold">General Information</h3>
+              <h3 className="text-sm font-semibold">{t("administration.branch.form.generalInformation")}</h3>
             </div>
 
-            {/* Level + Type first */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Branch Level <span className="text-red-500">*</span>
+                  {t("administration.branch.form.branchLevel")} <span className="text-red-500">*</span>
                 </Label>
                 {isDetailMode || isEditMode ? (
                   <Input value={levelDisplayName(level)} disabled />
@@ -252,12 +245,12 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                         onValueChange={(val) => { field.onChange(val as BranchLevel); clearParents(); }}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Level" />
+                          <SelectValue placeholder={t("administration.branch.form.selectLevel")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="regional">Regional</SelectItem>
-                          <SelectItem value="area">Area</SelectItem>
-                          <SelectItem value="sub_area">Sub Area</SelectItem>
+                          <SelectItem value="regional">{t("administration.branch.regional")}</SelectItem>
+                          <SelectItem value="area">{t("administration.branch.area")}</SelectItem>
+                          <SelectItem value="sub_area">{t("administration.branch.subArea")}</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
@@ -267,10 +260,10 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
 
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Branch Type <span className="text-red-500">*</span>
+                  {t("administration.branch.form.branchType")} <span className="text-red-500">*</span>
                 </Label>
                 {isDetailMode ? (
-                  <Input value={watch("type").charAt(0).toUpperCase() + watch("type").slice(1)} disabled />
+                  <Input value={t(`administration.branch.${watch("type")}`)} disabled />
                 ) : (
                   <Controller
                     name="type"
@@ -279,9 +272,9 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                       <Select value={field.value} onValueChange={(v) => { field.onChange(v); clearParents(); }}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="office">Office</SelectItem>
-                          <SelectItem value="noc">NOC</SelectItem>
-                          <SelectItem value="warehouse">Warehouse</SelectItem>
+                          <SelectItem value="office">{t("administration.branch.office")}</SelectItem>
+                          <SelectItem value="noc">{t("administration.branch.noc")}</SelectItem>
+                          <SelectItem value="warehouse">{t("administration.branch.warehouse")}</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
@@ -290,14 +283,13 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
               </div>
             </div>
 
-            {/* Name + Code */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-1">
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Branch Name <span className="text-red-500">*</span>
+                  {t("administration.branch.form.branchName")} <span className="text-red-500">*</span>
                 </Label>
                 <Input
-                  placeholder="e.g. Jakarta Pusat Area"
+                  placeholder={t("administration.branch.form.branchNamePlaceholder")}
                   {...register("name")}
                   disabled={isDetailMode}
                 />
@@ -309,16 +301,16 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
             {(!isSubArea || isEditMode || isDetailMode) && (
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Branch Code {!isEditMode && !isDetailMode && <span className="text-red-500">*</span>}
+                  {t("administration.branch.form.branchCode")} {!isEditMode && !isDetailMode && <span className="text-red-500">*</span>}
                   {!isDetailMode && !isEditMode && (
-                    <span className="ml-2 text-[10px] font-normal text-muted-foreground/60">— max 3 characters, generated from name</span>
+                    <span className="ml-2 text-[10px] font-normal text-muted-foreground/60">{t("administration.branch.form.codeHintAuto")}</span>
                   )}
                   {(isEditMode || isDetailMode) && (
-                    <span className="ml-2 text-[10px] font-normal text-muted-foreground/60">— generated by system</span>
+                    <span className="ml-2 text-[10px] font-normal text-muted-foreground/60">{t("administration.branch.form.codeHintSystem")}</span>
                   )}
                 </Label>
                 <Input
-                  placeholder="e.g. JKT"
+                  placeholder={t("administration.branch.form.branchCodePlaceholder")}
                   {...(!isEditMode && !isDetailMode ? { maxLength: 3 } : {})}
                   {...register("code")}
                   disabled={isDetailMode || isEditMode}
@@ -332,9 +324,9 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-muted-foreground">Status</Label>
+                <Label className="text-xs font-medium text-muted-foreground">{t("administration.branch.form.status")}</Label>
                 {isDetailMode ? (
-                  <Input value={watch("active") ? "Active" : "Inactive"} disabled />
+                  <Input value={watch("active") ? t("administration.branch.form.active") : t("administration.branch.form.inactive")} disabled />
                 ) : (
                   <Controller
                     name="active"
@@ -346,8 +338,8 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                       >
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="true">Active</SelectItem>
-                          <SelectItem value="false">Inactive</SelectItem>
+                          <SelectItem value="true">{t("administration.branch.form.active")}</SelectItem>
+                          <SelectItem value="false">{t("administration.branch.form.inactive")}</SelectItem>
                         </SelectContent>
                       </Select>
                     )}
@@ -356,11 +348,10 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
               </div>
             </div>
 
-            {/* Regional (Parent) */}
             {(isArea || isSubArea) && (
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Regional (Parent) <span className="text-red-500">*</span>
+                  {t("administration.branch.form.regionalParent")} <span className="text-red-500">*</span>
                 </Label>
                 {isDetailMode ? (
                   <Input
@@ -384,12 +375,12 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                         }}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={selectedBranch?._regionalName ?? "Select Regional Branch"} />
+                          <SelectValue placeholder={selectedBranch?._regionalName ?? t("administration.branch.form.selectRegional")} />
                         </SelectTrigger>
                         <SelectContent>
                           {regionals.length === 0 ? (
                             <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-                              No regional branches available for type &quot;{branchType}&quot;
+                              {t("administration.branch.form.noRegionalAvailable")} &quot;{branchType}&quot;
                             </div>
                           ) : (
                             regionals.map((r) => (
@@ -407,11 +398,10 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
               </div>
             )}
 
-            {/* Area (Parent) */}
             {isSubArea && (
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  Area (Parent) <span className="text-red-500">*</span>
+                  {t("administration.branch.form.areaParent")} <span className="text-red-500">*</span>
                 </Label>
                 {isDetailMode ? (
                   <Input
@@ -434,13 +424,13 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                       >
                         <SelectTrigger>
                           <SelectValue
-                            placeholder={!regionalId ? "Select Regional first" : (selectedBranch?._areaName ?? "Select Area Branch")}
+                            placeholder={!regionalId ? t("administration.branch.form.selectRegionalFirst") : (selectedBranch?._areaName ?? t("administration.branch.form.selectArea"))}
                           />
                         </SelectTrigger>
                         <SelectContent>
                           {areas.length === 0 ? (
                             <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-                              No area branches available{regionalId ? ` for type "${branchType}"` : ""}
+                              {t("administration.branch.form.noAreaAvailable")}{regionalId ? ` for type &quot;${branchType}&quot;` : ""}
                             </div>
                           ) : (
                             areas.map((a) => (
@@ -459,16 +449,15 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
             )}
           </div>
 
-          {/* Location & Geographic Boundary */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 pb-1 border-b border-border/50">
               <RiMapPinLine className="size-4 text-emerald-500" />
-              <h3 className="text-sm font-semibold">Location & Geographic Boundary</h3>
+              <h3 className="text-sm font-semibold">{t("administration.branch.form.locationBoundary")}</h3>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">Address</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("administration.branch.form.address")}</Label>
               <Textarea
-                placeholder="Enter branch address..."
+                placeholder={t("administration.branch.form.addressPlaceholder")}
                 className="min-h-[72px] resize-none"
                 {...register("address")}
                 disabled={isDetailMode}
@@ -484,8 +473,8 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                 readOnly={isDetailMode}
               />
               <Label className="text-xs font-medium text-muted-foreground">
-                Coverage Polygon
-                <span className="ml-1.5 text-muted-foreground/60 font-normal">(GeoJSON Polygon — for address-to-area resolution)</span>
+                {t("administration.branch.form.coveragePolygon")}
+                <span className="ml-1.5 text-muted-foreground/60 font-normal">{t("administration.branch.form.polygonHint")}</span>
               </Label>
               {errors.geographic_polygon && (
                 <p className="text-xs text-destructive">{errors.geographic_polygon.message}</p>

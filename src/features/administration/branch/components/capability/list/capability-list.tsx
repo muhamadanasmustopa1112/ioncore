@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getCoreRowModel,
   getFilteredRowModel,
@@ -26,13 +27,14 @@ import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useCapabilityList } from "../../../api/capability-queries";
-import { columns } from "./table/columns";
+import { getCapabilityColumns } from "./table/columns";
 
 interface CapabilityListProps {
   branchId: string;
 }
 
 export function CapabilityList({ branchId }: CapabilityListProps) {
+  const { t } = useTranslation();
   const { data: capabilities = [], isLoading, isError, refetch } = useCapabilityList(branchId);
 
   const [search, setSearch] = useState("");
@@ -48,6 +50,8 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
         c.description.toLowerCase().includes(q)
     );
   }, [capabilities, search]);
+
+  const columns = useMemo(() => getCapabilityColumns(t), [t]);
 
   const table = useReactTable({
     columns,
@@ -89,21 +93,21 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
           <div className="flex flex-col items-center gap-2 py-4">
             <AlertCircle className="size-8 text-destructive opacity-70" />
             <p className="text-sm font-medium text-destructive">
-              Failed to load capabilities
+              {t("administration.branch.capability.failedToLoad")}
             </p>
             <p className="text-xs text-muted-foreground">
-              Something went wrong. Please try again.
+              {t("administration.branch.capability.somethingWentWrong")}
             </p>
             <button
               onClick={() => refetch()}
               className="mt-1 flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"
             >
               <RefreshCw className="size-3.5" />
-              Retry
+              {t("administration.branch.capability.retry")}
             </button>
           </div>
         ) : (
-          "No capabilities found"
+          t("administration.branch.capability.noCapabilitiesFound")
         )
       }
     >
@@ -113,7 +117,7 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
             <div className="relative w-full sm:w-56">
               <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
               <Input
-                placeholder="Search capabilities..."
+                placeholder={t("administration.branch.capability.searchCapabilities")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full ps-9"
@@ -136,7 +140,7 @@ export function CapabilityList({ branchId }: CapabilityListProps) {
               trigger={
                 <Button variant="outline">
                   <Settings2 />
-                  View
+                  {t("administration.branch.capability.view")}
                 </Button>
               }
             />

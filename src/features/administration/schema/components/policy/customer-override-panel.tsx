@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from "lucide-react";
 import {
@@ -33,13 +34,19 @@ const SCHEMA_TYPE_COLORS: Record<string, "info" | "success" | "warning" | "destr
   COMMISSION: "destructive",
 };
 
-const OP_STYLE: Record<string, { label: string; class: string }> = {
-  replace: { label: "Changed", class: "bg-blue-500/10 text-blue-600" },
-  add:     { label: "Added",   class: "bg-green-500/10 text-green-600" },
-  remove:  { label: "Removed", class: "bg-red-500/10 text-red-600" },
+const OP_STYLE_CLASSES: Record<string, string> = {
+  replace: "bg-blue-500/10 text-blue-600",
+  add:     "bg-green-500/10 text-green-600",
+  remove:  "bg-red-500/10 text-red-600",
 };
 
 function DiffRow({ op }: { op: ContentDiffOp }) {
+  const { t } = useTranslation();
+  const OP_STYLE: Record<string, { label: string; class: string }> = {
+    replace: { label: t("administration.schema.overrideOpChanged"), class: OP_STYLE_CLASSES.replace },
+    add:     { label: t("administration.schema.overrideOpAdded"),   class: OP_STYLE_CLASSES.add },
+    remove:  { label: t("administration.schema.overrideOpRemoved"), class: OP_STYLE_CLASSES.remove },
+  };
   const style = OP_STYLE[op.op] ?? { label: op.op, class: "bg-muted text-muted-foreground" };
   return (
     <div className="grid grid-cols-[1fr_auto_auto_auto] items-center gap-3 rounded-lg bg-muted/40 px-3 py-2 text-xs">
@@ -56,15 +63,16 @@ function DiffRow({ op }: { op: ContentDiffOp }) {
 }
 
 function DiffPanel({ schemaId }: { schemaId: string }) {
+  const { t } = useTranslation();
   const { data, isFetching } = useCustomerSchemaDiff(schemaId, true);
   const ops = data?.data.diff ?? [];
 
   if (isFetching) return (
     <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
-      <RiLoader4Line className="size-3.5 animate-spin" />Loading diff…
+      <RiLoader4Line className="size-3.5 animate-spin" />{t("administration.schema.overrideDiffLoading")}
     </div>
   );
-  if (ops.length === 0) return <p className="text-xs text-muted-foreground py-2">No differences.</p>;
+  if (ops.length === 0) return <p className="text-xs text-muted-foreground py-2">{t("administration.schema.overrideDiffNone")}</p>;
   return (
     <div className="space-y-1.5">
       {ops.map((op, i) => <DiffRow key={`${op.path}-${i}`} op={op} />)}
@@ -73,6 +81,7 @@ function DiffPanel({ schemaId }: { schemaId: string }) {
 }
 
 function SchemaRow({ schema }: { schema: CustomerSchema }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const { openOverrideSheet } = useSchemaStore();
 
@@ -93,25 +102,25 @@ function SchemaRow({ schema }: { schema: CustomerSchema }) {
           )}
           {schema.is_overridden && (
             <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-yellow-500/10 text-yellow-600 shrink-0">
-              Overridden
+              {t("administration.schema.overrideTagOverridden")}
             </span>
           )}
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <Button variant="ghost" size="sm" className="h-6 text-xs px-2"
             onClick={() => setExpanded((v) => !v)}>
-            {expanded ? "Hide" : "Diff"}
+            {expanded ? t("administration.schema.overrideDiffHide") : t("administration.schema.overrideDiffShow")}
           </Button>
           <Button variant="outline" size="sm" className="h-6 text-xs px-2"
             onClick={() => openOverrideSheet(schema)}>
-            Override
+            {t("administration.schema.overrideBtn")}
           </Button>
         </div>
       </div>
 
       {expanded && (
         <div className="pb-3">
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Changes</p>
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">{t("administration.schema.overrideChanges")}</p>
           <DiffPanel schemaId={schema.id} />
         </div>
       )}
@@ -120,6 +129,7 @@ function SchemaRow({ schema }: { schema: CustomerSchema }) {
 }
 
 function CustomerCard({ group }: { group: CustomerGrouped }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const overriddenCount = group.customer_schemas.filter((s) => s.is_overridden).length;
 
@@ -145,11 +155,11 @@ function CustomerCard({ group }: { group: CustomerGrouped }) {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <Badge variant="secondary" appearance="light" className="text-[11px] px-2">
-            {group.customer_schema_count} schema{group.customer_schema_count !== 1 ? "s" : ""}
+            {group.customer_schema_count} {t("administration.schema.overrideSchemas")}{group.customer_schema_count !== 1 ? "s" : ""}
           </Badge>
           {overriddenCount > 0 && (
             <Badge variant="warning" appearance="light" className="text-[11px] px-2">
-              {overriddenCount} overridden
+              {overriddenCount} {t("administration.schema.overrideOverridden")}
             </Badge>
           )}
           {expanded ? (
@@ -172,6 +182,7 @@ function CustomerCard({ group }: { group: CustomerGrouped }) {
 }
 
 export function CustomerOverridePanel() {
+  const { t } = useTranslation();
   const [params, setParams] = useQueryStates({
     co_page:   parseAsInteger.withDefault(1),
     co_size:   parseAsInteger.withDefault(10),
@@ -204,15 +215,14 @@ export function CustomerOverridePanel() {
   return (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        Customer-specific schema overrides. Applied on top of the base schema at runtime for
-        customers with negotiated or special contract terms.
+        {t("administration.schema.overrideDesc")}
       </p>
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="relative w-full sm:w-64">
           <RiSearchLine className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
-            placeholder="Search customer..."
+            placeholder={t("administration.schema.overrideSearchPlaceholder")}
             className="pl-9 h-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -223,12 +233,12 @@ export function CustomerOverridePanel() {
       {isLoading ? (
         <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
           <RiLoader4Line className="size-4 animate-spin" />
-          Loading customer schemas...
+          {t("administration.schema.overrideLoading")}
         </div>
       ) : isError ? (
-        <p className="py-12 text-center text-sm text-destructive">Failed to load customer schemas.</p>
+        <p className="py-12 text-center text-sm text-destructive">{t("administration.schema.overrideError")}</p>
       ) : groups.length === 0 ? (
-        <p className="py-12 text-center text-sm text-muted-foreground">No customer schemas found.</p>
+        <p className="py-12 text-center text-sm text-muted-foreground">{t("administration.schema.overrideEmpty")}</p>
       ) : (
         <div className="space-y-3">
           {groups.map((group) => (
@@ -240,7 +250,7 @@ export function CustomerOverridePanel() {
       {!isLoading && !isError && total > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 pt-2 border-t border-border">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Rows per page</span>
+            <span>{t("administration.schema.overrideRowsPerPage")}</span>
             <Select value={String(size)} onValueChange={(v) => setSize(Number(v))}>
               <SelectTrigger className="w-fit" size="sm">
                 <SelectValue />
@@ -255,7 +265,7 @@ export function CustomerOverridePanel() {
 
           <div className="flex flex-wrap items-center justify-end gap-2">
             <span className="text-sm text-muted-foreground text-nowrap">
-              {(page - 1) * size + 1}–{Math.min(page * size, total)} of {total}
+              {(page - 1) * size + 1}–{Math.min(page * size, total)} {t("administration.schema.overrideOf")} {total}
             </span>
             {totalPages > 1 && (
               <div className="flex items-center gap-1">

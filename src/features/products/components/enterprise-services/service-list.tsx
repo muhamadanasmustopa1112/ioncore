@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getCoreRowModel, getSortedRowModel, useReactTable, RowSelectionState } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
 import { RiAddLine } from "@remixicon/react";
@@ -14,10 +15,11 @@ import { DataGridTable } from "@/components/ui/data-grid-table";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useAdminEnterpriseServices, useDeleteEnterpriseService } from "../../api/products-queries";
 import type { EnterpriseService } from "../../types/products";
-import { getServiceColumns } from "./service-columns";
+import { useServiceColumns } from "./service-columns";
 import { ServiceSheet } from "./service-sheet";
 
 export function ServiceList() {
+  const { t } = useTranslation();
   const [filter, setFilter] = useQueryStates({
     search: parseAsString,
     page: parseAsInteger.withDefault(1),
@@ -50,11 +52,7 @@ export function ServiceList() {
     setFilter({ page: next.page, limit: next.limit });
   };
 
-  const columns = useMemo(
-    () => getServiceColumns(openEdit, openDetail, (id) => deleteService.mutate(id)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
+  const columns = useServiceColumns(openEdit, openDetail, (id) => deleteService.mutate(id));
 
   const table = useReactTable({
     columns,
@@ -82,7 +80,7 @@ export function ServiceList() {
                 <div className="relative flex-1 min-w-[150px]">
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
-                    placeholder="Search service..."
+                    placeholder={t("administration.productsPage.serviceSearch")}
                     value={filter.search || ""}
                     onChange={(e) => setFilter({ search: e.target.value || null, page: 1 })}
                     className="ps-9 w-full"
@@ -94,7 +92,7 @@ export function ServiceList() {
                   )}
                 </div>
                 <Button variant="primary" className="h-9 px-4 text-sm font-semibold" onClick={openNew}>
-                  <RiAddLine className="size-4" /> Add Service
+                  <RiAddLine className="size-4" /> {t("administration.productsPage.serviceAddBtn")}
                 </Button>
               </div>
             </CardHeading>

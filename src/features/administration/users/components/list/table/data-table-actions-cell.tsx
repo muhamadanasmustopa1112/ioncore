@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslation } from "react-i18next";
 import { RiEditLine, RiEyeLine, RiLockLine, RiLockUnlockLine, RiUserFollowLine, RiUserForbidLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -15,6 +18,7 @@ import { UserData } from "../../../types";
 import { useUserStore } from "../../../store/user";
 
 export function ActionsCell({ row }: { row: Row<UserData> }) {
+  const { t } = useTranslation();
   const { openUserFormSheet } = useUserStore();
   const { mutate: updateStatus, isPending } = useUpdateUserStatus();
   const { mutate: revokeSessions } = useRevokeUserSessions();
@@ -28,18 +32,17 @@ export function ActionsCell({ row }: { row: Row<UserData> }) {
       { id, payload },
       {
         onSuccess: () => {
-          toast.success("User status updated");
-          // If deactivated, automatically revoke all sessions
+          toast.success(t("administration.users.userStatusUpdated"));
           if (payload.is_active === false) {
             revokeSessions(id, {
-              onSuccess: () => toast.info("All active sessions revoked"),
+              onSuccess: () => toast.info(t("administration.users.sessionsRevoked")),
             });
           }
         },
         onError: (err: unknown) =>
           toast.error(
             (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-            "Failed to update status",
+            t("administration.users.failedToUpdate"),
           ),
       },
     );
@@ -55,11 +58,11 @@ export function ActionsCell({ row }: { row: Row<UserData> }) {
       <DropdownMenuContent side="bottom" align="end">
         <DropdownMenuItem className="cursor-pointer" onClick={() => openUserFormSheet("edit", row.original)}>
           <RiEditLine />
-          Edit
+          {t("administration.users.edit")}
         </DropdownMenuItem>
         <DropdownMenuItem className="cursor-pointer" onClick={() => openUserFormSheet("details", row.original)}>
           <RiEyeLine />
-          Detail
+          {t("administration.users.detail")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {isActive ? (
@@ -68,7 +71,7 @@ export function ActionsCell({ row }: { row: Row<UserData> }) {
             onClick={() => handleStatusChange({ is_active: false })}
           >
             <RiUserForbidLine />
-            Deactivate
+            {t("administration.users.deactivate")}
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem
@@ -76,16 +79,15 @@ export function ActionsCell({ row }: { row: Row<UserData> }) {
             onClick={() => handleStatusChange({ is_active: true, is_locked: false })}
           >
             <RiUserFollowLine />
-            Activate
+            {t("administration.users.activate")}
           </DropdownMenuItem>
         )}
         <DropdownMenuItem
-          variant="destructive"
           className="cursor-pointer"
           onClick={() => handleStatusChange({ is_locked: !isLocked })}
         >
           {isLocked ? <RiLockUnlockLine /> : <RiLockLine />}
-          {isLocked ? "Unlock" : "Lock"}
+          {isLocked ? t("administration.users.unlock") : t("administration.users.lock")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +24,7 @@ import { SchemaBuilder } from "./builder/schema-builder";
 import { SCHEMA_TYPE_LABEL } from "../types/schema-type-constants";
 
 export function SchemaFormSheet() {
+  const { t } = useTranslation();
   const {
     schemaSheetOpen,
     closeSchemaSheet,
@@ -44,20 +46,20 @@ export function SchemaFormSheet() {
   const isOverrideMode = form === "override" || form === "view_override";
   const isViewOverrideMode = form === "view_override";
   const label = activeSchemaType
-    ? `${SCHEMA_TYPE_LABEL[activeSchemaType.toUpperCase()] ?? activeSchemaType} Schema`
-    : "Schema";
+    ? `${SCHEMA_TYPE_LABEL[activeSchemaType.toUpperCase()] ?? activeSchemaType} ${t("administration.schema.sheetTitleSuffix")}`
+    : t("administration.schema.sheetTitleSuffix");
 
   const title = isNewMode
-    ? `Create ${label}`
+    ? `${t("administration.schema.sheetTitleCreate")} ${label}`
     : isCloneMode
-      ? `Clone ${label}`
+      ? `${t("administration.schema.sheetTitleClone")} ${label}`
       : form === "edit"
-        ? `Edit ${label} (Draft)`
+        ? `${t("administration.schema.sheetTitleEdit")} ${label} (Draft)`
         : form === "override"
-          ? `Override ${label}`
+          ? `${t("administration.schema.sheetTitleOverride")} ${label}`
           : isViewOverrideMode
-            ? `View Override — ${label}`
-            : `${label} Details`;
+            ? `${t("administration.schema.sheetTitleViewOverride")} ${label}`
+            : `${label} ${t("administration.schema.sheetTitleDetails")}`;
 
   function handleConfirmOverride() {
     confirmOverride();
@@ -90,18 +92,18 @@ export function SchemaFormSheet() {
           </SheetBody>
           <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">
             <Button variant="ghost" onClick={closeSchemaSheet}>
-              Close
+              {t("administration.schema.sheetClose")}
             </Button>
             <div className="flex-1" />
             {!isDetailMode && (
               <>
                 <Button variant="outline" onClick={closeSchemaSheet} className="mr-3">
-                  Cancel
+                  {t("administration.schema.sheetCancel")}
                 </Button>
                 {form === "edit" && (
                   <>
                     <Button variant="outline" onClick={() => formSubmitter?.()} className="mr-3" disabled={sheetLoading}>
-                      Save as Draft
+                      {t("administration.schema.sheetSaveAsDraft")}
                     </Button>
                     <Button
                       variant="primary"
@@ -111,7 +113,7 @@ export function SchemaFormSheet() {
                         formSubmitter?.();
                       }}
                     >
-                      Submit for Approval
+                      {t("administration.schema.sheetSubmitApproval")}
                     </Button>
                   </>
                 )}
@@ -122,7 +124,7 @@ export function SchemaFormSheet() {
                     disabled={sheetLoading}
                     onClick={() => formSubmitter?.()}
                   >
-                    {isCloneMode ? "Create Clone" : "Create Schema"}
+                    {isCloneMode ? t("administration.schema.sheetCreateClone") : t("administration.schema.sheetCreateSchema")}
                   </Button>
                 )}
                 {isOverrideMode && (
@@ -132,7 +134,7 @@ export function SchemaFormSheet() {
                     disabled={sheetLoading}
                     onClick={() => formSubmitter?.()}
                   >
-                    Save Override
+                    {t("administration.schema.sheetSaveOverride")}
                   </Button>
                 )}
               </>
@@ -144,17 +146,17 @@ export function SchemaFormSheet() {
       <AlertDialog open={overrideConfirmOpen} onOpenChange={(open) => !open && closeOverrideConfirm()}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Override Changes</AlertDialogTitle>
+            <AlertDialogTitle>{t("administration.schema.confirmOverrideTitle")}</AlertDialogTitle>
           </AlertDialogHeader>
 
           {overrideChanges.length === 0 ? (
-            <p className="text-sm text-muted-foreground px-1">No changes detected.</p>
+            <p className="text-sm text-muted-foreground px-1">{t("administration.schema.confirmOverrideNoChanges")}</p>
           ) : (
             <div className="rounded-lg border border-border overflow-hidden text-xs">
               <div className="grid grid-cols-3 bg-muted/60 px-3 py-2 font-semibold text-muted-foreground uppercase tracking-wide text-[10px]">
-                <span>Field</span>
-                <span>Before</span>
-                <span>After</span>
+                <span>{t("administration.schema.confirmOverrideField")}</span>
+                <span>{t("administration.schema.confirmOverrideBefore")}</span>
+                <span>{t("administration.schema.confirmOverrideAfter")}</span>
               </div>
               <div className="divide-y divide-border max-h-64 overflow-y-auto">
                 {overrideChanges.map((c) => (
@@ -169,9 +171,9 @@ export function SchemaFormSheet() {
           )}
 
           <AlertDialogFooter className="mt-2">
-            <AlertDialogCancel onClick={closeOverrideConfirm}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={closeOverrideConfirm}>{t("administration.schema.confirmOverrideCancel")}</AlertDialogCancel>
             <Button variant="primary" onClick={handleConfirmOverride}>
-              Confirm & Save
+              {t("administration.schema.confirmOverrideSave")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
