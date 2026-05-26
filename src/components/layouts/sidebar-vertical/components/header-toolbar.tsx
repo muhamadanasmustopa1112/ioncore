@@ -40,8 +40,10 @@ import { Badge } from "@/components/ui/badge";
 import { ConfigSelector } from "@/components/shared/dialogs/config-selector";
 import { NotificationPopover } from "@/features/administration/notification/components/notification-popover";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useTranslation } from "react-i18next";
 
 export function HeaderToolbar() {
+  const { t } = useTranslation();
   const { isMobile } = useLayout();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
@@ -196,13 +198,13 @@ export function HeaderToolbar() {
             <DropdownMenuItem asChild className="py-2.5">
               <Link href="/profile" className="flex items-center gap-2 w-full">
                 <User className="size-4 opacity-70" />
-                <span className="font-medium">My Profile</span>
+                <span className="font-medium">{t("userMenu.myProfile")}</span>
               </Link>
             </DropdownMenuItem>
 
             <DropdownMenuItem className="py-2.5">
               <Settings className="size-4 opacity-70" />
-              <span className="font-medium">Settings</span>
+              <span className="font-medium">{t("userMenu.settings")}</span>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
@@ -213,14 +215,14 @@ export function HeaderToolbar() {
               ) : (
                 <Sun className="size-4 opacity-70" />
               )}
-              <span className="font-medium">{theme === "light" ? "Dark mode" : "Light mode"}</span>
+              <span className="font-medium">{theme === "light" ? t("userMenu.darkMode") : t("userMenu.lightMode")}</span>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={handleLogout} className="py-2.5 text-destructive focus:text-destructive focus:bg-destructive/10">
               <LogOut className="size-4" />
-              <span className="font-bold">Sign out</span>
+              <span className="font-bold">{t("userMenu.signOut")}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

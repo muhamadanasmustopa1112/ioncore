@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ interface DataGridPaginationProps {
 }
 
 function DataGridPagination(props: DataGridPaginationProps) {
+  const { t } = useTranslation();
   const { table, recordCount, isLoading } = useDataGrid();
   const { setFilter, filter } = props
 
@@ -162,7 +164,7 @@ function DataGridPagination(props: DataGridPaginationProps) {
           mergedProps?.sizesSkeleton
         ) : (
           <>
-            <div className="text-muted-foreground text-sm">Rows per page</div>
+            <div className="text-muted-foreground text-sm">{t("common.rowsPerPage")}</div>
             <Select
               value={`${pageSize}`}
               indicatorPosition="right"

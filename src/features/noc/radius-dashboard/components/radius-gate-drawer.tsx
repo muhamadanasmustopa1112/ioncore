@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslation } from "react-i18next";
 import {
   Sheet,
   SheetContent,
@@ -28,6 +29,7 @@ export function RadiusGateDrawer({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const { t } = useTranslation();
   const expiredCount = GATE_ALERTS.filter((a) => a.status === "EXPIRED").length;
   const retryCount = RETRY_QUEUE.length;
 
@@ -37,10 +39,10 @@ export function RadiusGateDrawer({
         <SheetHeader className="p-6 border-b bg-background shrink-0">
           <SheetTitle className="flex items-center gap-2 text-xl font-black text-on-surface">
             <RiAlarmWarningLine className="size-6 text-amber-500" />
-            Radius Gates & Alerts
+            {t("radius.gateAlertsTitle")}
           </SheetTitle>
           <SheetDescription className="text-muted-foreground">
-            Monitor temporary credentials, expiring windows, and pending provisioning queues.
+            {t("radius.gateAlertsDesc")}
           </SheetDescription>
         </SheetHeader>
 
@@ -51,16 +53,16 @@ export function RadiusGateDrawer({
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <RiAlarmWarningLine className="size-4" />
-                  Expiry Alerts
+                  {t("radius.expiryAlerts")}
                 </h3>
                 <Badge variant="destructive" className="font-mono text-xs">
-                  {expiredCount} Active
+                  {expiredCount} {t("radius.active")}
                 </Badge>
               </div>
 
               {GATE_ALERTS.length === 0 ? (
                 <div className="p-8 text-center text-slate-400 italic bg-white dark:bg-slate-900 rounded-xl border border-dashed">
-                  No active gate alerts
+                  {t("radius.noActiveAlerts")}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -76,16 +78,16 @@ export function RadiusGateDrawer({
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
                   <RiRefreshLine className="size-4" />
-                  Provisioning Retry Queue
+                  {t("radius.provisioningRetryQueue")}
                 </h3>
                 <Badge variant={retryCount > 0 ? "warning" : "secondary"} appearance="light" className="font-mono text-xs">
-                  {retryCount} Queued
+                  {retryCount} {t("radius.queued")}
                 </Badge>
               </div>
 
               {RETRY_QUEUE.length === 0 ? (
                 <div className="p-8 text-center text-slate-400 italic bg-white dark:bg-slate-900 rounded-xl border border-dashed">
-                  Retry queue is clear
+                  {t("radius.retryQueueClear")}
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -103,6 +105,7 @@ export function RadiusGateDrawer({
 }
 
 function AlertCard({ alert }: { alert: GateAlert }) {
+  const { t } = useTranslation();
   const isExpired = alert.status === "EXPIRED";
 
   return (
@@ -116,10 +119,10 @@ function AlertCard({ alert }: { alert: GateAlert }) {
                 {alert.status}
               </Badge>
             </div>
-            <p className="text-xs text-slate-500">Tech: <span className="font-semibold text-slate-700 dark:text-slate-300">{alert.technicianName}</span></p>
+            <p className="text-xs text-slate-500">{t("radius.tech")}: <span className="font-semibold text-slate-700 dark:text-slate-300">{alert.technicianName}</span></p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-0.5">Time</p>
+            <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-0.5">{t("radius.time")}</p>
             <p className="text-xs font-mono font-medium text-slate-600 dark:text-slate-300">{alert.expiredAt}</p>
           </div>
         </div>
@@ -130,10 +133,10 @@ function AlertCard({ alert }: { alert: GateAlert }) {
         {isExpired && (
           <div className="mt-4 flex gap-2">
             <Button variant="primary" size="sm" className="w-full text-[10px] h-8">
-              Verify BAST
+              {t("radius.verifyBast")}
             </Button>
             <Button variant="outline" size="sm" className="w-full text-[10px] h-8 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950">
-              Revoke Forcefully
+              {t("radius.revokeForcefully")}
             </Button>
           </div>
         )}
@@ -143,6 +146,7 @@ function AlertCard({ alert }: { alert: GateAlert }) {
 }
 
 function RetryCard({ item }: { item: RetryQueueItem }) {
+  const { t } = useTranslation();
   return (
     <Card className="border shadow-sm bg-white dark:bg-slate-900 rounded-xl overflow-hidden">
       <CardContent className="p-4">
@@ -154,17 +158,17 @@ function RetryCard({ item }: { item: RetryQueueItem }) {
                 {item.status.replace("_", " ")}
               </Badge>
             </div>
-            <p className="text-xs text-slate-500">Tech: <span className="font-semibold text-slate-700 dark:text-slate-300">{item.technicianName}</span></p>
+            <p className="text-xs text-slate-500">{t("radius.tech")}: <span className="font-semibold text-slate-700 dark:text-slate-300">{item.technicianName}</span></p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-0.5">Attempt</p>
+            <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-0.5">{t("radius.attempt")}</p>
             <p className="text-xs font-mono font-bold text-amber-600 dark:text-amber-500">{item.attempts} / 5</p>
           </div>
         </div>
         <div className="mt-3 p-2.5 rounded-lg text-xs flex items-start gap-2 bg-amber-50 dark:bg-amber-950/20 text-amber-800 dark:text-amber-400 border border-amber-100 dark:border-amber-900/30">
           <RiTimeLine className="size-4 shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold mb-0.5">Awaiting Retry</p>
+            <p className="font-semibold mb-0.5">{t("radius.awaitingRetry")}</p>
             <p>{item.errorMessage}</p>
           </div>
         </div>

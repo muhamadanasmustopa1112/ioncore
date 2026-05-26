@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   useReactTable,
   getCoreRowModel,
@@ -32,7 +33,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { RiHistoryLine } from "@remixicon/react";
 
-import { radiusLogColumns } from "./columns";
+import { useRadiusLogColumns } from "./columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { useRadiusDashboardStore } from "../../store/use-radius-dashboard-store";
 
@@ -47,6 +48,7 @@ import {
 } from "@/components/ui/sheet";
 
 export function RadiusLiveLogTable() {
+  const { t } = useTranslation();
   const { logs, isLoading } = useRadiusDashboardStore();
 
   const [filter, setFilter] = useQueryStates({
@@ -85,7 +87,7 @@ export function RadiusLiveLogTable() {
     return filteredLogs.slice(startIndex, endIndex);
   }, [filteredLogs, filter.page, filter.limit]);
 
-  const columns = useMemo(() => radiusLogColumns, []);
+  const columns = useRadiusLogColumns();
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
@@ -124,8 +126,8 @@ export function RadiusLiveLogTable() {
       setIsSubmitting(false);
       setSuccessMessage(
         actionType === "retry"
-          ? `AAA Re-Authentication command (CoA / Disconnect) sent successfully for ${selectedLog.username}. Session re-authenticated.`
-          : `Disconnect-Request (PoD) packet sent successfully for ${selectedLog.username}. Session successfully revoked.`
+          ? `AAA Re-Authentication command (CoA / Disconnect) sent successfully for ${selectedLog?.username}. Session re-authenticated.`
+          : `Disconnect-Request (PoD) packet sent successfully for ${selectedLog?.username}. Session successfully revoked.`
       );
     }, 1000);
   };
@@ -159,7 +161,7 @@ export function RadiusLiveLogTable() {
                 <RiHistoryLine className="size-4 text-primary" />
               </div>
               <CardHeading className="text-sm font-black uppercase tracking-widest text-foreground">
-                Live Authentication Logs
+                {t("radius.liveAuthLogs")}
               </CardHeading>
             </div>
 
@@ -170,14 +172,14 @@ export function RadiusLiveLogTable() {
                     <CollapsibleTrigger asChild>
                       <Button variant="outline" size="sm" className="h-10 rounded-xl px-4 font-bold border-2">
                         <Filter className="size-3.5" />
-                        Filter
+                        {t("radius.filter")}
                       </Button>
                     </CollapsibleTrigger>
 
                     <div className="relative">
                       <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                       <Input
-                        placeholder="Search Logs..."
+                        placeholder={t("radius.searchLogs")}
                         value={filter.search || ""}
                         onChange={(e) =>
                           setFilter({ ...filter, search: e.target.value })
@@ -205,7 +207,7 @@ export function RadiusLiveLogTable() {
             <Collapsible open={openFilter}>
               <CollapsibleContent className="border-t border-border/50 mt-4 py-4">
                 <div className="text-xs font-bold text-muted-foreground bg-muted/20 p-4 rounded-2xl border-2 border-dashed border-border/50 text-center">
-                  Advanced log filters (NAS Client, MAC Address, Reason) will be available soon.
+                  {t("radius.advancedFilters")}
                 </div>
               </CollapsibleContent>
             </Collapsible>
@@ -234,10 +236,10 @@ export function RadiusLiveLogTable() {
           <SheetHeader className="pb-6 border-b border-border/50">
             <SheetTitle className="text-lg font-black tracking-widest text-foreground flex items-center gap-2">
               <ShieldAlert className="size-5 text-primary" />
-              SESSION CONTROL
+              {t("radius.sessionControl")}
             </SheetTitle>
             <SheetDescription className="text-xs text-muted-foreground font-medium mt-1">
-              Troubleshoot subscriber logs and execute AAA re-auth or revocation directly to NAS clients.
+              {t("radius.sessionControlDesc")}
             </SheetDescription>
           </SheetHeader>
 
@@ -247,7 +249,7 @@ export function RadiusLiveLogTable() {
                 {/* Subscriber Log Detail Card */}
                 <div className="p-4 rounded-2xl bg-muted/30 border border-border/50 space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Subscriber Status</span>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">{t("radius.subscriberStatus")}</span>
                     <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-1 rounded-md ${
                       selectedLog.status === "success" 
                         ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" 
@@ -259,24 +261,24 @@ export function RadiusLiveLogTable() {
                   
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground font-medium">Username:</span>
+                      <span className="text-muted-foreground font-medium">{t("radius.username")}:</span>
                       <span className="font-bold text-foreground font-mono">{selectedLog.username}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground font-medium">MAC Address:</span>
+                      <span className="text-muted-foreground font-medium">{t("radius.macAddress")}:</span>
                       <span className="font-mono text-muted-foreground">{selectedLog.callingStationId}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground font-medium">NAS Client IP:</span>
+                      <span className="text-muted-foreground font-medium">{t("radius.nasClientIp")}:</span>
                       <span className="font-mono text-muted-foreground">{selectedLog.nasIp} <span className="text-[10px] text-muted-foreground/60">(Port: {selectedLog.nasPort})</span></span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground font-medium">Log Timestamp:</span>
+                      <span className="text-muted-foreground font-medium">{t("radius.logTimestamp")}:</span>
                       <span className="text-muted-foreground">{selectedLog.timestamp}</span>
                     </div>
                     {selectedLog.reason && (
                       <div className="flex justify-between pt-1 border-t border-dashed border-border/50">
-                        <span className="text-rose-500 font-bold">Failure Reason:</span>
+                        <span className="text-rose-500 font-bold">{t("radius.failureReason")}:</span>
                         <span className="text-rose-500 font-semibold">{selectedLog.reason}</span>
                       </div>
                     )}
@@ -290,24 +292,24 @@ export function RadiusLiveLogTable() {
                       <CheckCircle2 className="size-12 text-emerald-500" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-extrabold text-emerald-700 uppercase tracking-wider">Command Dispatched</h4>
+                      <h4 className="text-sm font-extrabold text-emerald-700 uppercase tracking-wider">{t("radius.commandDispatched")}</h4>
                       <p className="text-xs text-emerald-600/90 font-medium mt-1">{successMessage}</p>
                     </div>
                     
                     <div className="pt-2 border-t border-emerald-500/10 grid grid-cols-2 gap-2 text-[10px]">
                       <div className="text-left bg-emerald-500/5 p-2 rounded-xl">
-                        <span className="text-emerald-500/70 block uppercase font-bold">Reason Code</span>
+                        <span className="text-emerald-500/70 block uppercase font-bold">{t("radius.reasonCode")}</span>
                         <span className="font-bold text-emerald-800">{reasonCode}</span>
                       </div>
                       <div className="text-left bg-emerald-500/5 p-2 rounded-xl">
-                        <span className="text-emerald-500/70 block uppercase font-bold">Operator</span>
+                        <span className="text-emerald-500/70 block uppercase font-bold">{t("radius.operator")}</span>
                         <span className="font-bold text-emerald-800">NOC-ADMIN</span>
                       </div>
                     </div>
 
                     {note && (
                       <div className="text-left bg-emerald-500/5 p-2.5 rounded-xl text-[10px]">
-                        <span className="text-emerald-500/70 block uppercase font-bold">Admin Note</span>
+                        <span className="text-emerald-500/70 block uppercase font-bold">{t("radius.adminNote")}</span>
                         <span className="text-emerald-800 font-medium">{note}</span>
                       </div>
                     )}
@@ -322,14 +324,14 @@ export function RadiusLiveLogTable() {
                       }}
                       className="w-full h-10 font-bold uppercase text-xs tracking-wider bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl"
                     >
-                      Perform Another Action
+                      {t("radius.performAnotherAction")}
                     </Button>
                   </div>
                 ) : (
                   <>
                     {/* Action Selector Tabs */}
                     <div className="space-y-3">
-                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Choose Dispatch Action</span>
+                      <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">{t("radius.chooseAction")}</span>
                       <div className="grid grid-cols-2 gap-3">
                         <button
                           type="button"
@@ -345,8 +347,8 @@ export function RadiusLiveLogTable() {
                           }`}
                         >
                           <CheckCircle2 className={`size-5 ${actionType === "retry" ? "text-primary" : "text-muted-foreground"}`} />
-                          <span className="text-xs font-black uppercase tracking-wider">Retry Session</span>
-                          <span className="text-[9px] text-muted-foreground font-medium text-center">CoA Re-Authenticate</span>
+                          <span className="text-xs font-black uppercase tracking-wider">{t("radius.retrySession")}</span>
+                          <span className="text-[9px] text-muted-foreground font-medium text-center">{t("radius.coaReauth")}</span>
                         </button>
 
                         <button
@@ -363,8 +365,8 @@ export function RadiusLiveLogTable() {
                           }`}
                         >
                           <ShieldAlert className={`size-5 ${actionType === "revoke" ? "text-rose-500" : "text-muted-foreground"}`} />
-                          <span className="text-xs font-black uppercase tracking-wider text-rose-500">Revoke Session</span>
-                          <span className="text-[9px] text-muted-foreground font-medium text-center">PoD Disconnect</span>
+                          <span className="text-xs font-black uppercase tracking-wider text-rose-500">{t("radius.revokeSession")}</span>
+                          <span className="text-[9px] text-muted-foreground font-medium text-center">{t("radius.podDisconnect")}</span>
                         </button>
                       </div>
                     </div>
@@ -373,40 +375,40 @@ export function RadiusLiveLogTable() {
                     {actionType && (
                       <form onSubmit={handleSubmitAction} className="space-y-4 pt-4 border-t border-border/50 animate-in fade-in slide-in-from-bottom-2 duration-200">
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Reason Code</label>
+                          <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{t("radius.reasonCodeLabel")}</label>
                           <select
                             value={reasonCode}
                             onChange={(e) => setReasonCode(e.target.value)}
                             className="flex h-12 w-full items-center justify-between rounded-xl bg-muted/40 border border-transparent px-3.5 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20"
                             required
                           >
-                            <option value="" disabled>-- Select Reason Code --</option>
+                            <option value="" disabled>{t("radius.selectReasonCode")}</option>
                             {actionType === "retry" ? (
                               <>
-                                <option value="MIGRATE_DEVICE">ONT / Hardware Migration</option>
-                                <option value="SIGNAL_RESTORED">Optical Signal Restored</option>
-                                <option value="CONFIG_RESET">Router/CPE Reset</option>
-                                <option value="SPEED_BOOST">Speed Boost Provisioning</option>
-                                <option value="OTHER">Other Technical Resolution</option>
+                                <option value="MIGRATE_DEVICE">{t("radius.retryMigrateDevice")}</option>
+                                <option value="SIGNAL_RESTORED">{t("radius.retrySignalRestored")}</option>
+                                <option value="CONFIG_RESET">{t("radius.retryConfigReset")}</option>
+                                <option value="SPEED_BOOST">{t("radius.retrySpeedBoost")}</option>
+                                <option value="OTHER">{t("radius.retryOther")}</option>
                               </>
                             ) : (
                               <>
-                                <option value="EXPIRED_TRIAL">Temp / Trial Period Expired</option>
-                                <option value="BILLING_UNPAID">Unpaid Bill suspension</option>
-                                <option value="SUSPICIOUS_TRAFFIC">High packet rate / Abuse</option>
-                                <option value="USER_REQUEST">Customer account termination</option>
-                                <option value="OTHER">Other Administrative Action</option>
+                                <option value="EXPIRED_TRIAL">{t("radius.revokeExpiredTrial")}</option>
+                                <option value="BILLING_UNPAID">{t("radius.revokeBillingUnpaid")}</option>
+                                <option value="SUSPICIOUS_TRAFFIC">{t("radius.revokeSuspiciousTraffic")}</option>
+                                <option value="USER_REQUEST">{t("radius.revokeUserRequest")}</option>
+                                <option value="OTHER">{t("radius.revokeOther")}</option>
                               </>
                             )}
                           </select>
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Note / Remark</label>
+                          <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{t("radius.noteRemark")}</label>
                           <textarea
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
-                            placeholder="Enter administrative note..."
+                            placeholder={t("radius.enterNote")}
                             rows={3}
                             className="flex w-full rounded-xl bg-muted/40 border border-transparent px-3.5 py-2.5 text-xs font-semibold placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                             required
@@ -425,11 +427,11 @@ export function RadiusLiveLogTable() {
                           {isSubmitting ? (
                             <>
                               <Loader2 className="size-4 animate-spin" />
-                              Sending Command...
+                              {t("radius.sendingCommand")}
                             </>
                           ) : (
                             <>
-                              Dispatch AAA Request
+                              {t("radius.dispatchAaa")}
                               <ArrowRight className="size-4" />
                             </>
                           )}

@@ -54,28 +54,28 @@ import { useAdminLeads } from "../api/leads-queries";
 import type { LeadDto, LeadSource, LeadStatus } from "../types/leads-api";
 import { RerouteLeadSheet } from "./reroute-lead-sheet";
 
-const LEAD_STATUSES: { value: LeadStatus; label: string }[] = [
-  { value: "new", label: "New" },
-  { value: "potential", label: "Potential" },
-  { value: "warm", label: "Warm" },
-  { value: "hot", label: "Hot" },
-  { value: "active", label: "Active" },
-  { value: "converted", label: "Converted" },
-  { value: "lost", label: "Lost" },
+const LEAD_STATUS_KEYS: { value: LeadStatus; key: string }[] = [
+  { value: "new", key: "leads.statusNew" },
+  { value: "potential", key: "leads.statusPotential" },
+  { value: "warm", key: "leads.statusWarm" },
+  { value: "hot", key: "leads.statusHot" },
+  { value: "active", key: "leads.statusActive" },
+  { value: "converted", key: "leads.statusConverted" },
+  { value: "lost", key: "leads.statusLost" },
 ];
 
-const LEAD_SOURCES: { value: LeadSource; label: string }[] = [
-  { value: "referral", label: "Referral" },
-  { value: "cold_call", label: "Cold Call" },
-  { value: "website", label: "Website" },
-  { value: "whatsapp", label: "WhatsApp" },
-  { value: "social_media_dm", label: "Social Media DM" },
-  { value: "voip_call", label: "VoIP Call" },
-  { value: "line_call", label: "Line Call" },
-  { value: "walk_in", label: "Walk In" },
-  { value: "event", label: "Event" },
-  { value: "partner", label: "Partner" },
-  { value: "cs_referral", label: "CS Referral" },
+const LEAD_SOURCE_KEYS: { value: LeadSource; key: string }[] = [
+  { value: "referral", key: "leads.sourceReferral" },
+  { value: "cold_call", key: "leads.sourceColdCall" },
+  { value: "website", key: "leads.sourceWebsite" },
+  { value: "whatsapp", key: "leads.sourceWhatsapp" },
+  { value: "social_media_dm", key: "leads.sourceSocialMediaDm" },
+  { value: "voip_call", key: "leads.sourceVoipCall" },
+  { value: "line_call", key: "leads.sourceLineCall" },
+  { value: "walk_in", key: "leads.sourceWalkIn" },
+  { value: "event", key: "leads.sourceEvent" },
+  { value: "partner", key: "leads.sourcePartner" },
+  { value: "cs_referral", key: "leads.sourceCsReferral" },
 ];
 
 function LeadsViewToggle() {
@@ -137,7 +137,7 @@ export function LeadsList() {
     {
       id: "lead_name",
       accessorKey: "lead_name",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Name" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("leads.colName")} className="font-semibold" />,
       cell: ({ row }) => (
         <Button asChild variant="ghost" mode="link" size="sm" className="font-medium text-foreground">
           <Link href={paths.dashboard.crmAndSales.leads.detail.getHref(row.original.id)}>
@@ -150,7 +150,7 @@ export function LeadsList() {
     {
       id: "lead_type",
       accessorKey: "lead_type",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Type" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("leads.colType")} className="font-semibold" />,
       cell: ({ row }) => (
         <span className="text-muted-foreground text-sm capitalize">
           {row.original.lead_type} / {row.original.customer_sub_type}
@@ -161,14 +161,14 @@ export function LeadsList() {
     {
       id: "source",
       accessorKey: "source",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Source" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("leads.colSource")} className="font-semibold" />,
       cell: ({ row }) => <span className="text-muted-foreground text-sm capitalize">{row.original.source.replace("_", " ")}</span>,
       size: 130,
     },
     {
       id: "status",
       accessorKey: "status",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Status" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("leads.colStatus")} className="font-semibold" />,
       cell: ({ row }) => (
         <Badge variant={STATUS_VARIANT[row.original.status] ?? "secondary"} appearance="light" size="md">
           {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
@@ -179,7 +179,7 @@ export function LeadsList() {
     {
       id: "branch_name",
       accessorKey: "branch_name",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Branch" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("leads.colBranch")} className="font-semibold" />,
       cell: ({ row }) => (
         <span className="text-sm font-medium">
           {row.original.branch_name ?? "-"}
@@ -190,11 +190,11 @@ export function LeadsList() {
     {
       id: "cable_distance_meters",
       accessorKey: "cable_distance_meters",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Cable (m)" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("leads.colCable")} className="font-semibold" />,
       cell: ({ row }) => (
         <span className="text-muted-foreground text-sm">
           {row.original.cable_distance_meters ?? "—"}
-          {row.original.is_excess_cable_accepted && " (excess ok)"}
+          {row.original.is_excess_cable_accepted && ` ${t("leads.excessOk")}`}
         </span>
       ),
       size: 110,
@@ -202,7 +202,7 @@ export function LeadsList() {
     {
       id: "created_at",
       accessorKey: "created_at",
-      header: ({ column }) => <DataGridColumnHeader column={column} title="Created" className="font-semibold" />,
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("leads.colCreated")} className="font-semibold" />,
       cell: ({ row }) => (
         <span className="text-muted-foreground text-sm">
           {new Date(row.original.created_at).toLocaleDateString()}
@@ -212,7 +212,7 @@ export function LeadsList() {
     },
     {
       id: "actions",
-      header: () => <span className="text-[0.8125rem] font-semibold text-accent-foreground">Action</span>,
+      header: () => <span className="text-[0.8125rem] font-semibold text-accent-foreground">{t("leads.colAction")}</span>,
       cell: ({ row }) => {
         const { id } = row.original;
         return (
@@ -225,11 +225,11 @@ export function LeadsList() {
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
                 <Link href={paths.dashboard.crmAndSales.leads.detail.getHref(id)}>
-                  <Eye className="size-4 mr-2" /> Detail
+                  <Eye className="size-4 mr-2" /> {t("leads.actionDetail")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setRerouteLead(row.original)}>
-                <RiArrowRightUpLine className="size-4 mr-2" /> Reroute
+                <RiArrowRightUpLine className="size-4 mr-2" /> {t("leads.actionReroute")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -238,7 +238,8 @@ export function LeadsList() {
       size: 210,
       enableSorting: false,
     },
-  ], []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [t]);
 
   const table = useReactTable({
     columns,
@@ -317,21 +318,21 @@ export function LeadsList() {
                   </div>
                   <Select value={statusFilter || "all"} onValueChange={(v) => { void setStatusFilter(v === "all" ? "" : v); void setPage(1); }}>
                     <SelectTrigger className="h-9 w-36">
-                      <SelectValue placeholder="All Status" />
+                      <SelectValue placeholder={t("leads.allStatus")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      {LEAD_STATUSES.map((s) => (
-                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                      <SelectItem value="all">{t("leads.allStatus")}</SelectItem>
+                      {LEAD_STATUS_KEYS.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>{t(s.key)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <Select value={branchFilter || "all"} onValueChange={(v) => { void setBranchFilter(v === "all" ? "" : v); void setPage(1); }}>
                     <SelectTrigger className="h-9 w-40">
-                      <SelectValue placeholder="All Branches" />
+                      <SelectValue placeholder={t("leads.allBranches")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Branches</SelectItem>
+                      <SelectItem value="all">{t("leads.allBranches")}</SelectItem>
                       {areaBranches.map((b) => (
                         <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
                       ))}
@@ -339,12 +340,12 @@ export function LeadsList() {
                   </Select>
                   <Select value={sourceFilter || "all"} onValueChange={(v) => { void setSourceFilter(v === "all" ? "" : v); void setPage(1); }}>
                     <SelectTrigger className="h-9 w-40">
-                      <SelectValue placeholder="All Sources" />
+                      <SelectValue placeholder={t("leads.allSources")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All Sources</SelectItem>
-                      {LEAD_SOURCES.map((s) => (
-                        <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                      <SelectItem value="all">{t("leads.allSources")}</SelectItem>
+                      {LEAD_SOURCE_KEYS.map((s) => (
+                        <SelectItem key={s.value} value={s.value}>{t(s.key)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
