@@ -71,3 +71,63 @@ export interface HandoverRecord {
   warehouseSignature: string;  // Base64
   timestamp: string;
 }
+
+// Representing the serialized 'assets' table in the database
+export interface WarehouseAsset {
+  id: string;
+  stockItemId: string; // references stock_items
+  sku: string;
+  name: string;
+  category: "customer_equipment" | "field_tool" | "infrastructure_equipment";
+  serialNumber: string; // unique serial, nullable in DDL
+  qrCode: string; // unique QR
+  receivedAt: string; // date unit entered warehouse
+  purchaseCost: number; // valuation cost
+  warehouseId?: string; // references warehouses
+  warehouseName?: string;
+  status:
+    | "in_warehouse"
+    | "dispatched"
+    | "installed"
+    | "assigned"
+    | "in_use"
+    | "under_maintenance"
+    | "defective"
+    | "disposed"
+    | "returned"
+    | "cannibalized";
+  isRetrofit: boolean;
+  customerId?: string; // references customers
+  customerName?: string;
+  assignedTechnicianId?: string; // references users
+  assignedTechnicianName?: string;
+  woId?: string; // references work_orders
+  woNumber?: string;
+  branchId?: string; // references branches
+  branchName?: string;
+}
+
+// Representing source parts used in a retrofit ('asset_retrofit_components' table)
+export interface RetrofitComponent {
+  sourceAssetId: string;
+  sku: string;
+  name: string;
+  serialNumber: string;
+  componentRole: string; // e.g. 'logic_board', 'chassis', 'power_unit', 'housing'
+}
+
+// Representing a retrofit job ('asset_retrofits' table)
+export interface RetrofitJob {
+  id: string;
+  resultAssetId: string;
+  resultAssetSku: string;
+  resultAssetName: string;
+  resultAssetSerial?: string;
+  performedBy: string; // technician/user
+  performedByName: string;
+  performedAt: string;
+  woId?: string;
+  woNumber?: string;
+  notes: string;
+  components: RetrofitComponent[];
+}

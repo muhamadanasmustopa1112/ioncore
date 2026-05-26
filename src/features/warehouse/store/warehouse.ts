@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import { LowStockAlertData, WorkOrder, HandoverRecord } from "../types";
+import {
+  LowStockAlertData,
+  WorkOrder,
+  HandoverRecord,
+  WarehouseAsset,
+  RetrofitJob,
+} from "../types";
 
 // Pre-configured list of low stock alerts with category and uom
 const INITIAL_ASSETS: LowStockAlertData[] = [
@@ -80,29 +86,118 @@ const INITIAL_WORK_ORDERS: WorkOrder[] = [
     status: "Pending",
     dateCreated: "May 05, 2026",
   },
+];
+
+// Seed Serialized Assets matching PostgreSQL 'assets' table
+const INITIAL_SERIALIZED_ASSETS: WarehouseAsset[] = [
   {
-    id: "WO-2024-I098",
-    technicianName: "John Doe",
-    technicianRole: "Senior Tech",
-    avatarUrl: "",
-    equipmentList: [
-      { name: "Huawei HG8145V5 ONT", sku: "HW-ONT-992", qty: 4, uom: "pieces", serial: "SN-HUA88910" },
-      { name: "Fiber Drop Cable (500m)", sku: "FIB-DRP-500M", qty: 1, uom: "meters" },
-    ],
-    status: "Completed",
-    dateCreated: "May 03, 2026",
+    id: "AST-001",
+    stockItemId: "item-1",
+    sku: "HW-ONT-992",
+    name: "Huawei HG8145V5 ONT",
+    category: "customer_equipment",
+    serialNumber: "SN-HUA99210",
+    qrCode: "ION-ASSET-000142",
+    receivedAt: "2026-05-10T09:00:00Z",
+    purchaseCost: 485000.00,
+    warehouseId: "WH-BDG-UTR-01",
+    warehouseName: "Gudang Bandung Utara",
+    status: "in_warehouse",
+    isRetrofit: false,
   },
   {
-    id: "WO-2024-M022",
-    technicianName: "Michael Chen",
-    technicianRole: "Maintenance",
-    avatarUrl: "",
-    equipmentList: [
-      { name: "Splitter 1:8 PLC Box", sku: "SPL-18-PLC", qty: 3, uom: "pieces" },
-      { name: "SC/UPC Fiber Connectors", sku: "CON-SCUPC-10", qty: 20, uom: "pieces" },
+    id: "AST-002",
+    stockItemId: "item-1",
+    sku: "HW-ONT-992",
+    name: "Huawei HG8145V5 ONT (Broken Board)",
+    category: "customer_equipment",
+    serialNumber: "SN-HUA88910",
+    qrCode: "ION-ASSET-000143",
+    receivedAt: "2026-05-08T11:30:00Z",
+    purchaseCost: 485000.00,
+    warehouseId: "WH-BDG-UTR-01",
+    warehouseName: "Gudang Bandung Utara",
+    status: "defective",
+    isRetrofit: false,
+  },
+  {
+    id: "AST-003",
+    stockItemId: "item-3",
+    sku: "ZTE-ONT-404",
+    name: "ZTE F609 GPON ONT (Broken Chassis)",
+    category: "customer_equipment",
+    serialNumber: "SN-ZTE40498",
+    qrCode: "ION-ASSET-000185",
+    receivedAt: "2026-05-06T14:15:00Z",
+    purchaseCost: 450000.00,
+    warehouseId: "WH-BDG-UTR-01",
+    warehouseName: "Gudang Bandung Utara",
+    status: "defective",
+    isRetrofit: false,
+  },
+  {
+    id: "AST-004",
+    stockItemId: "item-4",
+    sku: "OTD-OTDR-EX",
+    name: "EXFO AXS-110 OTDR",
+    category: "field_tool",
+    serialNumber: "EXFO-AXS110-SN00892",
+    qrCode: "ION-ASSET-000912",
+    receivedAt: "2025-01-15T08:00:00Z",
+    purchaseCost: 12500000.00,
+    warehouseId: "WH-BDG-UTR-01",
+    warehouseName: "Gudang Bandung Utara",
+    status: "assigned",
+    isRetrofit: false,
+    assignedTechnicianId: "TECH-001",
+    assignedTechnicianName: "Budi Santoso",
+  },
+  {
+    id: "AST-005",
+    stockItemId: "item-5",
+    sku: "ZTE-GTGO-CARD",
+    name: "ZTE GTGO OLT Card",
+    category: "infrastructure_equipment",
+    serialNumber: "ZTE-GTGO-CARD-SN00123",
+    qrCode: "ION-ASSET-000551",
+    receivedAt: "2024-11-20T10:00:00Z",
+    purchaseCost: 8750000.00,
+    status: "installed",
+    isRetrofit: false,
+    branchId: "SA-BDG-UTR",
+    branchName: "SA-BDG-UTR Branch",
+  },
+];
+
+// Seed Retrofit Jobs matching PostgreSQL 'asset_retrofits' table
+const INITIAL_RETROFIT_JOBS: RetrofitJob[] = [
+  {
+    id: "RTF-101",
+    resultAssetId: "AST-RTF-199",
+    resultAssetSku: "HW-ONT-992-RFT",
+    resultAssetName: "Huawei HG8145V5 Retrofit",
+    resultAssetSerial: "SN-HUA992-RFT-01",
+    performedBy: "USR-001",
+    performedByName: "Andi Prasetya (Admin)",
+    performedAt: "2026-05-25T14:30:00Z",
+    woNumber: "WO-RETROFIT-001",
+    notes: "Merakit unit board logic dari ZTE-ONT-404 ke dalam sasis bersih milik HW-ONT-992 (Broken Board). Diuji coba dan berfungsi 100% normal.",
+    components: [
+      {
+        sourceAssetId: "AST-002",
+        sku: "HW-ONT-992",
+        name: "Huawei HG8145V5 ONT (Broken Board)",
+        serialNumber: "SN-HUA88910",
+        componentRole: "Chassis & Housing",
+      },
+      {
+        sourceAssetId: "AST-003",
+        sku: "ZTE-ONT-404",
+        name: "ZTE F609 GPON ONT (Broken Chassis)",
+        serialNumber: "SN-ZTE40498",
+        componentRole: "Logic Board Module",
+      },
     ],
-    status: "Pending",
-    dateCreated: "May 06, 2026",
   },
 ];
 
@@ -129,6 +224,14 @@ interface WarehouseState {
   // Details Panel State
   selectedWorkOrderId: string | null;
   setSelectedWorkOrderId: (id: string | null) => void;
+
+  // Serialized Assets & Retrofitting States (Matching DDL Schema)
+  serializedAssets: WarehouseAsset[];
+  retrofitJobs: RetrofitJob[];
+  retrofitDialogOpen: boolean;
+  setRetrofitDialogOpen: (open: boolean) => void;
+  addRetrofitJob: (job: Omit<RetrofitJob, "id" | "performedAt" | "performedBy" | "performedByName" | "resultAssetId">) => void;
+  updateAssetStatus: (id: string, status: WarehouseAsset["status"]) => void;
 }
 
 export const useWarehouseStore = create<WarehouseState>((set) => ({
@@ -185,4 +288,70 @@ export const useWarehouseStore = create<WarehouseState>((set) => ({
   // Selection
   selectedWorkOrderId: null,
   setSelectedWorkOrderId: (id) => set({ selectedWorkOrderId: id }),
+
+  // Serialized Assets & Retrofitting Actions
+  serializedAssets: INITIAL_SERIALIZED_ASSETS,
+  retrofitJobs: INITIAL_RETROFIT_JOBS,
+  retrofitDialogOpen: false,
+  setRetrofitDialogOpen: (open) => set({ retrofitDialogOpen: open }),
+
+  addRetrofitJob: (newJob) =>
+    set((state) => {
+      const jobId = `RTF-${state.retrofitJobs.length + 102}`;
+      const performedAt = new Date().toISOString();
+      const performedBy = "USR-001";
+      const performedByName = "Andi Prasetya (Admin)";
+
+      // 1. Mark source assets as cannibalized
+      const sourceIds = newJob.components.map((c) => c.sourceAssetId);
+      const updatedAssets = state.serializedAssets.map((asset) => {
+        if (sourceIds.includes(asset.id)) {
+          return { ...asset, status: "cannibalized" as const };
+        }
+        return asset;
+      });
+
+      // 2. Create the result asset in warehouse stock
+      const resultAssetId = `AST-RTF-${state.serializedAssets.length + 200}`;
+      const resultSerial = newJob.resultAssetSerial || `SN-RTF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      
+      const newResultAsset: WarehouseAsset = {
+        id: resultAssetId,
+        stockItemId: "HW-ONT-992-RFT",
+        sku: newJob.resultAssetSku,
+        name: newJob.resultAssetName,
+        category: "customer_equipment",
+        serialNumber: resultSerial,
+        qrCode: `ION-RFT-00${state.serializedAssets.length + 100}`,
+        receivedAt: performedAt,
+        purchaseCost: 350000.00, // lower cost valuation for cannibalized units
+        warehouseId: "WH-BDG-UTR-01",
+        warehouseName: "Gudang Bandung Utara",
+        status: "in_warehouse",
+        isRetrofit: true,
+      };
+
+      // 3. Add the job and new assets
+      const job: RetrofitJob = {
+        ...newJob,
+        id: jobId,
+        resultAssetId,
+        resultAssetSerial: resultSerial,
+        performedBy,
+        performedByName,
+        performedAt,
+      };
+
+      return {
+        serializedAssets: [newResultAsset, ...updatedAssets],
+        retrofitJobs: [job, ...state.retrofitJobs],
+      };
+    }),
+
+  updateAssetStatus: (id, status) =>
+    set((state) => ({
+      serializedAssets: state.serializedAssets.map((a) =>
+        a.id === id ? { ...a, status } : a
+      ),
+    })),
 }));

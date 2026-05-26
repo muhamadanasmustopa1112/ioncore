@@ -59,8 +59,11 @@ export const rejectCrossAreaRequest = ({
 const invalidateWO = (id?: string) => {
   const queryClient = getQueryClient();
   queryClient.invalidateQueries({ queryKey: TECHNICIAN_KEYS.all });
+  queryClient.refetchQueries({ queryKey: TECHNICIAN_KEYS.all });
+  
   if (id) {
     queryClient.invalidateQueries({ queryKey: TECHNICIAN_KEYS.workOrder(id) });
+    queryClient.refetchQueries({ queryKey: TECHNICIAN_KEYS.workOrder(id) });
   }
 };
 

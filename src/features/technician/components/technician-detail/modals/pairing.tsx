@@ -136,7 +136,7 @@ export function PairingModal({
   const { t } = useTranslation();
   const isReassign = currentTeam.length > 0;
   const [useAuto, setUseAuto] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<string[]>(currentTeam.map((t) => t.technician_id));
+  const [selectedIds, setSelectedIds] = useState<string[]>(currentTeam.map((tech) => tech.technician_id));
   const [override, setOverride] = useState(isReassign);
   const [note, setNote] = useState("");
   const [recommendation, setRecommendation] = useState<PairingRecommendationResponse | null>(null);
@@ -167,7 +167,7 @@ export function PairingModal({
           setRecommendation(rec);
           setViewMode("recommend");
           const suggested = rec?.suggested_team ?? [];
-          if (suggested.length > 0) setSelectedIds(suggested.map((t) => t.technician_id).filter(Boolean));
+          if (suggested.length > 0) setSelectedIds(suggested.map((tech) => tech.technician_id).filter(Boolean));
         },
       }
     );
@@ -183,10 +183,10 @@ export function PairingModal({
 
     const currentSelectedLevels = selectedIds.map(id => {
       const source = [
-        ...allTechnicians.map(t => ({ id: t.technician_id, level: t.level })),
+        ...allTechnicians.map(tech => ({ id: tech.technician_id, level: tech.level })),
         ...(recommendation?.candidates ?? []).map(c => ({ id: c.technician_id, level: c.level })),
-        ...currentTeam.map(t => ({ id: t.technician_id, level: t.level })),
-        ...(recommendation?.suggested_team ?? []).map(t => ({ id: t.technician_id, level: t.level })),
+        ...currentTeam.map(tech => ({ id: tech.technician_id, level: tech.level })),
+        ...(recommendation?.suggested_team ?? []).map(tech => ({ id: tech.technician_id, level: tech.level })),
       ].filter(x => !!x.id);
       const found = source.find(x => String(x.id) === String(id));
       return found?.level?.toString().toLowerCase().trim();
@@ -203,12 +203,12 @@ export function PairingModal({
     setValidationError(false);
 
     const map: Record<string, string> = {};
-    currentTeam.forEach((t) => { if (t.technician_id) map[t.technician_id] = t.technician_name; });
-    (recommendation?.suggested_team ?? []).forEach((t) => { if (t.technician_id) map[t.technician_id] = t.technician_name; });
+    currentTeam.forEach((tech) => { if (tech.technician_id) map[tech.technician_id] = tech.technician_name; });
+    (recommendation?.suggested_team ?? []).forEach((tech) => { if (tech.technician_id) map[tech.technician_id] = tech.technician_name; });
     (recommendation?.candidates ?? []).forEach((c) => { map[c.technician_id] = c.technician_name; });
-    allTechnicians.forEach((t) => { map[t.technician_id] = t.technician_name; });
+    allTechnicians.forEach((tech) => { map[tech.technician_id] = tech.technician_name; });
 
-    const beforeTeam = currentTeam.map(t => ({ id: t.technician_id, name: t.technician_name || map[t.technician_id] }));
+    const beforeTeam = currentTeam.map(tech => ({ id: tech.technician_id, name: tech.technician_name || map[tech.technician_id] }));
     const afterTeam = selectedIds.map(id => ({ id, name: map[id] || "Unknown Technician" }));
 
     mutation.mutate(
@@ -223,27 +223,27 @@ export function PairingModal({
 
   const candidates = recommendation?.candidates ?? [];
   const nameMap: Record<string, string> = {};
-  currentTeam.forEach((t) => { if (t.technician_id) nameMap[t.technician_id] = t.technician_name; });
-  (recommendation?.suggested_team ?? []).forEach((t) => { if (t.technician_id) nameMap[t.technician_id] = t.technician_name; });
+  currentTeam.forEach((tech) => { if (tech.technician_id) nameMap[tech.technician_id] = tech.technician_name; });
+  (recommendation?.suggested_team ?? []).forEach((tech) => { if (tech.technician_id) nameMap[tech.technician_id] = tech.technician_name; });
   candidates.forEach((c) => { nameMap[c.technician_id] = c.technician_name; });
-  allTechnicians.forEach((t) => { nameMap[t.technician_id] = t.technician_name; });
+  allTechnicians.forEach((tech) => { nameMap[tech.technician_id] = tech.technician_name; });
 
   const seniorCandidates = candidates.filter((c) => c.level === "senior" || c.level === "lead");
   const juniorCandidates = candidates.filter((c) => c.level === "junior");
 
   // Map the raw ListTechnicianItem to DispatchCandidate format for manual rendering
-  const mappedAllCandidates: DispatchCandidate[] = allTechnicians.map((t) => ({
-    technician_id: t.technician_id,
-    technician_name: t.technician_name,
-    level: t.level as any,
-    active_workload: t.active_workload,
-    skills: t.skills,
-    match_score: t.level === "senior" ? 85 : t.level === "lead" ? 90 : 65,
-    reasons: [`${t("workOrder.detail.area")}: ${t.area_id?.replace("area-", "").toUpperCase() || "UNKNOWN"}`],
-    cross_area: t.cross_area_enabled ?? false,
-    area_id: t.area_id,
-    sub_area_id: t.sub_area_id,
-    availability_status: t.availability_status,
+  const mappedAllCandidates: DispatchCandidate[] = allTechnicians.map((tech) => ({
+    technician_id: tech.technician_id,
+    technician_name: tech.technician_name,
+    level: tech.level as any,
+    active_workload: tech.active_workload,
+    skills: tech.skills,
+    match_score: tech.level === "senior" ? 85 : tech.level === "lead" ? 90 : 65,
+    reasons: [`${t("workOrder.detail.area")}: ${tech.area_id?.replace("area-", "")?.toUpperCase() || "UNKNOWN"}`],
+    cross_area: tech.cross_area_enabled ?? false,
+    area_id: tech.area_id,
+    sub_area_id: tech.sub_area_id,
+    availability_status: tech.availability_status,
   }));
 
   const filteredAllCandidates = mappedAllCandidates.filter((c) => {

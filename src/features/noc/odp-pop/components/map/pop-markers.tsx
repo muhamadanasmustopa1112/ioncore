@@ -1,9 +1,9 @@
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import { Badge } from "@/components/ui/badge";
 import { PopData } from "../../types/pop";
 import { createStatusIcon } from "./map-utils";
 import { MutableRefObject } from "react";
+import { MapPin, Server, Network, X } from "lucide-react";
 
 interface PopMarkersProps {
   data: PopData[];
@@ -20,41 +20,76 @@ export function PopMarkers({ data, markerRefs, onSelect }: PopMarkersProps) {
           position={[Number(pop.gps_lat), Number(pop.gps_lng)]}
           icon={createStatusIcon("active")}
           eventHandlers={{
-            click: () => onSelect?.(String(pop.id)),
+            click: () => {
+              onSelect?.(String(pop.id));
+              const marker = markerRefs.current[String(pop.id)];
+              if (marker) marker.openPopup();
+            },
           }}
           ref={(ref) => {
             if (ref) markerRefs.current[String(pop.id)] = ref;
           }}
-
         >
-          <Popup className="odp-popup">
-            <div className="w-[170px] p-1">
-              <div className="flex justify-between items-start mb-2 border-b pb-2">
-                <div>
-                  <h4 className="font-black text-xs m-0 text-foreground uppercase tracking-tight">{pop.name}</h4>
+          <Popup className="pop-popup" closeButton={false} minWidth={360} maxWidth={360}>
+            <div className="w-[360px] bg-card overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-border/50 bg-emerald-500/5">
+                <div className="flex items-center gap-2">
+                  <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Active POP</span>
                 </div>
-                <Badge
-                  variant="success"
-                  appearance="light"
-                  className="uppercase text-[9px] font-black"
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelect?.(null);
+                    const marker = markerRefs.current[String(pop.id)];
+                    if (marker) marker.closePopup();
+                  }}
+                  className="size-5 rounded-md flex items-center justify-center hover:bg-muted transition-colors cursor-pointer"
                 >
-                  Active
-                </Badge>
+                  <X className="size-3 text-muted-foreground" />
+                </button>
               </div>
+              <div className="p-4 space-y-3 text-left">
+                {/* Row 1: POP Name & Code Badge */}
+                <div className="flex items-center gap-2 flex-wrap min-w-0">
+                  <h4 className="text-sm font-black text-foreground uppercase tracking-tight truncate max-w-[240px]" title={pop.name}>
+                    {pop.name}
+                  </h4>
+                  {pop.code && (
+                    <span className="text-[9px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded border border-border/30 shrink-0">
+                      {pop.code}
+                    </span>
+                  )}
+                </div>
 
-              <div className="space-y-2 text-xs">
-                <div className="flex justify-between pb-1 border-b border-border/50">
-                  <span className="text-muted-foreground font-bold tracking-tight uppercase text-[9px]">Infrastructure:</span>
-                  <div className="text-right font-black uppercase text-[10px]">
-                    <span className="text-primary">{pop.oltCount}</span> OLT{" - "}
-                    <span className="text-primary">{pop.odpCount}</span> ODP
+                {/* Row 2: Area Badge, OLT Capsule, ODP Capsule aligned side-by-side */}
+                <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                  {pop.area && (
+                    <span className="text-[9px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded shrink-0">
+                      Area: {pop.area}
+                    </span>
+                  )}
+                  <div className="flex items-center gap-1 bg-muted/40 rounded-lg px-2 py-0.5 border border-border/10 shrink-0">
+                    <Server className="size-3 text-primary shrink-0" />
+                    <span className="text-[9px] text-muted-foreground font-bold tracking-tight">OLT</span>
+                    <span className="text-[10px] font-black text-primary ml-0.5">{pop.oltCount ?? 0}</span>
+                  </div>
+                  <div className="flex items-center gap-1 bg-muted/40 rounded-lg px-2 py-0.5 border border-border/10 shrink-0">
+                    <Network className="size-3 text-violet-500 shrink-0" />
+                    <span className="text-[9px] text-muted-foreground font-bold tracking-tight">ODP</span>
+                    <span className="text-[10px] font-black text-violet-500 ml-0.5">{pop.odpCount ?? 0}</span>
                   </div>
                 </div>
-                <div className="pt-1">
-                  <p className="text-[10px] text-muted-foreground font-medium leading-tight line-clamp-2">
-                    {pop.address}
-                  </p>
-                </div>
+
+                {/* Row 3: Address Pin & Truncated Text */}
+                {pop.address && (
+                  <div className="flex items-center gap-1.5 pt-2 border-t border-border/20">
+                    <MapPin className="size-3.5 text-muted-foreground shrink-0" />
+                    <p className="text-[10px] text-muted-foreground leading-none text-left truncate" title={pop.address}>
+                      {pop.address}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </Popup>
