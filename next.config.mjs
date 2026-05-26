@@ -66,7 +66,6 @@ const nextConfig = {
       return rewrites;
     }
 
-    // Non-proxy mode: /user/:path* → ${apiBaseUrl}/ion-user-service/api/v1/:path*
     return Object.entries(ionServices).map(([fullPath, alias]) => ({
       source: `/${alias}/:path*`,
       destination: `${normalizedBaseUrl}/${fullPath}/:path*`,

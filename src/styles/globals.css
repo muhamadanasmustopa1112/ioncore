@@ -377,8 +377,7 @@ html {
 .leaflet-tile-pane,
 .leaflet-overlay-pane,
 .leaflet-shadow-pane,
-.leaflet-marker-pane,
-.leaflet-popup-pane {
+.leaflet-marker-pane {
   position: absolute !important;
   left: 0;
   top: 0;

@@ -1,6 +1,8 @@
 @layer components {
+
   /* Base Leaflet container styles */
   .leaflet-container {
+
     /* Leaflet pane and control styles */
     & .leaflet-pane,
     & .leaflet-top,
@@ -19,6 +21,78 @@
       & .leaflet-popup-content {
         font-family: inherit;
         @apply text-xs;
+      }
+    }
+
+    /* Custom styled Leaflet popup for POP details */
+    & .leaflet-popup.pop-popup {
+      width: 360px !important;
+      max-width: 360px !important;
+      left: -180px !important;
+
+      & .leaflet-popup-content-wrapper {
+        padding: 0 !important;
+        overflow: hidden;
+        border-radius: 1rem !important;
+        border: 1px solid var(--border) !important;
+        background-color: var(--card) !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+        width: 360px !important;
+        max-width: 360px !important;
+      }
+
+      & .leaflet-popup-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 360px !important;
+        max-width: 360px !important;
+        font-family: inherit !important;
+        text-align: left !important;
+      }
+
+      & .leaflet-popup-close-button {
+        display: none !important;
+      }
+
+      & .leaflet-popup-tip {
+        background-color: var(--card) !important;
+        border-left: 1px solid var(--border) !important;
+        border-bottom: 1px solid var(--border) !important;
+        box-shadow: none !important;
+      }
+    }
+
+    /* Custom styled Leaflet popup for ODP details */
+    & .leaflet-popup.odp-popup {
+      width: 150px !important;
+      max-width: 150px !important;
+      left: -75px !important;
+
+      & .leaflet-popup-content-wrapper {
+        padding: 0.75rem !important;
+        overflow: hidden;
+        border-radius: 0.75rem !important;
+        border: 1px solid var(--border) !important;
+        background-color: var(--card) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        width: 150px !important;
+        max-width: 150px !important;
+      }
+
+      & .leaflet-popup-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 150px !important;
+        max-width: 150px !important;
+        font-family: inherit !important;
+        text-align: left !important;
+      }
+
+      & .leaflet-popup-tip {
+        background-color: var(--card) !important;
+        border-left: 1px solid var(--border) !important;
+        border-bottom: 1px solid var(--border) !important;
+        box-shadow: none !important;
       }
     }
   }

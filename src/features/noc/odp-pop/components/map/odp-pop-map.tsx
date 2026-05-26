@@ -249,15 +249,17 @@ export default function OdpPopMap({
           )}
         </MapContainer>
 
-        <Button
-          variant="outline"
-          size="sm"
-          mode="icon"
-          className="absolute bottom-6 right-6 z-10 bg-background/90 backdrop-blur-xl shadow-2xl border-none hover:bg-background size-10 rounded-xl transition-transform hover:scale-110 active:scale-95"
-          onClick={() => onSelect?.(null)}
-        >
-          <Maximize2 className="size-5 text-primary" />
-        </Button>
+        {selectedPopId && (
+          <Button
+            variant="outline"
+            size="sm"
+            mode="icon"
+            className="absolute bottom-6 right-6 z-10 bg-background/90 backdrop-blur-xl shadow-2xl border-none hover:bg-background size-10 rounded-xl transition-transform hover:scale-110 active:scale-95"
+            onClick={() => onSelect?.(null)}
+          >
+            <Maximize2 className="size-5 text-primary" />
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

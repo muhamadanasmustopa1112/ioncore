@@ -293,6 +293,13 @@ const ORDERS_ITEM = {
   icon: Package,
 };
 
+const WAREHOUSE_ITEM = {
+  title: "Warehouse",
+  path: paths.dashboard.warehouse.root.getHref(),
+  heading: 'Strategic',
+  icon: Box,
+};
+
 const ADMINISTRATION_ITEMS = [
   {
     title: "Branch",
@@ -391,6 +398,7 @@ export const DASHBOARD_MENU: MenuConfig = [
   CRM_SALES_ITEM,
   NETWORK_ORCHESTRATION_ITEM,
   TECHNICIAN_FIELD_ITEM,
+  WAREHOUSE_ITEM,
   ORDERS_ITEM,
   ...ADMINISTRATION_ITEMS,
 ];

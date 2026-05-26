@@ -2113,5 +2113,37 @@
   },
   "profile": {
     "title": "Profil"
+  },
+  "warehouse": {
+    "title": "Manajemen Gudang & Aset",
+    "collectionsTitle": "Pengambilan Barang (Teknisi)",
+    "serializedTitle": "Registrasi Aset Ter-serialisasi",
+    "retrofitsTitle": "Log Retrofit Aset",
+    "inventorySubtitle": "Level stok real-time, peringatan stok rendah, dan pemantauan pengiriman perangkat.",
+    "collectionsSubtitle": "Kelola dan lacak pengambilan peralatan oleh teknisi untuk perintah kerja yang ditugaskan.",
+    "assetsSubtitle": "Lacak nomor seri unik, waktu masuk gudang, biaya pembelian, dan status operasional aktif.",
+    "retrofitsSubtitle": "Rakit peralatan pelanggan yang operasional dengan memanen komponen dari aset fisik yang rusak.",
+    "searchAssets": "Cari aset...",
+    "searchTechnicians": "Cari teknisi...",
+    "searchSerialSku": "Cari nomor seri atau SKU...",
+    "searchRetrofitNotes": "Cari catatan retrofit...",
+    "tabInventory": "Stok & Peringatan Inventaris",
+    "tabAssets": "Aset Ter-serialisasi",
+    "tabRetrofits": "Retrofit Aset",
+    "tabCollections": "Pengambilan Barang (Teknisi)",
+    "qrHandover": "QR Handover",
+    "registerAsset": "Daftarkan Aset",
+    "registerNewAsset": "Daftar Aset Baru",
+    "performRetrofitJob": "Lakukan Perakitan Retrofit",
+    "newDispatch": "Pengiriman Baru",
+    "totalWarehouses": "Total Gudang",
+    "ontRatio": "Rasio ONT (Terpasang / Stok)",
+    "fiberStock": "Stok Kabel Serat",
+    "ontDistribution": "Distribusi ONT (Gudang vs Terpasang)",
+    "stockLevelsBranch": "Level Stok per Cabang",
+    "stockLowStockAlerts": "Peringatan Stok & Stok Rendah",
+    "defectiveUnitsAvailable": "Unit Rusak Tersedia",
+    "cannibalizedUsed": "Komponen Kanibalisasi Digunakan",
+    "retrofitSuccessRate": "Tingkat Keberhasilan Retrofit"
   }
 }

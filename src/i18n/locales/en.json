@@ -2108,5 +2108,37 @@
   },
   "profile": {
     "title": "Profile"
+  },
+  "warehouse": {
+    "title": "Warehouse & Asset Management",
+    "collectionsTitle": "Goods Collection (Technician Pick-up)",
+    "serializedTitle": "Serialized Asset Registry",
+    "retrofitsTitle": "Asset Retrofits & Cannibalization Log",
+    "inventorySubtitle": "Real-time stock levels, low-stock warnings, and device dispatch monitoring.",
+    "collectionsSubtitle": "Manage and track equipment collection by technicians for assigned work orders.",
+    "assetsSubtitle": "Track unique serial numbers, received timestamps, purchase costs, and active operational statuses.",
+    "retrofitsSubtitle": "Assemble operational customer equipment by harvesting components from defective physical assets.",
+    "searchAssets": "Search assets...",
+    "searchTechnicians": "Search technicians...",
+    "searchSerialSku": "Search serial or SKU...",
+    "searchRetrofitNotes": "Search retrofit notes...",
+    "tabInventory": "Inventory Stock & Alerts",
+    "tabAssets": "Serialized Assets (Lifecycle)",
+    "tabRetrofits": "Asset Retrofits (Cannibalization)",
+    "tabCollections": "Goods Collection (Technician Pick-up)",
+    "qrHandover": "QR Handover",
+    "registerAsset": "Register Asset",
+    "registerNewAsset": "Register New Asset",
+    "performRetrofitJob": "Perform Retrofit Job",
+    "newDispatch": "New Dispatch",
+    "totalWarehouses": "Total Warehouses",
+    "ontRatio": "ONT Ratio (Installed / Stock)",
+    "fiberStock": "Fiber Cable Stock",
+    "ontDistribution": "ONT Distribution (Warehouse vs Installed)",
+    "stockLevelsBranch": "Stock Levels by Branch",
+    "stockLowStockAlerts": "Stock & Low Stock Alerts",
+    "defectiveUnitsAvailable": "Defective Units Available",
+    "cannibalizedUsed": "Cannibalized Components Used",
+    "retrofitSuccessRate": "Retrofit Success Rate"
   }
 }
