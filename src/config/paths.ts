@@ -173,6 +173,68 @@ export const paths = {
         path: "/warehouse",
         getHref: () => "/warehouse",
       },
+      stock: {
+        root: {
+          path: "/warehouse/stock",
+          getHref: () => "/warehouse/stock",
+        },
+        detail: {
+          path: "/warehouse/stock/:id",
+          getHref: (id: string) => `/warehouse/stock/${id}`,
+        },
+      },
+      dispatch: {
+        root: {
+          path: "/warehouse/dispatch",
+          getHref: () => "/warehouse/dispatch",
+        },
+        detail: {
+          path: "/warehouse/dispatch/:id",
+          getHref: (id: string) => `/warehouse/dispatch/${id}`,
+        },
+      },
+      receive: {
+        root: {
+          path: "/warehouse/receive",
+          getHref: () => "/warehouse/receive",
+        },
+      },
+      transfers: {
+        root: {
+          path: "/warehouse/transfers",
+          getHref: () => "/warehouse/transfers",
+        },
+        detail: {
+          path: "/warehouse/transfers/:id",
+          getHref: (id: string) => `/warehouse/transfers/${id}`,
+        },
+      },
+      opname: {
+        root: {
+          path: "/warehouse/opname",
+          getHref: () => "/warehouse/opname",
+        },
+        detail: {
+          path: "/warehouse/opname/:id",
+          getHref: (id: string) => `/warehouse/opname/${id}`,
+        },
+      },
+      returns: {
+        root: {
+          path: "/warehouse/returns",
+          getHref: () => "/warehouse/returns",
+        },
+        detail: {
+          path: "/warehouse/returns/:id",
+          getHref: (id: string) => `/warehouse/returns/${id}`,
+        },
+      },
+      reports: {
+        root: {
+          path: "/warehouse/reports",
+          getHref: () => "/warehouse/reports",
+        },
+      },
     },
     operations: {
       root: {

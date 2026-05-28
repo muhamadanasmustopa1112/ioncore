@@ -47,6 +47,11 @@ import {
   Wallet,
   Webhook,
   Wrench,
+  Warehouse,
+  Truck,
+  RotateCcw,
+  ClipboardCheck,
+  FileBarChart,
 } from "lucide-react";
 import { paths } from "@/config/paths";
 import { MenuConfig } from "@/config/types";
@@ -297,7 +302,49 @@ const WAREHOUSE_ITEM = {
   title: "Warehouse",
   path: paths.dashboard.warehouse.root.getHref(),
   heading: 'Strategic',
-  icon: Box,
+  icon: Warehouse,
+  children: [
+    {
+      title: "Dashboard",
+      path: paths.dashboard.warehouse.root.getHref(),
+      icon: Box,
+    },
+    {
+      title: "Stock & Alerts",
+      path: paths.dashboard.warehouse.stock.root.getHref(),
+      icon: Database,
+    },
+    {
+      title: "WO Dispatch",
+      path: paths.dashboard.warehouse.dispatch.root.getHref(),
+      icon: Truck,
+    },
+    {
+      title: "Receive Stock",
+      path: paths.dashboard.warehouse.receive.root.getHref(),
+      icon: Package,
+    },
+    {
+      title: "Transfers",
+      path: paths.dashboard.warehouse.transfers.root.getHref(),
+      icon: ArrowLeftRight,
+    },
+    {
+      title: "Stock Opname",
+      path: paths.dashboard.warehouse.opname.root.getHref(),
+      icon: ClipboardCheck,
+    },
+    {
+      title: "Device Returns",
+      path: paths.dashboard.warehouse.returns.root.getHref(),
+      icon: RotateCcw,
+    },
+    {
+      title: "Reports",
+      path: paths.dashboard.warehouse.reports.root.getHref(),
+      icon: FileBarChart,
+    },
+  ],
 };
 
 const ADMINISTRATION_ITEMS = [

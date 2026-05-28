@@ -67,23 +67,22 @@ export interface HandoverRecord {
   id: string;
   workOrderId: string;
   technicianName: string;
-  technicianSignature: string; // Base64
-  warehouseSignature: string;  // Base64
+  technicianSignature: string;
+  warehouseSignature: string;
   timestamp: string;
 }
 
-// Representing the serialized 'assets' table in the database
 export interface WarehouseAsset {
   id: string;
-  stockItemId: string; // references stock_items
+  stockItemId: string;
   sku: string;
   name: string;
   category: "customer_equipment" | "field_tool" | "infrastructure_equipment";
-  serialNumber: string; // unique serial, nullable in DDL
-  qrCode: string; // unique QR
-  receivedAt: string; // date unit entered warehouse
-  purchaseCost: number; // valuation cost
-  warehouseId?: string; // references warehouses
+  serialNumber: string;
+  qrCode: string;
+  receivedAt: string;
+  purchaseCost: number;
+  warehouseId?: string;
   warehouseName?: string;
   status:
     | "in_warehouse"
@@ -97,37 +96,225 @@ export interface WarehouseAsset {
     | "returned"
     | "cannibalized";
   isRetrofit: boolean;
-  customerId?: string; // references customers
+  customerId?: string;
   customerName?: string;
-  assignedTechnicianId?: string; // references users
+  assignedTechnicianId?: string;
   assignedTechnicianName?: string;
-  woId?: string; // references work_orders
+  woId?: string;
   woNumber?: string;
-  branchId?: string; // references branches
+  branchId?: string;
   branchName?: string;
 }
 
-// Representing source parts used in a retrofit ('asset_retrofit_components' table)
 export interface RetrofitComponent {
   sourceAssetId: string;
   sku: string;
   name: string;
   serialNumber: string;
-  componentRole: string; // e.g. 'logic_board', 'chassis', 'power_unit', 'housing'
+  componentRole: string;
 }
 
-// Representing a retrofit job ('asset_retrofits' table)
 export interface RetrofitJob {
   id: string;
   resultAssetId: string;
   resultAssetSku: string;
   resultAssetName: string;
   resultAssetSerial?: string;
-  performedBy: string; // technician/user
+  performedBy: string;
   performedByName: string;
   performedAt: string;
   woId?: string;
   woNumber?: string;
   notes: string;
   components: RetrofitComponent[];
+}
+
+// ─── Stock Item (catalog entry) ──────────────────────────────────────────────
+
+export type StockItemCategory = "serialized_device" | "cable" | "consumable" | "infrastructure";
+export type StockItemType = "serialized" | "cable" | "consumable";
+
+export interface StockItem {
+  id: string;
+  name: string;
+  sku: string;
+  category: StockItemCategory;
+  itemType: StockItemType;
+  brand: string;
+  model: string;
+  uom: string;
+  unitCost: number;
+  description?: string;
+  active: boolean;
+}
+
+// ─── Stock Level (per warehouse per item) ────────────────────────────────────
+
+export type StockAlertStatus = "OK" | "Warning" | "Critical";
+
+export interface StockLevel {
+  id: string;
+  stockItemId: string;
+  stockItemName: string;
+  stockItemSku: string;
+  stockItemCategory: StockItemCategory;
+  stockItemType: StockItemType;
+  warehouseId: string;
+  warehouseName: string;
+  warehouseBranch: string;
+  currentStock: number;
+  threshold: number;
+  uom: string;
+  alertStatus: StockAlertStatus;
+}
+
+// ─── Dispatch / WO BOM ───────────────────────────────────────────────────────
+
+export type DispatchStatus = "pending" | "preparing" | "dispatched" | "completed";
+
+export interface DispatchBomItem {
+  id: string;
+  stockItemId: string;
+  stockItemName: string;
+  stockItemSku: string;
+  itemType: StockItemType;
+  qtyRequired: number;
+  qtyDispatched: number;
+  uom: string;
+  serialNumbers?: string[];
+  qrCodes?: string[];
+}
+
+export interface DispatchRecord {
+  id: string;
+  woNumber: string;
+  woType: string;
+  technicianId: string;
+  technicianName: string;
+  technicianRole: string;
+  warehouseId: string;
+  warehouseName: string;
+  status: DispatchStatus;
+  dateCreated: string;
+  dateDispatched?: string;
+  items: DispatchBomItem[];
+  notes?: string;
+}
+
+// ─── Stock Transfer ──────────────────────────────────────────────────────────
+
+export type TransferStatus = "pending" | "in_transit" | "received" | "cancelled";
+
+export interface TransferItem {
+  id: string;
+  stockItemId: string;
+  stockItemName: string;
+  stockItemSku: string;
+  itemType: StockItemType;
+  qty: number;
+  uom: string;
+}
+
+export interface StockTransfer {
+  id: string;
+  sourceWarehouseId: string;
+  sourceWarehouseName: string;
+  destinationWarehouseId: string;
+  destinationWarehouseName: string;
+  status: TransferStatus;
+  initiatedBy: string;
+  initiatedByName: string;
+  dateInitiated: string;
+  dateDispatched?: string;
+  dateReceived?: string;
+  items: TransferItem[];
+  notes?: string;
+}
+
+// ─── Stock Opname ────────────────────────────────────────────────────────────
+
+export type OpnameStatus = "scheduled" | "in_progress" | "completed" | "adjusted";
+
+export interface OpnameItemCount {
+  stockItemId: string;
+  stockItemName: string;
+  stockItemSku: string;
+  itemType: StockItemType;
+  uom: string;
+  systemCount: number;
+  countedCount: number | null;
+  variance: number;
+  status: "pending" | "counted" | "discrepancy" | "adjusted";
+  notes?: string;
+}
+
+export interface StockOpname {
+  id: string;
+  warehouseId: string;
+  warehouseName: string;
+  status: OpnameStatus;
+  scheduledDate: string;
+  startedAt?: string;
+  completedAt?: string;
+  initiatedBy: string;
+  initiatedByName: string;
+  items: OpnameItemCount[];
+  totalDiscrepancies: number;
+}
+
+// ─── Device Return ───────────────────────────────────────────────────────────
+
+export type ReturnStatus = "pending_return" | "received" | "restocked" | "decommissioned";
+export type DeviceOwnership = "ion_owned" | "leased" | "customer_owned";
+export type DeviceCondition = "good" | "damaged";
+
+export interface DeviceReturnRecord {
+  id: string;
+  assetId: string;
+  assetName: string;
+  assetSku: string;
+  serialNumber: string;
+  qrCode: string;
+  woNumber: string;
+  woId: string;
+  customerName: string;
+  customerId: string;
+  ownership: DeviceOwnership;
+  status: ReturnStatus;
+  condition?: DeviceCondition;
+  dateInitiated: string;
+  dateReceived?: string;
+  warehouseId?: string;
+  warehouseName?: string;
+  receivedBy?: string;
+  notes?: string;
+  linkedNewWoId?: string;
+}
+
+// ─── Report Types ────────────────────────────────────────────────────────────
+
+export interface StockMovementReport {
+  id: string;
+  date: string;
+  stockItemName: string;
+  stockItemSku: string;
+  warehouseName: string;
+  movementType: "dispatch" | "receive" | "transfer_in" | "transfer_out" | "adjustment" | "return";
+  quantity: number;
+  uom: string;
+  reference: string;
+  performedBy: string;
+}
+
+export interface ConsumptionReport {
+  woNumber: string;
+  technicianName: string;
+  date: string;
+  itemsConsumed: {
+    name: string;
+    sku: string;
+    estimated: number;
+    actual: number;
+    uom: string;
+  }[];
 }

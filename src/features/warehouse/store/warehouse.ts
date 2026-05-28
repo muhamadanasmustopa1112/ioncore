@@ -5,7 +5,20 @@ import {
   HandoverRecord,
   WarehouseAsset,
   RetrofitJob,
+  StockLevel,
+  DispatchRecord,
+  StockTransfer,
+  StockOpname,
+  DeviceReturnRecord,
+  OpnameItemCount,
 } from "../types";
+import {
+  DUMMY_STOCK_LEVELS,
+  DUMMY_DISPATCHES,
+  DUMMY_TRANSFERS,
+  DUMMY_OPNAMES,
+  DUMMY_DEVICE_RETURNS,
+} from "../data/dummy-subfeatures";
 
 // Pre-configured list of low stock alerts with category and uom
 const INITIAL_ASSETS: LowStockAlertData[] = [
@@ -225,13 +238,71 @@ interface WarehouseState {
   selectedWorkOrderId: string | null;
   setSelectedWorkOrderId: (id: string | null) => void;
 
-  // Serialized Assets & Retrofitting States (Matching DDL Schema)
+  // Serialized Assets & Retrofitting States
   serializedAssets: WarehouseAsset[];
   retrofitJobs: RetrofitJob[];
   retrofitDialogOpen: boolean;
   setRetrofitDialogOpen: (open: boolean) => void;
   addRetrofitJob: (job: Omit<RetrofitJob, "id" | "performedAt" | "performedBy" | "performedByName" | "resultAssetId">) => void;
   updateAssetStatus: (id: string, status: WarehouseAsset["status"]) => void;
+
+  // Stock Levels (sub-feature)
+  stockLevels: StockLevel[];
+  updateThreshold: (id: string, threshold: number) => void;
+  stockForm: "new" | "edit" | "details" | null;
+  stockSheetOpen: boolean;
+  selectedStock: StockLevel | null;
+  openStockFormSheet: (form: "new" | "edit" | "details" | null) => void;
+  closeStockFormSheet: () => void;
+  setSelectedStock: (stock: StockLevel | null) => void;
+
+  // Receive (sub-feature - reuses StockLevel data)
+  receiveForm: "new" | "edit" | "details" | null;
+  receiveSheetOpen: boolean;
+  selectedReceive: StockLevel | null;
+  openReceiveFormSheet: (form: "new" | "edit" | "details" | null) => void;
+  closeReceiveFormSheet: () => void;
+  setSelectedReceive: (receive: StockLevel | null) => void;
+
+  // Dispatch (sub-feature)
+  dispatches: DispatchRecord[];
+  updateDispatchStatus: (id: string, status: DispatchRecord["status"]) => void;
+  dispatchForm: "new" | "edit" | "details" | null;
+  dispatchSheetOpen: boolean;
+  selectedDispatch: DispatchRecord | null;
+  openDispatchFormSheet: (form: "new" | "edit" | "details" | null) => void;
+  closeDispatchFormSheet: () => void;
+  setSelectedDispatch: (dispatch: DispatchRecord | null) => void;
+
+  // Transfers (sub-feature)
+  transfers: StockTransfer[];
+  updateTransferStatus: (id: string, status: StockTransfer["status"]) => void;
+  transferForm: "new" | "edit" | "details" | null;
+  transferSheetOpen: boolean;
+  selectedTransfer: StockTransfer | null;
+  openTransferFormSheet: (form: "new" | "edit" | "details" | null) => void;
+  closeTransferFormSheet: () => void;
+  setSelectedTransfer: (transfer: StockTransfer | null) => void;
+
+  // Opname (sub-feature)
+  opnames: StockOpname[];
+  updateOpnameCount: (opnameId: string, stockItemId: string, counted: number) => void;
+  opnameForm: "new" | "edit" | "details" | null;
+  opnameSheetOpen: boolean;
+  selectedOpname: StockOpname | null;
+  openOpnameFormSheet: (form: "new" | "edit" | "details" | null) => void;
+  closeOpnameFormSheet: () => void;
+  setSelectedOpname: (opname: StockOpname | null) => void;
+
+  // Device Returns (sub-feature)
+  deviceReturns: DeviceReturnRecord[];
+  updateReturnStatus: (id: string, status: DeviceReturnRecord["status"], condition?: DeviceReturnRecord["condition"]) => void;
+  returnForm: "new" | "edit" | "details" | null;
+  returnSheetOpen: boolean;
+  selectedReturn: DeviceReturnRecord | null;
+  openReturnFormSheet: (form: "new" | "edit" | "details" | null) => void;
+  closeReturnFormSheet: () => void;
+  setSelectedReturn: (returnRecord: DeviceReturnRecord | null) => void;
 }
 
 export const useWarehouseStore = create<WarehouseState>((set) => ({
@@ -314,7 +385,7 @@ export const useWarehouseStore = create<WarehouseState>((set) => ({
       // 2. Create the result asset in warehouse stock
       const resultAssetId = `AST-RTF-${state.serializedAssets.length + 200}`;
       const resultSerial = newJob.resultAssetSerial || `SN-RTF-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-      
+
       const newResultAsset: WarehouseAsset = {
         id: resultAssetId,
         stockItemId: "HW-ONT-992-RFT",
@@ -324,7 +395,7 @@ export const useWarehouseStore = create<WarehouseState>((set) => ({
         serialNumber: resultSerial,
         qrCode: `ION-RFT-00${state.serializedAssets.length + 100}`,
         receivedAt: performedAt,
-        purchaseCost: 350000.00, // lower cost valuation for cannibalized units
+        purchaseCost: 350000.00,
         warehouseId: "WH-BDG-UTR-01",
         warehouseName: "Gudang Bandung Utara",
         status: "in_warehouse",
@@ -354,4 +425,124 @@ export const useWarehouseStore = create<WarehouseState>((set) => ({
         a.id === id ? { ...a, status } : a
       ),
     })),
+
+  // Stock Levels
+  stockLevels: DUMMY_STOCK_LEVELS,
+  updateThreshold: (id, threshold) =>
+    set((state) => ({
+      stockLevels: state.stockLevels.map((sl) =>
+        sl.id === id
+          ? {
+              ...sl,
+              threshold,
+              alertStatus:
+                sl.currentStock <= threshold * 0.5
+                  ? "Critical"
+                  : sl.currentStock <= threshold
+                  ? "Warning"
+                  : "OK",
+            }
+          : sl
+      ),
+    })),
+  stockForm: "new",
+  stockSheetOpen: false,
+  selectedStock: null,
+  openStockFormSheet: (form) => set((state) => ({ ...state, stockForm: form, stockSheetOpen: true })),
+  closeStockFormSheet: () => set((state) => ({ ...state, stockForm: null, stockSheetOpen: false })),
+  setSelectedStock: (stock) => set((state) => ({ ...state, selectedStock: stock })),
+
+  // Receive
+  receiveForm: "new",
+  receiveSheetOpen: false,
+  selectedReceive: null,
+  openReceiveFormSheet: (form) => set((state) => ({ ...state, receiveForm: form, receiveSheetOpen: true })),
+  closeReceiveFormSheet: () => set((state) => ({ ...state, receiveForm: null, receiveSheetOpen: false })),
+  setSelectedReceive: (receive) => set((state) => ({ ...state, selectedReceive: receive })),
+
+  // Dispatches
+  dispatches: DUMMY_DISPATCHES,
+  updateDispatchStatus: (id, status) =>
+    set((state) => ({
+      dispatches: state.dispatches.map((d) =>
+        d.id === id ? { ...d, status, dateDispatched: status === "dispatched" ? new Date().toISOString() : d.dateDispatched } : d
+      ),
+    })),
+  dispatchForm: "new",
+  dispatchSheetOpen: false,
+  selectedDispatch: null,
+  openDispatchFormSheet: (form) => set((state) => ({ ...state, dispatchForm: form, dispatchSheetOpen: true })),
+  closeDispatchFormSheet: () => set((state) => ({ ...state, dispatchForm: null, dispatchSheetOpen: false })),
+  setSelectedDispatch: (dispatch) => set((state) => ({ ...state, selectedDispatch: dispatch })),
+
+  // Transfers
+  transfers: DUMMY_TRANSFERS,
+  updateTransferStatus: (id, status) =>
+    set((state) => ({
+      transfers: state.transfers.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              status,
+              dateDispatched: status === "in_transit" ? new Date().toISOString() : t.dateDispatched,
+              dateReceived: status === "received" ? new Date().toISOString() : t.dateReceived,
+            }
+          : t
+      ),
+    })),
+  transferForm: "new",
+  transferSheetOpen: false,
+  selectedTransfer: null,
+  openTransferFormSheet: (form) => set((state) => ({ ...state, transferForm: form, transferSheetOpen: true })),
+  closeTransferFormSheet: () => set((state) => ({ ...state, transferForm: null, transferSheetOpen: false })),
+  setSelectedTransfer: (transfer) => set((state) => ({ ...state, selectedTransfer: transfer })),
+
+  // Opname
+  opnames: DUMMY_OPNAMES,
+  updateOpnameCount: (opnameId, stockItemId, counted) =>
+    set((state) => ({
+      opnames: state.opnames.map((o) => {
+        if (o.id !== opnameId) return o;
+        const updatedItems = o.items.map((item) => {
+          if (item.stockItemId !== stockItemId) return item;
+          const variance = counted - item.systemCount;
+          return {
+            ...item,
+            countedCount: counted,
+            variance,
+            status: (variance === 0 ? "adjusted" : "discrepancy") as OpnameItemCount["status"],
+          };
+        });
+        const totalDiscrepancies = updatedItems.filter((i) => i.variance !== 0).length;
+        return { ...o, items: updatedItems, totalDiscrepancies };
+      }),
+    })),
+  opnameForm: "new",
+  opnameSheetOpen: false,
+  selectedOpname: null,
+  openOpnameFormSheet: (form) => set((state) => ({ ...state, opnameForm: form, opnameSheetOpen: true })),
+  closeOpnameFormSheet: () => set((state) => ({ ...state, opnameForm: null, opnameSheetOpen: false })),
+  setSelectedOpname: (opname) => set((state) => ({ ...state, selectedOpname: opname })),
+
+  // Device Returns
+  deviceReturns: DUMMY_DEVICE_RETURNS,
+  updateReturnStatus: (id, status, condition) =>
+    set((state) => ({
+      deviceReturns: state.deviceReturns.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              status,
+              condition: condition ?? r.condition,
+              dateReceived: status === "received" ? new Date().toISOString() : r.dateReceived,
+            }
+          : r
+      ),
+    })),
+  returnForm: "new",
+  returnSheetOpen: false,
+  selectedReturn: null,
+  openReturnFormSheet: (form) => set((state) => ({ ...state, returnForm: form, returnSheetOpen: true })),
+  closeReturnFormSheet: () => set((state) => ({ ...state, returnForm: null, returnSheetOpen: false })),
+  setSelectedReturn: (returnRecord) => set((state) => ({ ...state, selectedReturn: returnRecord })),
 }));
