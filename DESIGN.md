@@ -1,14 +1,20 @@
 # ION Core — Architecture & Design Document
 
 **Product**: ION Core — ISP Enterprise Management System
-**Version**: 0.1
-**Last Updated**: 2026-05-27
+**Version**: 0.3
+**Last Updated**: 2026-05-29
+
+> **Note**: For implementation details, code patterns, and step-by-step guides, see `AGENTS.md`. This document focuses on architectural decisions, rationale, and tradeoffs.
 
 ---
 
 ## Table of Contents
 
 1. [Architectural Decisions](#architectural-decisions)
+   - AD-001 to AD-011 (Core Architecture)
+   - AD-012: Theme System (Dark/Light Mode)
+   - AD-013: Responsive Design Strategy
+   - AD-014: Language Locale (i18n) — Enhanced
 2. [Data Flow Patterns](#data-flow-patterns)
 3. [Component Patterns](#component-patterns)
 4. [State Architecture](#state-architecture)
@@ -31,6 +37,8 @@
 
 **Decision**: Organize code by feature domain (`src/features/[domain]/[feature]/`) rather than by technical layer (`src/api/`, `src/components/`, `src/types/`). Each feature module is self-contained with its own `api/`, `store/`, `types/`, `components/`, and `hooks/` subdirectories.
 
+> **Implementation details**: See AGENTS.md → Feature Module Standard for complete directory structure and code patterns.
+
 **Consequences**:
 - (+) Features can be developed, tested, and removed independently
 - (+) Co-located code is easier to find and refactor
@@ -49,51 +57,15 @@
 
 **Decision**: Use TanStack Query (React Query) as the sole mechanism for server state. Zustand is reserved for client UI state only (sheet open/close, selected item, filters). Never store API data in Zustand.
 
+> **Implementation details**: See AGENTS.md → API Layer for query key factory patterns, per-file hooks, and cache invalidation rules.
+
 **Consequences**:
 - (+) Automatic caching, background refetching, and stale-while-revalidate
 - (+) Built-in loading/error states eliminate boilerplate
 - (+) Cache invalidation via query keys is deterministic
 - (+) Optimistic updates and pagination are built-in
-- (-) Requires disciplined query key design (see AD-002a)
+- (-) Requires disciplined query key design (see AGENTS.md)
 - (-) Team must learn React Query patterns; inertia toward Zustand for everything
-
-**AD-002a: Query Key Factory Pattern**
-
-Every feature must define a `KEYS` constant using the factory pattern:
-
-```typescript
-export const ITEM_KEYS = {
-  all: () => ["ITEM"],
-  root: () => ["ITEM"],
-  list: (args?) => [...ITEM_KEYS.all(), "LIST", { ...(args || {}) }],
-  detail: (id: string) => [...ITEM_KEYS.all(), "DETAIL", id],
-  create: () => [...ITEM_KEYS.all(), "CREATE"],
-  update: (id: string) => [...ITEM_KEYS.all(), "UPDATE", id],
-  delete: (id: string) => [...ITEM_KEYS.all(), "DELETE", id],
-};
-```
-
-This enables partial invalidation (`invalidateQueries({ queryKey: ITEM_KEYS.all(), exact: false, refetchType: "active" })`) and ensures no orphaned or conflicting cache entries.
-
-**AD-002b: Per-File API Hooks**
-
-Each CRUD operation gets its own file, not a combined `.api.ts` or `.queries.ts`:
-
-| File | Purpose |
-|------|---------|
-| `api/keys.ts` | Query key factory constant |
-| `api/get-{items}.ts` | GET list: API function + `queryOptions()` + `useQuery` hook |
-| `api/get-{item}.ts` | GET detail: API function + `queryOptions()` + `useQuery` hook |
-| `api/post-{item}.ts` | POST create: API function + `useMutation` hook + Zod schema |
-| `api/put-{item}.ts` | PUT/PATCH update: API function + `useMutation` hook |
-| `api/delete-{item}.ts` | DELETE: API function + `useMutation` hook |
-
-Key patterns:
-- Use `queryOptions()` for SSR compatibility
-- Use `getQueryClient()` (not `useQueryClient()`) for SSR compatibility in mutations
-- Spread `...restConfig` FIRST in `useMutation`
-- Use `exact: false` and `refetchType: "active"` for cache invalidation
-- Extract error message from `error?.response?.data?.response?.message_en`
 
 ---
 
@@ -105,6 +77,8 @@ Key patterns:
 **Context**: The application needs local UI state for sheet open/close, selected items, and filter selections. Previous patterns mixed server and UI state in the same store.
 
 **Decision**: Zustand stores are created per-feature (not per-domain) and hold only ephemeral UI state: `sheetOpen`, `mode`, `selectedItem`, `filters`. Global stores exist only for `auth` and `layout`.
+
+> **Implementation details**: See AGENTS.md → State Management for store template and naming conventions.
 
 **Consequences**:
 - (+) Stores are small, focused, and easy to test
@@ -314,6 +288,243 @@ Dynamic route params are always `[id]`, never `[customNameId]`. Every route has 
 - (+) Consistent translation key namespace
 - (-) All existing strings must be migrated to `t()` calls
 - (-) Translation file size can grow large in administration features
+
+---
+
+### AD-012: Theme System (Dark/Light Mode)
+
+**Status**: Accepted
+**Date**: 2026-01
+
+**Context**: Users need visual flexibility for different lighting conditions and personal preferences. Enterprise environments often require consistent theming across large-screen workstations and field devices.
+
+**Decision**: Use `next-themes` library with class-based dark mode. `ThemeProvider` wraps the app root with `attribute="class"`, `defaultTheme="system"`, and `enableSystem` for automatic OS preference detection. Theme toggle is placed in the sidebar header toolbar.
+
+```tsx
+// src/components/layouts/context/theme-provider.tsx
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  );
+}
+```
+
+**Conventions**:
+- Use `dark:` Tailwind prefix for all dark mode overrides
+- Prefer CSS variable-based theming (`--background`, `--foreground`, `--primary`, etc.)
+- Avoid hardcoded colors — always use `hsl(var(--<token>))` or Tailwind config
+- `disableTransitionOnChange` prevents flash during theme switch
+- System preference is respected by default; user can override manually
+
+**Tailwind dark mode patterns**:
+```tsx
+// ✅ CORRECT — use dark: prefix
+<div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+
+// ❌ WRONG — hardcoded colors
+<div className="bg-white text-black">
+```
+
+**Consequences**:
+- (+) Automatic system preference detection — no manual toggle required
+- (+) Class-based approach works with SSR and static generation
+- (+) CSS variables enable consistent theming across shadcn/ui components
+- (-) Every component must be tested in both themes
+- (-) Custom components need explicit `dark:` variants for all color tokens
+
+---
+
+### AD-013: Responsive Design Strategy
+
+**Status**: Accepted
+**Date**: 2026-01
+
+**Context**: The application is used on desktop workstations (primary), tablets (field supervisors), and mobile devices (technicians). The sidebar layout, data tables, and forms must adapt to all screen sizes.
+
+**Decision**: Mobile-first approach with a single breakpoint at `1024px`. Custom `useIsMobile` hook detects viewport width via `window.matchMedia`. Two sidebar layouts: vertical (desktop) and horizontal (mobile).
+
+```tsx
+// src/hooks/use-mobile.tsx
+const MOBILE_BREAKPOINT = 1024;
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    mql.addEventListener("change", onChange);
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
+  return !!isMobile;
+}
+```
+
+**Breakpoint strategy**:
+| Screen | Width | Layout |
+|--------|-------|--------|
+| Desktop | ≥ 1024px | Vertical sidebar + full table |
+| Mobile | < 1024px | Horizontal sidebar + responsive table |
+
+**Responsive patterns**:
+```tsx
+// ✅ CORRECT — use useIsMobile for layout switching
+const isMobile = useIsMobile();
+{isMobile ? <MobileSidebar /> : <DesktopSidebar />}
+
+// ✅ CORRECT — responsive Tailwind classes
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+// ✅ CORITICAL — DataGrid horizontal scroll on mobile
+<ScrollArea className="w-full">
+  <DataGridContainer className="w-full min-w-[640px]">
+    <DataGridTable />
+  </DataGridContainer>
+  <ScrollBar orientation="horizontal" />
+</ScrollArea>
+```
+
+**Mobile considerations**:
+- Data tables use horizontal scroll, never collapse columns
+- Forms use full-width fields on mobile, side-by-side on desktop
+- Dialogs/Sheets use full-screen on mobile, slide-over on desktop
+- Touch targets minimum 44px (accessibility)
+
+**Consequences**:
+- (+) Single breakpoint simplifies layout logic
+- (+) `useIsMobile` hook provides SSR-safe detection
+- (+) Horizontal scroll preserves table data density on mobile
+- (-) Must test both layouts on every new page
+- (-) No tablet-specific breakpoint — 1024px covers both tablet and mobile
+
+---
+
+### AD-014: Language Locale (i18n) — Enhanced
+
+**Status**: Accepted
+**Date**: 2026-01
+
+**Context**: The application serves Indonesian and English users. Default language is Indonesian (`id`). Language preference must persist across sessions and be switchable via header dropdown.
+
+**Decision**: Use `react-i18next` with `i18next-browser-languagedetector`. Translation files in `src/i18n/locales/{en,id}/common.json`. `LanguageSwitcher` component in sidebar header toolbar provides dropdown with flag icons.
+
+```tsx
+// src/i18n/index.ts
+i18n
+  .use(initReactI18next)
+  .init({
+    resources,
+    fallbackLng: "id",
+    lng: "id",
+    interpolation: { escapeValue: false },
+  });
+```
+
+**LanguageSwitcher pattern**:
+```tsx
+// src/components/language-switcher.tsx
+const LANGUAGES = [
+  { code: "id", label: "Bahasa Indonesia", flag: "/media/flags/indonesia.svg" },
+  { code: "en", label: "English", flag: "/media/flags/united-states.svg" },
+];
+
+export function LanguageSwitcher() {
+  const { i18n } = useTranslation();
+  const currentLang = LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[0];
+
+  const handleLanguageChange = (code: string) => {
+    i18n.changeLanguage(code);
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="size-10 rounded-lg">
+          <img src={currentLang.flag} alt={currentLang.label} className="size-5 rounded-full" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        {LANGUAGES.map((lang) => (
+          <DropdownMenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)}>
+            <img src={lang.flag} alt={lang.label} className="size-4 rounded-full mr-2" />
+            <span className="font-medium">{lang.label}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+```
+
+**Conventions**:
+- All user-facing strings MUST use `t("key")` function
+- Never hardcode display text — always from translation JSON
+- Fallback language is `id` (Indonesian)
+- Translation keys follow dot notation: `menu.dashboard`, `common.save`, `feature.title`
+- Add new keys to BOTH `en.json` and `id.json` files
+
+**Consequences**:
+- (+) Language preference persists via `i18next-browser-languagedetector` (localStorage)
+- (+) Adding new languages requires only new JSON locale files
+- (+) `LanguageSwitcher` provides intuitive dropdown with flags
+- (-) All existing strings must be migrated to `t()` calls
+- (-) Translation file size grows with each feature
+- (-) Must keep both locale files in sync when adding new keys
+
+---
+
+### AD-015: File Size Limit (300 Lines Max)
+
+**Status**: Accepted
+**Date**: 2026-05
+
+**Context**: Large files (>500 lines) are difficult to maintain, review, and test. Finding specific logic requires excessive scrolling, and merge conflicts become more likely with longer files.
+
+**Decision**: Every source file MUST NOT exceed 300 lines (including comments, blank lines, and imports). When a file approaches this limit, it must be refactored by extracting logical units into separate components, hooks, or utilities.
+
+**Exceptions**: The following file types are exempt from the 300-line limit:
+- Route configuration files (`paths.ts`)
+- Constants/configuration files (`constants.ts`, `menu.ts`)
+- Translation/i18n files (`*.json`)
+- Mock/dummy data files (`data/dummy-*.ts`)
+- Type definition barrel files (`types/index.ts`)
+
+These files may exceed 300 lines but should still aim for reasonable size (max 500 lines).
+
+**Splitting strategies**:
+
+| File Type | Extraction Pattern | Example |
+|-----------|-------------------|---------|
+| Large component | Extract sub-components | `feature-list.tsx` → `feature-list-header.tsx`, `feature-list-body.tsx` |
+| Complex form | Extract form sections | `feature-form.tsx` → `feature-form-basic.tsx`, `feature-form-advanced.tsx` |
+| Table with many columns | Extract column groups | `columns.tsx` → `basic-columns.tsx`, `detail-columns.tsx` |
+| Store with many actions | Split by domain | `store.ts` → `store-ui.ts`, `store-filters.ts` |
+| Large utility file | Group by concern | `utils.ts` → `format-utils.ts`, `validation-utils.ts` |
+
+**Enforcement:**
+- Run `wc -l` on PR diff — flag files >300 lines
+- Code review checklist: verify file size before merge
+- ESLint rule (future): `max-lines: ["error", 300]`
+
+**Consequences**:
+- (+) Files are easier to read, review, and maintain
+- (+) Smaller files reduce merge conflict probability
+- (+) Encourages single-responsibility principle
+- (+) Better code organization and discoverability
+- (-) More files to navigate (mitigated by clear naming conventions)
+- (-) Requires discipline to split before hitting limit
 
 ---
 
@@ -616,7 +827,9 @@ Three-tier loading state system:
 | Active sidebar item | Zustand global store | `useLayoutStore` | `layout`, `menu` |
 | Auth user & tokens | Zustand global store | `useAuthStore` | `user`, `isAuthenticated` |
 | URL search params | nuqs | `useQueryState` | Page number, active tab |
-| Theme/locale | React context / i18n | `useTheme`, `useTranslation` | Dark mode, language |
+| Theme (dark/light) | `next-themes` via `ThemeProvider` | `useTheme` | Dark mode, system preference (AD-012) |
+| Locale (language) | `react-i18next` via `i18n` | `useTranslation` | Indonesian/English, LanguageSwitcher (AD-014) |
+| Responsive layout | `useIsMobile` hook (1024px breakpoint) | `useIsMobile` | Mobile sidebar, horizontal scroll (AD-013) |
 
 ### Zustand Store Template
 

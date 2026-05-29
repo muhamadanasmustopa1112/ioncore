@@ -77,7 +77,7 @@ export interface WarehouseAsset {
   stockItemId: string;
   sku: string;
   name: string;
-  category: "customer_equipment" | "field_tool" | "infrastructure_equipment";
+  category: "customer_equipment" | "field_tool" | "infrastructure_equipment" | "infrastructure";
   serialNumber: string;
   qrCode: string;
   receivedAt: string;
@@ -104,6 +104,15 @@ export interface WarehouseAsset {
   woNumber?: string;
   branchId?: string;
   branchName?: string;
+  // Infrastructure Lifecycle Fields (PRD Section 4.4)
+  purchaseDate?: string;
+  distributorName?: string;
+  purchaseOrderReference?: string;
+  warrantyExpiryDate?: string;
+  deploymentStatus?: DeploymentStatus;
+  deploymentLocation?: DeploymentLocation;
+  networkNodeId?: string;
+  maintenanceScheduleId?: string;
 }
 
 export interface RetrofitComponent {
@@ -133,6 +142,7 @@ export interface RetrofitJob {
 
 export type StockItemCategory = "serialized_device" | "cable" | "consumable" | "infrastructure";
 export type StockItemType = "serialized" | "cable" | "consumable";
+export type InventoryValuationMethod = "FIFO" | "LIFO";
 
 export interface StockItem {
   id: string;
@@ -166,6 +176,17 @@ export interface StockLevel {
   threshold: number;
   uom: string;
   alertStatus: StockAlertStatus;
+}
+
+// ─── Inventory Valuation Configuration ───────────────────────────────────────
+
+export interface InventoryValuationConfig {
+  warehouseId: string;
+  warehouseName: string;
+  valuationMethod: InventoryValuationMethod;
+  configuredBy: string;
+  configuredAt: string;
+  notes?: string;
 }
 
 // ─── Dispatch / WO BOM ───────────────────────────────────────────────────────
@@ -267,6 +288,18 @@ export interface StockOpname {
 export type ReturnStatus = "pending_return" | "received" | "restocked" | "decommissioned";
 export type DeviceOwnership = "ion_owned" | "leased" | "customer_owned";
 export type DeviceCondition = "good" | "damaged";
+export type DeploymentStatus = "in_warehouse" | "deployed" | "under_maintenance" | "decommissioned";
+
+export interface DeploymentLocation {
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  address: string;
+  branchId: string;
+  branchName: string;
+  nodeId?: string;
+}
 
 export interface DeviceReturnRecord {
   id: string;
