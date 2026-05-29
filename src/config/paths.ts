@@ -235,6 +235,12 @@ export const paths = {
           getHref: () => "/warehouse/reports",
         },
       },
+      inventoryConfig: {
+        root: {
+          path: "/warehouse/inventory-config",
+          getHref: () => "/warehouse/inventory-config",
+        },
+      },
     },
     operations: {
       root: {

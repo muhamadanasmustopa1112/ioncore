@@ -14,16 +14,6 @@ All feature requirements and business rules are defined in `.opencode/PRD-Master
 - Branch hierarchy rules (Regional → Area → Sub Area)
 - Module-specific requirements and integration points
 
-## Skill Guide
-
-Detailed coding patterns, component templates, and implementation standards are in `.opencode/SKILLS.md`. Reference this for:
-- Feature structure with barrel exports
-- Component patterns (List, Form Sheet, Form, Table Columns)
-- API layer patterns (Query Keys, API Functions, React Query Hooks)
-- Zustand store patterns
-- TypeScript standards and naming conventions
-- i18n, performance, and security rules
-
 ## Commands
 
 ```bash
@@ -109,6 +99,11 @@ features/[domain]/[feature-name]/
     ├── index.ts                  # Barrel export
     └── {item}.ts                # Type definitions (Item, Response, Params, Request)
 ```
+
+**IMPORTANT:**
+- Feature module = **root folder** (`features/[domain]/[feature]/`), NOT inside `components/`
+- Legacy pattern: `components/[feature]/` — **DO NOT USE** for new features
+- New pattern: `features/[domain]/[feature]/` — self-contained module with api/, components/, store/, data/, types/
 
 ### Route Standard
 
@@ -474,6 +469,126 @@ export const DataTableToolbar = () => {
 };
 ```
 
+### Theme System (Dark/Light Mode)
+
+Use `next-themes` with class-based dark mode. `ThemeProvider` wraps the app root.
+
+```tsx
+// src/components/layouts/context/theme-provider.tsx
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  return (
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+      {...props}
+    >
+      {children}
+    </NextThemesProvider>
+  );
+}
+```
+
+**Tailwind patterns:**
+```tsx
+// ✅ CORRECT — use dark: prefix
+<div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+
+// ❌ WRONG — hardcoded colors
+<div className="bg-white text-black">
+```
+
+**Conventions:**
+- Use `dark:` Tailwind prefix for all dark mode overrides
+- Prefer CSS variable-based theming (`--background`, `--foreground`, `--primary`)
+- Avoid hardcoded colors — use `hsl(var(--<token>))` or Tailwind config
+- `disableTransitionOnChange` prevents flash during theme switch
+
+### Responsive Design Strategy
+
+Mobile-first approach with a single breakpoint at `1024px`. Custom `useIsMobile` hook detects viewport width.
+
+```tsx
+// src/hooks/use-mobile.tsx
+const MOBILE_BREAKPOINT = 1024;
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    mql.addEventListener("change", onChange);
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
+
+  return !!isMobile;
+}
+```
+
+**Breakpoint strategy:**
+
+| Screen | Width | Layout |
+|--------|-------|--------|
+| Desktop | ≥ 1024px | Vertical sidebar + full table |
+| Mobile | < 1024px | Horizontal sidebar + responsive table |
+
+**Responsive patterns:**
+```tsx
+// ✅ CORRECT — use useIsMobile for layout switching
+const isMobile = useIsMobile();
+{isMobile ? <MobileSidebar /> : <DesktopSidebar />}
+
+// ✅ CORRECT — responsive Tailwind classes
+<div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+// ✅ CRITICAL — DataGrid horizontal scroll on mobile
+<ScrollArea className="w-full">
+  <DataGridContainer className="w-full min-w-[640px]">
+    <DataGridTable />
+  </DataGridContainer>
+  <ScrollBar orientation="horizontal" />
+</ScrollArea>
+```
+
+**Mobile considerations:**
+- Data tables use horizontal scroll, never collapse columns
+- Forms use full-width fields on mobile, side-by-side on desktop
+- Dialogs/Sheets use full-screen on mobile, slide-over on desktop
+- Touch targets minimum 44px (accessibility)
+
+### File Size Limit (AD-015)
+
+Every source file MUST NOT exceed **300 lines** (including comments, blank lines, and imports).
+
+**Exceptions:**
+- Route configuration files (`paths.ts`)
+- Constants/configuration files (`constants.ts`, `menu.ts`)
+- Translation/i18n files (`*.json`)
+- Mock/dummy data files (`data/dummy-*.ts`)
+- Type definition barrel files (`types/index.ts`)
+
+These files may exceed 300 lines but should still aim for reasonable size (max 500 lines).
+
+**Splitting strategies:**
+
+| File Type | Extraction Pattern | Example |
+|-----------|-------------------|---------|
+| Large component | Extract sub-components | `feature-list.tsx` → `feature-list-header.tsx`, `feature-list-body.tsx` |
+| Complex form | Extract form sections | `feature-form.tsx` → `feature-form-basic.tsx`, `feature-form-advanced.tsx` |
+| Table with many columns | Extract column groups | `columns.tsx` → `basic-columns.tsx`, `detail-columns.tsx` |
+| Store with many actions | Split by domain | `store.ts` → `store-ui.ts`, `store-filters.ts` |
+| Large utility file | Group by concern | `utils.ts` → `format-utils.ts`, `validation-utils.ts` |
+
+**Enforcement:**
+- Run `wc -l` on PR diff — flag files >300 lines
+- Code review checklist: verify file size before merge
+- ESLint rule (future): `max-lines: ["error", 300]`
+
 ## Critical Rules
 
 ### TypeScript
@@ -793,3 +908,6 @@ API calls proxy through Next.js rewrites. Service base paths defined in `src/con
 - [ ] No `any` type
 - [ ] All strings use i18n `t()` function
 - [ ] No hardcoded route strings
+- [ ] Test responsive layout (mobile + desktop)
+- [ ] Test dark/light theme
+- [ ] Verify file size < 300 lines (AD-015)

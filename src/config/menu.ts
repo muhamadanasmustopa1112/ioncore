@@ -344,6 +344,11 @@ const WAREHOUSE_ITEM = {
       path: paths.dashboard.warehouse.reports.root.getHref(),
       icon: FileBarChart,
     },
+    {
+      title: "Inventory Config",
+      path: paths.dashboard.warehouse.inventoryConfig.root.getHref(),
+      icon: Settings,
+    },
   ],
 };
 
