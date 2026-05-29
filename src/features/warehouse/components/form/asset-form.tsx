@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { UploadCloud, CheckCircle2 } from "lucide-react";
+import { UploadCloud, CheckCircle2, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useWarehouseStore } from "../../store/warehouse";
+import { ImportExportDialog } from "./import-export-dialog";
 
 const assetSchema = z.object({
   name: z.string().min(3, "Item name must be at least 3 characters"),
@@ -18,8 +19,7 @@ const assetSchema = z.object({
   units: z.coerce.number().min(0, "Units must be positive"),
   threshold: z.coerce.number().min(1, "Threshold must be at least 1"),
   uom: z.string().min(1, "UoM is required"),
-  specs: z.string().optional(),
-  initialSerial: z.string().optional(),
+  receivedBy: z.string().min(2, "Received by name is required"),
 });
 
 type AssetFormValues = z.infer<typeof assetSchema>;
@@ -30,6 +30,7 @@ interface AssetFormProps {
 
 export function AssetForm({ onSuccess }: AssetFormProps) {
   const { addAsset } = useWarehouseStore();
+  const [showImportExport, setShowImportExport] = useState(false);
 
   const {
     register,
@@ -70,6 +71,7 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
       units: values.units,
       threshold: values.threshold,
       uom: values.uom,
+      receivedBy: values.receivedBy,
     });
     onSuccess();
   };
@@ -160,17 +162,20 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
         </div>
       </div>
 
-      {/* Specifications */}
+      {/* Received By */}
       <div className="space-y-1">
         <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-          Technical Specifications
+          Received By *
         </label>
-        <textarea
-          rows={2}
-          placeholder="e.g. Dual-band Wi-Fi, 4GE ports, 1POTS port, optical interface."
-          className="flex w-full bg-background border border-input p-3 rounded-md text-xs text-foreground placeholder:text-muted-foreground focus:outline-hidden focus:ring-2 focus:ring-ring focus:ring-offset-2 resize-none"
-          {...register("specs")}
+        <Input
+          type="text"
+          placeholder="e.g. Budi Santoso"
+          className="text-xs h-10"
+          {...register("receivedBy")}
         />
+        {errors.receivedBy && (
+          <p className="text-[10px] text-red-500 font-bold">{errors.receivedBy.message}</p>
+        )}
       </div>
 
       {/* Quantities and UoM */}
@@ -231,20 +236,6 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
         </div>
       </div>
 
-      {/* Initial Serial Number for serialized equipment */}
-      {selectedCategory === "Equipment" && (
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            Initial Serial Number Tracking (Optional)
-          </label>
-          <Input
-            type="text"
-            placeholder="e.g. SN-9982310"
-            className="text-xs h-10"
-            {...register("initialSerial")}
-          />
-        </div>
-      )}
 
       {/* Image Upload Simulation */}
       <div className="space-y-1">
@@ -261,24 +252,42 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+      <div className="flex justify-between gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
         <Button
           type="button"
           variant="outline"
-          className="h-10 px-4 font-semibold text-xs"
-          onClick={onSuccess}
+          onClick={() => setShowImportExport(true)}
+          className="h-10 px-4 font-semibold text-xs flex items-center gap-2"
         >
-          Cancel
+          <FileText className="size-4" />
+          Import/Export
         </Button>
-        <Button
-          type="submit"
-          variant="primary"
-          className="h-10 px-5 font-semibold text-xs"
-          disabled={isSubmitting}
-        >
-          Register Item
-        </Button>
+        
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 px-4 font-semibold text-xs"
+            onClick={onSuccess}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            className="h-10 px-5 font-semibold text-xs"
+            disabled={isSubmitting}
+          >
+            Register Item
+          </Button>
+        </div>
       </div>
+
+      {/* Import/Export Dialog */}
+      <ImportExportDialog 
+        isOpen={showImportExport} 
+        onClose={() => setShowImportExport(false)} 
+      />
     </form>
   );
 }

@@ -12,6 +12,7 @@ import {
   DeviceReturnRecord,
   OpnameItemCount,
 } from "../types";
+import { AssetWithReceivedBy } from "../utils/csv-handler";
 import {
   DUMMY_STOCK_LEVELS,
   DUMMY_DISPATCHES,
@@ -21,7 +22,7 @@ import {
 } from "../data/dummy-subfeatures";
 
 // Pre-configured list of low stock alerts with category and uom
-const INITIAL_ASSETS: LowStockAlertData[] = [
+const INITIAL_ASSETS: AssetWithReceivedBy[] = [
   {
     id: "1",
     name: "Huawei HG8145V5 ONT",
@@ -33,6 +34,7 @@ const INITIAL_ASSETS: LowStockAlertData[] = [
     brand: "Huawei",
     model: "HG8145V5",
     uom: "pieces",
+    receivedBy: "Budi Santoso",
   },
   {
     id: "2",
@@ -45,6 +47,7 @@ const INITIAL_ASSETS: LowStockAlertData[] = [
     brand: "FiberOptic",
     model: "1KM-Drop",
     uom: "meters",
+    receivedBy: "Agus Prasetyo",
   },
   {
     id: "3",
@@ -57,6 +60,7 @@ const INITIAL_ASSETS: LowStockAlertData[] = [
     brand: "Generic",
     model: "1:8 PLC Splitter",
     uom: "pieces",
+    receivedBy: "Rizki Pratama",
   },
 ];
 
@@ -221,8 +225,8 @@ interface WarehouseState {
   setBranchFilter: (branch: string) => void;
 
   // Asset Registration States
-  assets: LowStockAlertData[];
-  addAsset: (asset: Omit<LowStockAlertData, "id" | "status">) => void;
+  assets: AssetWithReceivedBy[];
+  addAsset: (asset: Omit<AssetWithReceivedBy, "id" | "status">) => void;
   assetSheetOpen: boolean;
   setAssetSheetOpen: (open: boolean) => void;
 
@@ -317,7 +321,7 @@ export const useWarehouseStore = create<WarehouseState>((set) => ({
     set((state) => {
       const id = String(state.assets.length + 1);
       const status = newAsset.units <= newAsset.threshold * 0.5 ? "Critical" : "Warning";
-      const asset: LowStockAlertData = {
+      const asset: AssetWithReceivedBy = {
         ...newAsset,
         id,
         status,
