@@ -1,0 +1,105 @@
+import type { BulkOperationItem, PlanItem, ExecutionResult } from "../types";
+
+export const dummyPlans: PlanItem[] = [
+  { id: "plan-1", name: "Basic 10Mbps", monthlyPrice: 150000, speed: "10 Mbps", category: "Residential" },
+  { id: "plan-2", name: "Standard 20Mbps", monthlyPrice: 250000, speed: "20 Mbps", category: "Residential" },
+  { id: "plan-3", name: "Premium 50Mbps", monthlyPrice: 450000, speed: "50 Mbps", category: "Residential" },
+  { id: "plan-4", name: "Business 100Mbps", monthlyPrice: 800000, speed: "100 Mbps", category: "Business" },
+  { id: "plan-5", name: "Enterprise 200Mbps", monthlyPrice: 1500000, speed: "200 Mbps", category: "Enterprise" },
+  { id: "plan-6", name: "Corporate 500Mbps", monthlyPrice: 3000000, speed: "500 Mbps", category: "Corporate" },
+];
+
+export const dummyBulkOperations: BulkOperationItem[] = [
+  {
+    id: "bo-001",
+    op_type: "plan_change",
+    title: "Upgrade Basic to Standard - Jakarta Selatan",
+    description: "Upgrade Basic plan to Standard for Jakarta Selatan area",
+    scope: "Area: Jakarta Selatan",
+    status: "completed",
+    affected_customer_count: 245,
+    billing_delta_summary: { total_mrc_increase: 25000000, total_mrc_decrease: 0, no_change_count: 0 },
+    execution_log: [],
+    created_by: "Admin",
+    created_at: "2025-05-20T10:30:00Z",
+    updated_at: "2025-05-20T10:30:00Z",
+  },
+  {
+    id: "bo-002",
+    op_type: "price_adjustment",
+    title: "Annual Price Adjustment",
+    description: "Annual price adjustment for all residential plans",
+    scope: "All Customers",
+    status: "pending_approval",
+    affected_customer_count: 1850,
+    billing_delta_summary: { total_mrc_increase: 0, total_mrc_decrease: 50000000, no_change_count: 1850 },
+    execution_log: [],
+    created_by: "Finance",
+    created_at: "2025-05-22T14:15:00Z",
+    updated_at: "2025-05-22T14:15:00Z",
+  },
+  {
+    id: "bo-003",
+    op_type: "service_modification",
+    title: "Add Static IP Package",
+    description: "Add static IP package to all business customers",
+    scope: "Type: Business",
+    status: "executing",
+    affected_customer_count: 120,
+    billing_delta_summary: { total_mrc_increase: 36000000, total_mrc_decrease: 0, no_change_count: 0 },
+    execution_log: [],
+    created_by: "Operations",
+    created_at: "2025-05-25T09:00:00Z",
+    updated_at: "2025-05-25T09:00:00Z",
+  },
+  {
+    id: "bo-004",
+    op_type: "suspension",
+    title: "Temporary Suspension",
+    description: "Temporary suspension for overdue accounts",
+    scope: "Manual Selection",
+    status: "draft",
+    affected_customer_count: 15,
+    billing_delta_summary: { total_mrc_increase: 0, total_mrc_decrease: 0, no_change_count: 15 },
+    execution_log: [],
+    created_by: "Compliance",
+    created_at: "2025-05-26T16:45:00Z",
+    updated_at: "2025-05-26T16:45:00Z",
+  },
+  {
+    id: "bo-005",
+    op_type: "reactivation",
+    title: "Reactivate Accounts - Bandung Timur",
+    description: "Reactivate suspended accounts in Bandung Timur",
+    scope: "Area: Bandung Timur",
+    status: "failed",
+    affected_customer_count: 85,
+    billing_delta_summary: { total_mrc_increase: 12750000, total_mrc_decrease: 0, no_change_count: 0 },
+    execution_log: [],
+    created_by: "Operations",
+    created_at: "2025-05-18T11:20:00Z",
+    updated_at: "2025-05-18T11:20:00Z",
+  },
+];
+
+export const dummyAreas = [
+  "Jakarta Selatan",
+  "Jakarta Utara",
+  "Jakarta Barat",
+  "Jakarta Timur",
+  "Jakarta Pusat",
+  "Bandung Timur",
+  "Bandung Barat",
+  "Surabaya Utara",
+  "Surabaya Selatan",
+];
+
+export const dummyCustomerTypes = ["broadband", "business", "enterprise", "corporate"] as const;
+
+export const dummyExecutionResults: ExecutionResult[] = [
+  { customer_id: "cust-001", customer_name: "PT Maju Jaya", status: "success", message: "Plan upgraded successfully", executed_at: "2025-05-25T09:05:00Z" },
+  { customer_id: "cust-002", customer_name: "CV Berkah", status: "success", message: "Plan upgraded successfully", executed_at: "2025-05-25T09:05:30Z" },
+  { customer_id: "cust-003", customer_name: "UD Sentosa", status: "failed", message: "Insufficient balance for prorated charge", executed_at: "2025-05-25T09:06:00Z" },
+  { customer_id: "cust-004", customer_name: "PT Abadi Makmur", status: "success", message: "Plan upgraded successfully", executed_at: "2025-05-25T09:06:30Z" },
+  { customer_id: "cust-005", customer_name: "CV Sejahtera", status: "pending", message: "Awaiting ION Radius sync", executed_at: "2025-05-25T09:07:00Z" },
+];

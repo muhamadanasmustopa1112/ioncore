@@ -7,6 +7,7 @@ import {
   Box,
   BoxIcon,
   Building2,
+  Calendar,
   ClipboardList,
   Columns,
   Database,
@@ -17,7 +18,9 @@ import {
   Headset,
   KeyRound,
   LayoutGrid,
+  Layers,
   Map,
+  Megaphone,
   Network,
   Package,
   PanelsTopLeft,
@@ -352,6 +355,46 @@ const WAREHOUSE_ITEM = {
   ],
 };
 
+const OPERATIONS_ITEM = {
+  title: "Operations",
+  path: paths.dashboard.operations.root.getHref(),
+  heading: 'Operations',
+  icon: Activity,
+  permission: "ops.read",
+  children: [
+    {
+      title: "Planned Maintenance",
+      path: paths.dashboard.operations.plannedMaintenance.root.getHref(),
+      icon: Wrench,
+      permission: "ops.maintenance.read",
+    },
+    {
+      title: "Bulk Operations",
+      path: paths.dashboard.operations.bulkOperations.root.getHref(),
+      icon: Layers,
+      permission: "ops.bulk.read",
+    },
+    {
+      title: "Calendar",
+      path: paths.dashboard.operations.calendar.root.getHref(),
+      icon: Calendar,
+      permission: "ops.calendar.read",
+    },
+    {
+      title: "Announcements",
+      path: paths.dashboard.operations.announcements.root.getHref(),
+      icon: Megaphone,
+      permission: "ops.announcements.read",
+    },
+    {
+      title: "SLA Monitoring",
+      path: paths.dashboard.operations.slaMonitoring.root.getHref(),
+      icon: Activity,
+      permission: "ops.sla.read",
+    },
+  ],
+};
+
 const ADMINISTRATION_ITEMS = [
   {
     title: "Branch",
@@ -451,6 +494,7 @@ export const DASHBOARD_MENU: MenuConfig = [
   NETWORK_ORCHESTRATION_ITEM,
   TECHNICIAN_FIELD_ITEM,
   WAREHOUSE_ITEM,
+  OPERATIONS_ITEM,
   ORDERS_ITEM,
   ...ADMINISTRATION_ITEMS,
 ];

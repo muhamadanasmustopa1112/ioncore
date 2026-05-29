@@ -247,6 +247,60 @@ export const paths = {
         path: "/operations",
         getHref: () => "/operations",
       },
+      plannedMaintenance: {
+        root: {
+          path: "/operations/planned-maintenance",
+          getHref: () => "/operations/planned-maintenance",
+        },
+        create: {
+          path: "/operations/planned-maintenance/create",
+          getHref: () => "/operations/planned-maintenance/create",
+        },
+        detail: {
+          path: "/operations/planned-maintenance/:id",
+          getHref: (id: string) => `/operations/planned-maintenance/${id}`,
+        },
+        edit: {
+          path: "/operations/planned-maintenance/:id/edit",
+          getHref: (id: string) => `/operations/planned-maintenance/${id}/edit`,
+        },
+      },
+      bulkOperations: {
+        root: {
+          path: "/operations/bulk-operations",
+          getHref: () => "/operations/bulk-operations",
+        },
+        detail: {
+          path: "/operations/bulk-operations/:id",
+          getHref: (id: string) => `/operations/bulk-operations/${id}`,
+        },
+      },
+      calendar: {
+        root: {
+          path: "/operations/calendar",
+          getHref: () => "/operations/calendar",
+        },
+      },
+      announcements: {
+        root: {
+          path: "/operations/announcements",
+          getHref: () => "/operations/announcements",
+        },
+        create: {
+          path: "/operations/announcements/create",
+          getHref: () => "/operations/announcements/create",
+        },
+        detail: {
+          path: "/operations/announcements/:id",
+          getHref: (id: string) => `/operations/announcements/${id}`,
+        },
+      },
+      slaMonitoring: {
+        root: {
+          path: "/operations/sla-monitoring",
+          getHref: () => "/operations/sla-monitoring",
+        },
+      },
       workOrders: {
         root: {
           path: "/operations/work-orders",
