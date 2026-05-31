@@ -10,6 +10,7 @@ import {
   Calendar,
   ClipboardList,
   Columns,
+  CreditCard,
   Database,
   FileChartLine,
   FileText,
@@ -55,6 +56,8 @@ import {
   RotateCcw,
   ClipboardCheck,
   FileBarChart,
+  Ticket,
+  Star,
 } from "lucide-react";
 import { paths } from "@/config/paths";
 import { MenuConfig } from "@/config/types";
@@ -294,6 +297,46 @@ const TECHNICIAN_FIELD_ITEM = {
   ],
 };
 
+const FINANCE_ITEM = {
+  title: "Finance",
+  path: paths.dashboard.finance.root.getHref(),
+  heading: 'Finance',
+  icon: Wallet,
+  permission: "billing.read",
+  children: [
+    {
+      title: "Invoices",
+      path: paths.dashboard.finance.invoice.root.getHref(),
+      icon: FileText,
+      permission: "billing.invoice.read",
+    },
+    {
+      title: "Payments",
+      path: paths.dashboard.finance.payment.root.getHref(),
+      icon: CreditCard,
+      permission: "billing.payment.read",
+    },
+    {
+      title: "Suspensions",
+      path: paths.dashboard.finance.suspension.root.getHref(),
+      icon: ShieldOff,
+      permission: "billing.suspension.read",
+    },
+    {
+      title: "Commissions",
+      path: paths.dashboard.finance.commission.root.getHref(),
+      icon: Users,
+      permission: "billing.commission.read",
+    },
+    {
+      title: "Reports",
+      path: paths.dashboard.finance.report.root.getHref(),
+      icon: FileBarChart,
+      permission: "billing.report.read",
+    },
+  ],
+};
+
 const ORDERS_ITEM = {
   title: "Orders",
   path: paths.dashboard.operations.orders.root.getHref(),
@@ -391,6 +434,33 @@ const OPERATIONS_ITEM = {
       path: paths.dashboard.operations.slaMonitoring.root.getHref(),
       icon: Activity,
       permission: "ops.sla.read",
+    },
+  ],
+};
+
+const CUSTOMER_SERVICE_ITEM = {
+  title: "Customer Service",
+  path: paths.dashboard.customerService.root.getHref(),
+  heading: 'Support',
+  icon: Headset,
+  permission: "cs.read",
+  children: [
+    {
+      title: "Dashboard",
+      path: paths.dashboard.customerService.root.getHref(),
+      icon: Gauge,
+    },
+    {
+      title: "Tickets",
+      path: paths.dashboard.customerService.tickets.root.getHref(),
+      icon: Ticket,
+      permission: "cs.tickets.read",
+    },
+    {
+      title: "CSAT",
+      path: paths.dashboard.customerService.csat.root.getHref(),
+      icon: Star,
+      permission: "cs.csat.read",
     },
   ],
 };
@@ -493,8 +563,10 @@ export const DASHBOARD_MENU: MenuConfig = [
   CRM_SALES_ITEM,
   NETWORK_ORCHESTRATION_ITEM,
   TECHNICIAN_FIELD_ITEM,
+  FINANCE_ITEM,
   WAREHOUSE_ITEM,
   OPERATIONS_ITEM,
+  CUSTOMER_SERVICE_ITEM,
   ORDERS_ITEM,
   ...ADMINISTRATION_ITEMS,
 ];

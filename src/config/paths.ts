@@ -322,6 +322,28 @@ export const paths = {
         getHref: (id: string) => `/operations/connectivity/${id}`,
       },
     },
+    customerService: {
+      root: {
+        path: "/customer-service",
+        getHref: () => "/customer-service",
+      },
+      tickets: {
+        root: {
+          path: "/customer-service/tickets",
+          getHref: () => "/customer-service/tickets",
+        },
+        detail: {
+          path: "/customer-service/tickets/:id",
+          getHref: (id: string) => `/customer-service/tickets/${id}`,
+        },
+      },
+      csat: {
+        root: {
+          path: "/customer-service/csat",
+          getHref: () => "/customer-service/csat",
+        },
+      },
+    },
     user: {
       root: {
         path: "/users",
@@ -368,6 +390,54 @@ export const paths = {
       root: {
         path: "/users/employees/access-management",
         getHref: () => "/users/employees/access-management",
+      },
+    },
+    finance: {
+      root: {
+        path: "/finance",
+        getHref: () => "/finance",
+      },
+      invoice: {
+        root: {
+          path: "/finance/invoices",
+          getHref: () => "/finance/invoices",
+        },
+        create: {
+          path: "/finance/invoices/create",
+          getHref: () => "/finance/invoices/create",
+        },
+        detail: {
+          path: "/finance/invoices/:id",
+          getHref: (id: string) => `/finance/invoices/${id}`,
+        },
+      },
+      payment: {
+        root: {
+          path: "/finance/payments",
+          getHref: () => "/finance/payments",
+        },
+        detail: {
+          path: "/finance/payments/:id",
+          getHref: (id: string) => `/finance/payments/${id}`,
+        },
+      },
+      suspension: {
+        root: {
+          path: "/finance/suspensions",
+          getHref: () => "/finance/suspensions",
+        },
+      },
+      commission: {
+        root: {
+          path: "/finance/commissions",
+          getHref: () => "/finance/commissions",
+        },
+      },
+      report: {
+        root: {
+          path: "/finance/reports",
+          getHref: () => "/finance/reports",
+        },
       },
     },
     administration: {
