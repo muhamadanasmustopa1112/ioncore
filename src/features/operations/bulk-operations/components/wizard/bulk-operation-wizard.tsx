@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -74,18 +73,10 @@ export function BulkOperationWizard({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[800px] gap-0 p-0">
-        <DialogHeader className="flex flex-row items-center justify-between border-b px-6 py-4">
+        <DialogHeader className="border-b px-6 py-4">
           <DialogTitle className="text-lg font-semibold">
             {t("bulkOperations.wizard.title", "New Bulk Operation")}
           </DialogTitle>
-          <Button
-            mode="icon"
-            variant="ghost"
-            size="sm"
-            onClick={handleClose}
-          >
-            <X className="size-4" />
-          </Button>
         </DialogHeader>
 
         <div className="border-b px-6 py-3">

@@ -58,6 +58,7 @@ import {
   FileBarChart,
   Ticket,
   Star,
+  Receipt,
 } from "lucide-react";
 import { paths } from "@/config/paths";
 import { MenuConfig } from "@/config/types";
@@ -344,6 +345,38 @@ const ORDERS_ITEM = {
   icon: Package,
 };
 
+const ENTERPRISE_SYSTEM_ITEM = {
+  title: "Enterprise System",
+  path: paths.dashboard.enterprise.root.getHref(),
+  heading: 'Enterprise',
+  icon: Presentation,
+  permission: "enterprise.read",
+  children: [
+    { title: "Dashboard", path: paths.dashboard.enterprise.dashboard.getHref(), icon: BarChart3 },
+    { title: "Vendors", path: paths.dashboard.enterprise.vendors.root.getHref(), icon: Truck },
+    { title: "Projects", path: paths.dashboard.enterprise.projects.root.getHref(), icon: ClipboardList },
+    { title: "CPQ / BOQ", path: paths.dashboard.enterprise.cpq.root.getHref(), icon: FileText },
+    { title: "Intercompany PO", path: paths.dashboard.enterprise.icPo.root.getHref(), icon: ArrowLeftRight },
+    { title: "Resellers", path: paths.dashboard.enterprise.resellers.root.getHref(), icon: Users },
+    { title: "EWO", path: paths.dashboard.enterprise.ewo.root.getHref(), icon: Wrench },
+    { title: "Settlement", path: paths.dashboard.enterprise.settlement.root.getHref(), icon: Receipt },
+  ],
+};
+
+const WAR_ROOM_ITEM = {
+  title: "War Room",
+  path: paths.dashboard.warRoom.root.getHref(),
+  heading: 'Operations',
+  icon: ShieldAlert,
+  permission: "warroom.read",
+  children: [
+    { title: "Active Incidents", path: paths.dashboard.warRoom.root.getHref(), icon: ShieldAlert },
+    { title: "Task Board", path: paths.dashboard.warRoom.tasks.getHref(), icon: SquareKanban },
+    { title: "PIR Tracker", path: paths.dashboard.warRoom.pir.getHref(), icon: ClipboardCheck },
+    { title: "Broadcasts", path: paths.dashboard.warRoom.broadcasts.getHref(), icon: Megaphone },
+  ],
+};
+
 const WAREHOUSE_ITEM = {
   title: "Warehouse",
   path: paths.dashboard.warehouse.root.getHref(),
@@ -568,6 +601,8 @@ export const DASHBOARD_MENU: MenuConfig = [
   OPERATIONS_ITEM,
   CUSTOMER_SERVICE_ITEM,
   ORDERS_ITEM,
+  ENTERPRISE_SYSTEM_ITEM,
+  WAR_ROOM_ITEM,
   ...ADMINISTRATION_ITEMS,
 ];
 

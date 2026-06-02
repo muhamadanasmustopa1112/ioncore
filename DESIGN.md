@@ -1,8 +1,8 @@
 # ION Core — Architecture & Design Document
 
 **Product**: ION Core — ISP Enterprise Management System
-**Version**: 0.3
-**Last Updated**: 2026-05-29
+**Version**: 0.4
+**Last Updated**: 2026-06-02
 
 > **Note**: For implementation details, code patterns, and step-by-step guides, see `AGENTS.md`. This document focuses on architectural decisions, rationale, and tradeoffs.
 
@@ -15,6 +15,7 @@
    - AD-012: Theme System (Dark/Light Mode)
    - AD-013: Responsive Design Strategy
    - AD-014: Language Locale (i18n) — Enhanced
+   - AD-016: UI Consistency Standards
 2. [Data Flow Patterns](#data-flow-patterns)
 3. [Component Patterns](#component-patterns)
 4. [State Architecture](#state-architecture)
@@ -432,42 +433,6 @@ i18n
   });
 ```
 
-**LanguageSwitcher pattern**:
-```tsx
-// src/components/language-switcher.tsx
-const LANGUAGES = [
-  { code: "id", label: "Bahasa Indonesia", flag: "/media/flags/indonesia.svg" },
-  { code: "en", label: "English", flag: "/media/flags/united-states.svg" },
-];
-
-export function LanguageSwitcher() {
-  const { i18n } = useTranslation();
-  const currentLang = LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[0];
-
-  const handleLanguageChange = (code: string) => {
-    i18n.changeLanguage(code);
-  };
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="size-10 rounded-lg">
-          <img src={currentLang.flag} alt={currentLang.label} className="size-5 rounded-full" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        {LANGUAGES.map((lang) => (
-          <DropdownMenuItem key={lang.code} onClick={() => handleLanguageChange(lang.code)}>
-            <img src={lang.flag} alt={lang.label} className="size-4 rounded-full mr-2" />
-            <span className="font-medium">{lang.label}</span>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-```
-
 **Conventions**:
 - All user-facing strings MUST use `t("key")` function
 - Never hardcode display text — always from translation JSON
@@ -525,6 +490,140 @@ These files may exceed 300 lines but should still aim for reasonable size (max 5
 - (+) Better code organization and discoverability
 - (-) More files to navigate (mitigated by clear naming conventions)
 - (-) Requires discipline to split before hitting limit
+
+---
+
+### AD-016: UI Consistency Standards
+
+**Status**: Accepted
+**Date**: 2026-06
+
+**Context**: Features are built by different developers at different times, leading to inconsistent padding, margin, hardcoded colors, badge styling, and form sheet scroll behavior across the application.
+
+**Decision**: Establish mandatory UI standards for all new features and refactored code.
+
+#### Page Container Padding
+
+Every page-level component MUST use consistent padding:
+
+```tsx
+// ✅ CORRECT — standardized page container
+<div className="relative h-full w-full overflow-hidden px-6 py-4">
+
+// ❌ WRONG — inconsistent padding
+<div className="p-4">
+<div className="px-6 py-3">
+<div className="p-6">
+```
+
+**Standard:** `px-6 py-4` for all page containers.
+
+#### Toolbar Title Sizing
+
+```tsx
+// ✅ CORRECT
+<ToolbarTitle className="text-2xl font-extrabold tracking-tight">
+
+// ❌ WRONG — inconsistent sizing
+<ToolbarTitle className="text-xl font-extrabold tracking-tight sm:text-2xl">
+```
+
+#### No Hardcoded Colors
+
+All colors MUST use CSS variables or Tailwind semantic tokens. NEVER use hardcoded hex values.
+
+```tsx
+// ✅ CORRECT — CSS variables
+<span className="text-primary">
+<span className="bg-destructive text-destructive-foreground">
+<span className="text-muted-foreground">
+
+// ✅ CORRECT — Tailwind semantic tokens with dark: prefix
+<span className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+
+// ❌ WRONG — hardcoded hex
+<span style={{ color: "#f59e0b" }}>
+<Cell fill="#3b82f6" />
+```
+
+**Exception:** Recharts `fill` and `stroke` props MAY use CSS variable references:
+```tsx
+// ✅ CORRECT — Recharts with CSS variables
+<Cell fill="var(--color-primary)" />
+```
+
+#### Badge Component Usage
+
+All status/type badges MUST use the `<Badge>` component with semantic variants. NEVER use raw `<span>` with hardcoded Tailwind classes.
+
+```tsx
+// ✅ CORRECT — Badge component
+<Badge variant="success" appearance="light">Active</Badge>
+<Badge variant="destructive" appearance="light">Critical</Badge>
+<Badge variant="warning" appearance="light">Pending</Badge>
+<Badge variant="info" appearance="light">In Progress</Badge>
+<Badge variant="secondary" appearance="light">Draft</Badge>
+
+// ❌ WRONG — raw span with hardcoded classes
+<span className="bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full px-2 py-0.5 text-xs font-semibold">
+  Active
+</span>
+```
+
+**Available Badge variants:**
+
+| Variant | Use For |
+|---------|---------|
+| `default` | Neutral status |
+| `secondary` | Draft, inactive |
+| `success` | Active, completed, online |
+| `warning` | Pending, warm, near capacity |
+| `destructive` | Critical, failed, offline |
+| `info` | In progress, processing |
+| `outline` | Subtle labels |
+
+#### Form Sheet Scrollable Body
+
+All form sheets MUST have scrollable body content. The `SheetBody` MUST use `overflow-hidden` with an inner `ScrollArea`.
+
+```tsx
+// ✅ CORRECT — scrollable sheet body
+<SheetContent className="...flex flex-col">
+  <SheetHeader className="border-b px-5 py-4 shrink-0">
+    <SheetTitle>Title</SheetTitle>
+  </SheetHeader>
+
+  <SheetBody className="flex-1 p-0 overflow-hidden">
+    <ScrollArea className="h-full px-6 py-5">
+      {/* form content */}
+    </ScrollArea>
+  </SheetBody>
+
+  <SheetFooter className="border-t p-5 shrink-0">
+    {/* buttons */}
+  </SheetFooter>
+</SheetContent>
+
+// ❌ WRONG — no scroll, content gets cut off
+<SheetContent>
+  <SheetBody className="p-6">
+    {/* long form content — not scrollable */}
+  </SheetBody>
+</SheetContent>
+```
+
+**Key rules:**
+- `SheetContent` MUST have `flex flex-col` layout
+- `SheetHeader` MUST have `shrink-0`
+- `SheetBody` MUST have `flex-1 overflow-hidden`
+- Inner content MUST use `<ScrollArea className="h-full">`
+- `SheetFooter` MUST have `shrink-0`
+
+**Consequences**:
+- (+) Consistent visual appearance across all pages
+- (+) Dark mode works correctly without color overrides
+- (+) Long forms are always scrollable
+- (-) Existing code needs gradual migration to match standards
 
 ---
 

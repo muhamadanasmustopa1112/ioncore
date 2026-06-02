@@ -72,9 +72,9 @@ export interface MaintenanceEvent {
   updated_at: string;
 }
 
-export const maintenanceSchema = z.object({
+export const maintenanceFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(200, "Title must be 200 characters or less"),
-  description: z.string(),
+  description: z.string().min(1, "Description is required"),
   maintenance_type: z.enum(["fiber_upgrade", "olt_maintenance", "odp_replacement", "backbone", "config_change", "power", "other"], {
     message: "Please select a maintenance type",
   }),
@@ -84,19 +84,9 @@ export const maintenanceSchema = z.object({
     message: "Please select service impact level",
   }),
   requires_service_suspension: z.boolean(),
-  outcome_notes: z.string(),
 });
 
-export type MaintenanceFormData = {
-  title: string;
-  description: string;
-  maintenance_type: MaintenanceType;
-  scheduled_start: string;
-  scheduled_end: string;
-  service_impact: ServiceImpact;
-  requires_service_suspension: boolean;
-  outcome_notes: string;
-};
+export type MaintenanceFormData = z.infer<typeof maintenanceFormSchema>;
 
 export type MaintenanceParams = {
   draw: number;
@@ -114,4 +104,10 @@ export type MaintenanceResponse = {
     total_data: number;
     total_page: number;
   };
+};
+
+export type UpdateMaintenanceStatusPayload = {
+  id: string;
+  status: MaintenanceStatus;
+  notes?: string;
 };

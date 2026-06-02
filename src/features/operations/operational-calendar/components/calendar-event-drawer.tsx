@@ -105,7 +105,7 @@ export function EventDrawer({ open, onOpenChange }: EventDrawerProps) {
               variant={STATUS_BADGE[event.status]}
               appearance="light"
               size="sm"
-              className="shrink-0 mt-1"
+              className="shrink-0 mt-5"
             >
               {STATUS_LABELS[event.status]}
             </Badge>

@@ -574,6 +574,144 @@ export const paths = {
         getHref: () => "/administration/security-policy",
       },
     },
+    enterprise: {
+      root: {
+        path: "/enterprise",
+        getHref: () => "/enterprise",
+      },
+      dashboard: {
+        path: "/enterprise/dashboard",
+        getHref: () => "/enterprise/dashboard",
+      },
+      vendors: {
+        root: {
+          path: "/enterprise/vendors",
+          getHref: () => "/enterprise/vendors",
+        },
+        create: {
+          path: "/enterprise/vendors/create",
+          getHref: () => "/enterprise/vendors/create",
+        },
+        detail: {
+          path: "/enterprise/vendors/:id",
+          getHref: (id: string) => `/enterprise/vendors/${id}`,
+        },
+        edit: {
+          path: "/enterprise/vendors/:id/edit",
+          getHref: (id: string) => `/enterprise/vendors/${id}/edit`,
+        },
+      },
+      projects: {
+        root: {
+          path: "/enterprise/projects",
+          getHref: () => "/enterprise/projects",
+        },
+        create: {
+          path: "/enterprise/projects/create",
+          getHref: () => "/enterprise/projects/create",
+        },
+        detail: {
+          path: "/enterprise/projects/:id",
+          getHref: (id: string) => `/enterprise/projects/${id}`,
+        },
+        edit: {
+          path: "/enterprise/projects/:id/edit",
+          getHref: (id: string) => `/enterprise/projects/${id}/edit`,
+        },
+      },
+      cpq: {
+        root: {
+          path: "/enterprise/cpq",
+          getHref: () => "/enterprise/cpq",
+        },
+        preBoq: {
+          path: "/enterprise/cpq/pre-boq",
+          getHref: () => "/enterprise/cpq/pre-boq",
+        },
+        rfq: {
+          path: "/enterprise/cpq/rfq",
+          getHref: () => "/enterprise/cpq/rfq",
+        },
+        boq: {
+          path: "/enterprise/cpq/boq",
+          getHref: () => "/enterprise/cpq/boq",
+        },
+        quotation: {
+          path: "/enterprise/cpq/quotation",
+          getHref: () => "/enterprise/cpq/quotation",
+        },
+      },
+      icPo: {
+        root: {
+          path: "/enterprise/ic-po",
+          getHref: () => "/enterprise/ic-po",
+        },
+        detail: {
+          path: "/enterprise/ic-po/:id",
+          getHref: (id: string) => `/enterprise/ic-po/${id}`,
+        },
+      },
+      resellers: {
+        root: {
+          path: "/enterprise/resellers",
+          getHref: () => "/enterprise/resellers",
+        },
+        create: {
+          path: "/enterprise/resellers/create",
+          getHref: () => "/enterprise/resellers/create",
+        },
+        detail: {
+          path: "/enterprise/resellers/:id",
+          getHref: (id: string) => `/enterprise/resellers/${id}`,
+        },
+      },
+      ewo: {
+        root: {
+          path: "/enterprise/ewo",
+          getHref: () => "/enterprise/ewo",
+        },
+        create: {
+          path: "/enterprise/ewo/create",
+          getHref: () => "/enterprise/ewo/create",
+        },
+        detail: {
+          path: "/enterprise/ewo/:id",
+          getHref: (id: string) => `/enterprise/ewo/${id}`,
+        },
+      },
+      settlement: {
+        root: {
+          path: "/enterprise/settlement",
+          getHref: () => "/enterprise/settlement",
+        },
+        detail: {
+          path: "/enterprise/settlement/:id",
+          getHref: (id: string) => `/enterprise/settlement/${id}`,
+        },
+      },
+    },
+    warRoom: {
+      root: {
+        path: "/war-room",
+        getHref: () => "/war-room",
+      },
+      detail: {
+        path: "/war-room/:id",
+        getHref: (id: string) => `/war-room/${id}`,
+      },
+      tasks: {
+        path: "/war-room/tasks",
+        getHref: () => "/war-room/tasks",
+      },
+      pir: {
+        path: "/war-room/pir",
+        getHref: () => "/war-room/pir",
+      },
+      broadcasts: {
+        path: "/war-room/broadcasts",
+        getHref: () => "/war-room/broadcasts",
+      },
+    },
   },
   docs: {
     root: {
