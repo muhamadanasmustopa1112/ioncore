@@ -167,7 +167,9 @@
     "action": "Aksi",
     "source": "Sumber",
     "view": "Tampilan",
-    "rowsPerPage": "Baris per halaman"
+    "rowsPerPage": "Baris per halaman",
+    "language": "Bahasa",
+    "darkMode": "Mode Gelap"
   },
   "menu": {
     "dashboard": "Dasbor",
@@ -216,6 +218,12 @@
     "auditLog": "Log Audit",
     "accessPolicies": "Kebijakan Akses",
     "administration": "Administrasi",
+    "finance": "Keuangan",
+    "invoices": "Tagihan",
+    "payments": "Pembayaran",
+    "suspensions": "Penangguhan",
+    "commissions": "Komisi",
+    "reports": "Laporan",
     "headings": {
       "networkOrchestration": "Jaringan & Orkestrasi"
     }
@@ -2326,15 +2334,7 @@
       "noRecordsFound": "Tidak ada catatan pelanggaran ditemukan"
     }
   },
-  "menu": {
-    "finance": "Keuangan",
-    "invoices": "Tagihan",
-    "payments": "Pembayaran",
-    "suspensions": "Penangguhan",
-    "commissions": "Komisi",
-    "reports": "Laporan"
-  },
-  "billing": {
+    "billing": {
     "title": "Tagihan & Keuangan",
     "invoice": {
       "title": "Tagihan",

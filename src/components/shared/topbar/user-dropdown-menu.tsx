@@ -170,7 +170,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
           <DropdownMenuSubTrigger className="hover:[&_[data-slot=badge]]:border-input data-[state=open]:[&_[data-slot=badge]]:border-input flex items-center gap-2 [&_[data-slot=dropdown-menu-sub-trigger-indicator]]:hidden">
             <Globe />
             <span className="relative flex grow items-center justify-between gap-2">
-              Language
+              {t("common.language", "Language")}
               <Badge
                 variant="outline"
                 className="absolute end-0 top-1/2 -translate-y-1/2"
@@ -213,7 +213,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
         >
           <Moon />
           <div className="flex grow items-center justify-between gap-2">
-            Dark Mode
+            {t("common.darkMode", "Dark Mode")}
             <Switch
               size="sm"
               checked={theme === "dark"}
