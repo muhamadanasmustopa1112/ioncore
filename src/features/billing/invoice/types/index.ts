@@ -8,4 +8,5 @@ export type {
   CreateInvoiceRequest,
   CreateInvoiceLineItem,
   UpdateInvoiceRequest,
+  AppliedBillingSchemaRules,
 } from "./invoice";

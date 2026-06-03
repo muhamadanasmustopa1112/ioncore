@@ -7,6 +7,7 @@ import { Toolbar, ToolbarActions, ToolbarHeading, ToolbarTitle } from "@/compone
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import { ReceiveList } from "./list/receive-list";
+import { ReceiveFormSheet } from "./form/receive-form-sheet";
 import { useWarehouseStore } from "../../store/warehouse";
 
 export function ReceiveListPage() {
@@ -24,6 +25,7 @@ export function ReceiveListPage() {
         </ToolbarActions>
       </Toolbar>
       <div className="flex-1 overflow-auto mt-4"><ReceiveList /></div>
+      <ReceiveFormSheet />
     </div>
   );
 }

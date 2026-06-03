@@ -12,6 +12,7 @@ import {
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import { StockList } from "./list/stock-list";
+import { StockFormSheet } from "./form/stock-form-sheet";
 import { useWarehouseStore } from "../../store/warehouse";
 
 export function StockListPage() {
@@ -53,6 +54,7 @@ export function StockListPage() {
       <div className="flex-1 overflow-auto mt-4">
         <StockList />
       </div>
+      <StockFormSheet />
     </div>
   );
 }

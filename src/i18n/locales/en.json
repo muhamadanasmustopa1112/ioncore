@@ -163,7 +163,9 @@
     "action": "Action",
     "source": "Source",
     "view": "View",
-    "rowsPerPage": "Rows per page"
+    "rowsPerPage": "Rows per page",
+    "language": "Language",
+    "darkMode": "Dark Mode"
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -211,6 +213,12 @@
     "auditLog": "Audit Log",
     "accessPolicies": "Access Policies",
     "administration": "Administration",
+    "finance": "Finance",
+    "invoices": "Invoices",
+    "payments": "Payments",
+    "suspensions": "Suspensions",
+    "commissions": "Commissions",
+    "reports": "Reports",
     "headings": {
       "networkOrchestration": "Network & Orchestration"
     }
@@ -2321,15 +2329,7 @@
       "noRecordsFound": "No breaching records found"
     }
   },
-  "menu": {
-    "finance": "Finance",
-    "invoices": "Invoices",
-    "payments": "Payments",
-    "suspensions": "Suspensions",
-    "commissions": "Commissions",
-    "reports": "Reports"
-  },
-  "billing": {
+    "billing": {
     "title": "Billing & Finance",
     "invoice": {
       "title": "Invoices",

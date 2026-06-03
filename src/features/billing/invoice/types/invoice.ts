@@ -6,12 +6,20 @@ export interface InvoiceLineItem {
   subtotal: number;
 }
 
+export interface AppliedBillingSchemaRules {
+  otcType?: "free" | "prepaid" | "postpaid";
+  gracePeriodDays?: number;
+  lateFee?: { type: "percentage" | "fixed"; value: number };
+  taxRate?: number;
+  paymentMethods?: string[];
+}
+
 export interface InvoiceItem {
   id: string;
   invoiceNumber: string;
   customerId: string;
   customerName: string;
-  customerType: "broadband" | "business";
+  customerType: "broadband" | "business" | "enterprise" | "corporate";
   type: "otc" | "recurring" | "addon";
   status: "draft" | "sent" | "paid" | "overdue" | "partial" | "cancelled";
   subtotal: number;
@@ -21,7 +29,10 @@ export interface InvoiceItem {
   issuedDate: string;
   paidDate?: string;
   fakturPajakNumber?: string;
-  billingSchemaVersion: string;
+  billingSchemaVersionId: string;
+  billingSchemaName?: string;
+  billingSchemaVersion?: string;
+  appliedSchemaRules?: AppliedBillingSchemaRules;
   branch: string;
   notes?: string;
   lineItems: InvoiceLineItem[];
@@ -64,12 +75,12 @@ export interface CreateInvoiceLineItem {
 export interface CreateInvoiceRequest {
   customerId: string;
   customerName: string;
-  customerType: "broadband" | "business";
+  customerType: "broadband" | "business" | "enterprise" | "corporate";
   type: "otc" | "recurring" | "addon";
   dueDate: string;
   branch: string;
   notes?: string;
-  billingSchemaVersion: string;
+  billingSchemaVersionId: string;
   lineItems: CreateInvoiceLineItem[];
 }
 

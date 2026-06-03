@@ -105,6 +105,50 @@ export const useSuspensionColumns = () => {
       size: 130,
     },
     {
+      id: "suspensionSchema",
+      accessorFn: (row) => row.suspensionSchemaName,
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          title={t("billing.schema.schema", "Schema")}
+          column={column}
+          className="text-foreground font-semibold"
+        />
+      ),
+      cell: ({ row }) => (
+        <div>
+          <div className="font-medium">{row.original.suspensionSchemaName ?? "—"}</div>
+          <div className="text-muted-foreground text-xs">{row.original.suspensionSchemaVersion}</div>
+        </div>
+      ),
+      meta: { skeleton: <Skeleton className="h-4 w-32" /> },
+      enableSorting: true,
+      size: 180,
+    },
+    {
+      id: "autoSuspend",
+      accessorFn: (row) => row.appliedSchemaRules?.autoSuspend,
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          title={t("billing.suspension.autoSuspend", "Auto-Suspend")}
+          column={column}
+          className="text-foreground font-semibold"
+        />
+      ),
+      cell: ({ row }) => (
+        <Badge
+          variant={row.original.appliedSchemaRules?.autoSuspend ? "destructive" : "outline"}
+          className="capitalize"
+        >
+          {row.original.appliedSchemaRules?.autoSuspend
+            ? t("common.yes", "Yes")
+            : t("common.manual", "Manual")}
+        </Badge>
+      ),
+      meta: { skeleton: <Skeleton className="h-5 w-12 rounded-full" /> },
+      enableSorting: true,
+      size: 120,
+    },
+    {
       id: "suspensionDate",
       accessorFn: (row) => row.suspensionDate,
       header: ({ column }) => (

@@ -7,6 +7,7 @@ import { Toolbar, ToolbarActions, ToolbarHeading, ToolbarTitle } from "@/compone
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import { DispatchList } from "./list/dispatch-list";
+import { DispatchFormSheet } from "./form/dispatch-form-sheet";
 import { useWarehouseStore } from "../../store/warehouse";
 
 export function DispatchListPage() {
@@ -24,6 +25,7 @@ export function DispatchListPage() {
         </ToolbarActions>
       </Toolbar>
       <div className="flex-1 overflow-auto mt-4"><DispatchList /></div>
+      <DispatchFormSheet />
     </div>
   );
 }

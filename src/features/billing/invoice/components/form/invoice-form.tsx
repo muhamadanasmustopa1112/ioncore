@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
@@ -22,14 +22,25 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
+import { SchemaVersionSelector, useSchemaRules } from "@/components/shared/schema-version-selector";
+import { CustomerSelector } from "@/components/shared/customer-selector";
 import {
   invoiceSchema,
   type InvoiceFormData,
 } from "../../api/post-invoice";
 import { useCreateInvoice } from "../../api/post-invoice";
 import { useUpdateInvoice } from "../../api/put-invoice";
-import type { InvoiceItem } from "../../types";
+import type { InvoiceItem, AppliedBillingSchemaRules } from "../../types";
+import type { CustomerDto } from "@/features/customers/types/customers-api";
+
+const CUSTOMER_TYPE_MAP: Record<string, "broadband" | "business" | "enterprise" | "corporate"> = {
+  residential: "broadband",
+  business: "business",
+  enterprise: "enterprise",
+};
 
 interface InvoiceFormProps {
   onSuccess?: () => void;
@@ -46,6 +57,15 @@ export interface InvoiceFormRef {
 export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
   ({ onSuccess, invoice, readOnly, mode }, ref) => {
     const { t } = useTranslation();
+    const [selectedSchemaVersionId, setSelectedSchemaVersionId] = useState(
+      invoice?.billingSchemaVersionId || ""
+    );
+
+    const { rules: appliedRulesRaw } = useSchemaRules(
+      selectedSchemaVersionId || null
+    );
+
+    const appliedRules = appliedRulesRaw as AppliedBillingSchemaRules | null;
 
     const form = useForm<InvoiceFormData>({
       resolver: zodResolver(invoiceSchema),
@@ -59,7 +79,7 @@ export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
               dueDate: invoice.dueDate,
               branch: invoice.branch,
               notes: invoice.notes || "",
-              billingSchemaVersion: invoice.billingSchemaVersion,
+              billingSchemaVersionId: invoice.billingSchemaVersionId,
               lineItems: invoice.lineItems.map((li) => ({
                 description: li.description,
                 quantity: li.quantity,
@@ -74,7 +94,7 @@ export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
               dueDate: "",
               branch: "",
               notes: "",
-              billingSchemaVersion: "v1.0",
+              billingSchemaVersionId: "",
               lineItems: [{ description: "", quantity: 1, unitPrice: 0 }],
             },
     });
@@ -104,6 +124,46 @@ export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
       }
     }
 
+    const customerType = form.watch("customerType");
+
+    const handleCustomerSelect = (customer: CustomerDto | null) => {
+      if (!customer) {
+        form.setValue("customerId", "");
+        form.setValue("customerName", "");
+        form.setValue("customerType", "broadband");
+        form.setValue("branch", "");
+        form.setValue("billingSchemaVersionId", "");
+        setSelectedSchemaVersionId("");
+        return;
+      }
+
+      const mappedType = CUSTOMER_TYPE_MAP[customer.customer_type] || "broadband";
+
+      form.setValue("customerId", customer.id);
+      form.setValue("customerName", customer.full_name);
+      form.setValue("customerType", mappedType);
+      form.setValue("branch", customer.branch_name || "");
+
+      if (customer.billing_schema_version_id) {
+        form.setValue("billingSchemaVersionId", customer.billing_schema_version_id);
+        setSelectedSchemaVersionId(customer.billing_schema_version_id);
+      } else {
+        form.setValue("billingSchemaVersionId", "");
+        setSelectedSchemaVersionId("");
+      }
+    };
+
+    const handleSchemaChange = (val: string) => {
+      form.setValue("billingSchemaVersionId", val);
+      setSelectedSchemaVersionId(val);
+    };
+
+    const handleCustomerTypeChange = (val: string) => {
+      form.setValue("customerType", val as "broadband" | "business" | "enterprise" | "corporate");
+      form.setValue("billingSchemaVersionId", "");
+      setSelectedSchemaVersionId("");
+    };
+
     return (
       <Form {...form}>
         <form className="space-y-6">
@@ -112,40 +172,25 @@ export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
               {t("billing.invoice.billingInfo")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="customerName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("billing.invoice.customer")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={readOnly}
-                        placeholder="Customer name"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="customerId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Customer ID</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        disabled={readOnly}
-                        placeholder="CUST-001"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="md:col-span-2">
+                <FormField
+                  control={form.control}
+                  name="customerId"
+                  render={() => (
+                    <FormItem>
+                      <FormLabel>{t("billing.invoice.customer")}</FormLabel>
+                      <FormControl>
+                        <CustomerSelector
+                          value={form.watch("customerId")}
+                          onChange={handleCustomerSelect}
+                          disabled={readOnly}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="customerType"
@@ -155,8 +200,8 @@ export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
                       {t("billing.invoice.customerType")}
                     </FormLabel>
                     <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      onValueChange={handleCustomerTypeChange}
+                      value={field.value}
                       disabled={readOnly}
                     >
                       <FormControl>
@@ -170,6 +215,12 @@ export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
                         </SelectItem>
                         <SelectItem value="business">
                           {t("billing.report.business")}
+                        </SelectItem>
+                        <SelectItem value="enterprise">
+                          {t("billing.report.enterprise")}
+                        </SelectItem>
+                        <SelectItem value="corporate">
+                          {t("billing.report.corporate")}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -185,7 +236,7 @@ export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
                     <FormLabel>{t("billing.invoice.type")}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      value={field.value}
                       disabled={readOnly}
                     >
                       <FormControl>
@@ -205,6 +256,25 @@ export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="billingSchemaVersionId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("billing.schema.billingSchema", "Billing Schema")}</FormLabel>
+                    <FormControl>
+                      <SchemaVersionSelector
+                        schemaType="billing"
+                        customerType={customerType}
+                        value={field.value || ""}
+                        onChange={handleSchemaChange}
+                        disabled={readOnly}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -245,6 +315,55 @@ export const InvoiceForm = forwardRef<InvoiceFormRef, InvoiceFormProps>(
               />
             </div>
           </div>
+
+          {appliedRules && !readOnly && (
+            <>
+              <Separator />
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {t("billing.schema.appliedRules", "Applied Billing Schema Rules")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">OTC Type:</span>{" "}
+                      <Badge variant="outline" className="capitalize">{appliedRules.otcType || "—"}</Badge>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Grace Period:</span>{" "}
+                      <Badge variant="outline">{appliedRules.gracePeriodDays ? `${appliedRules.gracePeriodDays} days` : "—"}</Badge>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Late Fee:</span>{" "}
+                      <Badge variant="outline">
+                        {appliedRules.lateFee
+                          ? appliedRules.lateFee.type === "percentage"
+                            ? `${appliedRules.lateFee.value}%`
+                            : `Rp ${appliedRules.lateFee.value.toLocaleString("id-ID")}`
+                          : "None"}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Tax Rate:</span>{" "}
+                      <Badge variant="outline">{appliedRules.taxRate ? `${appliedRules.taxRate}%` : "—"}</Badge>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="text-muted-foreground">Payment Methods:</span>{" "}
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(appliedRules.paymentMethods || []).map((m) => (
+                          <Badge key={m} variant="secondary" className="capitalize text-xs">
+                            {m.replace("_", " ")}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
 
           <Separator />
 
