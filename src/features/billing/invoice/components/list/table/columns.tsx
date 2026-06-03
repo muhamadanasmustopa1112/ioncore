@@ -155,6 +155,26 @@ export const useInvoiceColumns = () => {
       size: 120,
     },
     {
+      id: "billingSchema",
+      accessorFn: (row) => row.billingSchemaName,
+      header: ({ column }) => (
+        <DataGridColumnHeader
+          title={t("billing.schema.schema", "Schema")}
+          column={column}
+          className="text-foreground font-semibold"
+        />
+      ),
+      cell: ({ row }) => (
+        <div>
+          <div className="font-medium">{row.original.billingSchemaName ?? "—"}</div>
+          <div className="text-muted-foreground text-xs">{row.original.billingSchemaVersion}</div>
+        </div>
+      ),
+      meta: { skeleton: <Skeleton className="h-4 w-32" /> },
+      enableSorting: true,
+      size: 180,
+    },
+    {
       id: "dueDate",
       accessorFn: (row) => row.dueDate,
       header: ({ column }) => (

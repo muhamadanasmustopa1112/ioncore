@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { RiDeleteBin7Line, RiEditLine, RiEyeLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
@@ -20,12 +21,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { paths } from "@/config/paths";
 import type { InvoiceItem } from "../../../types";
 import { useInvoiceStore } from "../../../store/invoice";
 import { useDeleteInvoice } from "../../../api/delete-invoice";
 
 export function ActionsCell({ row }: { row: Row<InvoiceItem> }) {
   const { t } = useTranslation();
+  const router = useRouter();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { openInvoiceFormSheet, setSelectedInvoice } = useInvoiceStore();
   const { mutate: deleteInvoice, isPending: isDeleting } = useDeleteInvoice({
@@ -43,21 +46,18 @@ export function ActionsCell({ row }: { row: Row<InvoiceItem> }) {
         <DropdownMenuContent side="bottom" align="end">
           <DropdownMenuItem
             className="cursor-pointer"
+            onClick={() => router.push(paths.dashboard.finance.invoice.detail.getHref(row.original.id))}
+          >
+            <RiEyeLine /> {t("billing.common.viewDetail")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer"
             onClick={() => {
               setSelectedInvoice(row.original);
               openInvoiceFormSheet("edit");
             }}
           >
             <RiEditLine /> {t("billing.common.edit")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="cursor-pointer"
-            onClick={() => {
-              setSelectedInvoice(row.original);
-              openInvoiceFormSheet("details");
-            }}
-          >
-            <RiEyeLine /> {t("billing.invoice.viewInvoice")}
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"

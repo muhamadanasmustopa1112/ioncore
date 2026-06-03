@@ -29,6 +29,11 @@ const customers = [
   { id: "CUST-013", name: "PT Nusantara Fiber", type: "business" as const },
   { id: "CUST-014", name: "Joko Widodo", type: "broadband" as const },
   { id: "CUST-015", name: "PT Samudra Net", type: "business" as const },
+  { id: "CUST-016", name: "PT Enterprise Mega Corp", type: "enterprise" as const },
+  { id: "CUST-017", name: "Corporate Holdings Ltd", type: "corporate" as const },
+  { id: "CUST-018", name: "Enterprise Solutions Inc", type: "enterprise" as const },
+  { id: "CUST-019", name: "PT Corporate Indonesia", type: "corporate" as const },
+  { id: "CUST-020", name: "Hendra Gunawan", type: "broadband" as const },
 ];
 
 const statuses: InvoiceItem["status"][] = [
@@ -60,6 +65,57 @@ function randomAmount(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+const schemaMap: Record<string, { id: string; name: string; version: string; rules: InvoiceItem["appliedSchemaRules"] }> = {
+  broadband: {
+    id: "schema-ver-bb-v12",
+    name: "Broadband Monthly Standard",
+    version: "v1.2",
+    rules: {
+      otcType: "prepaid",
+      gracePeriodDays: 7,
+      lateFee: { type: "percentage" as const, value: 2 },
+      taxRate: 11,
+      paymentMethods: ["bank_transfer", "e_wallet", "credit_card", "convenience_store"],
+    },
+  },
+  business: {
+    id: "schema-ver-biz-v20",
+    name: "Business Monthly Standard",
+    version: "v2.0",
+    rules: {
+      otcType: "prepaid",
+      gracePeriodDays: 15,
+      lateFee: { type: "percentage" as const, value: 1.5 },
+      taxRate: 11,
+      paymentMethods: ["bank_transfer", "e_wallet", "credit_card"],
+    },
+  },
+  enterprise: {
+    id: "schema-ver-ent-v10",
+    name: "Enterprise Quarterly",
+    version: "v1.0",
+    rules: {
+      otcType: "postpaid",
+      gracePeriodDays: 30,
+      lateFee: { type: "fixed" as const, value: 50000 },
+      taxRate: 11,
+      paymentMethods: ["bank_transfer", "credit_card"],
+    },
+  },
+  corporate: {
+    id: "schema-ver-corp-v10",
+    name: "Corporate Annual Custom",
+    version: "v1.0",
+    rules: {
+      otcType: "postpaid",
+      gracePeriodDays: 45,
+      lateFee: undefined,
+      taxRate: 11,
+      paymentMethods: ["bank_transfer", "credit_card"],
+    },
+  },
+};
+
 export const dummyInvoices: InvoiceItem[] = Array.from(
   { length: 50 },
   (_, i) => {
@@ -67,6 +123,7 @@ export const dummyInvoices: InvoiceItem[] = Array.from(
     const status = statuses[i % statuses.length];
     const type = types[i % types.length];
     const branch = branches[i % branches.length];
+    const schema = schemaMap[customer.type];
     const subtotal =
       type === "otc"
         ? randomAmount(100000, 500000)
@@ -95,7 +152,10 @@ export const dummyInvoices: InvoiceItem[] = Array.from(
           : undefined,
       fakturPajakNumber:
         status === "paid" ? generateFakturPajak(i + 1) : undefined,
-      billingSchemaVersion: customer.type === "broadband" ? "v1.0" : "v2.0",
+      billingSchemaVersionId: schema.id,
+      billingSchemaName: schema.name,
+      billingSchemaVersion: schema.version,
+      appliedSchemaRules: schema.rules,
       branch,
       notes: i % 3 === 0 ? "First billing cycle" : undefined,
       lineItems: [
@@ -105,7 +165,7 @@ export const dummyInvoices: InvoiceItem[] = Array.from(
             type === "otc"
               ? "One-Time Charge - Installation"
               : type === "recurring"
-                ? `Monthly Service - ${customer.type === "broadband" ? "50 Mbps" : "100 Mbps"}`
+                ? `Monthly Service - ${customer.type === "broadband" ? "50 Mbps" : customer.type === "business" ? "100 Mbps" : customer.type === "enterprise" ? "500 Mbps Dedicated" : "Custom Enterprise"}`
                 : "Speed Boost Add-on",
           quantity: 1,
           unitPrice: subtotal,

@@ -29,6 +29,11 @@ const customers = [
   { id: "CUST-013", name: "PT Nusantara Fiber", type: "business" as const },
   { id: "CUST-014", name: "Joko Widodo", type: "broadband" as const },
   { id: "CUST-015", name: "PT Samudra Net", type: "business" as const },
+  { id: "CUST-016", name: "PT Enterprise Mega Corp", type: "enterprise" as const },
+  { id: "CUST-017", name: "Corporate Holdings Ltd", type: "corporate" as const },
+  { id: "CUST-018", name: "Enterprise Solutions Inc", type: "enterprise" as const },
+  { id: "CUST-019", name: "PT Corporate Indonesia", type: "corporate" as const },
+  { id: "CUST-020", name: "Hendra Gunawan", type: "broadband" as const },
 ];
 
 const statuses: SuspensionItem["status"][] = [
@@ -57,13 +62,73 @@ function randomDate(start: Date, end: Date): string {
   return date.toISOString().split("T")[0];
 }
 
+const suspensionSchemaMap: Record<string, { id: string; name: string; version: string; rules: SuspensionItem["appliedSchemaRules"] }> = {
+  broadband: {
+    id: "schema-ver-susp-bb-v10",
+    name: "Broadband Auto-Suspend",
+    version: "v1.0",
+    rules: {
+      autoSuspend: true,
+      requiresApproval: false,
+      requiresExecutiveApproval: false,
+      ionRadiusAction: "full_block",
+    },
+  },
+  business: {
+    id: "schema-ver-susp-biz-v10",
+    name: "Business Manual Approval",
+    version: "v1.0",
+    rules: {
+      autoSuspend: false,
+      requiresApproval: true,
+      requiresExecutiveApproval: false,
+      ionRadiusAction: "full_block",
+    },
+  },
+  enterprise: {
+    id: "schema-ver-susp-ent-v10",
+    name: "Enterprise Finance Manager Approval",
+    version: "v1.0",
+    rules: {
+      autoSuspend: false,
+      requiresApproval: true,
+      requiresExecutiveApproval: false,
+      ionRadiusAction: "full_block",
+    },
+  },
+  corporate: {
+    id: "schema-ver-susp-corp-v10",
+    name: "Corporate Executive Approval",
+    version: "v1.0",
+    rules: {
+      autoSuspend: false,
+      requiresApproval: true,
+      requiresExecutiveApproval: true,
+      ionRadiusAction: "throttle",
+      throttleSpeedKbps: 64,
+    },
+  },
+};
+
 export const dummySuspensions: SuspensionItem[] = Array.from(
   { length: 20 },
   (_, i) => {
     const customer = customers[i % customers.length];
     const status = statuses[i % statuses.length];
     const branch = branches[i % branches.length];
+    const schema = suspensionSchemaMap[customer.type];
     const overdueDays = Math.floor(Math.random() * 60) + 15;
+
+    const approvalChain: SuspensionItem["approvalChain"] = customer.type === "corporate"
+      ? [
+          { role: "Finance Manager", approver: status !== "pending" ? "FinanceMgr-01" : undefined, status: status === "pending" ? "pending" : "approved" },
+          { role: "Executive", approver: status === "suspended" || status === "restored" ? "Exec-01" : undefined, status: status === "pending" || status === "approved" ? "pending" : "approved" },
+        ]
+      : customer.type === "business" || customer.type === "enterprise"
+        ? [
+            { role: "Finance Manager", approver: status !== "pending" ? "FinanceMgr-01" : undefined, status: status === "pending" ? "pending" : "approved" },
+          ]
+        : undefined;
 
     return {
       id: `SUS-${String(i + 1).padStart(3, "0")}`,
@@ -73,6 +138,11 @@ export const dummySuspensions: SuspensionItem[] = Array.from(
       invoiceNumber: generateInvoiceNumber(i + 1),
       overdueDays,
       status,
+      suspensionSchemaVersionId: schema.id,
+      suspensionSchemaName: schema.name,
+      suspensionSchemaVersion: schema.version,
+      appliedSchemaRules: schema.rules,
+      approvalChain,
       suspensionDate:
         status === "suspended" || status === "restored"
           ? randomDate(new Date("2026-01-01"), new Date("2026-06-01"))
@@ -83,7 +153,11 @@ export const dummySuspensions: SuspensionItem[] = Array.from(
           : undefined,
       approvedBy:
         status === "approved" || status === "suspended" || status === "restored"
-          ? "Admin System"
+          ? "FinanceMgr-01"
+          : undefined,
+      restoredBy:
+        status === "restored"
+          ? customer.type === "corporate" ? "Exec-01" : "FinanceMgr-01"
           : undefined,
       reason: reasons[i % reasons.length],
       branch,

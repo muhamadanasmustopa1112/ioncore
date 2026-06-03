@@ -3,4 +3,6 @@ export type {
   SuspensionMetadata,
   SuspensionListResponse,
   SuspensionParams,
+  AppliedSuspensionRules,
+  ApprovalChainEntry,
 } from "./suspension";

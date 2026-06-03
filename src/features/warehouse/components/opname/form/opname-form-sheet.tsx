@@ -1,0 +1,55 @@
+"use client";
+
+import { useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody, SheetFooter } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
+import { OpnameForm, type OpnameFormRef } from "./opname-form";
+
+export function OpnameFormSheet() {
+  const { t } = useTranslation();
+  const { opnameForm, opnameSheetOpen, closeOpnameFormSheet } = useWarehouseStore();
+  const formRef = useRef<OpnameFormRef>(null);
+
+  const isReadOnly = opnameForm === "details";
+
+  return (
+    <Sheet open={opnameSheetOpen} onOpenChange={(open) => !open && closeOpnameFormSheet()}>
+      <SheetContent className="sm:max-w-lg w-full flex flex-col">
+        <SheetHeader className="border-b px-5 py-4 shrink-0">
+          <SheetTitle className="text-lg font-extrabold">
+            {opnameForm === "new" && t("warehouse.newOpname", "New Stock Opname")}
+            {opnameForm === "edit" && t("warehouse.editOpname", "Edit Opname")}
+            {opnameForm === "details" && t("warehouse.opnameDetails", "Opname Details")}
+          </SheetTitle>
+        </SheetHeader>
+
+        <SheetBody className="flex-1 p-0 overflow-hidden">
+          <ScrollArea className="h-full">
+            <OpnameForm ref={formRef} onSuccess={closeOpnameFormSheet} mode={opnameForm ?? "new"} />
+          </ScrollArea>
+        </SheetBody>
+
+        {!isReadOnly && (
+          <SheetFooter className="border-t p-5 shrink-0">
+            <div className="flex w-full justify-end gap-3">
+              <Button variant="outline" className="h-10 px-4 font-semibold text-xs" onClick={closeOpnameFormSheet}>
+                {t("common.cancel", "Cancel")}
+              </Button>
+              <Button
+                variant="primary"
+                className="h-10 px-5 font-semibold text-xs"
+                onClick={() => formRef.current?.submit()}
+                disabled={formRef.current?.isPending}
+              >
+                {t("warehouse.startOpname", "Start Opname")}
+              </Button>
+            </div>
+          </SheetFooter>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}

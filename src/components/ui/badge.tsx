@@ -32,7 +32,7 @@ const badgeVariants = cva(
           "bg-[var(--color-warning-accent,var(--color-yellow-500))] text-[var(--color-warning-foreground,var(--color-white))]",
         info: "bg-[var(--color-info-accent,var(--color-violet-500))] text-[var(--color-info-foreground,var(--color-white))]",
         outline:
-          "bg-transparent border border-border text-secondary-foreground",
+          "bg-transparent border border-border text-muted-foreground",
         destructive: "bg-destructive text-destructive-foreground",
       },
       appearance: {

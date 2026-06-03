@@ -7,6 +7,7 @@ import { Toolbar, ToolbarActions, ToolbarHeading, ToolbarTitle } from "@/compone
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import { ReturnsList } from "./list/returns-list";
+import { ReturnFormSheet } from "./form/return-form-sheet";
 import { useWarehouseStore } from "../../store/warehouse";
 
 export function ReturnsListPage() {
@@ -24,6 +25,7 @@ export function ReturnsListPage() {
         </ToolbarActions>
       </Toolbar>
       <div className="flex-1 overflow-auto mt-4"><ReturnsList /></div>
+      <ReturnFormSheet />
     </div>
   );
 }

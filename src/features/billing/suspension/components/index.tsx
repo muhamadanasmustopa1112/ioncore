@@ -12,6 +12,7 @@ import {
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
 import { SuspensionList } from "./list/suspension-list";
+import { SuspensionDetailSheet } from "./form/suspension-detail-sheet";
 
 export function SuspensionListPage() {
   const { t } = useTranslation();
@@ -46,6 +47,7 @@ export function SuspensionListPage() {
       <div className="flex-1 overflow-auto mt-4">
         <SuspensionList />
       </div>
+      <SuspensionDetailSheet />
     </div>
   );
 }

@@ -1,14 +1,34 @@
+export interface AppliedSuspensionRules {
+  autoSuspend?: boolean;
+  requiresApproval?: boolean;
+  requiresExecutiveApproval?: boolean;
+  ionRadiusAction?: "full_block" | "throttle";
+  throttleSpeedKbps?: number;
+}
+
+export interface ApprovalChainEntry {
+  role: string;
+  approver?: string;
+  status: "pending" | "approved" | "rejected";
+}
+
 export interface SuspensionItem {
   id: string;
   customerId: string;
   customerName: string;
-  customerType: "broadband" | "business";
+  customerType: "broadband" | "business" | "enterprise" | "corporate";
   invoiceNumber: string;
   overdueDays: number;
   status: "pending" | "approved" | "suspended" | "restored";
+  suspensionSchemaVersionId: string;
+  suspensionSchemaName?: string;
+  suspensionSchemaVersion?: string;
+  appliedSchemaRules?: AppliedSuspensionRules;
+  approvalChain?: ApprovalChainEntry[];
   suspensionDate?: string;
   restoredDate?: string;
   approvedBy?: string;
+  restoredBy?: string;
   reason: string;
   branch: string;
   createdAt: string;

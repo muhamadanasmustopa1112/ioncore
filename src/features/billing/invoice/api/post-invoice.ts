@@ -11,14 +11,14 @@ const invoiceLineItemSchema = z.object({
 });
 
 export const invoiceSchema = z.object({
-  customerId: z.string().min(1, "Customer ID is required"),
+  customerId: z.string().min(1, "Customer is required"),
   customerName: z.string().min(1, "Customer name is required"),
-  customerType: z.enum(["broadband", "business"]),
+  customerType: z.enum(["broadband", "business", "enterprise", "corporate"]),
   type: z.enum(["otc", "recurring", "addon"]),
   dueDate: z.string().min(1, "Due date is required"),
   branch: z.string().min(1, "Branch is required"),
   notes: z.string().optional(),
-  billingSchemaVersion: z.string().min(1, "Schema version is required"),
+  billingSchemaVersionId: z.string().optional(),
   lineItems: z
     .array(invoiceLineItemSchema)
     .min(1, "At least one line item is required"),
