@@ -1,16 +1,22 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useMemo } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslation } from "react-i18next";
+import { QrCode } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
+import { ScannerDialog } from "../../scanner/scanner-dialog";
+import { ScanResultBadge } from "../../scanner/scan-result-badge";
+import { matchScannedQR } from "../../../utils/qr-matcher";
+import type { ScanResult } from "../../../hooks/use-qr-scanner";
+import type { WarehouseAsset } from "../../../types";
 
 const opnameSchema = z.object({
   warehouseId: z.string().min(1, "Warehouse is required"),
@@ -37,7 +43,23 @@ const WAREHOUSES = [
 export const OpnameForm = forwardRef<OpnameFormRef, OpnameFormProps>(
   ({ onSuccess, mode }, ref) => {
     const { t } = useTranslation();
-    const { stockLevels, opnames, updateOpnameCount } = useWarehouseStore();
+    const { stockLevels, opnames, updateOpnameCount, serializedAssets, assets } = useWarehouseStore();
+
+    const [scannerOpen, setScannerOpen] = useState(false);
+    const [scannedItems, setScannedItems] = useState<Map<string, number>>(new Map());
+
+    const handleOpnameScan = (result: ScanResult) => {
+      const match = matchScannedQR(result.text, serializedAssets, stockLevels, assets);
+      if (match.type === "asset" && match.data) {
+        const asset = match.data as WarehouseAsset;
+        setScannedItems((prev) => {
+          const next = new Map(prev);
+          const current = next.get(asset.id) || 0;
+          next.set(asset.id, current + 1);
+          return next;
+        });
+      }
+    };
 
     const {
       register,
@@ -108,9 +130,41 @@ export const OpnameForm = forwardRef<OpnameFormRef, OpnameFormProps>(
         </div>
 
         <div className="space-y-2">
-          <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            {t("warehouse.stockItems", "Stock Items")} ({warehouseStock.length})
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              {t("warehouse.stockItems", "Stock Items")} ({warehouseStock.length})
+            </span>
+            {!isReadOnly && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-8 text-xs gap-1.5"
+                onClick={() => setScannerOpen(true)}
+              >
+                <QrCode className="size-3.5" />
+                Scan Items
+              </Button>
+            )}
+          </div>
+
+          {scannedItems.size > 0 && (
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-muted-foreground">Scanned Items ({scannedItems.size})</p>
+              {Array.from(scannedItems.entries()).map(([id, count]) => {
+                const asset = serializedAssets.find((a) => a.id === id);
+                return asset ? (
+                  <ScanResultBadge
+                    key={id}
+                    success
+                    label={asset.name}
+                    value={`${count} scanned`}
+                  />
+                ) : null;
+              })}
+            </div>
+          )}
+
           <ScrollArea className="rounded-md border">
             <Table>
               <TableHeader>
@@ -150,6 +204,13 @@ export const OpnameForm = forwardRef<OpnameFormRef, OpnameFormProps>(
             </Table>
           </ScrollArea>
         </div>
+
+        <ScannerDialog
+          open={scannerOpen}
+          onOpenChange={setScannerOpen}
+          onScan={handleOpnameScan}
+          title="Scan Item for Physical Count"
+        />
       </div>
     );
   }
