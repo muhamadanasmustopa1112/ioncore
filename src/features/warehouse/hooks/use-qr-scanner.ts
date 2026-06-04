@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { BrowserMultiFormatReader, type IScannerControls } from "@zxing/browser";
+import { BrowserMultiFormatReader, BrowserCodeReader, type IScannerControls } from "@zxing/browser";
 
 export interface ScanResult {
   text: string;
@@ -28,6 +28,7 @@ export function useQRScanner(options: UseQRScannerOptions = {}) {
     readerRef.current = new BrowserMultiFormatReader();
     return () => {
       stopScanning();
+      BrowserCodeReader.releaseAllStreams();
     };
   }, []);
 
@@ -77,8 +78,7 @@ export function useQRScanner(options: UseQRScannerOptions = {}) {
             setScanResult(scanResult);
             onScan?.(scanResult);
             if (autoStop) {
-              controls.stop();
-              setIsScanning(false);
+              stopScanning();
             }
           }
         }
