@@ -36,6 +36,11 @@ export function useQRScanner(options: UseQRScannerOptions = {}) {
       controlsRef.current.stop();
       controlsRef.current = null;
     }
+    if (videoRef.current?.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
     setIsScanning(false);
   }, []);
 
