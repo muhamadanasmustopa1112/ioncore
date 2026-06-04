@@ -92,9 +92,10 @@ export function useQRScanner(options: UseQRScannerOptions = {}) {
   }, []);
 
   const toggleTorch = useCallback(async () => {
-    if (controlsRef.current) {
+    const controls = controlsRef.current;
+    if (controls?.switchTorch) {
       try {
-        await controlsRef.current.switchTorch();
+        await controls.switchTorch(true);
       } catch {
         // Torch not supported
       }
