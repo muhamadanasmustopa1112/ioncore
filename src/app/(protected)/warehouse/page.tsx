@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { WarehouseDashboard } from "@/features/warehouse/components";
+import { WarehouseDashboardPage } from "@/features/warehouse/components";
 import { ScreenLoader } from "@/components/common/screen-loader";
 
 export const metadata: Metadata = {
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <Suspense fallback={<ScreenLoader />}>
-      <WarehouseDashboard />
+      <WarehouseDashboardPage />
     </Suspense>
   );
 }

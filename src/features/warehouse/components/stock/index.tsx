@@ -10,6 +10,7 @@ import {
   ToolbarTitle,
 } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { paths } from "@/config/paths";
 import { StockList } from "./list/stock-list";
 import { StockFormSheet } from "./form/stock-form-sheet";
@@ -17,33 +18,49 @@ import { useWarehouseStore } from "../../store/warehouse";
 
 export function StockListPage() {
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
   const { openStockFormSheet } = useWarehouseStore();
 
   return (
-    <div className="relative h-full w-full overflow-hidden px-6 py-3">
-      <PageBreadcrumb
-        items={[
-          {
-            title: t("menu.warehouse", "Warehouse & Asset"),
-            path: paths.dashboard.warehouse.root.getHref(),
-          },
-          { title: t("warehouse.stockTitle", "Stock & Alerts") },
-        ]}
-      />
-      <Toolbar className="mt-5 items-center">
+    <div
+      className={`relative h-full w-full overflow-hidden ${isMobile ? "px-4 py-3" : "px-6 py-3"}`}
+    >
+      {!isMobile && (
+        <PageBreadcrumb
+          items={[
+            {
+              title: t("menu.warehouse", "Warehouse & Asset"),
+              path: paths.dashboard.warehouse.root.getHref(),
+            },
+            { title: t("warehouse.stockTitle", "Stock & Alerts") },
+          ]}
+        />
+      )}
+      <Toolbar className={isMobile ? "mt-2 items-center" : "mt-5 items-center"}>
         <ToolbarHeading>
-          <ToolbarTitle className="text-2xl font-extrabold tracking-tight">
+          <ToolbarTitle
+            className={
+              isMobile
+                ? "text-lg font-extrabold tracking-tight"
+                : "text-2xl font-extrabold tracking-tight"
+            }
+          >
             {t("warehouse.stockTitle", "Stock & Alerts")}
           </ToolbarTitle>
         </ToolbarHeading>
         <ToolbarActions>
-          <Button variant="outline" className="h-11 px-5 font-semibold shadow-xs">
-            <RiDownloadLine className="size-4" />
-            {t("common.exportData", "Export Data")}
-          </Button>
+          {!isMobile && (
+            <Button
+              variant="outline"
+              className="h-11 px-5 font-semibold shadow-xs"
+            >
+              <RiDownloadLine className="size-4" />
+              {t("common.exportData", "Export Data")}
+            </Button>
+          )}
           <Button
             variant="primary"
-            className="h-11 px-6 font-semibold shadow-md"
+            className="h-10 px-4 font-semibold shadow-md"
             onClick={() => openStockFormSheet("new")}
           >
             <RiAddLine className="size-5" />

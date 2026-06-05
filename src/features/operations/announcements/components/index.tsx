@@ -8,9 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toolbar, ToolbarActions, ToolbarHeading, ToolbarTitle } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
-import { AnnouncementList } from "./announcement-list";
+import { AnnouncementList } from "./list/announcement-list";
 import { AnnouncementInbox } from "./announcement-inbox";
-import { AnnouncementFormSheet } from "./announcement-form-sheet";
+import { AnnouncementFormSheet } from "./form/announcement-form-sheet";
 import { useAnnouncementStore } from "../store/announcement";
 
 export function AnnouncementListPage() {

@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useBulkOperationWizardStore } from "../../store/wizard";
+import { Step0SelectType } from "./step-0-select-type";
 import { Step1SelectPlans } from "./step-1-select-plans";
 import { Step2DefineScope } from "./step-2-define-scope";
 import { Step3ReviewPreview } from "./step-3-review-preview";
@@ -21,6 +22,7 @@ interface BulkOperationWizardProps {
 }
 
 const STEPS = [
+  "Select Type",
   "Select Plans",
   "Define Scope",
   "Review Preview",
@@ -32,7 +34,7 @@ export function BulkOperationWizard({
   onOpenChange,
 }: BulkOperationWizardProps) {
   const { t } = useTranslation();
-  const { currentStep, setStep, reset, sourcePlan, targetPlan } =
+  const { currentStep, setStep, reset, operationType, sourcePlan, targetPlan } =
     useBulkOperationWizardStore();
 
   useEffect(() => {
@@ -44,10 +46,14 @@ export function BulkOperationWizard({
   const canProceed = () => {
     switch (currentStep) {
       case 0:
-        return sourcePlan !== null && targetPlan !== null;
+        return operationType !== null;
       case 1:
-        return true;
+        return operationType === "plan_change"
+          ? sourcePlan !== null && targetPlan !== null
+          : true;
       case 2:
+        return true;
+      case 3:
         return true;
       default:
         return false;
@@ -55,7 +61,7 @@ export function BulkOperationWizard({
   };
 
   const handleNext = () => {
-    if (currentStep < 3 && canProceed()) {
+    if (currentStep < 4 && canProceed()) {
       setStep(currentStep + 1);
     }
   };
@@ -112,26 +118,27 @@ export function BulkOperationWizard({
         </div>
 
         <div className="min-h-[400px] px-6 py-4">
-          {currentStep === 0 && <Step1SelectPlans />}
-          {currentStep === 1 && <Step2DefineScope />}
-          {currentStep === 2 && <Step3ReviewPreview />}
-          {currentStep === 3 && <Step4Execution />}
+          {currentStep === 0 && <Step0SelectType />}
+          {currentStep === 1 && <Step1SelectPlans />}
+          {currentStep === 2 && <Step2DefineScope />}
+          {currentStep === 3 && <Step3ReviewPreview />}
+          {currentStep === 4 && <Step4Execution />}
         </div>
 
         <div className="flex items-center justify-end gap-2 border-t px-6 py-4">
-          {currentStep > 0 && currentStep < 3 && (
+          {currentStep > 0 && currentStep < 4 && (
             <Button variant="outline" onClick={handleBack}>
               {t("common.back", "Back")}
             </Button>
           )}
-          {currentStep < 3 && (
+          {currentStep < 4 && (
             <Button onClick={handleNext} disabled={!canProceed()}>
-              {currentStep === 2
+              {currentStep === 3
                 ? t("bulkOperations.execute", "Execute")
                 : t("common.next", "Next")}
             </Button>
           )}
-          {currentStep === 3 && (
+          {currentStep === 4 && (
             <Button variant="outline" onClick={handleClose}>
               {t("common.close", "Close")}
             </Button>

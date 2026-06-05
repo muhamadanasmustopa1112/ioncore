@@ -11,8 +11,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { useAnnouncementStore } from "../store/announcement";
+import { useAnnouncementStore } from "../../store/announcement";
 import { AnnouncementForm, type AnnouncementFormRef } from "./announcement-form";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AnnouncementFormSheet() {
   const { t } = useTranslation();
@@ -37,10 +38,12 @@ export function AnnouncementFormSheet() {
         </SheetHeader>
 
         <SheetBody className="flex-1 p-0 overflow-hidden">
-          <AnnouncementForm
-            ref={formRef}
-            mode={formMode || "new"}
-          />
+          <ScrollArea className="h-full">
+            <AnnouncementForm
+              ref={formRef}
+              mode={formMode || "new"}
+            />
+          </ScrollArea>
         </SheetBody>
 
         <SheetFooter className="border-border flex-row gap-2.5 border-t p-5 pb-4 lg:gap-0 mt-auto">

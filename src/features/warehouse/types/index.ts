@@ -144,6 +144,133 @@ export type StockItemCategory = "serialized_device" | "cable" | "consumable" | "
 export type StockItemType = "serialized" | "cable" | "consumable";
 export type InventoryValuationMethod = "FIFO" | "LIFO";
 
+// ─── Universal Asset Form Types ──────────────────────────────────────────────
+
+export type AssetType = "serialized" | "cable" | "consumable" | "infrastructure";
+
+export type SerializedCategory = "ONT" | "Router" | "Switch" | "ODP_Box" | "Media_Converter" | "Patch_Panel";
+export type CableCategory = "Fiber_Optic" | "Ethernet" | "Coaxial" | "Power";
+export type ConsumableCategory = "Connector" | "Fastener" | "Patch_Cord" | "Labeling" | "Mounting";
+export type InfrastructureCategory = "ODP" | "OLT" | "Mikrotik" | "Switch" | "Rack" | "Power_Supply";
+
+export type AssetCategory = SerializedCategory | CableCategory | ConsumableCategory | InfrastructureCategory;
+
+export type OwnershipType = "ion_owned" | "leased_to_customer" | "customer_owned";
+export type DeviceConditionType = "new" | "refurbished" | "damaged";
+export type InfraCondition = "new" | "active" | "under_maintenance" | "decommissioned";
+
+export interface UniversalAssetFormData {
+  // Common
+  assetType: AssetType;
+  category: AssetCategory;
+  name: string;
+  sku: string;
+  brand: string;
+  model: string;
+  uom: string;
+  unitCost?: number;
+  description?: string;
+  threshold: number;
+  receivedBy: string;
+
+  // Serialized
+  serialNumber?: string;
+  macAddress?: string;
+  firmwareVersion?: string;
+  ownershipType?: OwnershipType;
+  deviceCondition?: DeviceConditionType;
+  purchaseCost?: number;
+  receivedAt?: string;
+  isRetrofit?: boolean;
+
+  // Cable
+  specification?: string;
+  totalLength?: number;
+  costPerMeter?: number;
+
+  // Consumable
+  consumableSpec?: string;
+  quantityInStock?: number;
+  costPerUnit?: number;
+
+  // Infrastructure
+  purchaseDate?: string;
+  distributorName?: string;
+  purchasePrice?: number;
+  purchaseOrderReference?: string;
+  warrantyExpiryDate?: string;
+  infraCondition?: InfraCondition;
+  deploymentStatus?: DeploymentStatus;
+  deploymentLocation?: string;
+  networkNodeId?: string;
+}
+
+export const ASSET_TYPE_LABELS: Record<AssetType, string> = {
+  serialized: "Serialized Device",
+  cable: "Cable / Length-Based",
+  consumable: "Consumable / Quantity-Based",
+  infrastructure: "Network Infrastructure",
+};
+
+export const SERIALIZED_CATEGORIES: { value: SerializedCategory; label: string }[] = [
+  { value: "ONT", label: "ONT (GPON/EPON)" },
+  { value: "Router", label: "Wi-Fi Router" },
+  { value: "Switch", label: "Managed Switch" },
+  { value: "ODP_Box", label: "ODP Box" },
+  { value: "Media_Converter", label: "Media Converter" },
+  { value: "Patch_Panel", label: "Patch Panel" },
+];
+
+export const CABLE_CATEGORIES: { value: CableCategory; label: string }[] = [
+  { value: "Fiber_Optic", label: "Fiber Optic" },
+  { value: "Ethernet", label: "Ethernet (Cat6/Cat7)" },
+  { value: "Coaxial", label: "Coaxial" },
+  { value: "Power", label: "Power Cable" },
+];
+
+export const CONSUMABLE_CATEGORIES: { value: ConsumableCategory; label: string }[] = [
+  { value: "Connector", label: "Connector" },
+  { value: "Fastener", label: "Fastener (Cable Tie, Clip)" },
+  { value: "Patch_Cord", label: "Patch Cord" },
+  { value: "Labeling", label: "Labeling" },
+  { value: "Mounting", label: "Mounting Hardware" },
+];
+
+export const INFRASTRUCTURE_CATEGORIES: { value: InfrastructureCategory; label: string }[] = [
+  { value: "ODP", label: "ODP" },
+  { value: "OLT", label: "OLT" },
+  { value: "Mikrotik", label: "Mikrotik Router" },
+  { value: "Switch", label: "Core Switch" },
+  { value: "Rack", label: "Rack" },
+  { value: "Power_Supply", label: "Power Supply Unit" },
+];
+
+export const OWNERSHIP_OPTIONS: { value: OwnershipType; label: string }[] = [
+  { value: "ion_owned", label: "ION-Owned" },
+  { value: "leased_to_customer", label: "Leased to Customer" },
+  { value: "customer_owned", label: "Customer-Owned" },
+];
+
+export const DEVICE_CONDITION_OPTIONS: { value: DeviceConditionType; label: string }[] = [
+  { value: "new", label: "New" },
+  { value: "refurbished", label: "Refurbished" },
+  { value: "damaged", label: "Damaged" },
+];
+
+export const INFRA_CONDITION_OPTIONS: { value: InfraCondition; label: string }[] = [
+  { value: "new", label: "New" },
+  { value: "active", label: "Active" },
+  { value: "under_maintenance", label: "Under Maintenance" },
+  { value: "decommissioned", label: "Decommissioned" },
+];
+
+export const DEPLOYMENT_STATUS_OPTIONS: { value: DeploymentStatus; label: string }[] = [
+  { value: "in_warehouse", label: "In Warehouse" },
+  { value: "deployed", label: "Deployed" },
+  { value: "under_maintenance", label: "Under Maintenance" },
+  { value: "decommissioned", label: "Decommissioned" },
+];
+
 export interface StockItem {
   id: string;
   name: string;

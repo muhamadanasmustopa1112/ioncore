@@ -57,6 +57,7 @@ export interface BulkOperationParams {
 
 export interface WizardState {
   currentStep: number;
+  operationType: BulkOperationType | null;
   sourcePlan: PlanItem | null;
   targetPlan: PlanItem | null;
   scopeType: ScopeType;
@@ -68,6 +69,7 @@ export interface WizardState {
   executionResults: ExecutionResult[];
   reset: () => void;
   setStep: (step: number) => void;
+  setOperationType: (type: BulkOperationType | null) => void;
   setSourcePlan: (plan: PlanItem | null) => void;
   setTargetPlan: (plan: PlanItem | null) => void;
   setScopeType: (type: ScopeType) => void;
