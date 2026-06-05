@@ -4,13 +4,14 @@ import { Warehouse, Router, Cable, TrendingUp, TrendingDown } from "lucide-react
 import { useTranslation } from "react-i18next";
 import { MobileMetricCard } from "./mobile-metric-card";
 import { Card, CardContent } from "@/components/ui/card";
-import { DUMMY_METRICS } from "../../../data/dummy-warehouse";
+import type { WarehouseMetrics } from "../../../types";
 
 interface DashboardKpiProps {
   isMobile: boolean;
+  metrics: WarehouseMetrics;
 }
 
-export function DashboardKpi({ isMobile }: DashboardKpiProps) {
+export function DashboardKpi({ isMobile, metrics }: DashboardKpiProps) {
   const { t } = useTranslation();
 
   if (isMobile) {
@@ -18,28 +19,28 @@ export function DashboardKpi({ isMobile }: DashboardKpiProps) {
       <div className="grid grid-cols-2 gap-3">
         <MobileMetricCard
           title={t("warehouse.totalWarehouses", "Warehouses")}
-          value={DUMMY_METRICS.totalWarehouses}
+          value={metrics.totalWarehouses}
           icon={Warehouse}
-          delta={DUMMY_METRICS.totalWarehousesDelta}
+          delta={metrics.totalWarehousesDelta}
           deltaType="up"
         />
         <MobileMetricCard
           title={t("warehouse.fiberStock", "Fiber Stock")}
-          value={`${DUMMY_METRICS.fiberStockKm} km`}
+          value={`${metrics.fiberStockKm} km`}
           icon={Cable}
-          delta={DUMMY_METRICS.fiberStockDelta}
-          deltaType="down"
+          delta={metrics.fiberStockDelta}
+          deltaType={metrics.fiberStockTrend === "down" ? "down" : "up"}
         />
         <MobileMetricCard
           title={t("warehouse.ontInstalled", "ONT Installed")}
-          value={DUMMY_METRICS.installedOnt.toLocaleString()}
+          value={metrics.installedOnt.toLocaleString()}
           icon={Router}
-          delta={DUMMY_METRICS.ontRatioDelta}
+          delta={metrics.ontRatioDelta}
           deltaType="up"
         />
         <MobileMetricCard
           title={t("warehouse.ontWarehouse", "ONT Stock")}
-          value={DUMMY_METRICS.warehouseOnt.toLocaleString()}
+          value={metrics.warehouseOnt.toLocaleString()}
           icon={Warehouse}
         />
       </div>
@@ -56,7 +57,7 @@ export function DashboardKpi({ isMobile }: DashboardKpiProps) {
                 {t("warehouse.totalWarehouses", "Total Warehouses")}
               </p>
               <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white">
-                {DUMMY_METRICS.totalWarehouses}
+                {metrics.totalWarehouses}
               </h3>
             </div>
             <div className="bg-blue-50 dark:bg-blue-950/40 p-3 rounded-xl text-blue-700 dark:text-blue-400">
@@ -66,7 +67,7 @@ export function DashboardKpi({ isMobile }: DashboardKpiProps) {
           <div className="flex items-center gap-1.5 mt-4 text-xs font-medium text-slate-400">
             <span className="flex items-center text-green-600 font-bold gap-0.5">
               <TrendingUp className="size-3.5" />
-              {DUMMY_METRICS.totalWarehousesDelta}
+              {metrics.totalWarehousesDelta}
             </span>
             <span>{t("common.vsLastMonth", "vs last month")}</span>
           </div>
@@ -81,7 +82,7 @@ export function DashboardKpi({ isMobile }: DashboardKpiProps) {
                 {t("warehouse.ontRatio", "ONT Ratio (Installed / Stock)")}
               </p>
               <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white">
-                {DUMMY_METRICS.installedOnt.toLocaleString()} / {DUMMY_METRICS.warehouseOnt.toLocaleString()}
+                {metrics.installedOnt.toLocaleString()} / {metrics.warehouseOnt.toLocaleString()}
               </h3>
             </div>
             <div className="bg-blue-50 dark:bg-blue-950/40 p-3 rounded-xl text-blue-700 dark:text-blue-400">
@@ -91,7 +92,7 @@ export function DashboardKpi({ isMobile }: DashboardKpiProps) {
           <div className="flex items-center gap-1.5 mt-4 text-xs font-medium text-slate-400">
             <span className="flex items-center text-green-600 font-bold gap-0.5">
               <TrendingUp className="size-3.5" />
-              {DUMMY_METRICS.ontRatioDelta}
+              {metrics.ontRatioDelta}
             </span>
             <span>{t("common.vsLastMonth", "vs last month")}</span>
           </div>
@@ -106,7 +107,7 @@ export function DashboardKpi({ isMobile }: DashboardKpiProps) {
                 {t("warehouse.fiberStock", "Fiber Cable Stock")}
               </p>
               <h3 className="text-3xl font-extrabold text-slate-900 dark:text-white">
-                {DUMMY_METRICS.fiberStockKm} km
+                {metrics.fiberStockKm} km
               </h3>
             </div>
             <div className="bg-blue-50 dark:bg-blue-950/40 p-3 rounded-xl text-blue-700 dark:text-blue-400">
@@ -114,9 +115,9 @@ export function DashboardKpi({ isMobile }: DashboardKpiProps) {
             </div>
           </div>
           <div className="flex items-center gap-1.5 mt-4 text-xs font-medium text-slate-400">
-            <span className="flex items-center text-red-500 font-bold gap-0.5">
-              <TrendingDown className="size-3.5" />
-              {DUMMY_METRICS.fiberStockDelta}
+            <span className={`flex items-center font-bold gap-0.5 ${metrics.fiberStockTrend === "down" ? "text-red-500" : "text-green-600"}`}>
+              {metrics.fiberStockTrend === "down" ? <TrendingDown className="size-3.5" /> : <TrendingUp className="size-3.5" />}
+              {metrics.fiberStockDelta}
             </span>
             <span>{t("common.vsLastMonth", "vs last month")}</span>
           </div>

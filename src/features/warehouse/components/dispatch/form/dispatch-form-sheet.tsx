@@ -13,7 +13,7 @@ export function DispatchFormSheet() {
   const { dispatchForm, dispatchSheetOpen, closeDispatchFormSheet } = useWarehouseStore();
   const formRef = useRef<DispatchFormRef>(null);
 
-  const isReadOnly = dispatchForm === "details";
+  const showSubmit = dispatchForm === "new";
 
   return (
     <Sheet open={dispatchSheetOpen} onOpenChange={(open) => !open && closeDispatchFormSheet()}>
@@ -32,7 +32,7 @@ export function DispatchFormSheet() {
           </ScrollArea>
         </SheetBody>
 
-        {!isReadOnly && (
+        {showSubmit && (
           <SheetFooter className="border-t p-5 shrink-0">
             <div className="flex w-full justify-end gap-3">
               <Button variant="outline" className="h-10 px-4 font-semibold text-xs" onClick={closeDispatchFormSheet}>
@@ -44,7 +44,7 @@ export function DispatchFormSheet() {
                 onClick={() => formRef.current?.submit()}
                 disabled={formRef.current?.isPending}
               >
-                {dispatchForm === "new" ? t("common.create", "Create") : t("common.save", "Save")}
+                {t("warehouse.createDispatch", "Create Dispatch")}
               </Button>
             </div>
           </SheetFooter>

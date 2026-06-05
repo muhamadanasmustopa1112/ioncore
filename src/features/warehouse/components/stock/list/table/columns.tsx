@@ -14,6 +14,13 @@ const alertVariantMap: Record<string, "destructive" | "warning" | "success"> = {
   OK: "success",
 };
 
+const formatIdr = (value: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(value);
+
 export const useStockColumns = () => {
   const { t } = useTranslation();
 

@@ -7,10 +7,11 @@ import { EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { DeviceReturnRecord } from "@/features/warehouse/types";
+import type { ReturnsListItem } from "@/features/warehouse/types/returns";
+import { toDeviceReturnRecord } from "@/features/warehouse/types/returns";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
 
-export function ActionsCell({ row }: { row: Row<DeviceReturnRecord> }) {
+export function ActionsCell({ row }: { row: Row<ReturnsListItem> }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { openReturnFormSheet, setSelectedReturn } = useWarehouseStore();
 
@@ -21,10 +22,10 @@ export function ActionsCell({ row }: { row: Row<DeviceReturnRecord> }) {
           <Button className="size-7" mode="icon" variant="ghost"><EllipsisVertical /></Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="end">
-          <DropdownMenuItem className="cursor-pointer" onClick={() => { setSelectedReturn(row.original); openReturnFormSheet("edit"); }}>
+          <DropdownMenuItem className="cursor-pointer" onClick={() => { setSelectedReturn(toDeviceReturnRecord(row.original)); openReturnFormSheet("edit"); }}>
             <RiEditLine /> Edit
           </DropdownMenuItem>
-          <DropdownMenuItem className="cursor-pointer" onClick={() => { setSelectedReturn(row.original); openReturnFormSheet("details"); }}>
+          <DropdownMenuItem className="cursor-pointer" onClick={() => { setSelectedReturn(toDeviceReturnRecord(row.original)); openReturnFormSheet("details"); }}>
             <RiEyeLine /> Detail
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive" className="cursor-pointer" onClick={() => setShowDeleteDialog(true)}>

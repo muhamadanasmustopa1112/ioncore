@@ -26,6 +26,8 @@ export function WarehouseDashboardPage() {
     handleTabChange,
     searchQuery,
     setSearchQuery,
+    metrics,
+    filteredLowStockAlerts,
     filteredAssets,
     filteredWorkOrders,
     filteredSerializedAssets,
@@ -45,7 +47,7 @@ export function WarehouseDashboardPage() {
           onAddAsset={() => setAssetSheetOpen(true)}
         />
 
-        <DashboardKpi isMobile={isMobile} />
+        <DashboardKpi isMobile={isMobile} metrics={metrics} />
 
         <DashboardTabs
           activeTab={activeTab}
@@ -56,7 +58,7 @@ export function WarehouseDashboardPage() {
         <div className="mt-4">
           {activeTab === "inventory" && (
             <InventoryTab
-              filteredAssets={filteredAssets}
+              filteredAssets={filteredLowStockAlerts}
               isMobile={isMobile}
               onReorder={(item) => {
                 console.log("Reorder:", item);

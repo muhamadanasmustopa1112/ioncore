@@ -53,6 +53,7 @@ export const services = {
   technical: "/ion-technical-service/api/v1",
   notification: "/ion-notification-service/api/v1",
   billing: "/ion-billing-service/api/v1",
+  warehouse: "/ion-warehouse-service/api/v1",
 };
 
 // devices

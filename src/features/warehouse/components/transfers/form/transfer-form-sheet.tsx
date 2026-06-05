@@ -10,10 +10,17 @@ import { TransferForm, type TransferFormRef } from "./transfer-form";
 
 export function TransferFormSheet() {
   const { t } = useTranslation();
-  const { transferForm, transferSheetOpen, closeTransferFormSheet } = useWarehouseStore();
+  const {
+    transferForm,
+    transferSheetOpen,
+    selectedTransfer,
+    closeTransferFormSheet,
+  } = useWarehouseStore();
   const formRef = useRef<TransferFormRef>(null);
 
   const isReadOnly = transferForm === "details";
+  const formKey =
+    transferForm === "new" ? "new" : `${transferForm}-${selectedTransfer?.id ?? "none"}`;
 
   return (
     <Sheet open={transferSheetOpen} onOpenChange={(open) => !open && closeTransferFormSheet()}>
@@ -28,7 +35,12 @@ export function TransferFormSheet() {
 
         <SheetBody className="flex-1 p-0 overflow-hidden">
           <ScrollArea className="h-full">
-            <TransferForm ref={formRef} onSuccess={closeTransferFormSheet} mode={transferForm ?? "new"} />
+            <TransferForm
+              key={formKey}
+              ref={formRef}
+              onSuccess={closeTransferFormSheet}
+              mode={transferForm ?? "new"}
+            />
           </ScrollArea>
         </SheetBody>
 

@@ -6,33 +6,43 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetBody, SheetFooter } 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
-import { StockForm, type StockFormRef } from "./stock-form";
+import { StockItemForm, type StockItemFormRef } from "./stock-form";
+import { StockLevelDetail } from "./stock-level-detail";
 
 export function StockFormSheet() {
   const { t } = useTranslation();
-  const { stockForm, stockSheetOpen, closeStockFormSheet } = useWarehouseStore();
-  const formRef = useRef<StockFormRef>(null);
+  const { stockForm, stockSheetOpen, selectedStock, closeStockFormSheet } = useWarehouseStore();
+  const formRef = useRef<StockItemFormRef>(null);
 
-  const isReadOnly = stockForm === "details";
+  const isDetails = stockForm === "details";
 
   return (
     <Sheet open={stockSheetOpen} onOpenChange={(open) => !open && closeStockFormSheet()}>
       <SheetContent className="sm:max-w-lg w-full flex flex-col">
         <SheetHeader className="border-b px-5 py-4 shrink-0">
           <SheetTitle className="text-lg font-extrabold">
-            {stockForm === "new" && t("warehouse.addStockItem", "Add Stock Item")}
-            {stockForm === "edit" && t("warehouse.editStockItem", "Edit Stock Item")}
+            {stockForm === "new" && t("warehouse.receiveStock", "Receive Stock")}
+            {stockForm === "edit" && t("warehouse.receiveStock", "Receive Stock")}
             {stockForm === "details" && t("warehouse.stockDetails", "Stock Details")}
           </SheetTitle>
         </SheetHeader>
 
         <SheetBody className="flex-1 p-0 overflow-hidden">
-          <ScrollArea className="h-full">
-            <StockForm ref={formRef} onSuccess={closeStockFormSheet} mode={stockForm ?? "new"} />
+          <ScrollArea className="h-full px-5">
+            {isDetails ? (
+              <StockLevelDetail stock={selectedStock} />
+            ) : (
+              <StockItemForm
+                key={stockForm === "edit" ? selectedStock?.id ?? "edit" : "new"}
+                ref={formRef}
+                onSuccess={closeStockFormSheet}
+                mode={stockForm ?? "new"}
+              />
+            )}
           </ScrollArea>
         </SheetBody>
 
-        {!isReadOnly && (
+        {!isDetails && (
           <SheetFooter className="border-t p-5 shrink-0">
             <div className="flex w-full justify-end gap-3">
               <Button variant="outline" className="h-10 px-4 font-semibold text-xs" onClick={closeStockFormSheet}>
@@ -44,7 +54,7 @@ export function StockFormSheet() {
                 onClick={() => formRef.current?.submit()}
                 disabled={formRef.current?.isPending}
               >
-                {stockForm === "new" ? t("common.create", "Create") : t("common.save", "Save")}
+                {t("warehouse.createReceipt", "Create Receipt")}
               </Button>
             </div>
           </SheetFooter>

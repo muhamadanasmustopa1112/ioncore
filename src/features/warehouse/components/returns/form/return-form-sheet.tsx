@@ -10,10 +10,17 @@ import { ReturnForm, type ReturnFormRef } from "./return-form";
 
 export function ReturnFormSheet() {
   const { t } = useTranslation();
-  const { returnForm, returnSheetOpen, closeReturnFormSheet } = useWarehouseStore();
+  const {
+    returnForm,
+    returnSheetOpen,
+    selectedReturn,
+    closeReturnFormSheet,
+  } = useWarehouseStore();
   const formRef = useRef<ReturnFormRef>(null);
 
-  const isReadOnly = returnForm === "details";
+  const isReadOnly = returnForm === "details" || returnForm === "edit";
+  const formKey =
+    returnForm === "new" ? "new" : `${returnForm}-${selectedReturn?.id ?? "none"}`;
 
   return (
     <Sheet open={returnSheetOpen} onOpenChange={(open) => !open && closeReturnFormSheet()}>
@@ -28,11 +35,16 @@ export function ReturnFormSheet() {
 
         <SheetBody className="flex-1 p-0 overflow-hidden">
           <ScrollArea className="h-full">
-            <ReturnForm ref={formRef} onSuccess={closeReturnFormSheet} mode={returnForm ?? "new"} />
+            <ReturnForm
+              key={formKey}
+              ref={formRef}
+              onSuccess={closeReturnFormSheet}
+              mode={returnForm ?? "new"}
+            />
           </ScrollArea>
         </SheetBody>
 
-        {!isReadOnly && (
+        {!isReadOnly && returnForm === "new" && (
           <SheetFooter className="border-t p-5 shrink-0">
             <div className="flex w-full justify-end gap-3">
               <Button variant="outline" className="h-10 px-4 font-semibold text-xs" onClick={closeReturnFormSheet}>

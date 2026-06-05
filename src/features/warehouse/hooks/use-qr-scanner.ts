@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { BrowserMultiFormatReader, BrowserCodeReader, type IScannerControls } from "@zxing/browser";
+import {
+  BrowserQRCodeReader,
+  BrowserCodeReader,
+  type IScannerControls,
+} from "@zxing/browser";
 
 export interface ScanResult {
   text: string;
@@ -15,6 +19,11 @@ export interface UseQRScannerOptions {
   autoStop?: boolean;
 }
 
+const SCAN_OPTIONS = {
+  delayBetweenScanAttempts: 750,
+  delayBetweenScanSuccess: 400,
+};
+
 export function useQRScanner(options: UseQRScannerOptions = {}) {
   const { onScan, onError, autoStop = true } = options;
   const [isScanning, setIsScanning] = useState(false);
@@ -22,17 +31,21 @@ export function useQRScanner(options: UseQRScannerOptions = {}) {
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
-  const readerRef = useRef<BrowserMultiFormatReader | null>(null);
+  const readerRef = useRef<BrowserQRCodeReader | null>(null);
+  const sessionRef = useRef(0);
+
+  const onScanRef = useRef(onScan);
+  const onErrorRef = useRef(onError);
+  const autoStopRef = useRef(autoStop);
 
   useEffect(() => {
-    readerRef.current = new BrowserMultiFormatReader();
-    return () => {
-      stopScanning();
-      BrowserCodeReader.releaseAllStreams();
-    };
-  }, []);
+    onScanRef.current = onScan;
+    onErrorRef.current = onError;
+    autoStopRef.current = autoStop;
+  });
 
   const stopScanning = useCallback(() => {
+    sessionRef.current += 1;
     if (controlsRef.current) {
       controlsRef.current.stop();
       controlsRef.current = null;
@@ -45,18 +58,26 @@ export function useQRScanner(options: UseQRScannerOptions = {}) {
     setIsScanning(false);
   }, []);
 
+  const stopScanningRef = useRef(stopScanning);
+  stopScanningRef.current = stopScanning;
+
   const startScanning = useCallback(async () => {
     if (!readerRef.current || !videoRef.current) return;
+
+    stopScanningRef.current();
+    const session = sessionRef.current;
 
     setError(null);
     setScanResult(null);
 
     try {
-      const devices = await BrowserMultiFormatReader.listVideoInputDevices();
+      const devices = await BrowserCodeReader.listVideoInputDevices();
+      if (session !== sessionRef.current) return;
+
       if (devices.length === 0) {
         const msg = "No camera found on this device";
         setError(msg);
-        onError?.(msg);
+        onErrorRef.current?.(msg);
         return;
       }
 
@@ -65,31 +86,48 @@ export function useQRScanner(options: UseQRScannerOptions = {}) {
 
       setIsScanning(true);
 
-      controlsRef.current = await readerRef.current.decodeFromVideoDevice(
+      const controls = await readerRef.current.decodeFromVideoDevice(
         backCamera.deviceId,
         videoRef.current,
-        (result, _err, controls) => {
-          if (result) {
-            const scanResult: ScanResult = {
-              text: result.getText(),
-              format: result.getBarcodeFormat()?.toString() || "UNKNOWN",
-              timestamp: Date.now(),
-            };
-            setScanResult(scanResult);
-            onScan?.(scanResult);
-            if (autoStop) {
-              stopScanning();
-            }
+        (result) => {
+          if (session !== sessionRef.current || !result) return;
+
+          const nextResult: ScanResult = {
+            text: result.getText(),
+            format: result.getBarcodeFormat()?.toString() || "QR_CODE",
+            timestamp: Date.now(),
+          };
+          setScanResult(nextResult);
+          onScanRef.current?.(nextResult);
+          if (autoStopRef.current) {
+            stopScanningRef.current();
           }
         }
       );
+
+      if (session !== sessionRef.current) {
+        controls.stop();
+        return;
+      }
+
+      controlsRef.current = controls;
     } catch (err) {
+      if (session !== sessionRef.current) return;
       const msg = err instanceof Error ? err.message : "Failed to access camera";
       setError(msg);
-      onError?.(msg);
+      onErrorRef.current?.(msg);
       setIsScanning(false);
     }
-  }, [onScan, onError, autoStop]);
+  }, []);
+
+  useEffect(() => {
+    readerRef.current = new BrowserQRCodeReader(undefined, SCAN_OPTIONS);
+    return () => {
+      stopScanningRef.current();
+      BrowserCodeReader.releaseAllStreams();
+      readerRef.current = null;
+    };
+  }, []);
 
   const resetScan = useCallback(() => {
     setScanResult(null);
