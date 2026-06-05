@@ -113,7 +113,7 @@ export function MobileDispatchHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none min-w-0">
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none min-w-0 flex-wrap">
         <Button
           variant={selectedStatus === null ? "primary" : "outline"}
           size="sm"

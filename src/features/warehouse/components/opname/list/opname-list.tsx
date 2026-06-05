@@ -31,7 +31,11 @@ import {
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { DUMMY_OPNAMES } from "@/features/warehouse/data/dummy-subfeatures";
+import {
+  useInfiniteOpnames,
+  useOpnames,
+} from "@/features/warehouse/api/get-opnames";
+import { toStockOpnames } from "@/features/warehouse/types/opnames";
 import { useOpnameColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { MobileOpnameHeader } from "./mobile-opname-header";
@@ -42,6 +46,19 @@ import type { StockOpname } from "@/features/warehouse/types";
 const MOBILE_PAGE_SIZE = 10;
 const SCROLL_THRESHOLD = 0.8;
 
+const WAREHOUSE_FILTER_OPTIONS = [
+  { id: 1, name: "Gudang Jakarta Utara" },
+  { id: 2, name: "Gudang Bandung Utara" },
+  { id: 3, name: "Gudang Surabaya" },
+];
+
+const STATUS_FILTER_OPTIONS = [
+  "scheduled",
+  "in_progress",
+  "completed",
+  "adjusted",
+] as const;
+
 export function OpnameList() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -50,44 +67,67 @@ export function OpnameList() {
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
     search: parseAsString,
+    warehouse_id: parseAsInteger,
+    status: parseAsString,
   });
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   const columns = useOpnameColumns();
-  const [isLoading] = useState(false);
 
-  const filteredData = useMemo(() => {
-    let result = DUMMY_OPNAMES;
-
-    if (filter.search) {
-      const searchLower = filter.search.toLowerCase();
-      result = result.filter(
-        (item) =>
-          item.warehouseName.toLowerCase().includes(searchLower) ||
-          item.initiatedByName.toLowerCase().includes(searchLower)
-      );
-    }
-
-    if (selectedStatus) {
-      result = result.filter((item) => item.status === selectedStatus);
-    }
-
-    return result;
-  }, [filter.search, selectedStatus]);
-
-  const data = useMemo(() => {
-    const start = (filter.page - 1) * filter.limit;
-    return filteredData.slice(start, start + filter.limit);
-  }, [filteredData, filter.page, filter.limit]);
-
-  const metadata = useMemo(
+  const listParams = useMemo(
     () => ({
-      total_data: filteredData.length,
-      total_page: Math.ceil(filteredData.length / filter.limit),
+      page: filter.page,
+      limit: filter.limit,
+      search: filter.search || undefined,
+      warehouse_id: filter.warehouse_id ?? undefined,
+      status: filter.status || undefined,
     }),
-    [filteredData, filter.limit]
+    [
+      filter.page,
+      filter.limit,
+      filter.search,
+      filter.warehouse_id,
+      filter.status,
+    ]
   );
+
+  const {
+    data: opnamesResponse,
+    isLoading: isDesktopLoading,
+    isFetching: isDesktopFetching,
+  } = useOpnames({
+    params: listParams,
+    queryConfig: { enabled: !isMobile },
+  });
+
+  const {
+    data: infiniteData,
+    isLoading: isMobileLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteOpnames({
+    limit: MOBILE_PAGE_SIZE,
+    search: filter.search || undefined,
+    warehouse_id: filter.warehouse_id ?? undefined,
+    status: filter.status || undefined,
+    queryConfig: { enabled: isMobile },
+  });
+
+  const tableData = useMemo(
+    () => toStockOpnames(opnamesResponse?.data ?? []),
+    [opnamesResponse]
+  );
+  const metadata = opnamesResponse?.metadata;
+
+  const mobileDataAll = useMemo(
+    () =>
+      toStockOpnames(infiniteData?.pages.flatMap((page) => page.data) ?? []),
+    [infiniteData]
+  );
+
+  const mobileTotalCount =
+    infiniteData?.pages[0]?.metadata.total_data ?? mobileDataAll.length;
 
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string)
@@ -95,14 +135,11 @@ export function OpnameList() {
 
   const table = useReactTable({
     columns,
-    data,
-    pageCount: metadata.total_page,
+    data: tableData,
+    pageCount: metadata?.total_page ?? 0,
     getRowId: (row: StockOpname) => String(row.id),
     state: {
-      pagination: {
-        pageIndex: filter.page - 1,
-        pageSize: filter.limit,
-      },
+      pagination: { pageIndex: filter.page - 1, pageSize: filter.limit },
       columnOrder,
       rowSelection,
     },
@@ -117,34 +154,19 @@ export function OpnameList() {
     manualPagination: true,
   });
 
-  const [visibleCount, setVisibleCount] = useState(MOBILE_PAGE_SIZE);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-
-  const hasMore = visibleCount < filteredData.length;
 
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container || isFetchingMore || !hasMore) return;
+    if (!container || isFetchingNextPage || !hasNextPage) return;
 
     const { scrollTop, scrollHeight, clientHeight } = container;
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
 
     if (scrollPercentage > SCROLL_THRESHOLD) {
-      setIsFetchingMore(true);
-      setTimeout(() => {
-        setVisibleCount((prev) =>
-          Math.min(prev + MOBILE_PAGE_SIZE, filteredData.length)
-        );
-        setIsFetchingMore(false);
-      }, 400);
+      fetchNextPage();
     }
-  }, [isFetchingMore, hasMore, filteredData.length]);
-
-  const mobileData = useMemo(
-    () => filteredData.slice(0, visibleCount),
-    [filteredData, visibleCount]
-  );
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   const handleMobileDetail = useCallback(
     (item: StockOpname) => {
@@ -156,16 +178,31 @@ export function OpnameList() {
 
   const handleSearchChange = useCallback(
     (value: string) => {
-      setFilter({ ...filter, search: value });
-      setVisibleCount(MOBILE_PAGE_SIZE);
+      setFilter({ search: value || null, page: 1 });
     },
-    [filter, setFilter]
+    [setFilter]
   );
 
-  const handleStatusChange = useCallback((status: string | null) => {
-    setSelectedStatus(status);
-    setVisibleCount(MOBILE_PAGE_SIZE);
-  }, []);
+  const handleStatusChange = useCallback(
+    (status: string | null) => {
+      setFilter({ status: status || null, page: 1 });
+    },
+    [setFilter]
+  );
+
+  const clearFilters = useCallback(() => {
+    setFilter({
+      search: null,
+      status: null,
+      warehouse_id: null,
+      page: 1,
+    });
+  }, [setFilter]);
+
+  const hasActiveFilters =
+    !!filter.search || !!filter.status || filter.warehouse_id != null;
+
+  const isLoading = isMobile ? isMobileLoading : isDesktopLoading;
 
   const searchInput = (
     <div className="relative">
@@ -193,44 +230,23 @@ export function OpnameList() {
     return (
       <div className="mt-2 space-y-3 overflow-hidden">
         <MobileOpnameHeader
-          items={DUMMY_OPNAMES}
-          selectedStatus={selectedStatus}
+          items={mobileDataAll}
+          selectedStatus={filter.status ?? null}
           onStatusChange={handleStatusChange}
         />
 
-        <div className="relative">
-          <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
-          <Input
-            placeholder={t("warehouse.searchOpname", "Search opname...")}
-            value={filter.search || ""}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full ps-9"
-          />
-          {filter.search && (
-            <Button
-              mode="icon"
-              variant="ghost"
-              className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-              onClick={() => handleSearchChange("")}
-            >
-              <X />
-            </Button>
-          )}
-        </div>
+        {searchInput}
 
         <div className="flex items-center justify-between px-0.5">
           <span className="text-[11px] text-muted-foreground font-medium">
-            {filteredData.length} {t("common.items", "items")}
+            {mobileTotalCount} {t("common.items", "items")}
           </span>
-          {(filter.search || selectedStatus) && (
+          {hasActiveFilters && (
             <Button
               variant="ghost"
               size="sm"
               className="h-6 text-[10px] font-semibold text-muted-foreground px-2"
-              onClick={() => {
-                handleSearchChange("");
-                handleStatusChange(null);
-              }}
+              onClick={clearFilters}
             >
               Clear filters
             </Button>
@@ -242,7 +258,7 @@ export function OpnameList() {
           onScroll={handleScroll}
           className="max-h-[calc(100vh-420px)] overflow-y-auto space-y-3 pr-1"
         >
-          {mobileData.map((item) => (
+          {mobileDataAll.map((item) => (
             <OpnameMobileCard
               key={item.id}
               item={item}
@@ -250,22 +266,22 @@ export function OpnameList() {
             />
           ))}
 
-          {mobileData.length === 0 && !isLoading && (
+          {mobileDataAll.length === 0 && !isLoading && (
             <div className="text-center py-8 text-muted-foreground text-sm">
               {t("warehouse.noOpnames", "No opnames found")}
             </div>
           )}
 
-          {isFetchingMore && (
+          {isFetchingNextPage && (
             <div className="flex items-center justify-center py-3">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           )}
 
-          {!hasMore && mobileData.length > 0 && (
+          {!hasNextPage && mobileDataAll.length > 0 && (
             <div className="text-center py-3 text-[11px] text-muted-foreground">
-              {t("common.endOfList", "End of list")} •{" "}
-              {filteredData.length} {t("common.items", "items")}
+              {t("common.endOfList", "End of list")} • {mobileTotalCount}{" "}
+              {t("common.items", "items")}
             </div>
           )}
         </div>
@@ -276,7 +292,7 @@ export function OpnameList() {
   return (
     <DataGrid
       table={table}
-      recordCount={metadata.total_data}
+      recordCount={metadata?.total_data ?? 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -284,26 +300,73 @@ export function OpnameList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={isLoading}
+      isLoading={isLoading || isDesktopFetching}
     >
       <Card className="mt-[10px]">
         <CardHeader>
           <Collapsible open={openFilter} onOpenChange={setOpenFilter}>
             <CardHeading className="py-4">
               <div className="flex items-center gap-2">
-                <div>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="outline">
-                      <Filter />
-                      {t("common.filter")}
-                    </Button>
-                  </CollapsibleTrigger>
-                </div>
+                <CollapsibleTrigger asChild>
+                  <Button variant="outline">
+                    <Filter />
+                    {t("common.filter")}
+                  </Button>
+                </CollapsibleTrigger>
                 {searchInput}
               </div>
               <CollapsibleContent>
-                <div className="flex items-center gap-2 py-[5px] text-sm text-muted-foreground">
-                  {t("warehouse.noFilters", "No advanced filters defined yet.")}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                      {t("warehouse.warehouseLabel", "Warehouse")}
+                    </label>
+                    <select
+                      value={filter.warehouse_id ?? ""}
+                      onChange={(e) =>
+                        setFilter({
+                          warehouse_id: e.target.value
+                            ? Number(e.target.value)
+                            : null,
+                          page: 1,
+                        })
+                      }
+                      className="flex w-full bg-background border border-input h-9 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">
+                        {t("warehouse.allWarehouses", "All warehouses")}
+                      </option>
+                      {WAREHOUSE_FILTER_OPTIONS.map((wh) => (
+                        <option key={wh.id} value={wh.id}>
+                          {wh.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                      {t("common.status", "Status")}
+                    </label>
+                    <select
+                      value={filter.status || ""}
+                      onChange={(e) =>
+                        setFilter({
+                          status: e.target.value || null,
+                          page: 1,
+                        })
+                      }
+                      className="flex w-full bg-background border border-input h-9 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">
+                        {t("warehouse.allStatuses", "All statuses")}
+                      </option>
+                      {STATUS_FILTER_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </CollapsibleContent>
             </CardHeading>

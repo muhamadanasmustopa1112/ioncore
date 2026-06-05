@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { Flashlight, X, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQRScanner, type ScanResult } from "../../hooks/use-qr-scanner";
@@ -26,29 +26,26 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code" }: QRScanner
   });
 
   useEffect(() => {
-    startScanning();
+    void startScanning();
     return () => {
       stopScanning();
     };
-  }, [startScanning, stopScanning]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    void startScanning();
+  }, [startScanning]);
 
   return (
     <div className="fixed inset-0 z-[100] bg-background flex flex-col">
       <div className="flex items-center justify-between p-4 bg-background/90 backdrop-blur-sm border-b border-border">
         <h3 className="text-sm font-bold text-foreground">{title}</h3>
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTorch}
-          >
+          <Button variant="ghost" size="icon" onClick={toggleTorch}>
             <Flashlight className="size-5" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-          >
+          <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="size-5" />
           </Button>
         </div>
@@ -58,9 +55,12 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code" }: QRScanner
         <video
           ref={videoRef}
           className="absolute inset-0 w-full h-full object-cover"
+          muted
+          playsInline
+          autoPlay
         />
 
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="absolute inset-0 bg-black/50" />
 
           <div className="relative w-64 h-64">
@@ -83,7 +83,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code" }: QRScanner
                 variant="outline"
                 size="sm"
                 className="text-white border-white/30"
-                onClick={startScanning}
+                onClick={handleRetry}
               >
                 <RotateCcw className="size-4 mr-1" />
                 Retry
@@ -92,7 +92,7 @@ export function QRScanner({ onScan, onClose, title = "Scan QR Code" }: QRScanner
           )}
           {!error && !scanResult && isScanning && (
             <p className="text-white/80 text-xs text-center">
-              Point camera at QR code or barcode
+              Point camera at QR code
             </p>
           )}
           {scanResult && (

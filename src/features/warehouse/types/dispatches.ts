@@ -1,3 +1,24 @@
+export interface DispatchItemInput {
+  stock_item_id: number;
+  work_order_material_id: number;
+  quantity: number;
+  qr_payload: string;
+  asset_id?: number;
+  batch_id?: number;
+}
+
+export interface CreateDispatchRequest {
+  dispatch_number: string;
+  wo_id: string;
+  technician_user_id: string;
+  source_warehouse_id: number;
+  items: DispatchItemInput[];
+}
+
+export interface CreateDispatchResponse {
+  data: ApiDispatch;
+}
+
 export interface ApiDispatchItem {
   id: number;
   dispatch_record_id: number;

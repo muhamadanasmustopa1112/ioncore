@@ -420,6 +420,7 @@ export interface OpnameItemCount {
 
 export interface StockOpname {
   id: string;
+  sessionNumber?: string;
   warehouseId: string;
   warehouseName: string;
   status: OpnameStatus;
@@ -430,6 +431,8 @@ export interface StockOpname {
   initiatedByName: string;
   items: OpnameItemCount[];
   totalDiscrepancies: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ─── Device Return ───────────────────────────────────────────────────────────

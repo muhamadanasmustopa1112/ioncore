@@ -25,7 +25,11 @@ export const useOpnameColumns = () => {
       header: ({ column }) => (
         <DataGridColumnHeader title={t("warehouse.opnameId", "Opname ID")} column={column} className="text-foreground font-semibold" />
       ),
-      cell: ({ row }) => <div className="font-mono font-medium text-foreground">{row.original.id}</div>,
+      cell: ({ row }) => (
+        <div className="font-mono font-medium text-foreground">
+          {row.original.sessionNumber ?? row.original.id}
+        </div>
+      ),
       meta: { skeleton: <Skeleton className="h-4 w-20" /> },
       enableSorting: true,
       size: 120,

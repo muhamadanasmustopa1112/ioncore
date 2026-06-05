@@ -1,15 +1,22 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslation } from "react-i18next";
 import { QrCode } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { useCreateReturn } from "@/features/warehouse/api/post-return";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
+import { useAuthStore } from "@/store/auth-store";
+import { buildCreateReturnPayload } from "@/features/warehouse/utils/build-create-return-payload";
 import { ScannerDialog } from "../../scanner/scanner-dialog";
 import { ScanResultBadge } from "../../scanner/scan-result-badge";
 import { matchScannedQR } from "../../../utils/qr-matcher";
@@ -17,13 +24,12 @@ import type { ScanResult } from "../../../hooks/use-qr-scanner";
 import type { WarehouseAsset } from "../../../types";
 
 const returnSchema = z.object({
-  assetId: z.string().min(1, "Asset is required"),
-  woNumber: z.string().min(3, "WO number is required"),
-  customerName: z.string().min(2, "Customer name is required"),
-  ownership: z.enum(["ion_owned", "leased", "customer_owned"]),
-  warehouseId: z.string().min(1, "Warehouse is required"),
-  condition: z.enum(["good", "damaged"]).optional(),
-  notes: z.string().optional(),
+  wo_id: z.string().min(1, "WO ID is required"),
+  asset_id: z.number().min(1, "Asset ID is required"),
+  condition: z.string().min(1, "Condition is required"),
+  disposition: z.string().min(1, "Disposition is required"),
+  received_warehouse_id: z.number().min(1, "Warehouse is required"),
+  actor: z.string().min(1, "Actor is required"),
 });
 
 type ReturnFormValues = z.infer<typeof returnSchema>;
@@ -38,82 +44,138 @@ interface ReturnFormProps {
   mode: "new" | "edit" | "details";
 }
 
-const ASSETS = [
-  { id: "AST-001", name: "Huawei HG8145V5 ONT", serial: "SN-HUA99210", sku: "HW-ONT-992" },
-  { id: "AST-002", name: "ZTE F609 GPON ONT", serial: "SN-ZTE40498", sku: "ZTE-ONT-404" },
-  { id: "AST-003", name: "TP-Link AX3000 Router", serial: "SN-TPL3000-05", sku: "TPL-RT-3000" },
+const WAREHOUSE_OPTIONS = [
+  { id: 1, name: "Gudang Jakarta Utara" },
+  { id: 2, name: "Gudang Bandung Utara" },
+  { id: 3, name: "Gudang Surabaya" },
 ];
 
-const WAREHOUSES = [
-  { id: "WH-001", name: "Gudang Jakarta Utara" },
-  { id: "WH-002", name: "Gudang Bandung Utara" },
-  { id: "WH-003", name: "Gudang Surabaya" },
-];
+const CONDITION_OPTIONS = ["GOOD", "DAMAGED"] as const;
+
+const DISPOSITION_OPTIONS = [
+  "REFURBISH",
+  "RESTOCK",
+  "DECOMMISSION",
+  "PENALTY",
+] as const;
+
+const selectClassName =
+  "flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring";
 
 export const ReturnForm = forwardRef<ReturnFormRef, ReturnFormProps>(
   ({ onSuccess, mode }, ref) => {
     const { t } = useTranslation();
-    const { deviceReturns, serializedAssets, stockLevels, assets } = useWarehouseStore();
+    const user = useAuthStore((state) => state.user);
+    const { selectedReturn, serializedAssets, stockLevels, assets } =
+      useWarehouseStore();
+    const { mutate: createReturn, isPending } = useCreateReturn({
+      mutationConfig: { onSuccess: () => onSuccess() },
+    });
 
     const [scannerOpen, setScannerOpen] = useState(false);
-    const [scannedDevice, setScannedDevice] = useState<{ name: string; serial: string } | null>(null);
+    const [scannedDevice, setScannedDevice] = useState<{
+      name: string;
+      assetId: number;
+    } | null>(null);
 
-    const handleDeviceScan = (result: ScanResult) => {
-      const match = matchScannedQR(result.text, serializedAssets, stockLevels, assets);
-      if (match.type === "asset" && match.data) {
-        const asset = match.data as WarehouseAsset;
-        setScannedDevice({ name: asset.name, serial: asset.serialNumber });
-      }
-    };
+    const isReadOnly = mode === "details" || mode === "edit";
 
     const {
       register,
       handleSubmit,
-      formState: { errors, isSubmitting },
+      setValue,
+      reset,
+      formState: { errors },
     } = useForm<ReturnFormValues>({
       resolver: zodResolver(returnSchema),
-      defaultValues: { assetId: "AST-001", woNumber: "", customerName: "", ownership: "ion_owned", warehouseId: "WH-001", condition: "good", notes: "" },
+      defaultValues: {
+        wo_id: "",
+        asset_id: 0,
+        condition: "GOOD",
+        disposition: "REFURBISH",
+        received_warehouse_id: 1,
+        actor: user?.id ?? "",
+      },
     });
+
+    useEffect(() => {
+      if (user?.id) {
+        setValue("actor", user.id);
+      }
+    }, [user?.id, setValue]);
+
+    useEffect(() => {
+      if (isReadOnly && selectedReturn) {
+        reset({
+          wo_id: selectedReturn.woId || selectedReturn.woNumber,
+          asset_id: Number(selectedReturn.assetId) || 0,
+          condition: (selectedReturn.condition ?? "good").toUpperCase(),
+          disposition: selectedReturn.notes ?? "REFURBISH",
+          received_warehouse_id: Number(selectedReturn.warehouseId) || 1,
+          actor: selectedReturn.receivedBy ?? "",
+        });
+      }
+    }, [isReadOnly, selectedReturn, reset]);
+
+    const handleDeviceScan = (result: ScanResult) => {
+      const match = matchScannedQR(
+        result.text,
+        serializedAssets,
+        stockLevels,
+        assets
+      );
+      if (match.type === "asset" && match.data) {
+        const asset = match.data as WarehouseAsset;
+        const assetId = Number(asset.id);
+        if (assetId > 0) {
+          setValue("asset_id", assetId);
+        }
+        setScannedDevice({
+          name: asset.name,
+          assetId: assetId > 0 ? assetId : 0,
+        });
+      }
+    };
 
     useImperativeHandle(ref, () => ({
       submit: () => handleSubmit(onSubmit)(),
-      isPending: isSubmitting,
+      isPending,
     }));
 
     function onSubmit(values: ReturnFormValues) {
-      const asset = ASSETS.find((a) => a.id === values.assetId);
-      const warehouse = WAREHOUSES.find((w) => w.id === values.warehouseId);
-      if (!asset || !warehouse) return;
-
-      deviceReturns.push({
-        id: `RET-${Date.now()}`,
-        assetId: values.assetId,
-        assetName: asset.name,
-        assetSku: asset.sku,
-        serialNumber: asset.serial,
-        qrCode: `ION-ASSET-${Date.now()}`,
-        woNumber: values.woNumber,
-        woId: values.woNumber,
-        customerName: values.customerName,
-        customerId: "CUST-001",
-        ownership: values.ownership,
-        status: "pending_return",
-        condition: values.condition,
-        dateInitiated: new Date().toISOString(),
-        warehouseId: values.warehouseId,
-        warehouseName: warehouse.name,
-        notes: values.notes,
-      });
-      onSuccess();
+      if (mode !== "new") return;
+      createReturn(
+        buildCreateReturnPayload({
+          ...values,
+          actor: values.actor || user?.id || "",
+        })
+      );
     }
 
-    const isReadOnly = mode === "details";
-
     return (
-      <div className="space-y-5 px-1 py-2">
+      <div className="space-y-5 px-1 py-2 pb-6">
+        <input type="hidden" {...register("actor")} />
+
         <div className="space-y-1">
           <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            {t("warehouse.deviceName", "Device")} *
+            {t("warehouse.woNumber", "WO ID")} *
+          </label>
+          <Input
+            {...register("wo_id")}
+            readOnly={isReadOnly}
+            placeholder="WO-SIT-RETURN-001"
+            className="text-xs h-10 font-mono"
+          />
+          {errors.wo_id && (
+            <p className="text-[10px] text-destructive font-bold">
+              {errors.wo_id.message}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+            {t("warehouse.assetId", "Asset ID")} *
           </label>
           {!isReadOnly && (
             <Button
@@ -127,88 +189,93 @@ export const ReturnForm = forwardRef<ReturnFormRef, ReturnFormProps>(
               Scan Device QR
             </Button>
           )}
-          <select
-            {...register("assetId")}
-            disabled={isReadOnly}
-            className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
-          >
-            {ASSETS.map((asset) => (
-              <option key={asset.id} value={asset.id}>{asset.name} ({asset.serial})</option>
-            ))}
-          </select>
-          {errors.assetId && <p className="text-[10px] text-destructive font-bold">{errors.assetId.message}</p>}
+          <Input
+            type="number"
+            min={1}
+            {...register("asset_id", { valueAsNumber: true })}
+            readOnly={isReadOnly}
+            className="text-xs h-10 font-mono"
+          />
+          {errors.asset_id && (
+            <p className="text-[10px] text-destructive font-bold">
+              {errors.asset_id.message}
+            </p>
+          )}
           {scannedDevice && (
-            <ScanResultBadge success label="Device" value={`${scannedDevice.name} (${scannedDevice.serial})`} />
+            <ScanResultBadge
+              success
+              label="Device"
+              value={`${scannedDevice.name}${scannedDevice.assetId ? ` (#${scannedDevice.assetId})` : ""}`}
+            />
           )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.woNumber", "WO Number")} *
-            </label>
-            <Input {...register("woNumber")} readOnly={isReadOnly} className="text-xs h-10" />
-            {errors.woNumber && <p className="text-[10px] text-destructive font-bold">{errors.woNumber.message}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.customer", "Customer")} *
-            </label>
-            <Input {...register("customerName")} readOnly={isReadOnly} className="text-xs h-10" />
-            {errors.customerName && <p className="text-[10px] text-destructive font-bold">{errors.customerName.message}</p>}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.ownership", "Ownership")} *
-            </label>
-            <select
-              {...register("ownership")}
-              disabled={isReadOnly}
-              className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
-            >
-              <option value="ion_owned">ION Owned</option>
-              <option value="leased">Leased</option>
-              <option value="customer_owned">Customer Owned</option>
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.condition", "Condition")}
+              {t("warehouse.condition", "Condition")} *
             </label>
             <select
               {...register("condition")}
               disabled={isReadOnly}
-              className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
+              className={selectClassName}
             >
-              <option value="good">Good</option>
-              <option value="damaged">Damaged</option>
+              {CONDITION_OPTIONS.map((condition) => (
+                <option key={condition} value={condition}>
+                  {condition}
+                </option>
+              ))}
             </select>
+            {errors.condition && (
+              <p className="text-[10px] text-destructive font-bold">
+                {errors.condition.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              {t("warehouse.disposition", "Disposition")} *
+            </label>
+            <select
+              {...register("disposition")}
+              disabled={isReadOnly}
+              className={selectClassName}
+            >
+              {DISPOSITION_OPTIONS.map((disposition) => (
+                <option key={disposition} value={disposition}>
+                  {disposition}
+                </option>
+              ))}
+            </select>
+            {errors.disposition && (
+              <p className="text-[10px] text-destructive font-bold">
+                {errors.disposition.message}
+              </p>
+            )}
           </div>
         </div>
 
         <div className="space-y-1">
           <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            {t("warehouse.warehouseLabel", "Return Warehouse")} *
+            {t("warehouse.warehouseLabel", "Received Warehouse")} *
           </label>
           <select
-            {...register("warehouseId")}
+            {...register("received_warehouse_id", { valueAsNumber: true })}
             disabled={isReadOnly}
-            className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
+            className={selectClassName}
           >
-            {WAREHOUSES.map((wh) => <option key={wh.id} value={wh.id}>{wh.name}</option>)}
+            {WAREHOUSE_OPTIONS.map((wh) => (
+              <option key={wh.id} value={wh.id}>
+                {wh.name}
+              </option>
+            ))}
           </select>
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            {t("warehouse.notes", "Notes")}
-          </label>
-          <Textarea {...register("notes")} readOnly={isReadOnly} className="text-xs resize-none" rows={3} />
+          {errors.received_warehouse_id && (
+            <p className="text-[10px] text-destructive font-bold">
+              {errors.received_warehouse_id.message}
+            </p>
+          )}
         </div>
 
         <ScannerDialog

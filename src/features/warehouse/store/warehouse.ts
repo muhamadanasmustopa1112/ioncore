@@ -503,8 +503,20 @@ export const useWarehouseStore = create<WarehouseState>((set) => ({
   transferForm: "new",
   transferSheetOpen: false,
   selectedTransfer: null,
-  openTransferFormSheet: (form) => set((state) => ({ ...state, transferForm: form, transferSheetOpen: true })),
-  closeTransferFormSheet: () => set((state) => ({ ...state, transferForm: null, transferSheetOpen: false })),
+  openTransferFormSheet: (form) =>
+    set((state) => ({
+      ...state,
+      transferForm: form,
+      transferSheetOpen: true,
+      selectedTransfer: form === "new" ? null : state.selectedTransfer,
+    })),
+  closeTransferFormSheet: () =>
+    set((state) => ({
+      ...state,
+      transferForm: null,
+      transferSheetOpen: false,
+      selectedTransfer: null,
+    })),
   setSelectedTransfer: (transfer) => set((state) => ({ ...state, selectedTransfer: transfer })),
 
   // Opname
@@ -552,7 +564,19 @@ export const useWarehouseStore = create<WarehouseState>((set) => ({
   returnForm: "new",
   returnSheetOpen: false,
   selectedReturn: null,
-  openReturnFormSheet: (form) => set((state) => ({ ...state, returnForm: form, returnSheetOpen: true })),
-  closeReturnFormSheet: () => set((state) => ({ ...state, returnForm: null, returnSheetOpen: false })),
+  openReturnFormSheet: (form) =>
+    set((state) => ({
+      ...state,
+      returnForm: form,
+      returnSheetOpen: true,
+      selectedReturn: form === "new" ? null : state.selectedReturn,
+    })),
+  closeReturnFormSheet: () =>
+    set((state) => ({
+      ...state,
+      returnForm: null,
+      returnSheetOpen: false,
+      selectedReturn: null,
+    })),
   setSelectedReturn: (returnRecord) => set((state) => ({ ...state, selectedReturn: returnRecord })),
 }));

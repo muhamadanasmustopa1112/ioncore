@@ -1,6 +1,12 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -9,20 +15,48 @@ import { QrCode } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useCategories } from "@/features/warehouse/api/get-categories";
+import { useStartOpname } from "@/features/warehouse/api/post-opname-start";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
+import { useAuthStore } from "@/store/auth-store";
+import {
+  buildStartOpnamePayload,
+  generateOpnameSessionNumber,
+} from "@/features/warehouse/utils/build-start-opname-payload";
 import { ScannerDialog } from "../../scanner/scanner-dialog";
 import { ScanResultBadge } from "../../scanner/scan-result-badge";
 import { matchScannedQR } from "../../../utils/qr-matcher";
 import type { ScanResult } from "../../../hooks/use-qr-scanner";
 import type { WarehouseAsset } from "../../../types";
 
-const opnameSchema = z.object({
-  warehouseId: z.string().min(1, "Warehouse is required"),
-});
+const startOpnameSchema = z
+  .object({
+    session_number: z.string().min(1, "Session number is required"),
+    started_by: z.string().min(1, "Started by is required"),
+    warehouse_id: z.number().min(1, "Warehouse is required"),
+    scope: z.enum(["full", "category"]),
+    scope_category_id: z.number().optional(),
+  })
+  .refine(
+    (data) =>
+      data.scope !== "category" ||
+      (data.scope_category_id != null && data.scope_category_id > 0),
+    {
+      message: "Category is required for scoped opname",
+      path: ["scope_category_id"],
+    }
+  );
 
-type OpnameFormValues = z.infer<typeof opnameSchema>;
+type StartOpnameFormValues = z.infer<typeof startOpnameSchema>;
 
 export interface OpnameFormRef {
   submit: () => void;
@@ -34,22 +68,43 @@ interface OpnameFormProps {
   mode: "new" | "edit" | "details";
 }
 
-const WAREHOUSES = [
-  { id: "WH-001", name: "Gudang Jakarta Utara" },
-  { id: "WH-002", name: "Gudang Bandung Utara" },
-  { id: "WH-003", name: "Gudang Surabaya" },
+const WAREHOUSE_OPTIONS = [
+  { id: 1, name: "Gudang Jakarta Utara" },
+  { id: 2, name: "Gudang Bandung Utara" },
+  { id: 3, name: "Gudang Surabaya" },
 ];
+
+const SCOPE_OPTIONS = [
+  { value: "full", label: "Full Warehouse" },
+  { value: "category", label: "By Category" },
+] as const;
+
+const selectClassName =
+  "flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring";
 
 export const OpnameForm = forwardRef<OpnameFormRef, OpnameFormProps>(
   ({ onSuccess, mode }, ref) => {
     const { t } = useTranslation();
-    const { stockLevels, opnames, updateOpnameCount, serializedAssets, assets } = useWarehouseStore();
+    const user = useAuthStore((state) => state.user);
+    const { stockLevels, serializedAssets, assets } = useWarehouseStore();
+    const { data: categoriesResponse } = useCategories();
+    const categories = categoriesResponse?.data ?? [];
+    const { mutate: startOpnameSession, isPending } = useStartOpname({
+      mutationConfig: { onSuccess: () => onSuccess() },
+    });
 
     const [scannerOpen, setScannerOpen] = useState(false);
-    const [scannedItems, setScannedItems] = useState<Map<string, number>>(new Map());
+    const [scannedItems, setScannedItems] = useState<Map<string, number>>(
+      new Map()
+    );
 
     const handleOpnameScan = (result: ScanResult) => {
-      const match = matchScannedQR(result.text, serializedAssets, stockLevels, assets);
+      const match = matchScannedQR(
+        result.text,
+        serializedAssets,
+        stockLevels,
+        assets
+      );
       if (match.type === "asset" && match.data) {
         const asset = match.data as WarehouseAsset;
         setScannedItems((prev) => {
@@ -65,76 +120,149 @@ export const OpnameForm = forwardRef<OpnameFormRef, OpnameFormProps>(
       register,
       handleSubmit,
       watch,
-      formState: { errors, isSubmitting },
-    } = useForm<OpnameFormValues>({
-      resolver: zodResolver(opnameSchema),
-      defaultValues: { warehouseId: "WH-001" },
+      setValue,
+      formState: { errors },
+    } = useForm<StartOpnameFormValues>({
+      resolver: zodResolver(startOpnameSchema),
+      defaultValues: {
+        session_number: generateOpnameSessionNumber(),
+        started_by: user?.id ?? "",
+        warehouse_id: 1,
+        scope: "full",
+        scope_category_id: undefined,
+      },
     });
 
-    const warehouseId = watch("warehouseId");
+    useEffect(() => {
+      if (user?.id) {
+        setValue("started_by", user.id);
+      }
+    }, [user?.id, setValue]);
+
+    const warehouseId = watch("warehouse_id");
+    const scope = watch("scope");
 
     const warehouseStock = useMemo(() => {
-      return stockLevels.filter((sl) => sl.warehouseId === warehouseId);
+      return stockLevels.filter(
+        (sl) => sl.warehouseId === String(warehouseId)
+      );
     }, [stockLevels, warehouseId]);
 
     useImperativeHandle(ref, () => ({
       submit: () => handleSubmit(onSubmit)(),
-      isPending: isSubmitting,
+      isPending,
     }));
 
-    function onSubmit(values: OpnameFormValues) {
-      const warehouse = WAREHOUSES.find((w) => w.id === values.warehouseId);
-      if (!warehouse) return;
-
-      opnames.push({
-        id: `OPN-${Date.now()}`,
-        warehouseId: values.warehouseId,
-        warehouseName: warehouse.name,
-        status: "in_progress",
-        scheduledDate: new Date().toISOString().split("T")[0],
-        startedAt: new Date().toISOString(),
-        initiatedBy: "USR-001",
-        initiatedByName: "Admin",
-        items: warehouseStock.map((sl) => ({
-          stockItemId: sl.stockItemId,
-          stockItemName: sl.stockItemName,
-          stockItemSku: sl.stockItemSku,
-          itemType: sl.stockItemType,
-          uom: sl.uom,
-          systemCount: sl.currentStock,
-          countedCount: null,
-          variance: 0,
-          status: "pending",
-        })),
-        totalDiscrepancies: 0,
-      });
-      onSuccess();
+    function onSubmit(values: StartOpnameFormValues) {
+      startOpnameSession(
+        buildStartOpnamePayload({
+          ...values,
+          started_by: values.started_by || user?.id || "",
+        })
+      );
     }
 
     const isReadOnly = mode === "details";
 
     return (
       <div className="space-y-5 px-1 py-2">
+        <input type="hidden" {...register("started_by")} />
+
         <div className="space-y-1">
           <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-            {t("warehouse.warehouseLabel", "Warehouse")} *
+            {t("warehouse.sessionNumber", "Session Number")} *
           </label>
-          <select
-            {...register("warehouseId")}
+          <Input
+            {...register("session_number")}
             disabled={isReadOnly}
-            className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
-          >
-            {WAREHOUSES.map((wh) => <option key={wh.id} value={wh.id}>{wh.name}</option>)}
-          </select>
-          {errors.warehouseId && <p className="text-[10px] text-destructive font-bold">{errors.warehouseId.message}</p>}
+            className="text-xs h-10 font-mono"
+          />
+          {errors.session_number && (
+            <p className="text-[10px] text-destructive font-bold">
+              {errors.session_number.message}
+            </p>
+          )}
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              {t("warehouse.warehouseLabel", "Warehouse")} *
+            </label>
+            <select
+              {...register("warehouse_id", { valueAsNumber: true })}
+              disabled={isReadOnly}
+              className={selectClassName}
+            >
+              {WAREHOUSE_OPTIONS.map((wh) => (
+                <option key={wh.id} value={wh.id}>
+                  {wh.name}
+                </option>
+              ))}
+            </select>
+            {errors.warehouse_id && (
+              <p className="text-[10px] text-destructive font-bold">
+                {errors.warehouse_id.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              {t("warehouse.opnameScope", "Scope")} *
+            </label>
+            <select
+              {...register("scope")}
+              disabled={isReadOnly}
+              className={selectClassName}
+            >
+              {SCOPE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+            {errors.scope && (
+              <p className="text-[10px] text-destructive font-bold">
+                {errors.scope.message}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {scope === "category" && (
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              {t("warehouse.category", "Category")} *
+            </label>
+            <select
+              {...register("scope_category_id", { valueAsNumber: true })}
+              disabled={isReadOnly}
+              className={selectClassName}
+            >
+              <option value={0}>
+                {t("warehouse.selectCategory", "Select category...")}
+              </option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+            {errors.scope_category_id && (
+              <p className="text-[10px] text-destructive font-bold">
+                {errors.scope_category_id.message}
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               {t("warehouse.stockItems", "Stock Items")} ({warehouseStock.length})
             </span>
-            {!isReadOnly && (
+            {!isReadOnly && mode === "new" && (
               <Button
                 type="button"
                 variant="outline"
@@ -150,7 +278,9 @@ export const OpnameForm = forwardRef<OpnameFormRef, OpnameFormProps>(
 
           {scannedItems.size > 0 && (
             <div className="space-y-1">
-              <p className="text-[10px] font-bold text-muted-foreground">Scanned Items ({scannedItems.size})</p>
+              <p className="text-[10px] font-bold text-muted-foreground">
+                Scanned Items ({scannedItems.size})
+              </p>
               {Array.from(scannedItems.entries()).map(([id, count]) => {
                 const asset = serializedAssets.find((a) => a.id === id);
                 return asset ? (
@@ -169,9 +299,15 @@ export const OpnameForm = forwardRef<OpnameFormRef, OpnameFormProps>(
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-[10px] font-bold uppercase">{t("common.name", "Item")}</TableHead>
-                  <TableHead className="text-[10px] font-bold uppercase">{t("warehouse.systemCount", "System")}</TableHead>
-                  <TableHead className="text-[10px] font-bold uppercase">{t("warehouse.alertStatus", "Status")}</TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase">
+                    {t("common.name", "Item")}
+                  </TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase">
+                    {t("warehouse.systemCount", "System")}
+                  </TableHead>
+                  <TableHead className="text-[10px] font-bold uppercase">
+                    {t("warehouse.alertStatus", "Status")}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -179,12 +315,22 @@ export const OpnameForm = forwardRef<OpnameFormRef, OpnameFormProps>(
                   <TableRow key={item.id}>
                     <TableCell className="text-xs">
                       <div className="font-medium">{item.stockItemName}</div>
-                      <div className="text-[9px] text-muted-foreground font-mono">{item.stockItemSku}</div>
+                      <div className="text-[9px] text-muted-foreground font-mono">
+                        {item.stockItemSku}
+                      </div>
                     </TableCell>
-                    <TableCell className="text-xs font-bold">{item.currentStock} {item.uom}</TableCell>
+                    <TableCell className="text-xs font-bold">
+                      {item.currentStock} {item.uom}
+                    </TableCell>
                     <TableCell>
                       <Badge
-                        variant={item.alertStatus === "Critical" ? "destructive" : item.alertStatus === "Warning" ? "warning" : "success"}
+                        variant={
+                          item.alertStatus === "Critical"
+                            ? "destructive"
+                            : item.alertStatus === "Warning"
+                              ? "warning"
+                              : "success"
+                        }
                         appearance="light"
                         className="text-[9px]"
                       >
@@ -195,8 +341,14 @@ export const OpnameForm = forwardRef<OpnameFormRef, OpnameFormProps>(
                 ))}
                 {warehouseStock.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="text-center text-xs text-muted-foreground py-6">
-                      {t("warehouse.noStockItems", "No stock items for this warehouse.")}
+                    <TableCell
+                      colSpan={3}
+                      className="text-center text-xs text-muted-foreground py-6"
+                    >
+                      {t(
+                        "warehouse.noStockItems",
+                        "No stock items for this warehouse."
+                      )}
                     </TableCell>
                   </TableRow>
                 )}

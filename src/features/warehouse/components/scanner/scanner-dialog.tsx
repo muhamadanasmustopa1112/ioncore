@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { QRScanner } from "./qr-scanner";
 import type { ScanResult } from "../../hooks/use-qr-scanner";
 
@@ -16,15 +17,25 @@ export function ScannerDialog({
   onScan,
   title,
 }: ScannerDialogProps) {
+  const handleScan = useCallback(
+    (result: ScanResult) => {
+      onScan(result);
+      onOpenChange(false);
+    },
+    [onScan, onOpenChange]
+  );
+
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
+
   if (!open) return null;
 
   return (
     <QRScanner
-      onScan={(result) => {
-        onScan(result);
-        onOpenChange(false);
-      }}
-      onClose={() => onOpenChange(false)}
+      key="warehouse-scanner"
+      onScan={handleScan}
+      onClose={handleClose}
       title={title}
     />
   );

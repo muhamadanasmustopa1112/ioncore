@@ -13,6 +13,14 @@ export const WAREHOUSE_KEYS = {
     [...WAREHOUSE_KEYS.all(), "STOCK_LEVELS", params] as const,
   dispatches: (params?: Record<string, unknown>) =>
     [...WAREHOUSE_KEYS.all(), "DISPATCHES", params] as const,
+  transfers: (params?: Record<string, unknown>) =>
+    [...WAREHOUSE_KEYS.all(), "TRANSFERS", params] as const,
+  transferDetail: (id?: string) =>
+    [...WAREHOUSE_KEYS.all(), "TRANSFER_DETAIL", id] as const,
   purchases: (params?: Record<string, unknown>) =>
     [...WAREHOUSE_KEYS.all(), "PURCHASES", params] as const,
+  opnames: (params?: Record<string, unknown>) =>
+    [...WAREHOUSE_KEYS.all(), "OPNAMES", params] as const,
+  returns: (params?: Record<string, unknown>) =>
+    [...WAREHOUSE_KEYS.all(), "RETURNS", params] as const,
 };
