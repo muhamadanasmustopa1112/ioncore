@@ -17,7 +17,7 @@ export interface LowStockAlertData {
   units: number;
   threshold: number;
   status: "Critical" | "Warning";
-  category: "Cables" | "Equipment" | "Connectors";
+  category: string;
   brand?: string;
   model?: string;
   uom: string;
@@ -43,6 +43,15 @@ export interface WarehouseMetrics {
   fiberStockKm: number;
   fiberStockDelta: string;
   fiberStockTrend: "up" | "down" | "neutral";
+}
+
+export interface DashboardSummaryResponse {
+  data: {
+    metrics: WarehouseMetrics;
+    ontDistribution: OntDistributionData[];
+    branchStockLevels: BranchStockLevelData[];
+    lowStockAlerts: LowStockAlertData[];
+  };
 }
 
 export interface HandoverEquipment {
@@ -478,3 +487,14 @@ export interface ConsumptionReport {
     uom: string;
   }[];
 }
+
+export type { SerializedAssetsListParams, SerializedAssetsListResponse } from "./serialized-assets";
+export type { RetrofitsListParams, RetrofitsListResponse } from "./retrofits";
+export type { HandoversListParams, HandoversListResponse } from "./handovers";
+export type { Category, CategoriesListResponse } from "./categories";
+export type { CreateStockItemPayload, StockItemResponse } from "./stock-item";
+export type {
+  PurchaseReceiptLineInput,
+  CreatePurchaseReceiptRequest,
+  PurchaseReceiptResponse,
+} from "./purchase-receipt";
