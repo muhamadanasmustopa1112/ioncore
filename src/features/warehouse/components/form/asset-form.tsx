@@ -13,6 +13,9 @@ import { SerializedFieldsSection } from "./sections/serialized-fields";
 import { CableFieldsSection } from "./sections/cable-fields";
 import { ConsumableFieldsSection } from "./sections/consumable-fields";
 import { InfrastructureFieldsSection } from "./sections/infrastructure-fields";
+import { useCreateStockItem } from "../../api/post-stock-item";
+import { useCategories } from "../../api/get-categories";
+import { toast } from "sonner";
 import type {
   AssetType,
   AssetCategory,
@@ -39,6 +42,36 @@ function mapCategoryToLowStock(category: AssetCategory): "Cables" | "Equipment" 
   if ((CABLE_CATEGORIES as string[]).includes(category)) return "Cables";
   if ((CONSUMABLE_CATEGORIES as string[]).includes(category)) return "Connectors";
   return "Equipment";
+}
+
+function mapFormCategoryToCategoryId(
+  category: AssetCategory,
+  categories: { id: number; category_code: string }[]
+): number | undefined {
+  const categoryMap: Record<AssetCategory, string> = {
+    ONT: "ONT",
+    Router: "ROUTER",
+    Switch: "SWITCH",
+    ODP_Box: "ODP_BOX",
+    Media_Converter: "MEDIA_CONVERTER",
+    Patch_Panel: "PATCH_PANEL",
+    Fiber_Optic: "FIBER_OPTIC",
+    Ethernet: "ETHERNET",
+    Coaxial: "COAXIAL",
+    Power: "POWER",
+    Connector: "CONNECTOR",
+    Fastener: "FASTENER",
+    Patch_Cord: "PATCH_CORD",
+    Labeling: "LABELING",
+    Mounting: "MOUNTING",
+    ODP: "ODP",
+    OLT: "OLT",
+    Mikrotik: "MIKROTIK",
+    Rack: "RACK",
+    Power_Supply: "POWER_SUPPLY",
+  };
+  const code = categoryMap[category];
+  return categories.find((c) => c.category_code === code)?.id;
 }
 
 const universalAssetSchema = z
@@ -196,6 +229,10 @@ interface AssetFormProps {
 export function AssetForm({ onSuccess }: AssetFormProps) {
   const { addAsset } = useWarehouseStore();
   const [showImportExport, setShowImportExport] = useState(false);
+  const { data: categoriesResponse } = useCategories();
+  const categories = categoriesResponse?.data ?? [];
+
+  const { mutate: createStockItem, isPending } = useCreateStockItem();
 
   const form = useForm<UniversalAssetFormData>({
     resolver: zodResolver(universalAssetSchema),
@@ -208,26 +245,59 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
     },
   });
 
-  const { handleSubmit, formState: { isSubmitting }, watch } = form;
+  const { handleSubmit, watch } = form;
   const assetType = watch("assetType");
 
   const onSubmit = (values: UniversalAssetFormData) => {
-    addAsset({
-      name: values.name,
-      sku: values.sku,
-      category: mapCategoryToLowStock(values.category),
-      brand: values.brand,
-      model: values.model,
-      units: values.assetType === "cable"
-        ? (values.totalLength || 0)
-        : values.assetType === "consumable"
-          ? (values.quantityInStock || 0)
-          : 1,
-      threshold: values.threshold,
-      uom: values.uom,
-      receivedBy: values.receivedBy,
-    });
-    onSuccess();
+    const categoryId = mapFormCategoryToCategoryId(values.category, categories);
+    if (!categoryId) {
+      toast.error("Invalid category selected");
+      return;
+    }
+
+    const matchedCategory = categories.find((c) => c.id === categoryId);
+
+    createStockItem(
+      {
+        name: values.name,
+        sku: values.sku,
+        brand: values.brand,
+        model: values.model,
+        category_id: categoryId,
+        unit: values.uom,
+        valuation_method: "FIFO",
+        active: true,
+        requires_serial_at_intake: matchedCategory?.requires_serial_at_intake ?? false,
+        sub_warehouse_allowed: matchedCategory?.sub_warehouse_allowed_default ?? true,
+        default_install_wo_subtype: matchedCategory?.default_install_wo_subtype ?? "",
+        default_required_skills: matchedCategory?.default_required_skills ?? [],
+        default_maintenance_schedule_id: matchedCategory?.default_maintenance_schedule_id,
+      },
+      {
+        onSuccess: () => {
+          addAsset({
+            name: values.name,
+            sku: values.sku,
+            category: mapCategoryToLowStock(values.category),
+            brand: values.brand,
+            model: values.model,
+            units: values.assetType === "cable"
+              ? (values.totalLength || 0)
+              : values.assetType === "consumable"
+                ? (values.quantityInStock || 0)
+                : 1,
+            threshold: values.threshold,
+            uom: values.uom,
+            receivedBy: values.receivedBy,
+          });
+          toast.success("Asset registered successfully");
+          onSuccess();
+        },
+        onError: () => {
+          toast.error("Failed to register asset");
+        },
+      }
+    );
   };
 
   return (
@@ -282,7 +352,7 @@ export function AssetForm({ onSuccess }: AssetFormProps) {
             type="submit"
             variant="primary"
             className="h-10 px-5 text-xs font-semibold"
-            disabled={isSubmitting}
+            disabled={isPending || form.formState.isSubmitting}
           >
             Register Item
           </Button>
