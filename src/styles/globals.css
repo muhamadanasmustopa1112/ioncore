@@ -232,6 +232,13 @@
   /** Animations **/
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  --animate-scan: scan 2s linear infinite;
+
+  @keyframes scan {
+    0% { top: 0%; }
+    50% { top: 100%; }
+    100% { top: 0%; }
+  }
 
   /* Brand Colors */
   --color-sidebar-main: var(--sidebar-main);

@@ -11,6 +11,7 @@ import {
   Layers,
   ArrowRight,
   ClipboardList,
+  QrCode,
 } from "lucide-react";
 import {
   Dialog,
@@ -24,6 +25,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useWarehouseStore } from "../../store/warehouse";
 import { toast } from "sonner";
+import { ScannerDialog } from "../scanner/scanner-dialog";
+import { ScanResultBadge } from "../scanner/scan-result-badge";
+import { matchScannedQR } from "../../utils/qr-matcher";
+import type { ScanResult } from "../../hooks/use-qr-scanner";
+import type { WarehouseAsset } from "../../types";
 
 export function RetrofitDialog() {
   const {
@@ -34,6 +40,10 @@ export function RetrofitDialog() {
   } = useWarehouseStore();
 
   const [step, setStep] = useState<1 | 2>(1);
+
+  // QR Scanner states
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerTarget, setScannerTarget] = useState<"component1" | "component2" | null>(null);
 
   // Form states
   const [component1Id, setComponent1Id] = useState("");
@@ -55,6 +65,21 @@ export function RetrofitDialog() {
 
   const selectedAsset1 = defectiveAssets.find((a) => a.id === component1Id);
   const selectedAsset2 = defectiveAssets.find((a) => a.id === component2Id);
+
+  const handleRetrofitScan = (result: ScanResult) => {
+    const match = matchScannedQR(result.text, serializedAssets, [], []);
+    if (match.type === "asset" && match.data) {
+      const asset = match.data as WarehouseAsset;
+      if (asset.status === "defective" || asset.status === "under_maintenance") {
+        if (scannerTarget === "component1") {
+          setComponent1Id(asset.id);
+        } else if (scannerTarget === "component2") {
+          setComponent2Id(asset.id);
+        }
+      }
+    }
+    setScannerTarget(null);
+  };
 
   // Auto-fill result details if source components are selected
   useEffect(() => {
@@ -156,21 +181,32 @@ export function RetrofitDialog() {
                       <label className="text-[10px] font-bold text-slate-500 uppercase">
                         Source Asset A *
                       </label>
-                      <select
-                        className="w-full text-xs p-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-950 font-medium"
-                        value={component1Id}
-                        onChange={(e) => setComponent1Id(e.target.value)}
-                        required
-                      >
-                        <option value="">-- Select Defective Unit --</option>
-                        {defectiveAssets
-                          .filter((a) => a.id !== component2Id)
-                          .map((a) => (
-                            <option key={a.id} value={a.id}>
-                              {a.name} ({a.serialNumber})
-                            </option>
-                          ))}
-                      </select>
+                      <div className="flex gap-2">
+                        <select
+                          className="w-full text-xs p-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-950 font-medium"
+                          value={component1Id}
+                          onChange={(e) => setComponent1Id(e.target.value)}
+                          required
+                        >
+                          <option value="">-- Select Defective Unit --</option>
+                          {defectiveAssets
+                            .filter((a) => a.id !== component2Id)
+                            .map((a) => (
+                              <option key={a.id} value={a.id}>
+                                {a.name} ({a.serialNumber})
+                              </option>
+                            ))}
+                        </select>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 shrink-0"
+                          onClick={() => { setScannerTarget("component1"); setScannerOpen(true); }}
+                        >
+                          <QrCode className="size-4" />
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-1">
@@ -187,6 +223,13 @@ export function RetrofitDialog() {
                       />
                     </div>
                   </div>
+                  {component1Id && (
+                    <ScanResultBadge
+                      success
+                      label="Component 1"
+                      value={selectedAsset1?.serialNumber}
+                    />
+                  )}
                 </div>
 
                 {/* Component 2 */}
@@ -196,21 +239,32 @@ export function RetrofitDialog() {
                       <label className="text-[10px] font-bold text-slate-500 uppercase">
                         Source Asset B *
                       </label>
-                      <select
-                        className="w-full text-xs p-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-950 font-medium"
-                        value={component2Id}
-                        onChange={(e) => setComponent2Id(e.target.value)}
-                        required
-                      >
-                        <option value="">-- Select Defective Unit --</option>
-                        {defectiveAssets
-                          .filter((a) => a.id !== component1Id)
-                          .map((a) => (
-                            <option key={a.id} value={a.id}>
-                              {a.name} ({a.serialNumber})
-                            </option>
-                          ))}
-                      </select>
+                      <div className="flex gap-2">
+                        <select
+                          className="w-full text-xs p-2 border border-slate-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-950 font-medium"
+                          value={component2Id}
+                          onChange={(e) => setComponent2Id(e.target.value)}
+                          required
+                        >
+                          <option value="">-- Select Defective Unit --</option>
+                          {defectiveAssets
+                            .filter((a) => a.id !== component1Id)
+                            .map((a) => (
+                              <option key={a.id} value={a.id}>
+                                {a.name} ({a.serialNumber})
+                              </option>
+                            ))}
+                        </select>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8 shrink-0"
+                          onClick={() => { setScannerTarget("component2"); setScannerOpen(true); }}
+                        >
+                          <QrCode className="size-4" />
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-1">
@@ -227,6 +281,13 @@ export function RetrofitDialog() {
                       />
                     </div>
                   </div>
+                  {component2Id && (
+                    <ScanResultBadge
+                      success
+                      label="Component 2"
+                      value={selectedAsset2?.serialNumber}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -380,6 +441,13 @@ export function RetrofitDialog() {
           )}
         </DialogBody>
       </DialogContent>
+
+      <ScannerDialog
+        open={scannerOpen}
+        onOpenChange={setScannerOpen}
+        onScan={handleRetrofitScan}
+        title={scannerTarget === "component1" ? "Scan Component 1" : "Scan Component 2"}
+      />
     </Dialog>
   );
 }

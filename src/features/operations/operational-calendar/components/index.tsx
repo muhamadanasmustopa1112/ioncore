@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { CalendarDays, CalendarRange, List, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Toolbar, ToolbarActions, ToolbarHeading, ToolbarTitle } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
@@ -22,9 +23,19 @@ const VIEW_TABS: { value: CalendarViewType; label: string; icon: React.ElementTy
   { value: "list", label: "List", icon: List },
 ];
 
+const AREAS = [
+  { id: "AREA-001", name: "Jakarta Utara" },
+  { id: "AREA-002", name: "Jakarta Selatan" },
+  { id: "AREA-003", name: "Jakarta Barat" },
+  { id: "AREA-004", name: "Tangerang" },
+  { id: "AREA-005", name: "Bekasi" },
+  { id: "AREA-006", name: "Depok" },
+  { id: "AREA-007", name: "Bandung" },
+];
+
 export function OperationalCalendarPage() {
   const { t } = useTranslation();
-  const { view, setView, currentMonth, filters } = useCalendarStore();
+  const { view, setView, currentMonth, filters, setFilters } = useCalendarStore();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const params = useMemo(
@@ -73,20 +84,45 @@ export function OperationalCalendarPage() {
       </Toolbar>
 
       <div className="mt-4">
-        <Tabs
-          value={view}
-          onValueChange={(v) => setView(v as CalendarViewType)}
-        >
-          <TabsList variant="line" size="sm">
-            {VIEW_TABS.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5">
-                <tab.icon className="size-3.5" />
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <div className="flex items-center gap-3 mb-4">
+          <Tabs
+            value={view}
+            onValueChange={(v) => setView(v as CalendarViewType)}
+          >
+            <TabsList variant="line" size="sm">
+              {VIEW_TABS.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5">
+                  <tab.icon className="size-3.5" />
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
-          <TabsContent value="monthly" className="mt-4">
+          <div className="flex-1" />
+
+          <Select
+            value={filters.area_id || "all"}
+            onValueChange={(value) =>
+              setFilters({ area_id: value === "all" ? null : value })
+            }
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder={t("calendar.allAreas", "All Areas")} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("calendar.allAreas", "All Areas")}</SelectItem>
+              {AREAS.map((area) => (
+                <SelectItem key={area.id} value={area.id}>
+                  {area.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Tabs value={view} onValueChange={(v) => setView(v as CalendarViewType)}>
+          <TabsContent value="monthly" className="mt-0">
             {isLoading ? (
               <div className="flex items-center justify-center h-64 text-sm text-muted-foreground">
                 Loading calendar...

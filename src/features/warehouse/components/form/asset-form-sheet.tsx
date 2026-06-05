@@ -17,13 +17,13 @@ export function AssetFormSheet() {
 
   return (
     <Sheet open={assetSheetOpen} onOpenChange={setAssetSheetOpen}>
-      <SheetContent side="right" className="sm:max-w-md w-full overflow-y-auto">
+      <SheetContent side="right" className="sm:max-w-lg w-full overflow-y-auto">
         <SheetHeader className="border-b border-slate-100 dark:border-slate-800 pb-4">
           <SheetTitle className="text-lg font-extrabold text-slate-900 dark:text-white">
-            Register New Stock Item
+            Register New Asset
           </SheetTitle>
           <SheetDescription className="text-xs">
-            Insert item details to include in master data catalog and enable tracking.
+            Select asset type and fill in the details. Fields will adjust based on the selected type.
           </SheetDescription>
         </SheetHeader>
         <SheetBody className="pt-4">

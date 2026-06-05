@@ -20,10 +20,10 @@ import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useAnnouncementColumns } from "./list/table/columns";
-import { DataTableToolbar } from "./list/table/data-table-toolbar";
-import { dummyAnnouncements } from "../data/dummy-announcements";
-import type { Announcement, AnnouncementListResponse } from "../types";
+import { useAnnouncementColumns } from "./table/columns";
+import { DataTableToolbar } from "./table/data-table-toolbar";
+import { useAnnouncements } from "../../api/get-announcements";
+import type { Announcement } from "../../types";
 
 export function AnnouncementList() {
   const { t } = useTranslation();
@@ -37,18 +37,17 @@ export function AnnouncementList() {
 
   const columns = useAnnouncementColumns();
 
-  const responseData: AnnouncementListResponse = useMemo(() => {
-    const filtered = dummyAnnouncements.filter((a) =>
-      !filter.search || a.title.toLowerCase().includes(filter.search.toLowerCase()),
-    );
-    return {
-      data: filtered,
-      metadata: { total_data: filtered.length, total_page: 1 },
-    };
-  }, [filter.search]);
+  const params = useMemo(() => ({
+    draw: 1,
+    start: (filter.page - 1) * filter.limit,
+    length: filter.limit,
+    search: filter.search || "",
+  }), [filter]);
 
-  const data = useMemo(() => responseData.data, [responseData]);
-  const metadata = useMemo(() => responseData.metadata, [responseData]);
+  const { data: responseData, isLoading, isFetching } = useAnnouncements({ params });
+
+  const data = useMemo(() => responseData?.data ?? [], [responseData]);
+  const metadata = useMemo(() => responseData?.metadata, [responseData]);
 
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
@@ -79,6 +78,7 @@ export function AnnouncementList() {
     <DataGrid
       table={table}
       recordCount={metadata?.total_data || 0}
+      isLoading={isLoading || isFetching}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,

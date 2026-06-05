@@ -3,6 +3,7 @@ import type { WizardState } from "../types";
 
 export const useBulkOperationWizardStore = create<WizardState>((set) => ({
   currentStep: 0,
+  operationType: null,
   sourcePlan: null,
   targetPlan: null,
   scopeType: "all",
@@ -16,6 +17,7 @@ export const useBulkOperationWizardStore = create<WizardState>((set) => ({
   reset: () =>
     set({
       currentStep: 0,
+      operationType: null,
       sourcePlan: null,
       targetPlan: null,
       scopeType: "all",
@@ -28,6 +30,7 @@ export const useBulkOperationWizardStore = create<WizardState>((set) => ({
     }),
 
   setStep: (step) => set({ currentStep: step }),
+  setOperationType: (type) => set({ operationType: type }),
   setSourcePlan: (plan) => set({ sourcePlan: plan }),
   setTargetPlan: (plan) => set({ targetPlan: plan }),
   setScopeType: (type) => set({ scopeType: type }),

@@ -1,14 +1,20 @@
 "use client";
 
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslation } from "react-i18next";
+import { QrCode } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
+import { ScannerDialog } from "../../scanner/scanner-dialog";
+import { ScanResultBadge } from "../../scanner/scan-result-badge";
+import { matchScannedQR } from "../../../utils/qr-matcher";
+import type { ScanResult } from "../../../hooks/use-qr-scanner";
+import type { WarehouseAsset } from "../../../types";
 
 const returnSchema = z.object({
   assetId: z.string().min(1, "Asset is required"),
@@ -47,7 +53,18 @@ const WAREHOUSES = [
 export const ReturnForm = forwardRef<ReturnFormRef, ReturnFormProps>(
   ({ onSuccess, mode }, ref) => {
     const { t } = useTranslation();
-    const { deviceReturns } = useWarehouseStore();
+    const { deviceReturns, serializedAssets, stockLevels, assets } = useWarehouseStore();
+
+    const [scannerOpen, setScannerOpen] = useState(false);
+    const [scannedDevice, setScannedDevice] = useState<{ name: string; serial: string } | null>(null);
+
+    const handleDeviceScan = (result: ScanResult) => {
+      const match = matchScannedQR(result.text, serializedAssets, stockLevels, assets);
+      if (match.type === "asset" && match.data) {
+        const asset = match.data as WarehouseAsset;
+        setScannedDevice({ name: asset.name, serial: asset.serialNumber });
+      }
+    };
 
     const {
       register,
@@ -98,6 +115,18 @@ export const ReturnForm = forwardRef<ReturnFormRef, ReturnFormProps>(
           <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
             {t("warehouse.deviceName", "Device")} *
           </label>
+          {!isReadOnly && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mb-2 h-8 text-xs gap-1.5"
+              onClick={() => setScannerOpen(true)}
+            >
+              <QrCode className="size-3.5" />
+              Scan Device QR
+            </Button>
+          )}
           <select
             {...register("assetId")}
             disabled={isReadOnly}
@@ -108,6 +137,9 @@ export const ReturnForm = forwardRef<ReturnFormRef, ReturnFormProps>(
             ))}
           </select>
           {errors.assetId && <p className="text-[10px] text-destructive font-bold">{errors.assetId.message}</p>}
+          {scannedDevice && (
+            <ScanResultBadge success label="Device" value={`${scannedDevice.name} (${scannedDevice.serial})`} />
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -178,6 +210,13 @@ export const ReturnForm = forwardRef<ReturnFormRef, ReturnFormProps>(
           </label>
           <Textarea {...register("notes")} readOnly={isReadOnly} className="text-xs resize-none" rows={3} />
         </div>
+
+        <ScannerDialog
+          open={scannerOpen}
+          onOpenChange={setScannerOpen}
+          onScan={handleDeviceScan}
+          title="Scan Returned Device"
+        />
       </div>
     );
   }

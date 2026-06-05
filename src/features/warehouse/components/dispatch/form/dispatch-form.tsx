@@ -1,19 +1,23 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useMemo } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslation } from "react-i18next";
-import { Package, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Package, AlertTriangle, CheckCircle2, QrCode } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
 import { BOM_TEMPLATES, WO_TYPE_OPTIONS } from "@/features/warehouse/data/bom-templates";
 import { generateBomItems, checkStockAvailability } from "@/features/warehouse/utils/bom-generator";
 import type { DispatchBomItem } from "@/features/warehouse/types";
+import { ScannerDialog } from "../../scanner/scanner-dialog";
+import { ScanResultBadge } from "../../scanner/scan-result-badge";
+import type { ScanResult } from "../../../hooks/use-qr-scanner";
 
 const dispatchSchema = z.object({
   woNumber: z.string().min(3, "WO number is required"),
@@ -38,6 +42,16 @@ export const DispatchForm = forwardRef<DispatchFormRef, DispatchFormProps>(
   ({ onSuccess, mode }, ref) => {
     const { t } = useTranslation();
     const { dispatches, updateDispatchStatus, stockLevels, serializedAssets } = useWarehouseStore();
+
+    const [scannerOpen, setScannerOpen] = useState(false);
+    const [scannedTechId, setScannedTechId] = useState<string | null>(null);
+
+    const handleTechScan = (result: ScanResult) => {
+      if (result.text.startsWith("TECH-")) {
+        setScannedTechId(result.text);
+        setValue("technicianName", result.text);
+      }
+    };
 
     const {
       register,
@@ -120,8 +134,22 @@ export const DispatchForm = forwardRef<DispatchFormRef, DispatchFormProps>(
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               {t("warehouse.technician", "Technician")} *
             </label>
-            <Input {...register("technicianName")} readOnly={isReadOnly} className="text-xs h-10" />
+            <div className="flex gap-2">
+              <Input {...register("technicianName")} readOnly={isReadOnly} className="text-xs h-10 flex-1" />
+              {!isReadOnly && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-10 shrink-0"
+                  onClick={() => setScannerOpen(true)}
+                >
+                  <QrCode className="size-4" />
+                </Button>
+              )}
+            </div>
             {errors.technicianName && <p className="text-[10px] text-destructive font-bold">{errors.technicianName.message}</p>}
+            {scannedTechId && <ScanResultBadge success label="Technician" value={scannedTechId} />}
           </div>
 
           <div className="space-y-1">
@@ -196,6 +224,13 @@ export const DispatchForm = forwardRef<DispatchFormRef, DispatchFormProps>(
             </Table>
           </ScrollArea>
         </div>
+
+        <ScannerDialog
+          open={scannerOpen}
+          onOpenChange={setScannerOpen}
+          onScan={handleTechScan}
+          title="Scan Technician ID Card"
+        />
       </div>
     );
   }

@@ -11,7 +11,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { Announcement, AnnouncementPriority } from "../types";
-import { dummyAnnouncements } from "../data/dummy-announcements";
+import { useAnnouncements } from "../api/get-announcements";
+import { useAcknowledgeAnnouncement } from "../api/post-acknowledge";
 
 const priorityBadgeClass: Record<AnnouncementPriority, string> = {
   normal: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
@@ -30,14 +31,18 @@ export function AnnouncementInbox() {
   const [inboxFilter, setInboxFilter] = useState<InboxFilter>("all");
   const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set());
 
+  const { data: responseData } = useAnnouncements({ params: { draw: 1, start: 0, length: 100 } });
+  const announcements = responseData?.data ?? [];
+  const { mutate: acknowledgeAnnouncement } = useAcknowledgeAnnouncement();
+
   const inboxItems = useMemo(() => {
-    return dummyAnnouncements.map((ann) => {
+    return announcements.map((ann) => {
       const summary = ann.acknowledgment_summary;
       const isAcked = acknowledgedIds.has(ann.id) || summary.acknowledged_count === summary.total_recipients;
       const isRead = ann.read_receipt_summary.opened_count > 0;
       return { ...ann, isAcknowledged: isAcked, isRead };
     });
-  }, [acknowledgedIds]);
+  }, [acknowledgedIds, announcements]);
 
   const filteredItems = useMemo(() => {
     switch (inboxFilter) {
@@ -53,7 +58,11 @@ export function AnnouncementInbox() {
   }, [inboxItems, inboxFilter]);
 
   const handleAcknowledge = (id: string) => {
-    setAcknowledgedIds((prev) => new Set(prev).add(id));
+    acknowledgeAnnouncement(id, {
+      onSuccess: () => {
+        setAcknowledgedIds((prev) => new Set(prev).add(id));
+      },
+    });
   };
 
   return (

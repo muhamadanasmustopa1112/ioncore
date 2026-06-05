@@ -13,9 +13,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAnnouncementStore } from "../store/announcement";
-import { dummyBranches } from "../data/dummy-announcements";
-import type { AnnouncementFormData, AnnouncementTargetRole, AnnouncementChannel } from "../types";
+import { toast } from "sonner";
+import { useAnnouncementStore } from "../../store/announcement";
+import { dummyBranches } from "../../data/dummy-announcements";
+import { useCreateAnnouncement } from "../../api/post-announcement";
+import type { AnnouncementFormData, AnnouncementTargetRole, AnnouncementChannel } from "../../types";
 
 const ROLES: { value: AnnouncementTargetRole; label: string }[] = [
   { value: "operations_admin", label: "Operations Admin" },
@@ -67,7 +69,7 @@ export const AnnouncementForm = forwardRef<AnnouncementFormRef, Props>(
           },
     });
 
-    const isPending = false;
+    const { mutate: createAnnouncement, isPending } = useCreateAnnouncement();
 
     useImperativeHandle(ref, () => ({
       submit: () => { form.handleSubmit(onSubmit)(); },
@@ -75,9 +77,16 @@ export const AnnouncementForm = forwardRef<AnnouncementFormRef, Props>(
     }));
 
     const onSubmit = (formData: AnnouncementFormData) => {
-      void formData;
-      closeFormSheet();
-      onSuccess?.();
+      createAnnouncement(formData, {
+        onSuccess: () => {
+          toast.success("Announcement created successfully");
+          closeFormSheet();
+          onSuccess?.();
+        },
+        onError: () => {
+          toast.error("Failed to create announcement");
+        },
+      });
     };
 
     const disabled = readOnly || isPending;

@@ -24,6 +24,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useWarehouseStore } from "../../store/warehouse";
 import { SignaturePad } from "./signature-pad";
 import { WorkOrder } from "../../types";
+import { ScannerDialog } from "../scanner/scanner-dialog";
+import { ScanResultBadge } from "../scanner/scan-result-badge";
+import { matchScannedQR } from "../../utils/qr-matcher";
+import type { ScanResult } from "../../hooks/use-qr-scanner";
 
 const AVAILABLE_SERIAL_NUMBERS = [
   "SN-HUA99210-JAK",
@@ -41,6 +45,8 @@ export function HandoverDialog() {
     completeWorkOrder,
     addHandoverRecord,
     assets,
+    serializedAssets,
+    stockLevels,
   } = useWarehouseStore();
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
@@ -52,6 +58,13 @@ export function HandoverDialog() {
   const [idScanned, setIdScanned] = useState(false);
   const [scannedSerial, setScannedSerial] = useState("");
   const [currentTime, setCurrentTime] = useState("");
+
+  // QR Scanner states
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerTarget, setScannerTarget] = useState<"ont" | "serial" | "id" | null>(null);
+  const [scannedOntValue, setScannedOntValue] = useState("");
+  const [scannedSerialValue, setScannedSerialValue] = useState("");
+  const [scannedIdValue, setScannedIdValue] = useState("");
 
   // Signature states
   const [techSign, setTechSign] = useState("");
@@ -71,17 +84,37 @@ export function HandoverDialog() {
     setStep(2); // Direct to step 2: Picking list verification & physical items scanning
   };
 
+  const handleScanResult = (result: ScanResult) => {
+    if (scannerTarget === "ont") {
+      const match = matchScannedQR(result.text, serializedAssets, stockLevels, assets);
+      if (match.type === "asset" || match.type === "stock_item") {
+        setScannedOntValue(result.text);
+        setOntScanned(true);
+      }
+    } else if (scannerTarget === "serial") {
+      setScannedSerialValue(result.text);
+      setScannedSerial(result.text);
+      setSerialScanned(true);
+    } else if (scannerTarget === "id") {
+      setScannedIdValue(result.text);
+      setIdScanned(true);
+    }
+    setScannerTarget(null);
+  };
+
   const handleScanONT = () => {
-    setOntScanned(true);
+    setScannerTarget("ont");
+    setScannerOpen(true);
   };
 
   const handleScanSerial = () => {
-    setSerialScanned(true);
-    setScannedSerial(selectedWO?.equipmentList[0]?.serial || "SN-HUA99210-JAK");
+    setScannerTarget("serial");
+    setScannerOpen(true);
   };
 
   const handleScanIDCard = () => {
-    setIdScanned(true);
+    setScannerTarget("id");
+    setScannerOpen(true);
   };
 
   const handleAssignONT = () => {
@@ -126,6 +159,11 @@ export function HandoverDialog() {
     setScannedSerial("");
     setTechSign("");
     setWhSign("");
+    setScannerOpen(false);
+    setScannerTarget(null);
+    setScannedOntValue("");
+    setScannedSerialValue("");
+    setScannedIdValue("");
     setHandoverDialogOpen(false);
   };
 
@@ -234,6 +272,7 @@ export function HandoverDialog() {
                   </div>
                   {ontScanned && <span className="text-[10px] font-bold text-emerald-600 uppercase">Scanned</span>}
                 </button>
+                {scannedOntValue && <ScanResultBadge success label="ONT QR" value={scannedOntValue} />}
 
                 {ontScanned && !serialScanned ? (
                   <div className="p-3 bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-xl space-y-2">
@@ -280,6 +319,7 @@ export function HandoverDialog() {
                     {serialScanned && <span className="text-[10px] font-bold text-emerald-600 uppercase">Captured</span>}
                   </button>
                 )}
+                {scannedSerialValue && <ScanResultBadge success label="Serial Number" value={scannedSerialValue} />}
 
                 <button
                   onClick={handleScanIDCard}
@@ -301,6 +341,7 @@ export function HandoverDialog() {
                   </div>
                   {idScanned && <span className="text-[10px] font-bold text-emerald-600 uppercase">Verified</span>}
                 </button>
+                {scannedIdValue && <ScanResultBadge success label="Officer ID" value={scannedIdValue} />}
               </div>
 
               {/* Timestamp & GEO Tagging Info Panel */}
@@ -414,6 +455,17 @@ export function HandoverDialog() {
           )}
         </DialogBody>
       </DialogContent>
+
+      <ScannerDialog
+        open={scannerOpen}
+        onOpenChange={setScannerOpen}
+        onScan={handleScanResult}
+        title={
+          scannerTarget === "ont" ? "Scan ONT QR Code" :
+          scannerTarget === "serial" ? "Scan Serial Number" :
+          "Scan Officer ID Card"
+        }
+      />
     </Dialog>
   );
 }

@@ -28,11 +28,13 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { useMaintenanceStore } from "../../store/maintenance";
 import { maintenanceFormSchema, type MaintenanceFormData, type MaintenanceStatus } from "../../types";
+import { useCreateMaintenance } from "../../api/post-maintenance";
 import { useUpdateMaintenanceStatus } from "../../api/put-maintenance-status";
 import { MaintenanceFormActions } from "./maintenance-form-actions";
 import { AreaPicker } from "./area-picker";
 import { NodeSelector } from "./node-selector";
 import { CustomerCountPanel } from "./customer-count-panel";
+import { MaintenanceTimeline } from "./maintenance-timeline";
 
 const STATUS_VARIANT: Record<MaintenanceStatus, "primary" | "success" | "warning" | "destructive" | "secondary"> = {
   draft: "secondary", scheduled: "primary", approved: "primary",
@@ -54,6 +56,7 @@ export type MaintenanceFormRef = {
 export const MaintenanceForm = forwardRef<MaintenanceFormRef, MaintenanceFormProps>(
   ({ onSuccess, readOnly = false, mode }, ref) => {
     const { closeFormSheet, selectedMaintenance, formAreas, formNodes, setFormAreas, setFormNodes } = useMaintenanceStore();
+    const { mutate: createMaintenance, isPending: isCreating } = useCreateMaintenance();
     const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateMaintenanceStatus();
     const data = selectedMaintenance;
     const isVerticalSidebar = process.env.NEXT_PUBLIC_SIDEBAR === "vertical";
@@ -89,7 +92,7 @@ export const MaintenanceForm = forwardRef<MaintenanceFormRef, MaintenanceFormPro
       },
     });
 
-    const isPending = isUpdatingStatus;
+    const isPending = isUpdatingStatus || isCreating;
 
     useImperativeHandle(ref, () => ({
       submit: () => { form.handleSubmit(onSubmit)(); },
@@ -97,9 +100,12 @@ export const MaintenanceForm = forwardRef<MaintenanceFormRef, MaintenanceFormPro
     }));
 
     const onSubmit = (formData: MaintenanceFormData) => {
-      void formData;
-      closeFormSheet();
-      onSuccess?.();
+      createMaintenance(formData, {
+        onSuccess: () => {
+          closeFormSheet();
+          onSuccess?.();
+        },
+      });
     };
 
     const handleStatus = (status: MaintenanceStatus) => {
@@ -232,6 +238,13 @@ export const MaintenanceForm = forwardRef<MaintenanceFormRef, MaintenanceFormPro
                         <div className="space-y-2 border-t pt-6">
                           <p className="text-sm font-medium">Outcome Notes</p>
                           <p className="text-sm">{data.outcome_notes}</p>
+                        </div>
+                      )}
+
+                      {isDetailMode && data && data.timeline && data.timeline.length > 0 && (
+                        <div className="space-y-3 border-t pt-6">
+                          <p className="text-sm font-medium">Timeline</p>
+                          <MaintenanceTimeline timeline={data.timeline} />
                         </div>
                       )}
                     </div>

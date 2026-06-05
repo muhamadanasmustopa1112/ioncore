@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
-import { Calendar, Clock, MapPin, Zap, ExternalLink } from "lucide-react";
+import { Calendar, Clock, MapPin, Zap } from "lucide-react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useCalendarStore } from "../store/calendar";
-import type { CalendarEvent, CalendarEventType, CalendarEventStatus } from "../types";
+import type { CalendarEventType, CalendarEventStatus } from "../types";
 
 const EVENT_TYPE_LABELS: Record<CalendarEventType, string> = {
   maintenance: "Maintenance",
@@ -48,17 +49,6 @@ const PRIORITY_LABELS: Record<string, string> = {
   high: "High",
   critical: "Critical",
 };
-
-const DUMMY_TIMELINE = [
-  { time: "Created", description: "Event created by system", offset: "0d" },
-  { time: "Scheduled", description: "Added to operations calendar", offset: "0d" },
-  { time: "Team Notified", description: "Affected teams notified via email", offset: "-1d" },
-];
-
-const DUMMY_LINKED_WOS = [
-  { id: "WO-2026-0481", title: "OLT Port Check", status: "CREATED" },
-  { id: "WO-2026-0482", title: "Fiber Route Inspection", status: "IN_PROGRESS" },
-];
 
 interface EventDrawerProps {
   open: boolean;
@@ -199,10 +189,14 @@ export function EventDrawer({ open, onOpenChange }: EventDrawerProps) {
               {t("calendar.impactedNodes", "Impacted Nodes")}
             </p>
             <div className="rounded-md border border-border bg-muted/30 p-3 text-xs text-muted-foreground">
-              <p>3 OLT devices, 12 ODP nodes, 1 backbone segment</p>
-              <p className="mt-1 text-[11px]">
-                Affected fiber route: Kelapa Gading → Sunter → PIK
-              </p>
+              {event.metadata?.estimated_customers_affected ? (
+                <p>{event.metadata.estimated_customers_affected.toLocaleString()} customers affected</p>
+              ) : (
+                <p className="text-muted-foreground text-sm">No impact data available</p>
+              )}
+              {event.metadata?.service_impact && (
+                <p className="mt-1">Service impact: {event.metadata.service_impact.replace(/_/g, " ")}</p>
+              )}
             </div>
           </div>
 
@@ -210,49 +204,26 @@ export function EventDrawer({ open, onOpenChange }: EventDrawerProps) {
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t("calendar.linkedWOs", "Linked Work Orders")}
             </p>
-            <div className="space-y-1.5">
-              {DUMMY_LINKED_WOS.map((wo) => (
-                <div
-                  key={wo.id}
-                  className="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <ExternalLink className="size-3.5 text-muted-foreground" />
-                    <span className="text-xs font-medium text-foreground">{wo.id}</span>
-                    <span className="text-xs text-muted-foreground">- {wo.title}</span>
-                  </div>
-                  <Badge
-                    variant={
-                      wo.status === "DONE"
-                        ? "success"
-                        : wo.status === "IN_PROGRESS"
-                          ? "warning"
-                          : "primary"
-                    }
-                    appearance="light"
-                    size="xs"
-                  >
-                    {wo.status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
+            <p className="text-sm text-muted-foreground">No linked work orders</p>
           </div>
 
           <div className="space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t("calendar.timeline", "Timeline")}
             </p>
-            <div className="relative ml-2 border-l-2 border-border pl-4 space-y-4">
-              {DUMMY_TIMELINE.map((entry, i) => (
-                <div key={i} className="relative">
-                  <div className="absolute -left-[21px] top-1 size-2.5 rounded-full border-2 border-primary bg-background" />
-                  <p className="text-xs font-medium text-foreground">{entry.time}</p>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {entry.description}
-                  </p>
-                </div>
-              ))}
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Start:</span>
+                <span>{formatDate(event.start_date)}, {formatTime(event.start_date)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">End:</span>
+                <span>{formatDate(event.end_date)}, {formatTime(event.end_date)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Status:</span>
+                <span className="capitalize">{event.status.replace(/_/g, " ")}</span>
+              </div>
             </div>
           </div>
 
@@ -272,13 +243,13 @@ export function EventDrawer({ open, onOpenChange }: EventDrawerProps) {
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             {t("common.close", "Close")}
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => toast.info("Escalation coming soon")}>
             {t("calendar.escalate", "Escalate")}
           </Button>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => toast.info("Cancel coming soon")}>
             {t("calendar.cancelEvent", "Cancel Event")}
           </Button>
-          <Button variant="primary" size="sm">
+          <Button variant="primary" size="sm" onClick={() => toast.info("Edit coming soon")}>
             {t("common.edit", "Edit")}
           </Button>
         </div>

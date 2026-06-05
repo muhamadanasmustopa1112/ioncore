@@ -7,7 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Toolbar, ToolbarActions, ToolbarHeading, ToolbarTitle } from "@/components/common/toolbar";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { paths } from "@/config/paths";
-import { dummySlaDashboard } from "../data/dummy-sla-metrics";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSlaDashboard } from "../api/get-sla-metrics";
 import { useSlaStore } from "../store/sla";
 import { SlaMetricCard } from "./sla-metric-card";
 import { SlaDrilldownDrawer } from "./sla-drilldown-drawer";
@@ -16,10 +17,9 @@ import type { SlaMetric } from "../types";
 export function SlaDashboardPage() {
   const { t } = useTranslation();
   const { setSelectedMetric } = useSlaStore();
-
-  const metrics = Object.values(dummySlaDashboard.metrics);
-
-  const lastUpdated = new Date(dummySlaDashboard.last_updated).toLocaleString();
+  const { data: slaData, isLoading, refetch } = useSlaDashboard({ params: {} });
+  const metrics = slaData ? Object.values(slaData.metrics) : [];
+  const lastUpdated = slaData ? new Date(slaData.last_updated).toLocaleString() : "";
 
   const handleMetricClick = (metric: SlaMetric) => {
     setSelectedMetric(metric);
@@ -46,7 +46,7 @@ export function SlaDashboardPage() {
           <span className="text-xs text-muted-foreground">
             {t("sla.lastUpdated", "Last updated")}: {lastUpdated}
           </span>
-          <Button variant="outline" className="h-11 px-5 font-semibold shadow-xs">
+          <Button variant="outline" className="h-11 px-5 font-semibold shadow-xs" onClick={() => refetch()}>
             <RefreshCw className="size-4" />
             {t("common.refresh", "Refresh")}
           </Button>
@@ -54,13 +54,21 @@ export function SlaDashboardPage() {
       </Toolbar>
 
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {metrics.map((metric) => (
-          <SlaMetricCard
-            key={metric.metric_key}
-            metric={metric}
-            onClick={() => handleMetricClick(metric)}
-          />
-        ))}
+        {isLoading
+          ? Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-lg border p-5">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="mt-4 h-8 w-20" />
+                <Skeleton className="mt-3 h-3 w-16" />
+              </div>
+            ))
+          : metrics.map((metric) => (
+              <SlaMetricCard
+                key={metric.metric_key}
+                metric={metric}
+                onClick={() => handleMetricClick(metric)}
+              />
+            ))}
       </div>
 
       <div className="mt-6">

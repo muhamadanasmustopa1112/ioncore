@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { format } from "date-fns";
+import { toast } from "sonner";
 import { Download, Users, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,18 +11,6 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useAnnouncementStore } from "../store/announcement";
-import { dummyRecipients } from "../data/dummy-announcements";
-import type { AnnouncementTargetRole } from "../types";
-
-const roleLabel: Record<AnnouncementTargetRole, string> = {
-  operations_admin: "Operations Admin",
-  noc_manager: "NOC Manager",
-  noc: "NOC",
-  team_leader: "Team Leader",
-  finance_manager: "Finance Manager",
-  sales_manager: "Sales Manager",
-  management: "Management",
-};
 
 export function AcknowledgmentTracker() {
   const { t } = useTranslation();
@@ -32,8 +20,7 @@ export function AcknowledgmentTracker() {
     if (!announcement) return null;
     const { total_recipients, acknowledged_count, pending_count, pending_users } = announcement.acknowledgment_summary;
     const pct = total_recipients > 0 ? Math.round((acknowledged_count / total_recipients) * 100) : 0;
-    const pendingRecipients = dummyRecipients.filter((r) => !r.acknowledged);
-    return { total_recipients, acknowledged_count, pending_count, pending_users, pct, pendingRecipients };
+    return { total_recipients, acknowledged_count, pending_count, pending_users, pct };
   }, [announcement]);
 
   if (!trackerOpen || !announcement || !stats) return null;
@@ -129,30 +116,27 @@ export function AcknowledgmentTracker() {
                 </h4>
               </div>
               <ScrollArea className="max-h-[200px]">
-                {stats.pendingRecipients.length === 0 ? (
+                {stats.pending_users.length === 0 ? (
                   <p className="py-4 text-center text-sm text-muted-foreground">
                     {t("announcements.allAcknowledged", "All recipients have acknowledged.")}
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {stats.pendingRecipients.map((recipient) => (
+                    {stats.pending_users.map((userName, index) => (
                       <div
-                        key={recipient.id}
+                        key={index}
                         className="flex items-center justify-between rounded-md border px-3 py-2"
                       >
                         <div className="flex items-center gap-2">
                           <div className="flex size-7 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                            {recipient.user_name.charAt(0)}
+                            {userName.charAt(0)}
                           </div>
                           <div>
-                            <p className="text-sm font-medium">{recipient.user_name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {roleLabel[recipient.user_role]} &middot; {recipient.branch_name}
-                            </p>
+                            <p className="text-sm font-medium">{userName}</p>
                           </div>
                         </div>
                         <Badge variant="outline" className="text-xs">
-                          {recipient.delivered ? (recipient.opened ? "Opened" : "Delivered") : "Sent"}
+                          Pending
                         </Badge>
                       </div>
                     ))}
@@ -164,7 +148,7 @@ export function AcknowledgmentTracker() {
         </CardContent>
 
         <div className="border-border border-t p-4 flex justify-end">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => toast.info("Export coming soon")}>
             <Download className="size-4" />
             {t("announcements.exportReport", "Export Report")}
           </Button>

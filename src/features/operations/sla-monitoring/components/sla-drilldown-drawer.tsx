@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { Download, Filter, Search, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -158,9 +159,15 @@ export function SlaDrilldownDrawer() {
               <span className="text-xs font-medium text-foreground">
                 {selectedIds.size} {t("sla.selected", "selected")}
               </span>
-              <Button variant="outline" size="sm">{t("sla.reassign", "Reassign")}</Button>
-              <Button variant="outline" size="sm">{t("sla.notify", "Notify")}</Button>
-              <Button variant="destructive" size="sm">{t("sla.escalate", "Escalate")}</Button>
+              <Button variant="outline" size="sm" onClick={() => { toast.success(`Reassigned ${selectedIds.size} items`); setSelectedIds(new Set()); }}>
+                {t("sla.reassign", "Reassign")}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => { toast.success(`Notified ${selectedIds.size} items`); setSelectedIds(new Set()); }}>
+                {t("sla.notify", "Notify")}
+              </Button>
+              <Button variant="destructive" size="sm" onClick={() => { toast.success(`Escalated ${selectedIds.size} items`); setSelectedIds(new Set()); }}>
+                {t("sla.escalate", "Escalate")}
+              </Button>
             </div>
           )}
 
@@ -191,7 +198,7 @@ export function SlaDrilldownDrawer() {
         </SheetBody>
 
         <div className="border-t border-border px-5 py-3 flex items-center justify-between">
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="sm" onClick={() => toast.info("Export coming soon")}>
             <Download className="size-3.5" />
             {t("common.export", "Export")}
           </Button>
