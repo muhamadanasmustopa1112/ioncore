@@ -1,38 +1,22 @@
 "use client";
 
-import { forwardRef, useImperativeHandle } from "react";
+import { forwardRef, useImperativeHandle, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useCreateStockItem } from "@/features/warehouse/api/post-stock-item";
 import { useCreatePurchaseReceipt } from "@/features/warehouse/api/post-purchase-receipt";
-import { useCategories } from "@/features/warehouse/api/get-categories";
+import { useStockItems } from "@/features/warehouse/api/get-stock-items";
+import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
+import type { StockLevel } from "@/features/warehouse/types";
 import { toast } from "sonner";
 
-// Schema 1: Stock Item Catalog
-const stockItemSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  sku: z.string().min(3, "SKU must be at least 3 characters"),
-  brand: z.string().min(2, "Brand is required"),
-  model: z.string().min(2, "Model is required"),
-  category_id: z.number().min(1, "Category is required"),
-  unit: z.string().min(1, "Unit is required"),
-  valuation_method: z.string().min(1, "Valuation method is required"),
-  active: z.boolean(),
-  requires_serial_at_intake: z.boolean(),
-  sub_warehouse_allowed: z.boolean(),
-  default_install_wo_subtype: z.string(),
-  default_maintenance_schedule_id: z.string(),
-  default_required_skills: z.string(),
-});
-
-// Schema 2: Purchase Receipt
 const purchaseReceiptSchema = z.object({
+  stock_item_id: z.number().min(1, "Stock item is required"),
   warehouse_id: z.number().min(1, "Warehouse is required"),
-  quantity: z.number().min(1, "Quantity must be at least 1"),
+  quantity: z.number().min(1, "Receive quantity must be at least 1"),
+  threshold: z.number().min(0).optional(),
   unit_cost: z.number().min(0, "Unit cost is required"),
   vendor_name: z.string().min(1, "Vendor name is required"),
   purchase_date: z.string().min(1, "Purchase date is required"),
@@ -41,15 +25,67 @@ const purchaseReceiptSchema = z.object({
   notes: z.string().optional(),
 });
 
-// Combined schema for form
-const combinedSchema = stockItemSchema.merge(purchaseReceiptSchema);
-type StockItemFormValues = z.infer<typeof combinedSchema>;
+type PurchaseReceiptFormValues = z.infer<typeof purchaseReceiptSchema>;
 
 const WAREHOUSE_OPTIONS = [
   { id: 1, name: "Gudang Jakarta Utara" },
   { id: 2, name: "Gudang Bandung Utara" },
   { id: 3, name: "Gudang Surabaya" },
 ];
+
+function parseCommaList(value?: string): string[] {
+  if (!value) return [];
+  return value.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+function getDefaultFormValues(): PurchaseReceiptFormValues {
+  return {
+    stock_item_id: 0,
+    warehouse_id: 1,
+    quantity: 1,
+    threshold: undefined,
+    unit_cost: 0,
+    vendor_name: "",
+    purchase_date: new Date().toISOString().split("T")[0],
+    serials: "",
+    mac_addresses: "",
+    notes: "",
+  };
+}
+
+function getInitialFormValues(
+  mode: "new" | "edit" | "details",
+  selectedStock: StockLevel | null
+): PurchaseReceiptFormValues {
+  if (mode === "edit" && selectedStock) {
+    return {
+      ...getDefaultFormValues(),
+      stock_item_id: Number(selectedStock.stockItemId),
+      warehouse_id: Number(selectedStock.warehouseId),
+      threshold: selectedStock.threshold,
+      quantity: 1,
+    };
+  }
+  return getDefaultFormValues();
+}
+
+interface ReadOnlyFieldProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+function ReadOnlyField({ label, children }: ReadOnlyFieldProps) {
+  return (
+    <div className="space-y-1">
+      <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+        {label}
+      </label>
+      <div className="rounded-md border border-input bg-muted/30 px-3 py-2.5">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export interface StockItemFormRef {
   submit: () => void;
@@ -64,348 +100,269 @@ interface StockItemFormProps {
 export const StockItemForm = forwardRef<StockItemFormRef, StockItemFormProps>(
   ({ onSuccess, mode }, ref) => {
     const { t } = useTranslation();
-    const { mutate: createStockItem, isPending } = useCreateStockItem();
-    const { mutate: createPurchaseReceipt, isPending: isPendingReceipt } = useCreatePurchaseReceipt();
+    const { selectedStock } = useWarehouseStore();
+    const { mutate: createPurchaseReceipt, isPending } = useCreatePurchaseReceipt();
+    const { data: stockItemsResponse } = useStockItems();
+    const stockItems = stockItemsResponse?.data ?? [];
 
-    const { data: categoriesResponse } = useCategories();
-    const categories = categoriesResponse?.data ?? [];
+    const isEditMode = mode === "edit" && !!selectedStock;
 
     const {
       register,
       handleSubmit,
       watch,
       formState: { errors },
-    } = useForm<StockItemFormValues>({
-      resolver: zodResolver(combinedSchema),
-      defaultValues: {
-        // Stock item fields
-        name: "",
-        sku: "",
-        brand: "",
-        model: "",
-        category_id: 0,
-        unit: "",
-        valuation_method: "FIFO",
-        active: true,
-        requires_serial_at_intake: false,
-        sub_warehouse_allowed: true,
-        default_install_wo_subtype: "",
-        default_maintenance_schedule_id: "",
-        default_required_skills: "",
-        // Purchase receipt fields
-        warehouse_id: 1,
-        quantity: 1,
-        unit_cost: 0,
-        vendor_name: "",
-        purchase_date: new Date().toISOString().split("T")[0],
-        serials: "",
-        mac_addresses: "",
-        notes: "",
-      },
+    } = useForm<PurchaseReceiptFormValues>({
+      resolver: zodResolver(purchaseReceiptSchema),
+      defaultValues: getInitialFormValues(mode, selectedStock),
     });
 
-    const requiresSerial = watch("requires_serial_at_intake");
+    const selectedStockItemId = watch("stock_item_id");
+
+    const selectedStockItem = useMemo(
+      () => stockItems.find((item) => item.id === selectedStockItemId),
+      [stockItems, selectedStockItemId]
+    );
+
+    const requiresSerial =
+      selectedStockItem?.requires_serial_at_intake ??
+      selectedStock?.stockItemType === "serialized";
 
     useImperativeHandle(ref, () => ({
       submit: () => handleSubmit(onSubmit)(),
-      isPending: isPending || isPendingReceipt,
+      isPending,
     }));
 
-    function onSubmit(values: StockItemFormValues) {
-      const skillsArray = values.default_required_skills
-        ? values.default_required_skills.split(",").map((s) => s.trim()).filter(Boolean)
-        : [];
-
-      // Step 1: Create stock item catalog entry
-      createStockItem(
+    function onSubmit(values: PurchaseReceiptFormValues) {
+      createPurchaseReceipt(
         {
-          name: values.name,
-          sku: values.sku,
-          brand: values.brand,
-          model: values.model,
-          category_id: values.category_id,
-          unit: values.unit,
-          valuation_method: values.valuation_method,
-          active: values.active,
-          requires_serial_at_intake: values.requires_serial_at_intake,
-          sub_warehouse_allowed: values.sub_warehouse_allowed,
-          default_install_wo_subtype: values.default_install_wo_subtype,
-          default_maintenance_schedule_id: values.default_maintenance_schedule_id || undefined,
-          default_required_skills: skillsArray,
+          destination_warehouse_id: values.warehouse_id,
+          lines: [
+            {
+              stock_item_id: values.stock_item_id,
+              quantity: values.quantity,
+              unit_cost: values.unit_cost,
+              serials: parseCommaList(values.serials),
+              mac_addresses: parseCommaList(values.mac_addresses),
+            },
+          ],
+          vendor_name: values.vendor_name,
+          purchase_date: values.purchase_date,
+          received_at: new Date().toISOString(),
+          notes: values.notes,
         },
         {
-          onSuccess: (stockItemResponse) => {
-            // Step 2: Create purchase receipt with initial stock
-            const stockItemId = stockItemResponse.id;
-
-            createPurchaseReceipt(
-              {
-                destination_warehouse_id: values.warehouse_id,
-                lines: [
-                  {
-                    stock_item_id: stockItemId,
-                    quantity: values.quantity,
-                    unit_cost: values.unit_cost,
-                    serials: values.serials
-                      ? values.serials.split(",").map((s) => s.trim()).filter(Boolean)
-                      : [],
-                    mac_addresses: values.mac_addresses
-                      ? values.mac_addresses.split(",").map((s) => s.trim()).filter(Boolean)
-                      : [],
-                  },
-                ],
-                vendor_name: values.vendor_name,
-                purchase_date: values.purchase_date,
-                received_at: new Date().toISOString(),
-                notes: values.notes,
-              },
-              {
-                onSuccess: () => {
-                  toast.success("Stock item and purchase receipt created");
-                  onSuccess();
-                },
-                onError: () => {
-                  toast.error("Stock item created but purchase receipt failed");
-                },
-              }
-            );
-          },
-          onError: () => {
-            toast.error("Failed to create stock item");
+          onSuccess: () => {
+            toast.success("Purchase receipt created");
+            onSuccess();
           },
         }
       );
     }
 
-    const isReadOnly = mode === "details";
-
     return (
-      <div className="space-y-5 px-1 py-2">
+      <div className="space-y-5 px-1 py-2 pb-6">
+        {isEditMode && selectedStock ? (
+          <>
+            <input type="hidden" {...register("stock_item_id", { valueAsNumber: true })} />
+            <input type="hidden" {...register("warehouse_id", { valueAsNumber: true })} />
+
+            <ReadOnlyField label={t("warehouse.stockItem", "Stock Item")}>
+              <p className="text-sm font-medium text-foreground">
+                {selectedStock.stockItemName}
+              </p>
+              <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
+                SKU: {selectedStock.stockItemSku}
+              </p>
+            </ReadOnlyField>
+
+            <ReadOnlyField label={t("warehouse.warehouse", "Warehouse")}>
+              <p className="text-sm font-medium text-foreground">
+                {selectedStock.warehouseName}
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                {selectedStock.warehouseBranch}
+              </p>
+            </ReadOnlyField>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <ReadOnlyField label={t("warehouse.stockStatus", "Current Stock")}>
+                <p className="text-sm font-bold text-foreground">
+                  {selectedStock.currentStock.toLocaleString()}{" "}
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {selectedStock.uom}
+                  </span>
+                </p>
+              </ReadOnlyField>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  {t("warehouse.thresholdLabel", "Threshold")} *
+                </label>
+                <Input
+                  type="number"
+                  {...register("threshold", { valueAsNumber: true })}
+                  className="text-xs h-10"
+                />
+                {errors.threshold && (
+                  <p className="text-[10px] text-destructive font-bold">{errors.threshold.message}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {t("warehouse.receiveQuantity", "Receive Quantity")} *
+              </label>
+              <Input
+                type="number"
+                {...register("quantity", { valueAsNumber: true })}
+                className="text-xs h-10"
+              />
+              {errors.quantity && (
+                <p className="text-[10px] text-destructive font-bold">{errors.quantity.message}</p>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {t("warehouse.stockItem", "Stock Item")} *
+              </label>
+              <select
+                {...register("stock_item_id", { valueAsNumber: true })}
+                className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
+              >
+                <option value="">Select stock item</option>
+                {stockItems.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} ({item.sku})
+                  </option>
+                ))}
+              </select>
+              {errors.stock_item_id && (
+                <p className="text-[10px] text-destructive font-bold">{errors.stock_item_id.message}</p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  {t("warehouse.warehouse", "Warehouse")} *
+                </label>
+                <select
+                  {...register("warehouse_id", { valueAsNumber: true })}
+                  className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
+                >
+                  {WAREHOUSE_OPTIONS.map((wh) => (
+                    <option key={wh.id} value={wh.id}>{wh.name}</option>
+                  ))}
+                </select>
+                {errors.warehouse_id && (
+                  <p className="text-[10px] text-destructive font-bold">{errors.warehouse_id.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  {t("warehouse.receiveQuantity", "Receive Quantity")} *
+                </label>
+                <Input
+                  type="number"
+                  {...register("quantity", { valueAsNumber: true })}
+                  className="text-xs h-10"
+                />
+                {errors.quantity && (
+                  <p className="text-[10px] text-destructive font-bold">{errors.quantity.message}</p>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.itemName", "Item Name")} *
+              {t("warehouse.unitCost", "Unit Cost")} *
             </label>
-            <Input {...register("name")} disabled={isReadOnly} placeholder="e.g. ONT ZTE F670L" className="text-xs h-10" />
-            {errors.name && <p className="text-[10px] text-destructive font-bold">{errors.name.message}</p>}
+            <Input
+              type="number"
+              {...register("unit_cost", { valueAsNumber: true })}
+              className="text-xs h-10"
+            />
+            {errors.unit_cost && (
+              <p className="text-[10px] text-destructive font-bold">{errors.unit_cost.message}</p>
+            )}
           </div>
 
           <div className="space-y-1">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              SKU *
+              {t("warehouse.vendorName", "Vendor Name")} *
             </label>
-            <Input {...register("sku")} disabled={isReadOnly} placeholder="e.g. ONT-ZTE-F670L" className="text-xs h-10 font-mono" />
-            {errors.sku && <p className="text-[10px] text-destructive font-bold">{errors.sku.message}</p>}
+            <Input
+              {...register("vendor_name")}
+              placeholder="e.g. PT Supplier Utama"
+              className="text-xs h-10"
+            />
+            {errors.vendor_name && (
+              <p className="text-[10px] text-destructive font-bold">{errors.vendor_name.message}</p>
+            )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.brand", "Brand")} *
+              {t("warehouse.purchaseDate", "Purchase Date")} *
             </label>
-            <Input {...register("brand")} disabled={isReadOnly} placeholder="e.g. ZTE" className="text-xs h-10" />
-            {errors.brand && <p className="text-[10px] text-destructive font-bold">{errors.brand.message}</p>}
+            <Input
+              type="date"
+              {...register("purchase_date")}
+              className="text-xs h-10"
+            />
+            {errors.purchase_date && (
+              <p className="text-[10px] text-destructive font-bold">{errors.purchase_date.message}</p>
+            )}
           </div>
 
           <div className="space-y-1">
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.model", "Model")} *
+              {t("warehouse.notes", "Notes")}
             </label>
-            <Input {...register("model")} disabled={isReadOnly} placeholder="e.g. F670L" className="text-xs h-10" />
-            {errors.model && <p className="text-[10px] text-destructive font-bold">{errors.model.message}</p>}
+            <Input
+              {...register("notes")}
+              placeholder="Optional notes"
+              className="text-xs h-10"
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.category", "Category")} *
-            </label>
-            <select
-              {...register("category_id", { valueAsNumber: true })}
-              disabled={isReadOnly}
-              className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
-            >
-              <option value="">Select category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.label}</option>
-              ))}
-            </select>
-            {errors.category_id && <p className="text-[10px] text-destructive font-bold">{errors.category_id.message}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.unit", "Unit")} *
-            </label>
-            <Input {...register("unit")} disabled={isReadOnly} placeholder="e.g. pcs, meters" className="text-xs h-10" />
-            {errors.unit && <p className="text-[10px] text-destructive font-bold">{errors.unit.message}</p>}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.valuationMethod", "Valuation Method")} *
-            </label>
-            <select
-              {...register("valuation_method")}
-              disabled={isReadOnly}
-              className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
-            >
-              <option value="FIFO">FIFO</option>
-              <option value="LIFO">LIFO</option>
-            </select>
-            {errors.valuation_method && <p className="text-[10px] text-destructive font-bold">{errors.valuation_method.message}</p>}
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.installWoSubtype", "Install WO Subtype")}
-            </label>
-            <Input {...register("default_install_wo_subtype")} disabled={isReadOnly} placeholder="e.g. ont_install" className="text-xs h-10" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.maintenanceSchedule", "Maintenance Schedule")}
-            </label>
-            <Input {...register("default_maintenance_schedule_id")} disabled={isReadOnly} placeholder="e.g. MONTHLY, P90D" className="text-xs h-10" />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              {t("warehouse.requiredSkills", "Required Skills")}
-            </label>
-            <Input {...register("default_required_skills")} disabled={isReadOnly} placeholder="Comma separated, e.g. fiber_install, ont_activation" className="text-xs h-10" />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" {...register("active")} disabled={isReadOnly} className="size-4 rounded border-input" />
-            <span className="text-xs font-bold text-muted-foreground">{t("warehouse.active", "Active")}</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" {...register("requires_serial_at_intake")} disabled={isReadOnly} className="size-4 rounded border-input" />
-            <span className="text-xs font-bold text-muted-foreground">{t("warehouse.requiresSerial", "Requires Serial at Intake")}</span>
-          </label>
-
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input type="checkbox" {...register("sub_warehouse_allowed")} disabled={isReadOnly} className="size-4 rounded border-input" />
-            <span className="text-xs font-bold text-muted-foreground">{t("warehouse.subWarehouseAllowed", "Sub-warehouse Allowed")}</span>
-          </label>
-        </div>
-
-        {/* Purchase Receipt Section */}
-        <div className="border-t pt-4 mt-4">
-          <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">
-            Purchase Receipt Details
-          </h3>
-
+        {requiresSerial && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Warehouse *
+                {t("warehouse.serialNumbers", "Serial Numbers")}
               </label>
-              <select
-                {...register("warehouse_id", { valueAsNumber: true })}
-                disabled={isReadOnly}
-                className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
-              >
-                {WAREHOUSE_OPTIONS.map((wh) => (
-                  <option key={wh.id} value={wh.id}>{wh.name}</option>
-                ))}
-              </select>
-              {errors.warehouse_id && <p className="text-[10px] text-destructive font-bold">{errors.warehouse_id.message}</p>}
+              <Input
+                {...register("serials")}
+                placeholder="Comma-separated serials"
+                className="text-xs h-10"
+              />
             </div>
 
             <div className="space-y-1">
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Quantity *
+                {t("warehouse.macAddresses", "MAC Addresses")}
               </label>
-              <Input type="number" {...register("quantity", { valueAsNumber: true })} disabled={isReadOnly} className="text-xs h-10" />
-              {errors.quantity && <p className="text-[10px] text-destructive font-bold">{errors.quantity.message}</p>}
+              <Input
+                {...register("mac_addresses")}
+                placeholder="Comma-separated MACs"
+                className="text-xs h-10"
+              />
             </div>
           </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Unit Cost *
-              </label>
-              <Input type="number" {...register("unit_cost", { valueAsNumber: true })} disabled={isReadOnly} className="text-xs h-10" />
-              {errors.unit_cost && <p className="text-[10px] text-destructive font-bold">{errors.unit_cost.message}</p>}
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Vendor Name *
-              </label>
-              <Input {...register("vendor_name")} disabled={isReadOnly} placeholder="e.g. PT Supplier Utama" className="text-xs h-10" />
-              {errors.vendor_name && <p className="text-[10px] text-destructive font-bold">{errors.vendor_name.message}</p>}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Purchase Date *
-              </label>
-              <Input type="date" {...register("purchase_date")} disabled={isReadOnly} className="text-xs h-10" />
-              {errors.purchase_date && <p className="text-[10px] text-destructive font-bold">{errors.purchase_date.message}</p>}
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                Notes
-              </label>
-              <Input {...register("notes")} disabled={isReadOnly} placeholder="Optional notes" className="text-xs h-10" />
-            </div>
-          </div>
-
-          {requiresSerial && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  Serial Numbers
-                </label>
-                <Input {...register("serials")} disabled={isReadOnly} placeholder="Comma-separated serials" className="text-xs h-10" />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  MAC Addresses
-                </label>
-                <Input {...register("mac_addresses")} disabled={isReadOnly} placeholder="Comma-separated MACs" className="text-xs h-10" />
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
-          <Button
-            type="button"
-            variant="outline"
-            className="h-10 px-4 text-xs font-semibold"
-            onClick={onSuccess}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            className="h-10 px-5 text-xs font-semibold"
-            disabled={isPending || isPendingReceipt}
-          >
-            {isPending ? "Creating Item..." : isPendingReceipt ? "Creating Receipt..." : "Register Item"}
-          </Button>
-        </div>
+        )}
       </div>
     );
   }

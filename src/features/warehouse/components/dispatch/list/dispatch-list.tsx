@@ -31,7 +31,11 @@ import {
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { DUMMY_DISPATCHES } from "@/features/warehouse/data/dummy-subfeatures";
+import {
+  useDispatches,
+  useInfiniteDispatches,
+} from "@/features/warehouse/api/get-dispatches";
+import { mapApiDispatchesToRecords } from "@/features/warehouse/utils/map-dispatch";
 import { useDispatchColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { MobileDispatchHeader } from "./mobile-dispatch-header";
@@ -42,6 +46,21 @@ import { DispatchRecord } from "@/features/warehouse/types";
 const MOBILE_PAGE_SIZE = 10;
 const SCROLL_THRESHOLD = 0.8;
 
+const WAREHOUSE_FILTER_OPTIONS = [
+  { id: 1, name: "Gudang Jakarta Utara" },
+  { id: 2, name: "Gudang Bandung Utara" },
+  { id: 3, name: "Gudang Surabaya" },
+];
+
+const STATUS_FILTER_OPTIONS = [
+  "IN_TRANSIT",
+  "PENDING",
+  "PREPARING",
+  "DISPATCHED",
+  "COMPLETED",
+  "SIGNED_OFF",
+];
+
 export function DispatchList() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -49,47 +68,75 @@ export function DispatchList() {
   const [filter, setFilter] = useQueryStates({
     limit: parseAsInteger.withDefault(10),
     page: parseAsInteger.withDefault(1),
-    search: parseAsString,
+    wo_id: parseAsString,
+    technician_user_id: parseAsString,
+    source_warehouse_id: parseAsInteger,
+    status: parseAsString,
   });
   const [openFilter, setOpenFilter] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const columns = useDispatchColumns();
-  const [isLoading] = useState(false);
 
-  const filteredData = useMemo(() => {
-    let result = DUMMY_DISPATCHES;
-
-    if (filter.search) {
-      const searchLower = filter.search.toLowerCase();
-      result = result.filter(
-        (item) =>
-          item.woNumber.toLowerCase().includes(searchLower) ||
-          item.technicianName.toLowerCase().includes(searchLower) ||
-          item.warehouseName.toLowerCase().includes(searchLower)
-      );
-    }
-
-    if (selectedStatus) {
-      result = result.filter((item) => item.status === selectedStatus);
-    }
-
-    return result;
-  }, [filter.search, selectedStatus]);
-
-  const data = useMemo(() => {
-    const start = (filter.page - 1) * filter.limit;
-    return filteredData.slice(start, start + filter.limit);
-  }, [filteredData, filter.page, filter.limit]);
-
-  const metadata = useMemo(
+  const apiParams = useMemo(
     () => ({
-      total_data: filteredData.length,
-      total_page: Math.ceil(filteredData.length / filter.limit),
+      page: filter.page,
+      limit: filter.limit,
+      wo_id: filter.wo_id || undefined,
+      technician_user_id: filter.technician_user_id || undefined,
+      source_warehouse_id: filter.source_warehouse_id ?? undefined,
+      status: filter.status || undefined,
     }),
-    [filteredData, filter.limit]
+    [
+      filter.page,
+      filter.limit,
+      filter.wo_id,
+      filter.technician_user_id,
+      filter.source_warehouse_id,
+      filter.status,
+    ]
   );
+
+  const {
+    data: dispatchesResponse,
+    isLoading: isDesktopLoading,
+    isFetching: isDesktopFetching,
+  } = useDispatches({
+    params: apiParams,
+    queryConfig: { enabled: !isMobile },
+  });
+
+  const {
+    data: infiniteData,
+    isLoading: isMobileLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteDispatches({
+    limit: MOBILE_PAGE_SIZE,
+    wo_id: filter.wo_id || undefined,
+    technician_user_id: filter.technician_user_id || undefined,
+    source_warehouse_id: filter.source_warehouse_id ?? undefined,
+    status: filter.status || undefined,
+    queryConfig: { enabled: isMobile },
+  });
+
+  const tableData = useMemo(
+    () => mapApiDispatchesToRecords(dispatchesResponse?.data ?? []),
+    [dispatchesResponse]
+  );
+  const metadata = dispatchesResponse?.metadata;
+
+  const mobileDataAll = useMemo(
+    () =>
+      mapApiDispatchesToRecords(
+        infiniteData?.pages.flatMap((page) => page.data) ?? []
+      ),
+    [infiniteData]
+  );
+
+  const mobileTotalCount =
+    infiniteData?.pages[0]?.metadata.total_data ?? mobileDataAll.length;
 
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string)
@@ -97,8 +144,8 @@ export function DispatchList() {
 
   const table = useReactTable({
     columns,
-    data,
-    pageCount: metadata.total_page,
+    data: tableData,
+    pageCount: metadata?.total_page ?? 0,
     getRowId: (row: DispatchRecord) => String(row.id),
     state: {
       pagination: { pageIndex: filter.page - 1, pageSize: filter.limit },
@@ -116,35 +163,19 @@ export function DispatchList() {
     manualPagination: true,
   });
 
-  // Mobile infinite scroll
-  const [visibleCount, setVisibleCount] = useState(MOBILE_PAGE_SIZE);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-
-  const hasMore = visibleCount < filteredData.length;
 
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container || isFetchingMore || !hasMore) return;
+    if (!container || isFetchingNextPage || !hasNextPage) return;
 
     const { scrollTop, scrollHeight, clientHeight } = container;
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
 
     if (scrollPercentage > SCROLL_THRESHOLD) {
-      setIsFetchingMore(true);
-      setTimeout(() => {
-        setVisibleCount((prev) =>
-          Math.min(prev + MOBILE_PAGE_SIZE, filteredData.length)
-        );
-        setIsFetchingMore(false);
-      }, 400);
+      fetchNextPage();
     }
-  }, [isFetchingMore, hasMore, filteredData.length]);
-
-  const mobileData = useMemo(
-    () => filteredData.slice(0, visibleCount),
-    [filteredData, visibleCount]
-  );
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   const handleMobileDetail = useCallback(
     (item: DispatchRecord) => {
@@ -154,83 +185,96 @@ export function DispatchList() {
     [setSelectedDispatch, openDispatchFormSheet]
   );
 
-  const handleSearchChange = useCallback(
+  const handleWoIdChange = useCallback(
     (value: string) => {
-      setFilter({ ...filter, search: value });
-      setVisibleCount(MOBILE_PAGE_SIZE);
+      setFilter({ ...filter, wo_id: value || null, page: 1 });
     },
     [filter, setFilter]
   );
 
-  const handleStatusChange = useCallback((status: string | null) => {
-    setSelectedStatus(status);
-    setVisibleCount(MOBILE_PAGE_SIZE);
-  }, []);
+  const handleStatusChange = useCallback(
+    (status: string | null) => {
+      setFilter({ ...filter, status: status || null, page: 1 });
+    },
+    [filter, setFilter]
+  );
+
+  const clearFilters = useCallback(() => {
+    setFilter({
+      wo_id: null,
+      technician_user_id: null,
+      source_warehouse_id: null,
+      status: null,
+      page: 1,
+    });
+  }, [setFilter]);
+
+  const hasActiveFilters =
+    !!filter.wo_id ||
+    !!filter.technician_user_id ||
+    filter.source_warehouse_id != null ||
+    !!filter.status;
+
+  const isLoading = isMobile ? isMobileLoading : isDesktopLoading;
+  const isFetching = isMobile ? isFetchingNextPage : isDesktopFetching;
 
   if (isMobile) {
     return (
       <div className="mt-2 space-y-3 overflow-hidden">
-        {/* KPI Summary + Status Filters */}
         <MobileDispatchHeader
-          items={DUMMY_DISPATCHES}
-          selectedStatus={selectedStatus}
+          items={mobileDataAll}
+          selectedStatus={filter.status}
           onStatusChange={handleStatusChange}
         />
 
-        {/* Search Bar */}
         <div className="relative">
           <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
           <Input
-            placeholder={t("warehouse.searchDispatch", "Search dispatches...")}
-            value={filter.search || ""}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder={t("warehouse.searchByWoId", "Search by WO ID...")}
+            value={filter.wo_id || ""}
+            onChange={(e) => handleWoIdChange(e.target.value)}
             className="w-full ps-9"
           />
-          {filter.search && (
+          {filter.wo_id && (
             <Button
               mode="icon"
               variant="ghost"
               className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-              onClick={() => handleSearchChange("")}
+              onClick={() => handleWoIdChange("")}
             >
               <X />
             </Button>
           )}
         </div>
 
-        {/* Results Count */}
         <div className="flex items-center justify-between px-0.5">
           <span className="text-[11px] text-muted-foreground font-medium">
-            {filteredData.length} {t("common.items", "items")}
-            {selectedStatus && (
+            {mobileTotalCount} {t("common.items", "items")}
+            {filter.status && (
               <span className="text-muted-foreground/60">
                 {" "}
-                • {selectedStatus}
+                • {filter.status}
               </span>
             )}
           </span>
-          {(filter.search || selectedStatus) && (
+          {hasActiveFilters && (
             <Button
               variant="ghost"
               size="sm"
               className="h-6 text-[10px] font-semibold text-muted-foreground px-2 cursor-pointer transition-colors duration-200"
-              onClick={() => {
-                handleSearchChange("");
-                handleStatusChange(null);
-              }}
+              onClick={clearFilters}
             >
               {t("common.clearFilters", "Clear filters")}
             </Button>
           )}
         </div>
 
-        {/* Card List with Infinite Scroll */}
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
           className="max-h-[calc(100vh-420px)] overflow-y-auto space-y-3 pr-1"
         >
-          {mobileData.map((item) => (
+          {mobileDataAll.map((item) => (
             <DispatchMobileCard
               key={item.id}
               item={item}
@@ -238,21 +282,22 @@ export function DispatchList() {
             />
           ))}
 
-          {mobileData.length === 0 && !isLoading && (
+          {mobileDataAll.length === 0 && !isLoading && (
             <div className="text-center py-8 text-muted-foreground text-sm">
               {t("warehouse.noDispatches", "No dispatches found")}
             </div>
           )}
 
-          {isFetchingMore && (
+          {(isFetching || isFetchingNextPage) && (
             <div className="flex items-center justify-center py-3">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           )}
 
-          {!hasMore && mobileData.length > 0 && (
+          {!hasNextPage && mobileDataAll.length > 0 && (
             <div className="text-center py-3 text-[11px] text-muted-foreground">
-              {t("common.endOfList", "End of list")} • {filteredData.length} {t("common.items", "items")}
+              {t("common.endOfList", "End of list")} • {mobileTotalCount}{" "}
+              {t("common.items", "items")}
             </div>
           )}
         </div>
@@ -263,7 +308,7 @@ export function DispatchList() {
   return (
     <DataGrid
       table={table}
-      recordCount={metadata.total_data}
+      recordCount={metadata?.total_data ?? 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -271,7 +316,7 @@ export function DispatchList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={isLoading}
+      isLoading={isDesktopLoading || isDesktopFetching}
     >
       <Card className="mt-[10px]">
         <CardHeader>
@@ -288,21 +333,27 @@ export function DispatchList() {
                   <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
                   <Input
                     placeholder={t(
-                      "warehouse.searchDispatch",
-                      "Search dispatches..."
+                      "warehouse.searchByWoId",
+                      "Search by WO ID..."
                     )}
-                    value={filter.search || ""}
+                    value={filter.wo_id || ""}
                     onChange={(e) =>
-                      setFilter({ ...filter, search: e.target.value })
+                      setFilter({
+                        ...filter,
+                        wo_id: e.target.value || null,
+                        page: 1,
+                      })
                     }
                     className="w-64 ps-9"
                   />
-                  {filter.search && (
+                  {filter.wo_id && (
                     <Button
                       mode="icon"
                       variant="ghost"
                       className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-                      onClick={() => setFilter({ ...filter, search: "" })}
+                      onClick={() =>
+                        setFilter({ ...filter, wo_id: null, page: 1 })
+                      }
                     >
                       <X />
                     </Button>
@@ -310,9 +361,83 @@ export function DispatchList() {
                 </div>
               </div>
               <CollapsibleContent>
-                <div className="flex items-center gap-2 py-[5px] text-sm text-muted-foreground">
-                  {t("warehouse.noFilters", "No advanced filters defined yet.")}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 py-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                      {t("warehouse.technician", "Technician")}
+                    </label>
+                    <Input
+                      value={filter.technician_user_id || ""}
+                      onChange={(e) =>
+                        setFilter({
+                          ...filter,
+                          technician_user_id: e.target.value || null,
+                          page: 1,
+                        })
+                      }
+                      placeholder="tech-bks-001"
+                      className="text-xs h-9"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                      {t("warehouse.warehouseLabel", "Warehouse")}
+                    </label>
+                    <select
+                      value={filter.source_warehouse_id ?? ""}
+                      onChange={(e) =>
+                        setFilter({
+                          ...filter,
+                          source_warehouse_id: e.target.value
+                            ? Number(e.target.value)
+                            : null,
+                          page: 1,
+                        })
+                      }
+                      className="flex w-full bg-background border border-input h-9 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">All warehouses</option>
+                      {WAREHOUSE_FILTER_OPTIONS.map((wh) => (
+                        <option key={wh.id} value={wh.id}>
+                          {wh.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                      {t("common.status", "Status")}
+                    </label>
+                    <select
+                      value={filter.status || ""}
+                      onChange={(e) =>
+                        setFilter({
+                          ...filter,
+                          status: e.target.value || null,
+                          page: 1,
+                        })
+                      }
+                      className="flex w-full bg-background border border-input h-9 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
+                    >
+                      <option value="">All statuses</option>
+                      {STATUS_FILTER_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={clearFilters}
+                  >
+                    {t("common.clearFilters", "Clear filters")}
+                  </Button>
+                )}
               </CollapsibleContent>
             </CardHeading>
           </Collapsible>

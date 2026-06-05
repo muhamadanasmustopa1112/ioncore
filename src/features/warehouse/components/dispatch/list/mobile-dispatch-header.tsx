@@ -20,11 +20,20 @@ interface MobileDispatchHeaderProps {
 }
 
 const statusFilters = [
-  { value: "pending", label: "Pending", icon: Clock },
-  { value: "preparing", label: "Preparing", icon: Wrench },
-  { value: "dispatched", label: "Dispatched", icon: Truck },
-  { value: "completed", label: "Completed", icon: CheckCircle2 },
+  { value: "IN_TRANSIT", label: "In Transit", icon: Truck },
+  { value: "PENDING", label: "Pending", icon: Clock },
+  { value: "PREPARING", label: "Preparing", icon: Wrench },
+  { value: "DISPATCHED", label: "Dispatched", icon: Truck },
+  { value: "COMPLETED", label: "Completed", icon: CheckCircle2 },
 ];
+
+function normalizeStatus(status: string): string {
+  return status.toUpperCase().replace(/-/g, "_");
+}
+
+function countByStatus(items: DispatchRecord[], status: string): number {
+  return items.filter((i) => normalizeStatus(i.status) === status).length;
+}
 
 export function MobileDispatchHeader({
   items,
@@ -33,17 +42,18 @@ export function MobileDispatchHeader({
 }: MobileDispatchHeaderProps) {
   const stats = useMemo(() => {
     const total = items.length;
-    const pending = items.filter((i) => i.status === "pending").length;
-    const preparing = items.filter((i) => i.status === "preparing").length;
-    const dispatched = items.filter((i) => i.status === "dispatched").length;
-    const completed = items.filter((i) => i.status === "completed").length;
+    const inTransit = countByStatus(items, "IN_TRANSIT");
+    const pending = countByStatus(items, "PENDING");
+    const preparing = countByStatus(items, "PREPARING");
+    const dispatched =
+      countByStatus(items, "DISPATCHED") + countByStatus(items, "SIGNED_OFF");
+    const completed = countByStatus(items, "COMPLETED");
 
-    return { total, pending, preparing, dispatched, completed };
+    return { total, inTransit, pending, preparing, dispatched, completed };
   }, [items]);
 
   return (
     <div className="space-y-3">
-      {/* KPI Grid */}
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-2.5">
           <div className="flex items-center gap-1.5 mb-1">
@@ -55,9 +65,7 @@ export function MobileDispatchHeader({
           <div className="text-lg font-extrabold text-foreground">
             {stats.total}
           </div>
-          <div className="text-[9px] text-muted-foreground">
-            dispatches
-          </div>
+          <div className="text-[9px] text-muted-foreground">dispatches</div>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-2.5">
@@ -70,24 +78,20 @@ export function MobileDispatchHeader({
           <div className="text-lg font-extrabold text-amber-600 dark:text-amber-400">
             {stats.pending}
           </div>
-          <div className="text-[9px] text-muted-foreground">
-            awaiting action
-          </div>
+          <div className="text-[9px] text-muted-foreground">awaiting action</div>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-2.5">
           <div className="flex items-center gap-1.5 mb-1">
             <Truck className="size-3.5 text-blue-500" />
             <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-              Dispatched
+              In Transit
             </span>
           </div>
           <div className="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-            {stats.dispatched}
+            {stats.inTransit + stats.dispatched}
           </div>
-          <div className="text-[9px] text-muted-foreground">
-            in the field
-          </div>
+          <div className="text-[9px] text-muted-foreground">in the field</div>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-2.5">
@@ -109,73 +113,6 @@ export function MobileDispatchHeader({
         </div>
       </div>
 
-      {/* Status Pipeline Bar */}
-      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-2.5 overflow-hidden">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[11px] font-semibold text-foreground">
-            Pipeline
-          </span>
-          <span className="text-[10px] text-muted-foreground">
-            {stats.total} total
-          </span>
-        </div>
-        <div className="flex h-2 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-          {stats.pending > 0 && (
-            <div
-              className="bg-amber-500 transition-all"
-              style={{
-                width: `${(stats.pending / stats.total) * 100}%`,
-              }}
-            />
-          )}
-          {stats.preparing > 0 && (
-            <div
-              className="bg-slate-400 transition-all"
-              style={{
-                width: `${(stats.preparing / stats.total) * 100}%`,
-              }}
-            />
-          )}
-          {stats.dispatched > 0 && (
-            <div
-              className="bg-blue-500 transition-all"
-              style={{
-                width: `${(stats.dispatched / stats.total) * 100}%`,
-              }}
-            />
-          )}
-          {stats.completed > 0 && (
-            <div
-              className="bg-emerald-500 transition-all"
-              style={{
-                width: `${(stats.completed / stats.total) * 100}%`,
-              }}
-            />
-          )}
-        </div>
-        <div className="flex items-center justify-between mt-1.5 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap min-w-0">
-            <span className="flex items-center gap-1 text-[9px] text-muted-foreground shrink-0">
-              <span className="size-1.5 rounded-full bg-amber-500" />
-              Pending
-            </span>
-            <span className="flex items-center gap-1 text-[9px] text-muted-foreground shrink-0">
-              <span className="size-1.5 rounded-full bg-slate-400" />
-              Preparing
-            </span>
-            <span className="flex items-center gap-1 text-[9px] text-muted-foreground shrink-0">
-              <span className="size-1.5 rounded-full bg-blue-500" />
-              Dispatched
-            </span>
-            <span className="flex items-center gap-1 text-[9px] text-muted-foreground shrink-0">
-              <span className="size-1.5 rounded-full bg-emerald-500" />
-              Done
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Status Filter Chips */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none min-w-0">
         <Button
           variant={selectedStatus === null ? "primary" : "outline"}
@@ -191,7 +128,7 @@ export function MobileDispatchHeader({
           <ListFilter className="size-3 mr-1" />
           All
         </Button>
-        {statusFilters.map(({ value, label, icon: Icon }) => (
+        {statusFilters.map(({ value, label }) => (
           <Button
             key={value}
             variant={selectedStatus === value ? "primary" : "outline"}

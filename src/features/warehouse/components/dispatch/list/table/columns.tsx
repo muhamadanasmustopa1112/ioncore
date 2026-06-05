@@ -8,12 +8,29 @@ import { DataGridColumnHeader } from "@/components/ui/data-grid-column-header";
 import { ActionsCell } from "./data-table-actions-cell";
 import { DispatchRecord } from "@/features/warehouse/types";
 
-const statusVariantMap: Record<string, "info" | "secondary" | "destructive" | "warning"> = {
-  pending: "warning",
-  preparing: "secondary",
-  dispatched: "info",
-  completed: "secondary",
-};
+function getStatusVariant(
+  status: string
+): "info" | "secondary" | "destructive" | "warning" | "success" {
+  const normalized = status.toUpperCase().replace(/-/g, "_");
+  switch (normalized) {
+    case "PENDING":
+      return "warning";
+    case "PREPARING":
+      return "secondary";
+    case "IN_TRANSIT":
+    case "DISPATCHED":
+    case "SIGNED_OFF":
+      return "info";
+    case "COMPLETED":
+      return "success";
+    default:
+      return "secondary";
+  }
+}
+
+function formatStatusLabel(status: string): string {
+  return status.replace(/_/g, " ");
+}
 
 export const useDispatchColumns = () => {
   const { t } = useTranslation();
@@ -28,7 +45,11 @@ export const useDispatchColumns = () => {
       cell: ({ row }) => (
         <div>
           <div className="font-medium text-foreground">{row.original.woNumber}</div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">{row.original.woType}</div>
+          {row.original.dispatchNumber && (
+            <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
+              {row.original.dispatchNumber}
+            </div>
+          )}
         </div>
       ),
       meta: { skeleton: <Skeleton className="h-4 w-28" /> },
@@ -44,7 +65,9 @@ export const useDispatchColumns = () => {
       cell: ({ row }) => (
         <div>
           <div className="font-medium text-foreground">{row.original.technicianName}</div>
-          <div className="text-[10px] text-muted-foreground">{row.original.technicianRole}</div>
+          {row.original.technicianRole && (
+            <div className="text-[10px] text-muted-foreground">{row.original.technicianRole}</div>
+          )}
         </div>
       ),
       meta: { skeleton: <Skeleton className="h-4 w-32" /> },
@@ -69,8 +92,8 @@ export const useDispatchColumns = () => {
         <DataGridColumnHeader title={t("common.status", "Status")} column={column} className="text-foreground font-semibold" />
       ),
       cell: ({ row }) => (
-        <Badge variant={statusVariantMap[row.original.status] || "secondary"} appearance="light" className="font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">
-          {row.original.status}
+        <Badge variant={getStatusVariant(row.original.status)} appearance="light" className="font-bold text-[10px] px-2 py-0.5 rounded-full uppercase">
+          {formatStatusLabel(row.original.status)}
         </Badge>
       ),
       meta: { skeleton: <Skeleton className="h-5 w-20 rounded-full" /> },

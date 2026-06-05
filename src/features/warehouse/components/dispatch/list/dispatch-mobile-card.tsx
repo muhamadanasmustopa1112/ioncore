@@ -22,6 +22,12 @@ const statusVariantMap: Record<
   preparing: "secondary",
   dispatched: "info",
   completed: "success",
+  PENDING: "warning",
+  PREPARING: "secondary",
+  IN_TRANSIT: "info",
+  DISPATCHED: "info",
+  SIGNED_OFF: "info",
+  COMPLETED: "success",
 };
 
 const statusBorderMap: Record<string, string> = {
@@ -29,6 +35,12 @@ const statusBorderMap: Record<string, string> = {
   preparing: "border-l-slate-400",
   dispatched: "border-l-blue-500",
   completed: "border-l-emerald-500",
+  PENDING: "border-l-amber-500",
+  PREPARING: "border-l-slate-400",
+  IN_TRANSIT: "border-l-blue-500",
+  DISPATCHED: "border-l-blue-500",
+  SIGNED_OFF: "border-l-blue-500",
+  COMPLETED: "border-l-emerald-500",
 };
 
 const statusIconBgMap: Record<string, string> = {
@@ -36,6 +48,12 @@ const statusIconBgMap: Record<string, string> = {
   preparing: "bg-slate-50 dark:bg-slate-800",
   dispatched: "bg-blue-50 dark:bg-blue-950/40",
   completed: "bg-emerald-50 dark:bg-emerald-950/40",
+  PENDING: "bg-amber-50 dark:bg-amber-950/40",
+  PREPARING: "bg-slate-50 dark:bg-slate-800",
+  IN_TRANSIT: "bg-blue-50 dark:bg-blue-950/40",
+  DISPATCHED: "bg-blue-50 dark:bg-blue-950/40",
+  SIGNED_OFF: "bg-blue-50 dark:bg-blue-950/40",
+  COMPLETED: "bg-emerald-50 dark:bg-emerald-950/40",
 };
 
 const statusIconColorMap: Record<string, string> = {
@@ -43,6 +61,12 @@ const statusIconColorMap: Record<string, string> = {
   preparing: "text-slate-500",
   dispatched: "text-blue-500",
   completed: "text-emerald-500",
+  PENDING: "text-amber-500",
+  PREPARING: "text-slate-500",
+  IN_TRANSIT: "text-blue-500",
+  DISPATCHED: "text-blue-500",
+  SIGNED_OFF: "text-blue-500",
+  COMPLETED: "text-emerald-500",
 };
 
 const statusIcon: Record<string, typeof Package> = {
@@ -50,7 +74,26 @@ const statusIcon: Record<string, typeof Package> = {
   preparing: Wrench,
   dispatched: Truck,
   completed: Package,
+  PENDING: Package,
+  PREPARING: Wrench,
+  IN_TRANSIT: Truck,
+  DISPATCHED: Truck,
+  SIGNED_OFF: Truck,
+  COMPLETED: Package,
 };
+
+function isCompletedStatus(status: string): boolean {
+  return status.toUpperCase() === "COMPLETED" || status === "completed";
+}
+
+function isInTransitStatus(status: string): boolean {
+  const s = status.toUpperCase();
+  return s === "IN_TRANSIT" || s === "DISPATCHED" || s === "SIGNED_OFF" || status === "dispatched";
+}
+
+function isPendingStatus(status: string): boolean {
+  return status.toUpperCase() === "PENDING" || status === "pending";
+}
 
 interface DispatchMobileCardProps {
   item: DispatchRecord;
@@ -130,7 +173,7 @@ export function DispatchMobileCard({
               </Badge>
             </div>
             <div className="text-[10px] text-muted-foreground font-mono mt-1">
-              {item.woType}
+              {item.dispatchNumber ?? item.woType}
             </div>
           </div>
         </div>
@@ -179,11 +222,11 @@ export function DispatchMobileCard({
             <div
               className={cn(
                 "text-sm font-extrabold",
-                item.status === "completed"
+                isCompletedStatus(item.status)
                   ? "text-emerald-600 dark:text-emerald-400"
-                  : item.status === "dispatched"
+                  : isInTransitStatus(item.status)
                     ? "text-blue-600 dark:text-blue-400"
-                    : item.status === "pending"
+                    : isPendingStatus(item.status)
                       ? "text-amber-600 dark:text-amber-400"
                       : "text-foreground"
               )}
@@ -199,9 +242,9 @@ export function DispatchMobileCard({
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-500",
-                item.status === "completed"
+                isCompletedStatus(item.status)
                   ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                  : item.status === "dispatched"
+                  : isInTransitStatus(item.status)
                     ? "bg-gradient-to-r from-blue-500 to-blue-400"
                     : "bg-gradient-to-r from-amber-500 to-amber-400"
               )}

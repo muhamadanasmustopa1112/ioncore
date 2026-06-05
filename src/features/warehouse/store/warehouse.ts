@@ -452,8 +452,14 @@ export const useWarehouseStore = create<WarehouseState>((set) => ({
   stockForm: "new",
   stockSheetOpen: false,
   selectedStock: null,
-  openStockFormSheet: (form) => set((state) => ({ ...state, stockForm: form, stockSheetOpen: true })),
-  closeStockFormSheet: () => set((state) => ({ ...state, stockForm: null, stockSheetOpen: false })),
+  openStockFormSheet: (form) =>
+    set((state) => ({
+      stockForm: form,
+      stockSheetOpen: true,
+      selectedStock: form === "new" ? null : state.selectedStock,
+    })),
+  closeStockFormSheet: () =>
+    set({ stockForm: null, stockSheetOpen: false, selectedStock: null }),
   setSelectedStock: (stock) => set((state) => ({ ...state, selectedStock: stock })),
 
   // Receive

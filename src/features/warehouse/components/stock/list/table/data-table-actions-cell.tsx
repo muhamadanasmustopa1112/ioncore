@@ -57,7 +57,7 @@ export function ActionsCell({ row }: { row: Row<StockLevel> }) {
         <DropdownMenuContent side="bottom" align="end">
           <DropdownMenuItem className="cursor-pointer" onClick={handleEditClick}>
             <RiEditLine />
-            Edit
+            Receive Stock
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer" onClick={handleDetailClick}>
             <RiEyeLine />

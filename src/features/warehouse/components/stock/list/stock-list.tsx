@@ -31,7 +31,10 @@ import {
 } from "@/components/ui/collapsible";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { DUMMY_STOCK_LEVELS } from "@/features/warehouse/data/dummy-subfeatures";
+import {
+  useInfiniteStockLevels,
+  useStockLevels,
+} from "@/features/warehouse/api/get-stock-levels";
 import { useStockColumns } from "./table/columns";
 import { DataTableToolbar } from "./table/data-table-toolbar";
 import { MobileStockHeader } from "./mobile-stock-header";
@@ -57,43 +60,53 @@ export function StockList() {
 
   const columns = useStockColumns();
 
-  const [isLoading] = useState(false);
-
-  const filteredData = useMemo(() => {
-    let result = DUMMY_STOCK_LEVELS;
-
-    if (filter.search) {
-      const searchLower = filter.search.toLowerCase();
-      result = result.filter(
-        (item) =>
-          item.stockItemName.toLowerCase().includes(searchLower) ||
-          item.stockItemSku.toLowerCase().includes(searchLower) ||
-          item.warehouseName.toLowerCase().includes(searchLower)
-      );
-    }
-
-    if (selectedCategory) {
-      result = result.filter(
-        (item) => item.stockItemCategory === selectedCategory
-      );
-    }
-
-    return result;
-  }, [filter.search, selectedCategory]);
-
-  const data = useMemo(() => {
-    const start = (filter.page - 1) * filter.limit;
-    const end = start + filter.limit;
-    return filteredData.slice(start, end);
-  }, [filteredData, filter.page, filter.limit]);
-
-  const metadata = useMemo(
+  const desktopParams = useMemo(
     () => ({
-      total_data: filteredData.length,
-      total_page: Math.ceil(filteredData.length / filter.limit),
+      page: filter.page,
+      limit: filter.limit,
+      search: filter.search || undefined,
     }),
-    [filteredData, filter.limit]
+    [filter.page, filter.limit, filter.search]
   );
+
+  const {
+    data: stockLevelsResponse,
+    isLoading: isDesktopLoading,
+    isFetching: isDesktopFetching,
+  } = useStockLevels({
+    params: desktopParams,
+    queryConfig: { enabled: !isMobile },
+  });
+
+  const {
+    data: infiniteData,
+    isLoading: isMobileLoading,
+    isFetchingNextPage,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteStockLevels({
+    limit: MOBILE_PAGE_SIZE,
+    search: filter.search || undefined,
+    queryConfig: { enabled: isMobile },
+  });
+
+  const tableData = stockLevelsResponse?.data ?? [];
+  const metadata = stockLevelsResponse?.metadata;
+
+  const mobileDataAll = useMemo(
+    () => infiniteData?.pages.flatMap((page) => page.data) ?? [],
+    [infiniteData]
+  );
+
+  const mobileTotalCount =
+    infiniteData?.pages[0]?.metadata.total_data ?? mobileDataAll.length;
+
+  const mobileData = useMemo(() => {
+    if (!selectedCategory) return mobileDataAll;
+    return mobileDataAll.filter(
+      (item) => item.stockItemCategory === selectedCategory
+    );
+  }, [mobileDataAll, selectedCategory]);
 
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string)
@@ -101,8 +114,8 @@ export function StockList() {
 
   const table = useReactTable({
     columns,
-    data,
-    pageCount: metadata.total_page,
+    data: tableData,
+    pageCount: metadata?.total_page ?? 0,
     getRowId: (row: StockLevel) => String(row.id),
     state: {
       pagination: {
@@ -123,35 +136,19 @@ export function StockList() {
     manualPagination: true,
   });
 
-  // Mobile infinite scroll
-  const [visibleCount, setVisibleCount] = useState(MOBILE_PAGE_SIZE);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-
-  const hasMore = visibleCount < filteredData.length;
 
   const handleScroll = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container || isFetchingMore || !hasMore) return;
+    if (!container || isFetchingNextPage || !hasNextPage) return;
 
     const { scrollTop, scrollHeight, clientHeight } = container;
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
 
     if (scrollPercentage > SCROLL_THRESHOLD) {
-      setIsFetchingMore(true);
-      setTimeout(() => {
-        setVisibleCount((prev) =>
-          Math.min(prev + MOBILE_PAGE_SIZE, filteredData.length)
-        );
-        setIsFetchingMore(false);
-      }, 400);
+      void fetchNextPage();
     }
-  }, [isFetchingMore, hasMore, filteredData.length]);
-
-  const mobileData = useMemo(
-    () => filteredData.slice(0, visibleCount),
-    [filteredData, visibleCount]
-  );
+  }, [isFetchingNextPage, hasNextPage, fetchNextPage]);
 
   const handleMobileDetail = useCallback(
     (item: StockLevel) => {
@@ -161,22 +158,17 @@ export function StockList() {
     [setSelectedStock, openStockFormSheet]
   );
 
-  // Reset visible count when search changes
   const handleSearchChange = useCallback(
     (value: string) => {
-      setFilter({ ...filter, search: value });
-      setVisibleCount(MOBILE_PAGE_SIZE);
+      void setFilter({ search: value || null, page: 1 });
+      setSelectedCategory(null);
     },
-    [filter, setFilter]
+    [setFilter]
   );
 
-  const handleCategoryChange = useCallback(
-    (category: string | null) => {
-      setSelectedCategory(category);
-      setVisibleCount(MOBILE_PAGE_SIZE);
-    },
-    []
-  );
+  const handleCategoryChange = useCallback((category: string | null) => {
+    setSelectedCategory(category);
+  }, []);
 
   const searchInput = (
     <div className="relative">
@@ -203,14 +195,12 @@ export function StockList() {
   if (isMobile) {
     return (
       <div className="mt-2 space-y-3 overflow-hidden">
-        {/* KPI Summary + Category Filters */}
         <MobileStockHeader
-          items={DUMMY_STOCK_LEVELS}
+          items={mobileDataAll}
           selectedCategory={selectedCategory}
           onCategoryChange={handleCategoryChange}
         />
 
-        {/* Search Bar */}
         <div className="relative">
           <Search className="text-muted-foreground absolute start-3 top-1/2 size-4 -translate-y-1/2" />
           <Input
@@ -231,10 +221,9 @@ export function StockList() {
           )}
         </div>
 
-        {/* Results Count */}
         <div className="flex items-center justify-between px-0.5">
           <span className="text-[11px] text-muted-foreground font-medium">
-            {filteredData.length} {t("common.items", "items")}
+            {mobileTotalCount} {t("common.items", "items")}
             {selectedCategory && (
               <span className="text-muted-foreground/60">
                 {" "}
@@ -257,7 +246,6 @@ export function StockList() {
           )}
         </div>
 
-        {/* Card List with Infinite Scroll */}
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
@@ -271,22 +259,28 @@ export function StockList() {
             />
           ))}
 
-          {mobileData.length === 0 && !isLoading && (
+          {mobileData.length === 0 && !isMobileLoading && (
             <div className="text-center py-8 text-muted-foreground text-sm">
               {t("warehouse.noStockItems", "No stock items found")}
             </div>
           )}
 
-          {isFetchingMore && (
+          {isMobileLoading && (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+
+          {isFetchingNextPage && (
             <div className="flex items-center justify-center py-3">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           )}
 
-          {!hasMore && mobileData.length > 0 && (
+          {!hasNextPage && mobileData.length > 0 && (
             <div className="text-center py-3 text-[11px] text-muted-foreground">
               {t("common.endOfList", "End of list")} •{" "}
-              {filteredData.length} {t("common.items", "items")}
+              {mobileTotalCount} {t("common.items", "items")}
             </div>
           )}
         </div>
@@ -297,7 +291,7 @@ export function StockList() {
   return (
     <DataGrid
       table={table}
-      recordCount={metadata.total_data}
+      recordCount={metadata?.total_data ?? 0}
       tableLayout={{
         columnsPinnable: true,
         columnsMovable: true,
@@ -305,7 +299,7 @@ export function StockList() {
         columnsResizable: true,
         cellBorder: true,
       }}
-      isLoading={isLoading}
+      isLoading={isDesktopLoading || isDesktopFetching}
     >
       <Card className="mt-[10px]">
         <CardHeader>

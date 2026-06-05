@@ -149,7 +149,7 @@ export interface RetrofitJob {
 
 // ─── Stock Item (catalog entry) ──────────────────────────────────────────────
 
-export type StockItemCategory = "serialized_device" | "cable" | "consumable" | "infrastructure";
+export type StockItemCategory = string;
 export type StockItemType = "serialized" | "cable" | "consumable";
 export type InventoryValuationMethod = "FIFO" | "LIFO";
 
@@ -308,6 +308,7 @@ export interface StockLevel {
   warehouseId: string;
   warehouseName: string;
   warehouseBranch: string;
+  unitCost?: number;
   currentStock: number;
   threshold: number;
   uom: string;
@@ -327,7 +328,18 @@ export interface InventoryValuationConfig {
 
 // ─── Dispatch / WO BOM ───────────────────────────────────────────────────────
 
-export type DispatchStatus = "pending" | "preparing" | "dispatched" | "completed";
+export type DispatchStatus =
+  | "pending"
+  | "preparing"
+  | "dispatched"
+  | "completed"
+  | "IN_TRANSIT"
+  | "PENDING"
+  | "PREPARING"
+  | "DISPATCHED"
+  | "COMPLETED"
+  | "SIGNED_OFF"
+  | string;
 
 export interface DispatchBomItem {
   id: string;
@@ -344,6 +356,7 @@ export interface DispatchBomItem {
 
 export interface DispatchRecord {
   id: string;
+  dispatchNumber?: string;
   woNumber: string;
   woType: string;
   technicianId: string;
@@ -492,9 +505,14 @@ export type { SerializedAssetsListParams, SerializedAssetsListResponse } from ".
 export type { RetrofitsListParams, RetrofitsListResponse } from "./retrofits";
 export type { HandoversListParams, HandoversListResponse } from "./handovers";
 export type { Category, CategoriesListResponse } from "./categories";
-export type { CreateStockItemPayload, StockItemResponse } from "./stock-item";
+export type {
+  CreateStockItemPayload,
+  StockItemResponse,
+  StockItemsListResponse,
+} from "./stock-item";
 export type {
   PurchaseReceiptLineInput,
   CreatePurchaseReceiptRequest,
   PurchaseReceiptResponse,
 } from "./purchase-receipt";
+export type { StockLevelsListParams, StockLevelsListResponse } from "./stock-levels";

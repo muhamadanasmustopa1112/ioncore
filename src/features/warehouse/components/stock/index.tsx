@@ -64,7 +64,7 @@ export function StockListPage() {
             onClick={() => openStockFormSheet("new")}
           >
             <RiAddLine className="size-5" />
-            {t("warehouse.addStockItem", "Add Stock Item")}
+            {t("warehouse.receiveStock", "Receive Stock")}
           </Button>
         </ToolbarActions>
       </Toolbar>

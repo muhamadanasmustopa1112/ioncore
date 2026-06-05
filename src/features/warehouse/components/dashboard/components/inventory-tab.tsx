@@ -14,10 +14,10 @@ import {
 } from "@/components/ui/table";
 import { ShoppingCart, AlertCircle } from "lucide-react";
 import { MobileTableCard } from "./mobile-table-card";
-import type { AssetWithReceivedBy } from "../../../utils/csv-handler";
+import type { LowStockAlertData } from "../../../types";
 
 interface InventoryTabProps {
-  filteredAssets: AssetWithReceivedBy[];
+  filteredAssets: LowStockAlertData[];
   isMobile: boolean;
   onReorder?: (item: { name: string; sku: string }) => void;
 }
