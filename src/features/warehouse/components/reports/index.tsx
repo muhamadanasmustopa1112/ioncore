@@ -7,7 +7,7 @@ import { Toolbar, ToolbarActions, ToolbarHeading, ToolbarTitle } from "@/compone
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { paths } from "@/config/paths";
-import { ReportsList } from "./list/reports-list";
+import { ReportsTabs } from "./reports-tabs";
 
 export function ReportsListPage() {
   const { t } = useTranslation();
@@ -23,6 +23,14 @@ export function ReportsListPage() {
           <ToolbarTitle className={isMobile ? "text-lg font-extrabold tracking-tight" : "text-2xl font-extrabold tracking-tight"}>
             {t("warehouse.reportsTitle", "Reports")}
           </ToolbarTitle>
+          {!isMobile && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {t(
+                "warehouse.reportsSubtitle",
+                "Operational audit trails and reconciliation views across warehouse activity."
+              )}
+            </p>
+          )}
         </ToolbarHeading>
         <ToolbarActions>
           {!isMobile && (
@@ -34,7 +42,7 @@ export function ReportsListPage() {
         </ToolbarActions>
       </Toolbar>
       <div className="flex-1 overflow-auto mt-4">
-        <ReportsList />
+        <ReportsTabs />
       </div>
     </div>
   );
