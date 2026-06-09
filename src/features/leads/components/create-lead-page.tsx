@@ -37,6 +37,7 @@ import type { CustomerStatus } from "@/features/customers/types/customers-api";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { paths } from "@/config/paths";
 import { useCreateLead } from "../api/leads-queries";
+import { getLeadMutationErrorMessage } from "../api/map-lead-mutation-error";
 import type { CustomerSubType, LeadSource, LeadStatus, LeadType } from "../types/leads-api";
 
 const LEAD_TYPES: { value: LeadType; label: string }[] = [
@@ -169,7 +170,7 @@ export function CreateLeadPage() {
       });
       router.push(paths.dashboard.crmAndSales.leads.root.getHref());
     } catch (err) {
-      toast.error((err as any)?.response?.data?.error ?? (err as any)?.response?.data?.message ?? t("common.error"));
+      toast.error(getLeadMutationErrorMessage(err, "common.error"));
     }
   }
 

@@ -14,6 +14,7 @@ import {
   updateLeadCableDistance,
   updateLeadStatus,
 } from "./leads-api";
+import { getLeadMutationErrorMessage } from "./map-lead-mutation-error";
 import { listSales } from "./sales-api";
 import type { SalesListParams } from "./sales-api";
 import type {
@@ -94,7 +95,9 @@ export function useCreateLead() {
       toast.success("Lead created");
       qc.invalidateQueries({ queryKey: leadKeys.all });
     },
-    onError: () => toast.error("Failed to create lead"),
+    onError: (err: unknown) => {
+      toast.error(getLeadMutationErrorMessage(err, "leads.createFailed"));
+    },
   });
 }
 
