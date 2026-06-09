@@ -1531,7 +1531,7 @@
         "branchNamePlaceholder": "cth. Jakarta Pusat Area",
         "branchCode": "Kode Branch",
         "branchCodePlaceholder": "cth. JKT",
-        "codeHintAuto": "— maks 3 karakter, dibuat dari nama",
+        "codeHintAuto": "— maks 3 karakter, dibuat otomatis & unik dari nama",
         "codeHintSystem": "— dibuat oleh sistem",
         "status": "Status",
         "active": "Aktif",
