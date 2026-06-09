@@ -159,6 +159,34 @@ export function useBranchList(
   });
 }
 
+export function useBranchCodesByType(branchType: string) {
+  return useQuery({
+    queryKey: [...branchKeys.list(), "codes-by-type", branchType] as const,
+    queryFn: async () => {
+      const codes: string[] = [];
+      let page = 1;
+      const perPage = 100;
+      let total = Infinity;
+
+      while (codes.length < total) {
+        const res = await getBranchList({
+          page,
+          per_page: perPage,
+          branch_type: branchType,
+        });
+        const branches = res.data?.branches ?? [];
+        total = res.data?.metadata?.total ?? branches.length;
+        codes.push(...branches.map((branch) => branch.code).filter(Boolean));
+        if (branches.length === 0) break;
+        page += 1;
+      }
+
+      return codes;
+    },
+    enabled: !!branchType,
+  });
+}
+
 export interface UseBranchListPaginatedParams {
   page?: number;
   per_page?: number;

@@ -50,7 +50,7 @@ export function BranchFormSheet() {
   }) => {
     const branchPayload = {
       name: formData.name,
-      code: formData.code,
+      ...(isNewMode ? { code: formData.code } : {}),
       is_active: formData.is_active,
       type: formData.type,
       address: formData.address,

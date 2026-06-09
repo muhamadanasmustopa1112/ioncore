@@ -19,60 +19,64 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useBranchStore } from "../../store/branch";
-import { useAreaList, useBranchTree, useRegionalList } from "../../api/branch-queries";
+import { useAreaList, useBranchCodesByType, useRegionalList } from "../../api/branch-queries";
 import { BranchData, BranchLevel, GeographicPolygon } from "../../types";
 import {
   BRANCH_CODE_LENGTH,
   generateUniqueBranchCode,
 } from "../../utils/generate-branch-code";
 
-const branchSchema = z
-  .object({
-    name: z.string().min(1, "Branch name is required"),
-    code: z
-      .string()
-      .max(BRANCH_CODE_LENGTH, `Branch code must be at most ${BRANCH_CODE_LENGTH} characters`)
-      .optional(),
-    type: z.enum(["office", "noc", "warehouse"]),
-    level: z.enum(["regional", "area", "sub_area"]),
-    active: z.boolean(),
-    regionalId: z.string().optional(),
-    areaId: z.string().optional(),
-    address: z.string().optional(),
-    lat: z.number().optional(),
-    long: z.number().optional(),
-    geographic_polygon: z.string().optional().refine((val) => {
-      if (!val) return true;
-      const trimmed = val.trim();
-      if (!trimmed || trimmed === "undefined") return true;
-      try {
-        const parsed = JSON.parse(trimmed);
-        return !!parsed && typeof parsed === "object";
-      } catch {
-        return false;
+function createBranchSchema(requireCode: boolean) {
+  return z
+    .object({
+      name: z.string().min(1, "Branch name is required"),
+      code: requireCode
+        ? z
+            .string()
+            .max(BRANCH_CODE_LENGTH, `Branch code must be at most ${BRANCH_CODE_LENGTH} characters`)
+            .optional()
+        : z.string().optional(),
+      type: z.enum(["office", "noc", "warehouse"]),
+      level: z.enum(["regional", "area", "sub_area"]),
+      active: z.boolean(),
+      regionalId: z.string().optional(),
+      areaId: z.string().optional(),
+      address: z.string().optional(),
+      lat: z.number().optional(),
+      long: z.number().optional(),
+      geographic_polygon: z.string().optional().refine((val) => {
+        if (!val) return true;
+        const trimmed = val.trim();
+        if (!trimmed || trimmed === "undefined") return true;
+        try {
+          const parsed = JSON.parse(trimmed);
+          return !!parsed && typeof parsed === "object";
+        } catch {
+          return false;
+        }
+      }, "Must be valid JSON (GeoJSON coordinate array)"),
+    })
+    .superRefine((data, ctx) => {
+      if ((data.level === "area" || data.level === "sub_area") && !data.regionalId) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Regional (Parent) is required", path: ["regionalId"] });
       }
-    }, "Must be valid JSON (GeoJSON coordinate array)"),
-  })
-  .superRefine((data, ctx) => {
-    if ((data.level === "area" || data.level === "sub_area") && !data.regionalId) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Regional (Parent) is required", path: ["regionalId"] });
-    }
-    if (data.level === "sub_area" && !data.areaId) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Area (Parent) is required", path: ["areaId"] });
-    }
-    if (data.level !== "sub_area") {
-      const code = data.code?.trim() ?? "";
-      if (!code) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Branch code is required",
-          path: ["code"],
-        });
+      if (data.level === "sub_area" && !data.areaId) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Area (Parent) is required", path: ["areaId"] });
       }
-    }
-  });
+      if (requireCode && data.level !== "sub_area") {
+        const code = data.code?.trim() ?? "";
+        if (!code) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Branch code is required",
+            path: ["code"],
+          });
+        }
+      }
+    });
+}
 
-type BranchFormValues = z.infer<typeof branchSchema>;
+type BranchFormValues = z.infer<ReturnType<typeof createBranchSchema>>;
 
 const parseGeographicPolygon = (value?: string) => {
   if (!value) return undefined;
@@ -125,6 +129,12 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const selectedBranch = branchData ?? storedBranch;
   const isEditMode = formMode === "edit";
   const isDetailMode = formMode === "details";
+  const isNewMode = formMode === "new";
+
+  const branchSchema = useMemo(
+    () => createBranchSchema(isNewMode),
+    [isNewMode],
+  );
 
   const defaultValues = useMemo(
     () => ({
@@ -182,20 +192,20 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
 
   const isSubArea = level === "sub_area";
 
-  const { data: allBranches = [] } = useBranchTree();
-  const existingCodes = useMemo(
-    () => allBranches.map((branch) => branch.code),
-    [allBranches],
-  );
+  const { data: sameTypeCodes = [], isFetched: codesLoaded } = useBranchCodesByType(branchType);
 
   useEffect(() => {
-    if (isEditMode || isDetailMode || isSubArea) return;
-    const generated = generateUniqueBranchCode(name, existingCodes);
+    if (isEditMode || isDetailMode || isSubArea || !codesLoaded) return;
+    if (!name.trim()) {
+      setValue("code", "", { shouldValidate: false });
+      return;
+    }
+    const generated = generateUniqueBranchCode(name, sameTypeCodes);
     setValue("code", generated, { shouldValidate: false });
-  }, [name, existingCodes, isSubArea, isEditMode, isDetailMode, setValue]);
+  }, [name, sameTypeCodes, codesLoaded, branchType, isSubArea, isEditMode, isDetailMode, setValue]);
 
-  const { data: regionals = [] } = useRegionalList();
-  const { data: areas = [] } = useAreaList(regionalId);
+  const { data: regionals = [] } = useRegionalList(branchType);
+  const { data: areas = [] } = useAreaList(regionalId, branchType);
 
   const isRegional = level === "regional";
   const isArea = level === "area";
@@ -210,7 +220,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const onFormSubmit = (values: BranchFormValues) => {
     onSubmit?.({
       name: values.name,
-      code: values.code,
+      ...(isNewMode ? { code: values.code } : {}),
       is_active: values.active,
       type: values.type,
       level: values.level,
@@ -333,12 +343,12 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                 </Label>
                 <Input
                   placeholder={t("administration.branch.form.branchCodePlaceholder")}
-                  maxLength={BRANCH_CODE_LENGTH}
+                  {...(isNewMode ? { maxLength: BRANCH_CODE_LENGTH } : {})}
                   {...register("code")}
                   disabled={isDetailMode || isEditMode}
                   className="font-mono uppercase"
                 />
-                {errors.code && (
+                {errors.code && isNewMode && (
                   <p className="text-xs text-destructive">{errors.code.message}</p>
                 )}
               </div>
