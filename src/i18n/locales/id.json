@@ -392,7 +392,9 @@
     "sourceEvent": "Event",
     "sourcePartner": "Partner",
     "sourceCsReferral": "CS Referral",
-    "sourceReferral": "Referral"
+    "sourceReferral": "Referral",
+    "noSalesRepAvailable": "Tidak ada Sales Rep yang tersedia. Silakan pilih cabang lain atau hubungi admin cabang.",
+    "createFailed": "Gagal membuat lead"
   },
   "radius": {
     "dashboardTitle": "DASHBOARD",
@@ -1533,6 +1535,9 @@
         "branchCodePlaceholder": "cth. JKT",
         "codeHintAuto": "— maks 3 karakter, dibuat otomatis & unik dari nama",
         "codeHintSystem": "— dibuat oleh sistem",
+        "duplicateBranchCode": "Kode branch tidak boleh sama. Gunakan kode lain atau ubah nama cabang agar kode otomatis berbeda.",
+        "createFailed": "Gagal menambah cabang",
+        "updateFailed": "Gagal memperbarui cabang",
         "status": "Status",
         "active": "Aktif",
         "inactive": "Nonaktif",

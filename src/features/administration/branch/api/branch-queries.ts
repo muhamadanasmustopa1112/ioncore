@@ -19,6 +19,7 @@ import {
   updateSubArea,
   deleteSubArea,
 } from "./branch-api";
+import { getBranchMutationErrorMessage } from "./map-branch-mutation-error";
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -301,11 +302,9 @@ export function useCreateBranch() {
       qc.invalidateQueries({ queryKey: branchKeys.all });
     },
     onError: (err: unknown) => {
-      const msg =
-        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
-        (err as Error)?.message ??
-        "Failed to create branch";
-      toast.error(msg);
+      toast.error(
+        getBranchMutationErrorMessage(err, "administration.branch.form.createFailed"),
+      );
     },
   });
 }
@@ -337,11 +336,9 @@ export function useUpdateBranch() {
       qc.invalidateQueries({ queryKey: branchKeys.all });
     },
     onError: (err: unknown) => {
-      const msg =
-        (err as { response?: { data?: { error?: string } } })?.response?.data?.error ??
-        (err as Error)?.message ??
-        "Failed to update branch";
-      toast.error(msg);
+      toast.error(
+        getBranchMutationErrorMessage(err, "administration.branch.form.updateFailed"),
+      );
     },
   });
 }
