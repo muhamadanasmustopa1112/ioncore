@@ -19,13 +19,20 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useBranchStore } from "../../store/branch";
-import { useAreaList, useRegionalList } from "../../api/branch-queries";
+import { useAreaList, useBranchTree, useRegionalList } from "../../api/branch-queries";
 import { BranchData, BranchLevel, GeographicPolygon } from "../../types";
+import {
+  BRANCH_CODE_LENGTH,
+  generateUniqueBranchCode,
+} from "../../utils/generate-branch-code";
 
 const branchSchema = z
   .object({
     name: z.string().min(1, "Branch name is required"),
-    code: z.string().optional(),
+    code: z
+      .string()
+      .max(BRANCH_CODE_LENGTH, `Branch code must be at most ${BRANCH_CODE_LENGTH} characters`)
+      .optional(),
     type: z.enum(["office", "noc", "warehouse"]),
     level: z.enum(["regional", "area", "sub_area"]),
     active: z.boolean(),
@@ -52,6 +59,16 @@ const branchSchema = z
     }
     if (data.level === "sub_area" && !data.areaId) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Area (Parent) is required", path: ["areaId"] });
+    }
+    if (data.level !== "sub_area") {
+      const code = data.code?.trim() ?? "";
+      if (!code) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Branch code is required",
+          path: ["code"],
+        });
+      }
     }
   });
 
@@ -165,12 +182,17 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
 
   const isSubArea = level === "sub_area";
 
+  const { data: allBranches = [] } = useBranchTree();
+  const existingCodes = useMemo(
+    () => allBranches.map((branch) => branch.code),
+    [allBranches],
+  );
+
   useEffect(() => {
     if (isEditMode || isDetailMode || isSubArea) return;
-    const firstWord = name.trim().split(/\s+/)[0] ?? "";
-    const generated = firstWord.slice(0, 3).toUpperCase();
+    const generated = generateUniqueBranchCode(name, existingCodes);
     setValue("code", generated, { shouldValidate: false });
-  }, [name, isSubArea, isEditMode, isDetailMode, setValue]);
+  }, [name, existingCodes, isSubArea, isEditMode, isDetailMode, setValue]);
 
   const { data: regionals = [] } = useRegionalList();
   const { data: areas = [] } = useAreaList(regionalId);
@@ -311,10 +333,10 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                 </Label>
                 <Input
                   placeholder={t("administration.branch.form.branchCodePlaceholder")}
-                  {...(!isEditMode && !isDetailMode ? { maxLength: 3 } : {})}
+                  maxLength={BRANCH_CODE_LENGTH}
                   {...register("code")}
                   disabled={isDetailMode || isEditMode}
-                  className="font-mono"
+                  className="font-mono uppercase"
                 />
                 {errors.code && (
                   <p className="text-xs text-destructive">{errors.code.message}</p>

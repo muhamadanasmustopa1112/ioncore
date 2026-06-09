@@ -44,6 +44,7 @@ export function AccountSection({ onPasswordChange }: AccountSectionProps) {
             className="pr-10"
           />
           <Button
+            type="button"
             mode="icon"
             variant="ghost"
             className="absolute end-0.5 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"

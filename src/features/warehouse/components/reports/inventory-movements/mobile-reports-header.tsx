@@ -6,59 +6,65 @@ import {
   ArrowDownUp,
   ArrowLeftRight,
   FileBarChart,
-  Minus,
   PackageCheck,
-  RotateCcw,
   Send,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { StockMovementReport } from "@/features/warehouse/types";
+import type { InventoryMovementItem } from "@/features/warehouse/types/inventory-movements";
 
 interface MobileReportsHeaderProps {
-  items: StockMovementReport[];
+  items: InventoryMovementItem[];
+  totalCount: number;
   selectedType: string | null;
   onTypeChange: (type: string | null) => void;
 }
 
+function bucketMovement(type: string) {
+  const upper = type.toUpperCase();
+  if (upper.includes("DISPATCH") || (upper.includes("OUT") && !upper.includes("IN"))) {
+    return "outbound";
+  }
+  if (
+    upper.includes("RESTOCK") ||
+    upper.includes("RECEIVE") ||
+    (upper.includes("IN") && !upper.includes("OUT"))
+  ) {
+    return "inbound";
+  }
+  if (upper.includes("TRANSFER") || upper.includes("REFURBISH")) return "transfer";
+  if (upper.includes("ADJUST") || upper.includes("OPNAME")) return "adjust";
+  return "other";
+}
+
 export function MobileReportsHeader({
   items,
+  totalCount,
   selectedType,
   onTypeChange,
 }: MobileReportsHeaderProps) {
   const stats = useMemo(() => {
-    const total = items.length;
-    const dispatched = items.filter((i) => i.movementType === "dispatch").length;
-    const received = items.filter(
-      (i) => i.movementType === "receive" || i.movementType === "transfer_in"
-    ).length;
-    const adjusted = items.filter((i) => i.movementType === "adjustment").length;
-    const returned = items.filter((i) => i.movementType === "return").length;
-    const transferred = items.filter(
-      (i) => i.movementType === "transfer_out"
-    ).length;
-    const totalQty = items.reduce((sum, i) => sum + i.quantity, 0);
+    const buckets = { outbound: 0, inbound: 0, transfer: 0, adjust: 0, other: 0 };
+    let totalQty = 0;
 
-    return { total, dispatched, received, adjusted, returned, transferred, totalQty };
+    for (const item of items) {
+      buckets[bucketMovement(item.movement_type)] += 1;
+      totalQty += item.quantity;
+    }
+
+    return { ...buckets, totalQty };
   }, [items]);
 
   const movementTypes = useMemo(() => {
-    const set = new Set(items.map((i) => i.movementType));
-    return Array.from(set);
+    const set = new Set(items.map((i) => i.movement_type));
+    return Array.from(set).sort();
   }, [items]);
 
-  const typeLabels: Record<string, string> = {
-    dispatch: "Dispatch",
-    receive: "Receive",
-    transfer_in: "Transfer In",
-    transfer_out: "Transfer Out",
-    adjustment: "Adjustment",
-    return: "Return",
-  };
+  const pipelineTotal =
+    stats.outbound + stats.inbound + stats.transfer + stats.adjust + stats.other || 1;
 
   return (
     <div className="space-y-3">
-      {/* KPI Grid */}
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-2.5">
           <div className="flex items-center gap-1.5 mb-1">
@@ -67,9 +73,7 @@ export function MobileReportsHeader({
               Total
             </span>
           </div>
-          <div className="text-lg font-extrabold text-foreground">
-            {stats.total}
-          </div>
+          <div className="text-lg font-extrabold text-foreground">{totalCount}</div>
           <div className="text-[9px] text-muted-foreground">movements</div>
         </div>
 
@@ -77,40 +81,29 @@ export function MobileReportsHeader({
           <div className="flex items-center gap-1.5 mb-1">
             <Send className="size-3.5 text-blue-500" />
             <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-              Dispatched
+              Outbound
             </span>
           </div>
           <div className="text-lg font-extrabold text-blue-600 dark:text-blue-400">
-            {stats.dispatched}
+            {stats.outbound}
           </div>
-          <div className="text-[9px] text-muted-foreground">
-            {stats.total > 0
-              ? Math.round((stats.dispatched / stats.total) * 100)
-              : 0}
-            % of total
-          </div>
+          <div className="text-[9px] text-muted-foreground">in view</div>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-2.5">
           <div className="flex items-center gap-1.5 mb-1">
             <PackageCheck className="size-3.5 text-emerald-500" />
             <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-              Received
+              Inbound
             </span>
           </div>
           <div className="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
-            {stats.received}
+            {stats.inbound}
           </div>
-          <div className="text-[9px] text-muted-foreground">
-            {stats.total > 0
-              ? Math.round((stats.received / stats.total) * 100)
-              : 0}
-            % of total
-          </div>
+          <div className="text-[9px] text-muted-foreground">in view</div>
         </div>
       </div>
 
-      {/* Movement Pipeline Bar */}
       <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-2.5 overflow-hidden">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
@@ -122,73 +115,59 @@ export function MobileReportsHeader({
           <div className="flex items-center gap-1.5">
             <Settings className="size-3 text-red-500" />
             <span className="text-[10px] text-muted-foreground">
-              {stats.adjusted} Adjusted
+              {stats.adjust} Adjusted
             </span>
           </div>
         </div>
         <div className="flex h-2 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
-          {stats.dispatched > 0 && (
+          {stats.outbound > 0 && (
             <div
               className="bg-blue-500 transition-all"
-              style={{
-                width: `${(stats.dispatched / stats.total) * 100}%`,
-              }}
+              style={{ width: `${(stats.outbound / pipelineTotal) * 100}%` }}
             />
           )}
-          {stats.received > 0 && (
+          {stats.inbound > 0 && (
             <div
               className="bg-emerald-500 transition-all"
-              style={{
-                width: `${(stats.received / stats.total) * 100}%`,
-              }}
+              style={{ width: `${(stats.inbound / pipelineTotal) * 100}%` }}
             />
           )}
-          {stats.transferred > 0 && (
+          {stats.transfer > 0 && (
             <div
               className="bg-amber-500 transition-all"
-              style={{
-                width: `${(stats.transferred / stats.total) * 100}%`,
-              }}
+              style={{ width: `${(stats.transfer / pipelineTotal) * 100}%` }}
             />
           )}
-          {stats.adjusted > 0 && (
+          {stats.adjust > 0 && (
             <div
               className="bg-red-500 transition-all"
-              style={{
-                width: `${(stats.adjusted / stats.total) * 100}%`,
-              }}
+              style={{ width: `${(stats.adjust / pipelineTotal) * 100}%` }}
             />
           )}
-          {stats.returned > 0 && (
+          {stats.other > 0 && (
             <div
               className="bg-slate-400 transition-all"
-              style={{
-                width: `${(stats.returned / stats.total) * 100}%`,
-              }}
+              style={{ width: `${(stats.other / pipelineTotal) * 100}%` }}
             />
           )}
         </div>
         <div className="flex items-center justify-between mt-1.5">
           <span className="text-[9px] text-muted-foreground">
-            Net qty: {stats.totalQty > 0 ? "+" : ""}
-            {stats.totalQty.toLocaleString()}
+            Qty in view: {stats.totalQty.toLocaleString()}
           </span>
           <span className="text-[9px] text-muted-foreground">
-            {stats.total} total movements
+            {items.length} loaded
           </span>
         </div>
       </div>
 
-      {/* Type Filter Chips */}
       <div className="flex items-center gap-1.5 flex-wrap">
         <Button
           variant={selectedType === null ? "primary" : "outline"}
           size="sm"
           className={cn(
             "h-7 rounded-full text-[11px] font-semibold px-3 shrink-0",
-            selectedType === null
-              ? ""
-              : "border-slate-200 dark:border-slate-700"
+            selectedType === null ? "" : "border-slate-200 dark:border-slate-700"
           )}
           onClick={() => onTypeChange(null)}
         >
@@ -202,13 +181,11 @@ export function MobileReportsHeader({
             size="sm"
             className={cn(
               "h-7 rounded-full text-[11px] font-semibold px-3 shrink-0",
-              selectedType === type
-                ? ""
-                : "border-slate-200 dark:border-slate-700"
+              selectedType === type ? "" : "border-slate-200 dark:border-slate-700"
             )}
             onClick={() => onTypeChange(type)}
           >
-            {typeLabels[type] || type.replace("_", " ")}
+            {type.replace(/_/g, " ")}
           </Button>
         ))}
       </div>

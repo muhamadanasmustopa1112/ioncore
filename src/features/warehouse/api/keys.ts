@@ -23,4 +23,12 @@ export const WAREHOUSE_KEYS = {
     [...WAREHOUSE_KEYS.all(), "OPNAMES", params] as const,
   returns: (params?: Record<string, unknown>) =>
     [...WAREHOUSE_KEYS.all(), "RETURNS", params] as const,
+  inventoryMovements: (params?: Record<string, unknown>) =>
+    [...WAREHOUSE_KEYS.all(), "INVENTORY_MOVEMENTS", params] as const,
+  dispatchReports: (params?: Record<string, unknown>) =>
+    [...WAREHOUSE_KEYS.all(), "DISPATCH_REPORTS", params] as const,
+  thresholdDashboard: (params?: Record<string, unknown>) =>
+    [...WAREHOUSE_KEYS.all(), "THRESHOLD_DASHBOARD", params] as const,
+  opnameDiscrepancies: (params?: Record<string, unknown>) =>
+    [...WAREHOUSE_KEYS.all(), "OPNAME_DISCREPANCIES", params] as const,
 };
