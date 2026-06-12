@@ -3,7 +3,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Bell,
+  Check,
   ChevronDown,
+  Loader2,
   LogOut,
   Moon,
   Search,
@@ -49,7 +51,7 @@ export function HeaderToolbar() {
   const router = useRouter();
 
   const { user, rawUser, setProfile } = useAuthStore();
-  const { mutate: setActiveBranch } = useSetActiveBranch();
+  const { mutate: setActiveBranch, isPending: isSwitchingBranch } = useSetActiveBranch();
 
   const shouldFetchProfile = !user;
   const { data: meResponse } = useMyProfile(shouldFetchProfile);
@@ -75,7 +77,17 @@ export function HeaderToolbar() {
     if (!user) return "";
     return (user.primaryRole || "USER").toUpperCase();
   }, [user]);
-  const displayBranch = user?.primaryBranch || "";
+  const branches = rawUser?.branches ?? [];
+  const canSwitchBranch = branches.length > 1;
+
+  const displayBranch = useMemo(() => {
+    const activeId = rawUser?.active_branch_id;
+    const activeBranch = activeId
+      ? branches.find((b) => b.id === activeId)
+      : undefined;
+    return activeBranch?.name || activeBranch?.code || user?.primaryBranch || "";
+  }, [rawUser?.active_branch_id, branches, user?.primaryBranch]);
+
   const initials = user?.avatarInitials || "U";
 
   return (
@@ -99,29 +111,46 @@ export function HeaderToolbar() {
       <div className="flex items-center gap-3">
         {/* Branch Selector */}
         {!isMobile && displayBranch && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="gap-2 bg-muted/40 hover:bg-muted/60 transition-colors h-10 px-4 rounded-lg hidden md:flex font-medium text-muted-foreground">
-                {displayBranch}
-                <ChevronDown className="size-4 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64">
-              {rawUser?.branches?.length ? (
-                rawUser.branches.map((b) => (
-                  <DropdownMenuItem
-                    key={b.id}
-                    className={b.id === rawUser.active_branch_id ? "font-semibold" : ""}
-                    onClick={() => setActiveBranch({ branch_id: b.id })}
-                  >
-                    {b.name || b.code || b.id}
-                  </DropdownMenuItem>
-                ))
-              ) : (
-                <DropdownMenuItem className="font-semibold">{displayBranch}</DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          canSwitchBranch ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  disabled={isSwitchingBranch}
+                  className="gap-2 bg-muted/40 hover:bg-muted/60 transition-colors h-10 px-4 rounded-lg hidden md:flex font-medium text-muted-foreground"
+                >
+                  {isSwitchingBranch ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : null}
+                  {displayBranch}
+                  <ChevronDown className="size-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                {branches.map((b) => {
+                  const isActive = b.id === rawUser?.active_branch_id;
+                  return (
+                    <DropdownMenuItem
+                      key={b.id}
+                      disabled={isSwitchingBranch || isActive}
+                      className={isActive ? "font-semibold" : ""}
+                      onClick={() => {
+                        if (isActive) return;
+                        setActiveBranch({ branch_id: b.id });
+                      }}
+                    >
+                      <span className="flex-1">{b.name || b.code || b.id}</span>
+                      {isActive && <Check className="size-4 text-primary" />}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <span className="hidden md:inline-flex items-center h-10 px-4 rounded-lg bg-muted/40 text-sm font-medium text-muted-foreground">
+              {displayBranch}
+            </span>
+          )
         )}
 
         {/* Notif / Messages */}
