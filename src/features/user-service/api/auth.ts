@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { services } from "@/config/constants";
+import { useAuthStore } from "@/store/auth-store";
+import { persistActiveBranchId } from "../utils";
 import { userServiceApi } from "./client";
 import { userServiceKeys } from "./keys";
 import type {
@@ -183,7 +186,24 @@ export const useSetActiveBranch = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: SetActiveBranchRequest) => setActiveBranch(payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: userServiceKeys.me() }),
+    onSuccess: (resp, variables) => {
+      const updatedUser = resp.data;
+      if (updatedUser) {
+        useAuthStore.getState().setProfile(updatedUser);
+      }
+      const branchId = updatedUser?.active_branch_id ?? variables.branch_id;
+      if (branchId) {
+        persistActiveBranchId(branchId);
+      }
+      void qc.invalidateQueries({ queryKey: userServiceKeys.me() });
+      toast.success("Active branch updated");
+    },
+    onError: (err: unknown) => {
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data
+          ?.message ?? "Failed to switch branch";
+      toast.error(message);
+    },
   });
 };
 

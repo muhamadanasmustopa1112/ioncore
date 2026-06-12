@@ -35,3 +35,11 @@ export function persistAuthPayload(payload: AuthPayload) {
     setCookie(auth.active_branch_id, activeBranch, refreshExp);
   }
 }
+
+export function persistActiveBranchId(branchId: string, expiresAt?: Date) {
+  setCookie(
+    auth.active_branch_id,
+    branchId,
+    expiresAt ?? new Date(Date.now() + 30 * DAY_MS),
+  );
+}
