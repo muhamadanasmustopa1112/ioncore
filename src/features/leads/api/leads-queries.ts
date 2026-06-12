@@ -19,6 +19,7 @@ import { listUsers } from "@/features/user-service/api/users";
 import { userServiceKeys } from "@/features/user-service/api/keys";
 import type { AuthUser } from "@/features/user-service/types";
 import { normalizePermissionName } from "@/lib/permission-aliases";
+import { isNonCriticalQueryError } from "@/lib/query-error";
 import { sendNotification } from "@/features/administration/notification/api/send-notification";
 import { getLeadMutationErrorMessage } from "./map-lead-mutation-error";
 import { listSales } from "./sales-api";
@@ -122,12 +123,29 @@ export function useMyLeads(page = 1, per_page = 25) {
   });
 }
 
+const emptyLeadList = (params: LeadListParams) => ({
+  leads: [] as LeadDto[],
+  metadata: {
+    page: params.page ?? 1,
+    per_page: params.per_page ?? 25,
+    total: 0,
+  },
+});
+
 export function useAdminLeads(params: LeadListParams = {}, enabled = true) {
   return useQuery({
     queryKey: leadKeys.list(params),
-    queryFn: async () => (await listLeadsAdmin(params)).data,
+    queryFn: async () => {
+      try {
+        return (await listLeadsAdmin(params)).data;
+      } catch (error) {
+        if (isNonCriticalQueryError(error)) return emptyLeadList(params);
+        throw error;
+      }
+    },
     placeholderData: (prev) => prev,
     enabled,
+    meta: { suppressGlobalError: true },
   });
 }
 
@@ -145,9 +163,17 @@ export function useAdminLeadsByBranches(
   const queries = useQueries({
     queries: branchIds.map((branch_id) => ({
       queryKey: leadKeys.list({ ...fetchParams, branch_id }),
-      queryFn: async () => (await listLeadsAdmin({ ...fetchParams, branch_id })).data,
+      queryFn: async () => {
+        try {
+          return (await listLeadsAdmin({ ...fetchParams, branch_id })).data;
+        } catch (error) {
+          if (isNonCriticalQueryError(error)) return emptyLeadList(fetchParams);
+          throw error;
+        }
+      },
       enabled: enabled && branchIds.length > 0,
       placeholderData: (prev: Awaited<ReturnType<typeof listLeadsAdmin>>["data"]) => prev,
+      meta: { suppressGlobalError: true },
     })),
   });
 

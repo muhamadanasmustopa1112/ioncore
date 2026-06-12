@@ -44,6 +44,11 @@ export interface LeadDto {
   referrer_name?: string | null;
   assigned_sales_id: string | null;
   assigned_sales_name?: string | null;
+  sales_name?: string | null;
+  nik?: string | null;
+  contact_person?: string | null;
+  phone_number?: string | null;
+  address?: string | null;
   branch_id: string;
   branch_name?: string | null;
   status: LeadStatus;
