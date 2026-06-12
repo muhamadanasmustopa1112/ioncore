@@ -44,3 +44,13 @@ export type RegisterDeviceTokenResponse = {
   message: string;
   error?: string;
 };
+
+export type SendNotificationPayload = {
+  body: string;
+  data: {
+    deeplink: string;
+  };
+  is_send_push_notif: boolean;
+  title: string;
+  user_id: string;
+};

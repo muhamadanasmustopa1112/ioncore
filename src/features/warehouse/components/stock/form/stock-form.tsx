@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useCreatePurchaseReceipt } from "@/features/warehouse/api/post-purchase-receipt";
 import { useStockItems } from "@/features/warehouse/api/get-stock-items";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
-import type { StockLevel } from "@/features/warehouse/types";
+import type { StockItemResponse } from "@/features/warehouse/types/stock-item";
 import { toast } from "sonner";
 
 const purchaseReceiptSchema = z.object({
@@ -55,14 +55,12 @@ function getDefaultFormValues(): PurchaseReceiptFormValues {
 
 function getInitialFormValues(
   mode: "new" | "edit" | "details",
-  selectedStock: StockLevel | null
+  selectedStockItem: StockItemResponse | null
 ): PurchaseReceiptFormValues {
-  if (mode === "edit" && selectedStock) {
+  if (mode === "edit" && selectedStockItem) {
     return {
       ...getDefaultFormValues(),
-      stock_item_id: Number(selectedStock.stockItemId),
-      warehouse_id: Number(selectedStock.warehouseId),
-      threshold: selectedStock.threshold,
+      stock_item_id: selectedStockItem.id,
       quantity: 1,
     };
   }
@@ -100,12 +98,14 @@ interface StockItemFormProps {
 export const StockItemForm = forwardRef<StockItemFormRef, StockItemFormProps>(
   ({ onSuccess, mode }, ref) => {
     const { t } = useTranslation();
-    const { selectedStock } = useWarehouseStore();
+    const { selectedStockItem: storeSelectedStockItem } = useWarehouseStore();
     const { mutate: createPurchaseReceipt, isPending } = useCreatePurchaseReceipt();
-    const { data: stockItemsResponse } = useStockItems();
+    const { data: stockItemsResponse } = useStockItems({
+      params: { page: 1, limit: 100 },
+    });
     const stockItems = stockItemsResponse?.data ?? [];
 
-    const isEditMode = mode === "edit" && !!selectedStock;
+    const isEditMode = mode === "edit" && !!storeSelectedStockItem;
 
     const {
       register,
@@ -114,19 +114,20 @@ export const StockItemForm = forwardRef<StockItemFormRef, StockItemFormProps>(
       formState: { errors },
     } = useForm<PurchaseReceiptFormValues>({
       resolver: zodResolver(purchaseReceiptSchema),
-      defaultValues: getInitialFormValues(mode, selectedStock),
+      defaultValues: getInitialFormValues(mode, storeSelectedStockItem),
     });
 
     const selectedStockItemId = watch("stock_item_id");
 
-    const selectedStockItem = useMemo(
+    const matchedStockItem = useMemo(
       () => stockItems.find((item) => item.id === selectedStockItemId),
       [stockItems, selectedStockItemId]
     );
 
     const requiresSerial =
-      selectedStockItem?.requires_serial_at_intake ??
-      selectedStock?.stockItemType === "serialized";
+      storeSelectedStockItem?.requires_serial_at_intake ??
+      matchedStockItem?.requires_serial_at_intake ??
+      false;
 
     useImperativeHandle(ref, () => ({
       submit: () => handleSubmit(onSubmit)(),
@@ -162,66 +163,50 @@ export const StockItemForm = forwardRef<StockItemFormRef, StockItemFormProps>(
 
     return (
       <div className="space-y-5 px-1 py-2 pb-6">
-        {isEditMode && selectedStock ? (
+        {isEditMode && storeSelectedStockItem ? (
           <>
             <input type="hidden" {...register("stock_item_id", { valueAsNumber: true })} />
-            <input type="hidden" {...register("warehouse_id", { valueAsNumber: true })} />
 
             <ReadOnlyField label={t("warehouse.stockItem", "Stock Item")}>
               <p className="text-sm font-medium text-foreground">
-                {selectedStock.stockItemName}
+                {storeSelectedStockItem.name}
               </p>
               <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
-                SKU: {selectedStock.stockItemSku}
-              </p>
-            </ReadOnlyField>
-
-            <ReadOnlyField label={t("warehouse.warehouse", "Warehouse")}>
-              <p className="text-sm font-medium text-foreground">
-                {selectedStock.warehouseName}
-              </p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">
-                {selectedStock.warehouseBranch}
+                SKU: {storeSelectedStockItem.sku} • {storeSelectedStockItem.category_code}
               </p>
             </ReadOnlyField>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <ReadOnlyField label={t("warehouse.stockStatus", "Current Stock")}>
-                <p className="text-sm font-bold text-foreground">
-                  {selectedStock.currentStock.toLocaleString()}{" "}
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {selectedStock.uom}
-                  </span>
-                </p>
-              </ReadOnlyField>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  {t("warehouse.warehouse", "Warehouse")} *
+                </label>
+                <select
+                  {...register("warehouse_id", { valueAsNumber: true })}
+                  className="flex w-full bg-background border border-input h-10 px-3 rounded-md text-xs text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring"
+                >
+                  {WAREHOUSE_OPTIONS.map((wh) => (
+                    <option key={wh.id} value={wh.id}>{wh.name}</option>
+                  ))}
+                </select>
+                {errors.warehouse_id && (
+                  <p className="text-[10px] text-destructive font-bold">{errors.warehouse_id.message}</p>
+                )}
+              </div>
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  {t("warehouse.thresholdLabel", "Threshold")} *
+                  {t("warehouse.receiveQuantity", "Receive Quantity")} *
                 </label>
                 <Input
                   type="number"
-                  {...register("threshold", { valueAsNumber: true })}
+                  {...register("quantity", { valueAsNumber: true })}
                   className="text-xs h-10"
                 />
-                {errors.threshold && (
-                  <p className="text-[10px] text-destructive font-bold">{errors.threshold.message}</p>
+                {errors.quantity && (
+                  <p className="text-[10px] text-destructive font-bold">{errors.quantity.message}</p>
                 )}
               </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                {t("warehouse.receiveQuantity", "Receive Quantity")} *
-              </label>
-              <Input
-                type="number"
-                {...register("quantity", { valueAsNumber: true })}
-                className="text-xs h-10"
-              />
-              {errors.quantity && (
-                <p className="text-[10px] text-destructive font-bold">{errors.quantity.message}</p>
-              )}
             </div>
           </>
         ) : (

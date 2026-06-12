@@ -36,7 +36,7 @@ import { BranchCombobox } from "@/features/administration/branch/components/bran
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { useReferrerCustomers } from "@/features/customers/api/customers-queries";
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
-import { useCreateLead } from "../api/leads-queries";
+import { useCreateLead, useSalesAdminUsers } from "../api/leads-queries";
 import type {
   CreateLeadPayload,
   CustomerSubType,
@@ -97,6 +97,7 @@ function resetState() {
     source: "referral" as LeadSource,
     referrerCustomerId: "",
     branchId: "",
+    assignedSalesId: "",
     nik: "",
     lat: INSTALL_DEFAULT[0],
     lng: INSTALL_DEFAULT[1],
@@ -112,6 +113,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
   const [source, setSource] = useState<LeadSource>(initial.source);
   const [referrerCustomerId, setReferrerCustomerId] = useState(initial.referrerCustomerId);
   const [branchId, setBranchId] = useState(initial.branchId);
+  const [assignedSalesId, setAssignedSalesId] = useState(initial.assignedSalesId);
   const [nik, setNik] = useState(initial.nik);
   const [lat, setLat] = useState(initial.lat);
   const [lng, setLng] = useState(initial.lng);
@@ -129,6 +131,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
     source === "referral" ? { search: customerSearch || undefined, size: 500, status: "active" } : {}
   );
   const createLead = useCreateLead();
+  const { users: salesAdminUsers, isLoading: salesAdminsLoading } = useSalesAdminUsers(branchId || undefined);
 
   const activeBranches = useMemo(
     () => branches.filter((b) => {
@@ -163,6 +166,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
       setSource(s.source);
       setReferrerCustomerId(s.referrerCustomerId);
       setBranchId(s.branchId);
+      setAssignedSalesId(s.assignedSalesId);
       setNik(s.nik);
       setLat(s.lat);
       setLng(s.lng);
@@ -187,6 +191,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
       status: "new",
       ...(nik.trim() ? { nik: nik.trim() } : {}),
       ...(pinMoved ? { latitude: lat, longitude: lng } : {}),
+      ...(assignedSalesId ? { assigned_sales_id: assignedSalesId } : {}),
     };
     createLead.mutate(payload, { onSuccess: () => handleOpenChange(false) });
   };
@@ -366,13 +371,45 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                 <BranchCombobox
                   branches={activeBranches}
                   value={branchId}
-                  onValueChange={setBranchId}
+                  onValueChange={(v) => {
+                    setBranchId(v);
+                    setAssignedSalesId("");
+                  }}
                   branchType={branchType}
                   onTypeChange={setBranchType}
                   onSearchChange={setSearch}
                   isLoading={branchesLoading}
                   className="w-full"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs">{t("leads.assignedSales", "Assigned Sales")}</Label>
+                <Select
+                  value={assignedSalesId || "none"}
+                  onValueChange={(v) => setAssignedSalesId(v === "none" ? "" : v)}
+                  disabled={!branchId || salesAdminsLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        !branchId
+                          ? t("leads.selectBranchFirst", "Select branch first")
+                          : salesAdminsLoading
+                            ? t("common.loading")
+                            : t("leads.selectAssignedSales", "Select sales admin")
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t("leads.noAssignedSales", "Not assigned")}</SelectItem>
+                    {salesAdminUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
             </div>

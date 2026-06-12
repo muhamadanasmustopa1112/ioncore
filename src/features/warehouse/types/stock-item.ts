@@ -14,6 +14,12 @@ export interface CreateStockItemPayload {
   valuation_method: string;
 }
 
+export interface StockItemsListParams {
+  page: number;
+  limit: number;
+  search?: string;
+}
+
 export interface StockItemResponse {
   id: number;
   name: string;
@@ -21,6 +27,8 @@ export interface StockItemResponse {
   brand: string;
   model: string;
   category_id: number;
+  category_code: string;
+  item_type: number;
   unit: string;
   active: boolean;
   valuation_method: string;

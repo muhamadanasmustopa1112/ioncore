@@ -3,14 +3,16 @@
 import { useMemo, useState } from "react";
 import { useWarehouseStore } from "../../../store/warehouse";
 import { useDashboardSummary } from "../../../api/get-dashboard-summary";
+import { useStockItems } from "../../../api/get-stock-items";
 import { useSerializedAssets } from "../../../api/get-serialized-assets";
 import { useRetrofits } from "../../../api/get-retrofits";
 import { useHandovers } from "../../../api/get-handovers";
-import { DUMMY_METRICS, DUMMY_ONT_DISTRIBUTION, DUMMY_BRANCH_STOCK_LEVELS, DUMMY_LOW_STOCK_ALERTS } from "../../../data/dummy-warehouse";
+import { DUMMY_METRICS, DUMMY_ONT_DISTRIBUTION, DUMMY_BRANCH_STOCK_LEVELS } from "../../../data/dummy-warehouse";
 import type { DashboardTab } from "../types";
-import type { WarehouseMetrics, OntDistributionData, BranchStockLevelData, LowStockAlertData, WarehouseAsset, RetrofitJob, WorkOrder } from "../../../types";
+import type { WarehouseMetrics, OntDistributionData, BranchStockLevelData, WarehouseAsset, RetrofitJob, WorkOrder } from "../../../types";
 
 const ASSETS_PAGE_SIZE = 10;
+const INVENTORY_PAGE_SIZE = 20;
 
 export function useDashboard() {
   const {
@@ -32,7 +34,6 @@ export function useDashboard() {
   const metrics: WarehouseMetrics = dashboardResponse?.data?.metrics ?? DUMMY_METRICS;
   const ontDistribution: OntDistributionData[] = dashboardResponse?.data?.ontDistribution ?? DUMMY_ONT_DISTRIBUTION;
   const branchStockLevels: BranchStockLevelData[] = dashboardResponse?.data?.branchStockLevels ?? DUMMY_BRANCH_STOCK_LEVELS;
-  const lowStockAlerts: LowStockAlertData[] = dashboardResponse?.data?.lowStockAlerts ?? DUMMY_LOW_STOCK_ALERTS;
 
   const [activeTab, setActiveTab] = useState<DashboardTab>("inventory");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -40,6 +41,23 @@ export function useDashboard() {
   const [assetsPage, setAssetsPage] = useState(1);
   const [retrofitsPage, setRetrofitsPage] = useState(1);
   const [handoversPage, setHandoversPage] = useState(1);
+
+  const inventoryParams = useMemo(
+    () => ({
+      page: 1,
+      limit: INVENTORY_PAGE_SIZE,
+      search: activeTab === "inventory" && searchQuery ? searchQuery : undefined,
+    }),
+    [activeTab, searchQuery]
+  );
+
+  const { data: stockItemsResponse, isLoading: isStockItemsLoading } = useStockItems({
+    params: inventoryParams,
+    queryConfig: { enabled: activeTab === "inventory" },
+  });
+
+  const stockItems = stockItemsResponse?.data ?? [];
+  const stockItemsMetadata = stockItemsResponse?.metadata;
 
   const serializedAssetsParams = useMemo(() => ({
     page: assetsPage,
@@ -132,11 +150,6 @@ export function useDashboard() {
     });
   }, [retrofitsFromApi, retrofitJobs, searchQuery]);
 
-  const filteredLowStockAlerts = lowStockAlerts.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.sku.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const handleTabChange = (tab: DashboardTab) => {
     setActiveTab(tab);
     setSearchQuery("");
@@ -155,8 +168,10 @@ export function useDashboard() {
     metrics,
     ontDistribution,
     branchStockLevels,
-    lowStockAlerts,
-    filteredLowStockAlerts,
+    stockItems,
+    stockItemsMetadata,
+    filteredStockItems: stockItems,
+    isStockItemsLoading,
     isLoading: isDashboardLoading,
     filteredAssets,
     filteredWorkOrders,

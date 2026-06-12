@@ -8,7 +8,8 @@ export const WAREHOUSE_KEYS = {
   handovers: (params?: Record<string, unknown>) =>
     [...WAREHOUSE_KEYS.all(), "HANDOVERS", params] as const,
   categories: () => [...WAREHOUSE_KEYS.all(), "CATEGORIES"] as const,
-  stockItems: () => [...WAREHOUSE_KEYS.all(), "STOCK_ITEMS"] as const,
+  stockItems: (params?: Record<string, unknown>) =>
+    [...WAREHOUSE_KEYS.all(), "STOCK_ITEMS", params] as const,
   stockLevels: (params?: Record<string, unknown>) =>
     [...WAREHOUSE_KEYS.all(), "STOCK_LEVELS", params] as const,
   dispatches: (params?: Record<string, unknown>) =>

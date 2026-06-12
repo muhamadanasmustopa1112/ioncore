@@ -101,7 +101,7 @@ const NewTransferForm = forwardRef<
   const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const { data: stockItemsResponse, isLoading: isStockItemsLoading } =
-    useStockItems();
+    useStockItems({ params: { page: 1, limit: 100 } });
   const stockItems = stockItemsResponse?.data ?? [];
   const { mutate: createTransfer, isPending } = useCreateTransfer({
     mutationConfig: { onSuccess: () => onSuccess() },

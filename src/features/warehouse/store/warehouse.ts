@@ -13,6 +13,7 @@ import {
   OpnameItemCount,
 } from "../types";
 import { AssetWithReceivedBy } from "../utils/csv-handler";
+import type { StockItemResponse } from "../types/stock-item";
 import {
   DUMMY_STOCK_LEVELS,
   DUMMY_DISPATCHES,
@@ -255,10 +256,10 @@ interface WarehouseState {
   updateThreshold: (id: string, threshold: number) => void;
   stockForm: "new" | "edit" | "details" | null;
   stockSheetOpen: boolean;
-  selectedStock: StockLevel | null;
+  selectedStockItem: StockItemResponse | null;
   openStockFormSheet: (form: "new" | "edit" | "details" | null) => void;
   closeStockFormSheet: () => void;
-  setSelectedStock: (stock: StockLevel | null) => void;
+  setSelectedStockItem: (stockItem: StockItemResponse | null) => void;
 
   // Receive (sub-feature - reuses StockLevel data)
   receiveForm: "new" | "edit" | "details" | null;
@@ -451,16 +452,17 @@ export const useWarehouseStore = create<WarehouseState>((set) => ({
     })),
   stockForm: "new",
   stockSheetOpen: false,
-  selectedStock: null,
+  selectedStockItem: null,
   openStockFormSheet: (form) =>
     set((state) => ({
       stockForm: form,
       stockSheetOpen: true,
-      selectedStock: form === "new" ? null : state.selectedStock,
+      selectedStockItem: form === "new" ? null : state.selectedStockItem,
     })),
   closeStockFormSheet: () =>
-    set({ stockForm: null, stockSheetOpen: false, selectedStock: null }),
-  setSelectedStock: (stock) => set((state) => ({ ...state, selectedStock: stock })),
+    set({ stockForm: null, stockSheetOpen: false, selectedStockItem: null }),
+  setSelectedStockItem: (stockItem) =>
+    set((state) => ({ ...state, selectedStockItem: stockItem })),
 
   // Receive
   receiveForm: "new",

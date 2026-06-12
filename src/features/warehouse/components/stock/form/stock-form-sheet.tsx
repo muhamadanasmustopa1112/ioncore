@@ -7,11 +7,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
 import { StockItemForm, type StockItemFormRef } from "./stock-form";
-import { StockLevelDetail } from "./stock-level-detail";
+import { StockItemDetail } from "./stock-item-detail";
 
 export function StockFormSheet() {
   const { t } = useTranslation();
-  const { stockForm, stockSheetOpen, selectedStock, closeStockFormSheet } = useWarehouseStore();
+  const { stockForm, stockSheetOpen, selectedStockItem, closeStockFormSheet } = useWarehouseStore();
   const formRef = useRef<StockItemFormRef>(null);
 
   const isDetails = stockForm === "details";
@@ -30,10 +30,10 @@ export function StockFormSheet() {
         <SheetBody className="flex-1 p-0 overflow-hidden">
           <ScrollArea className="h-full px-5">
             {isDetails ? (
-              <StockLevelDetail stock={selectedStock} />
+              <StockItemDetail stockItem={selectedStockItem} />
             ) : (
               <StockItemForm
-                key={stockForm === "edit" ? selectedStock?.id ?? "edit" : "new"}
+                key={stockForm === "edit" ? selectedStockItem?.id ?? "edit" : "new"}
                 ref={formRef}
                 onSuccess={closeStockFormSheet}
                 mode={stockForm ?? "new"}

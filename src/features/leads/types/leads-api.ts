@@ -42,7 +42,8 @@ export interface LeadDto {
   source: LeadSource;
   referrer_customer_id: string | null;
   referrer_name?: string | null;
-  assigned_sales_id: string;
+  assigned_sales_id: string | null;
+  assigned_sales_name?: string | null;
   branch_id: string;
   branch_name?: string | null;
   status: LeadStatus;

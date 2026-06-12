@@ -7,7 +7,8 @@ import { Wrapper } from "./components/wrapper";
 import { LayoutProvider } from "@/components/layouts/context/layout-context";
 import { LayoutProvider as SidebarLayoutProvider } from "./components/context";
 import { MAIN_NAV } from "@/config/layout-15.config";
-import { DOCS_MENU, DASHBOARD_MENU, TECHNICIAN_MENU } from "@/config/menu";
+import { DOCS_MENU, DASHBOARD_MENU, SALES_ADMIN_MENU, TECHNICIAN_MENU } from "@/config/menu";
+import { isSalesAdminRole } from "@/features/leads/utils/is-sales-admin";
 import { useFilteredMenu } from "@/lib/permissions";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -35,6 +36,10 @@ export function SidebarVerticalLayout({
   const baseMenu = useMemo(() => {
     if (pathname.startsWith('/docs')) {
       return DOCS_MENU;
+    }
+
+    if (isSalesAdminRole(rawUser?.roles)) {
+      return SALES_ADMIN_MENU;
     }
 
     // Explicit routing untuk role Technician/Field Staff

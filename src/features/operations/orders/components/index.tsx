@@ -115,7 +115,12 @@ function OrderDetailSheet({
               </div>
               <div>
                 <p className="text-muted-foreground text-xs font-medium mb-1">Status</p>
-                <Badge variant={ORDER_STATUS_VARIANTS[order.status]} appearance="light" size="md">
+                <Badge
+                  variant={ORDER_STATUS_VARIANTS[order.status]}
+                  appearance="light"
+                  size="md"
+                  className="h-auto min-h-6 px-2.5 py-1 leading-snug"
+                >
                   {ORDER_STATUS_LABELS[order.status]}
                 </Badge>
               </div>
@@ -284,11 +289,16 @@ export function OrdersPage() {
       accessorKey: "status",
       header: ({ column }) => <DataGridColumnHeader column={column} title="Status" className="font-semibold" />,
       cell: ({ row }) => (
-        <Badge variant={ORDER_STATUS_VARIANTS[row.original.status]} appearance="light" size="md">
+        <Badge
+          variant={ORDER_STATUS_VARIANTS[row.original.status]}
+          appearance="light"
+          size="md"
+          className="h-auto min-h-6 px-2.5 py-1 leading-snug"
+        >
           {ORDER_STATUS_LABELS[row.original.status]}
         </Badge>
       ),
-      size: 120,
+      size: 150,
     },
     {
       id: "grand_total",

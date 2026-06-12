@@ -612,5 +612,11 @@ export const TECHNICIAN_MENU: MenuConfig = [
   TECHNICIAN_FIELD_ITEM,
 ];
 
+// Menu khusus untuk SALES_ADMIN — CRM & Sales + Orders saja
+export const SALES_ADMIN_MENU: MenuConfig = [
+  CRM_SALES_ITEM,
+  ORDERS_ITEM,
+];
+
 // Export default untuk backward compatibility
 export const MENU = DOCS_MENU;
