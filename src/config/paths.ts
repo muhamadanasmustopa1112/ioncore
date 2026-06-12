@@ -565,6 +565,10 @@ export const paths = {
         path: "/administration/approval-policy",
         getHref: () => "/administration/approval-policy",
       },
+      approvals: {
+        path: "/administration/approvals",
+        getHref: () => "/administration/approvals",
+      },
       accessException: {
         path: "/administration/access-exception",
         getHref: () => "/administration/access-exception",
