@@ -5,15 +5,16 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { shouldShowGlobalQueryErrorToast } from "@/lib/query-error";
 
 function makeQueryClient() {
   return new QueryClient({
     queryCache: new QueryCache({
-      onError: (_error, query) => {
-        // Skip during SSR — toast requires browser DOM
+      onError: (error, query) => {
         if (typeof window === "undefined") return;
-        // Skip if the query suppresses the global toast (has its own error UI)
         if (query.meta?.suppressGlobalError) return;
+        // 404 / 4xx / network: inline empty states only — avoid confusing toasts
+        if (!shouldShowGlobalQueryErrorToast(error)) return;
         toast.error("Failed to load data. Please try again.");
       },
     }),

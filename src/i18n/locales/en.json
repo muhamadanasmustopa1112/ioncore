@@ -365,6 +365,8 @@
     "colBranch": "Branch",
     "colAssignedSales": "Sales",
     "assignedSales": "Assigned Sales",
+    "salesName": "Sales Name",
+    "contactPerson": "Contact Person",
     "selectAssignedSales": "Select sales admin",
     "selectBranchFirst": "Select branch first",
     "noAssignedSales": "Not assigned",

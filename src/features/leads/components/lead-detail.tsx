@@ -3,7 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
-import { RiArrowRightUpLine, RiUserAddLine, RiMapPinLine, RiRouteLine, RiCheckboxCircleLine, RiUserReceivedLine } from "@remixicon/react";
+import { RiArrowRightUpLine, RiUserAddLine, RiMapPinLine, RiRouteLine, RiCheckboxCircleLine, RiUserReceivedLine, RiUserLine, RiIdCardLine, RiPhoneLine, RiHomeLine } from "@remixicon/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -93,6 +93,10 @@ export function LeadDetail() {
     return <div className="p-8 text-center text-muted-foreground text-sm">{t("leads.leadNotFound", "Lead not found")}</div>;
   }
 
+  const displayValue = (value?: string | null) => (value?.trim() ? value.trim() : "—");
+  const salesName = lead.sales_name ?? lead.assigned_sales_name;
+  const contactPerson = lead.contact_person ?? lead.phone_number;
+
   return (
     <div className="flex flex-col gap-6 p-4">
       <PageBreadcrumb
@@ -135,6 +139,10 @@ export function LeadDetail() {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
+          { label: t("leads.salesName", "Sales Name"), value: displayValue(salesName), icon: <RiUserLine className="size-4 text-muted-foreground" /> },
+          { label: t("customers.nik"), value: displayValue(lead.nik), icon: <RiIdCardLine className="size-4 text-muted-foreground" /> },
+          { label: t("leads.contactPerson", "Contact Person"), value: displayValue(contactPerson), icon: <RiPhoneLine className="size-4 text-muted-foreground" /> },
+          { label: t("common.address"), value: displayValue(lead.address), icon: <RiHomeLine className="size-4 text-muted-foreground" /> },
           { label: t("leads.cableDistance", "Cable Distance"), value: `${lead.cable_distance_meters} m`, icon: <RiRouteLine className="size-4 text-muted-foreground" /> },
           { label: t("leads.excessCable", "Excess Cable"), value: lead.is_excess_cable_accepted ? t("leads.accepted", "Accepted") : t("leads.notAccepted", "Not accepted"), icon: <RiCheckboxCircleLine className="size-4 text-muted-foreground" /> },
           { label: t("leads.coords", "Coords"), value: lead.installation_point_lat ? `${lead.installation_point_lat?.toFixed(4)}, ${lead.installation_point_lng?.toFixed(4)}` : "—", icon: <RiMapPinLine className="size-4 text-muted-foreground" /> },

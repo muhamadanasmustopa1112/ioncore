@@ -19,6 +19,7 @@ import {
   createCustomerDocumentsBulk,
   validateCustomerDocument,
 } from "./customer-documents-api";
+import { isNonCriticalQueryError } from "@/lib/query-error";
 import type {
   CreateCustomerDocumentPayload,
   CreateCustomerFromLeadPayload,
@@ -39,15 +40,26 @@ export const customerKeys = {
   detail: (id: string) => [...customerKeys.all, "detail", id] as const,
 };
 
+const emptyCustomerList = (params: CustomerListParams) => ({
+  items: [] as CustomerDto[],
+  meta: { page: params.page ?? 1, size: params.size ?? 25, total: 0 },
+});
+
 export function useCustomerList(params: CustomerListParams = {}, enabled = true) {
   return useQuery({
     queryKey: customerKeys.list(params),
     queryFn: async () => {
-      const res = await listCustomers(params);
-      return { items: res.data.customers ?? [], meta: res.data.metadata };
+      try {
+        const res = await listCustomers(params);
+        return { items: res.data.customers ?? [], meta: res.data.metadata };
+      } catch (error) {
+        if (isNonCriticalQueryError(error)) return emptyCustomerList(params);
+        throw error;
+      }
     },
     placeholderData: (prev) => prev,
     enabled,
+    meta: { suppressGlobalError: true },
   });
 }
 
@@ -66,11 +78,17 @@ export function useCustomerListByBranches(
     queries: branchIds.map((branch_id) => ({
       queryKey: customerKeys.list({ ...fetchParams, branch_id }),
       queryFn: async () => {
-        const res = await listCustomers({ ...fetchParams, branch_id });
-        return { items: res.data.customers ?? [], meta: res.data.metadata };
+        try {
+          const res = await listCustomers({ ...fetchParams, branch_id });
+          return { items: res.data.customers ?? [], meta: res.data.metadata };
+        } catch (error) {
+          if (isNonCriticalQueryError(error)) return emptyCustomerList(fetchParams);
+          throw error;
+        }
       },
       enabled: enabled && branchIds.length > 0,
       placeholderData: (prev: { items: CustomerDto[]; meta?: { page: number; size: number; total: number } }) => prev,
+      meta: { suppressGlobalError: true },
     })),
   });
 

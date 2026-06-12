@@ -370,6 +370,8 @@
     "colBranch": "Cabang",
     "colAssignedSales": "Sales",
     "assignedSales": "Sales yang Ditugaskan",
+    "salesName": "Nama Sales",
+    "contactPerson": "Kontak Person",
     "selectAssignedSales": "Pilih sales admin",
     "selectBranchFirst": "Pilih cabang terlebih dahulu",
     "noAssignedSales": "Belum ditugaskan",

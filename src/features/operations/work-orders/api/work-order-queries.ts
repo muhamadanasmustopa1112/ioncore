@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useBranchScope } from "@/hooks/use-branch-scope";
+import { isNonCriticalQueryError } from "@/lib/query-error";
 import type { WorkOrder, Checklist, ChecklistItem } from "../types/work-order";
 import type {
   WorkOrderDto,
@@ -98,13 +99,20 @@ export function useWorkOrderList(filters?: WorkOrderFilters) {
   return useQuery({
     queryKey: workOrderKeys.list(finalFilters),
     queryFn: async () => {
-      const res = await listWorkOrders(finalFilters);
-      return {
-        workOrders: (res.data?.work_orders ?? []).map(mapWorkOrder),
-        total: res.data?.metadata.total ?? 0,
-        page: res.data?.metadata.page ?? 1,
-        perPage: res.data?.metadata.per_page ?? 10,
-      };
+      try {
+        const res = await listWorkOrders(finalFilters);
+        return {
+          workOrders: (res.data?.work_orders ?? []).map(mapWorkOrder),
+          total: res.data?.metadata.total ?? 0,
+          page: res.data?.metadata.page ?? 1,
+          perPage: res.data?.metadata.per_page ?? 10,
+        };
+      } catch (error) {
+        if (isNonCriticalQueryError(error)) {
+          return { workOrders: [], total: 0, page: 1, perPage: finalFilters.per_page ?? 10 };
+        }
+        throw error;
+      }
     },
     retry: false,
     meta: { suppressGlobalError: true },
