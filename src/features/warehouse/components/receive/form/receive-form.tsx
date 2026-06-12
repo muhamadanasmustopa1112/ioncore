@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useTranslation } from "react-i18next";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useWarehouseStore } from "@/features/warehouse/store/warehouse";
 
 const receiveSchema = z.object({
@@ -124,7 +123,13 @@ export const ReceiveForm = forwardRef<ReceiveFormRef, ReceiveFormProps>(
             <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               {t("warehouse.quantity", "Quantity")} *
             </label>
-            <Input type="number" {...register("quantity")} readOnly={isReadOnly} className="text-xs h-10" />
+            <Input
+              type="number"
+              min={1}
+              {...register("quantity", { valueAsNumber: true })}
+              readOnly={isReadOnly}
+              className="text-xs h-10"
+            />
             {errors.quantity && <p className="text-[10px] text-destructive font-bold">{errors.quantity.message}</p>}
           </div>
 

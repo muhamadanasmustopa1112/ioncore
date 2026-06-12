@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +25,7 @@ import {
   BRANCH_CODE_LENGTH,
   generateUniqueBranchCode,
 } from "../../utils/generate-branch-code";
+import { reverseGeocode } from "../../utils/reverse-geocode";
 
 function createBranchSchema(requireCode: boolean) {
   return z
@@ -189,6 +190,9 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const branchType = watch("type");
   const name = watch("name");
   const regionalId = watch("regionalId") ?? "";
+  const lat = watch("lat");
+  const long = watch("long");
+  const [isResolvingAddress, setIsResolvingAddress] = useState(false);
 
   const isSubArea = level === "sub_area";
 
@@ -209,6 +213,34 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
 
   const isRegional = level === "regional";
   const isArea = level === "area";
+
+  useEffect(() => {
+    if (isDetailMode) return;
+
+    if (lat == null || long == null) {
+      setValue("address", "");
+      return;
+    }
+
+    let cancelled = false;
+    setIsResolvingAddress(true);
+
+    reverseGeocode(lat, long)
+      .then((address) => {
+        if (!cancelled) {
+          setValue("address", address ?? "");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsResolvingAddress(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [lat, long, isDetailMode, setValue]);
 
   const isLocked = isEditMode || isDetailMode;
   const clearParents = () => {
@@ -487,12 +519,24 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
               <h3 className="text-sm font-semibold">{t("administration.branch.form.locationBoundary")}</h3>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-muted-foreground">{t("administration.branch.form.address")}</Label>
+              <Label className="text-xs font-medium text-muted-foreground">
+                {t("administration.branch.form.address")}
+                {!isDetailMode && (
+                  <span className="ml-1.5 text-muted-foreground/60 font-normal">
+                    {t("administration.branch.form.addressAutoHint")}
+                  </span>
+                )}
+              </Label>
               <Textarea
-                placeholder={t("administration.branch.form.addressPlaceholder")}
-                className="min-h-[72px] resize-none"
+                placeholder={
+                  isResolvingAddress
+                    ? t("administration.branch.form.addressResolving")
+                    : t("administration.branch.form.addressPlaceholder")
+                }
+                className="min-h-[72px] resize-none bg-muted/40"
                 {...register("address")}
-                disabled={isDetailMode}
+                disabled
+                readOnly
               />
             </div>
             <div className="space-y-2">

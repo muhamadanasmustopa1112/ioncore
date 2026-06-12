@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
@@ -50,8 +50,11 @@ import {
 } from "@/components/common/toolbar";
 import { paths } from "@/config/paths";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
-import { useAdminLeads } from "../api/leads-queries";
+import { useMyProfile } from "@/features/user-service/api/auth";
+import { useAuthStore } from "@/store/auth-store";
+import { useAdminLeads, useAdminLeadsByBranches } from "../api/leads-queries";
 import type { LeadDto, LeadSource, LeadStatus } from "../types/leads-api";
+import { isSalesAdminRole } from "../utils/is-sales-admin";
 import { RerouteLeadSheet } from "./reroute-lead-sheet";
 
 const LEAD_STATUS_KEYS: { value: LeadStatus; key: string }[] = [
@@ -117,18 +120,49 @@ export function LeadsList() {
   const router = useRouter();
   const [rerouteLead, setRerouteLead] = useState<LeadDto | null>(null);
 
+  const rawUser = useAuthStore((s) => s.rawUser);
+  const { data: meResp } = useMyProfile();
+  const meUser = meResp?.data ?? rawUser;
+  const isSalesAdmin = isSalesAdminRole(meUser?.roles);
+  const salesAdminBranchIds = useMemo(
+    () => (meUser?.branches ?? []).map((branch) => branch.id).filter(Boolean),
+    [meUser?.branches],
+  );
+
+  useEffect(() => {
+    if (isSalesAdmin && branchFilter) {
+      void setBranchFilter("");
+    }
+  }, [isSalesAdmin, branchFilter, setBranchFilter]);
+
   const { data: branchesData } = useBranchList({ per_page: 200 });
   const branches = branchesData ?? [];
   const areaBranches = branches.filter((b) => b.level === "area");
 
-  const { data, isLoading } = useAdminLeads({
+  const leadListParams = {
     name: search || undefined,
-    branch_id: branchFilter || undefined,
     status: (statusFilter as LeadStatus) || undefined,
     source: (sourceFilter as LeadSource) || undefined,
     page,
     per_page: PAGE_SIZE,
-  });
+  };
+
+  const { data: defaultLeadsData, isLoading: isDefaultLeadsLoading } = useAdminLeads(
+    {
+      ...leadListParams,
+      branch_id: branchFilter || undefined,
+    },
+    !isSalesAdmin,
+  );
+
+  const { data: scopedLeadsData, isLoading: isScopedLeadsLoading } = useAdminLeadsByBranches(
+    salesAdminBranchIds,
+    leadListParams,
+    isSalesAdmin,
+  );
+
+  const data = isSalesAdmin ? scopedLeadsData : defaultLeadsData;
+  const isLoading = isSalesAdmin ? isScopedLeadsLoading : isDefaultLeadsLoading;
 
   const leads = data?.leads ?? [];
   const total = data?.metadata?.total ?? 0;
@@ -186,6 +220,22 @@ export function LeadsList() {
         </span>
       ),
       size: 200,
+    },
+    {
+      id: "assigned_sales_id",
+      accessorKey: "assigned_sales_id",
+      header: ({ column }) => <DataGridColumnHeader column={column} title={t("leads.colAssignedSales")} className="font-semibold" />,
+      cell: ({ row }) => (
+        <Badge
+          variant={row.original.assigned_sales_id ? "success" : "warning"}
+          appearance="light"
+          size="md"
+          className="h-auto min-h-6 px-2.5 py-1 leading-snug"
+        >
+          {row.original.assigned_sales_id ? t("leads.assigned") : t("leads.notAssigned")}
+        </Badge>
+      ),
+      size: 180,
     },
     {
       id: "cable_distance_meters",
@@ -327,17 +377,19 @@ export function LeadsList() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Select value={branchFilter || "all"} onValueChange={(v) => { void setBranchFilter(v === "all" ? "" : v); void setPage(1); }}>
-                    <SelectTrigger className="h-9 w-40">
-                      <SelectValue placeholder={t("leads.allBranches")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">{t("leads.allBranches")}</SelectItem>
-                      {areaBranches.map((b) => (
-                        <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {!isSalesAdmin && (
+                    <Select value={branchFilter || "all"} onValueChange={(v) => { void setBranchFilter(v === "all" ? "" : v); void setPage(1); }}>
+                      <SelectTrigger className="h-9 w-40">
+                        <SelectValue placeholder={t("leads.allBranches")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t("leads.allBranches")}</SelectItem>
+                        {areaBranches.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                   <Select value={sourceFilter || "all"} onValueChange={(v) => { void setSourceFilter(v === "all" ? "" : v); void setPage(1); }}>
                     <SelectTrigger className="h-9 w-40">
                       <SelectValue placeholder={t("leads.allSources")} />

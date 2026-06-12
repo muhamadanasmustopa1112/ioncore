@@ -23,7 +23,7 @@ export const ORDER_TYPE_LABELS: Record<OrderType, string> = {
 };
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
-  PENDING: "Pending",
+  PENDING: "Menunggu Pemasangan",
   CONFIRMED: "Confirmed",
   PROCESSING: "Processing",
   COMPLETED: "Completed",

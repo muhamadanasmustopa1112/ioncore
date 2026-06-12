@@ -27,7 +27,8 @@ export function WarehouseDashboardPage() {
     searchQuery,
     setSearchQuery,
     metrics,
-    filteredLowStockAlerts,
+    filteredStockItems,
+    isStockItemsLoading,
     filteredAssets,
     filteredWorkOrders,
     filteredSerializedAssets,
@@ -58,11 +59,9 @@ export function WarehouseDashboardPage() {
         <div className="mt-4">
           {activeTab === "inventory" && (
             <InventoryTab
-              filteredAssets={filteredLowStockAlerts}
+              items={filteredStockItems}
+              isLoading={isStockItemsLoading}
               isMobile={isMobile}
-              onReorder={(item) => {
-                console.log("Reorder:", item);
-              }}
             />
           )}
           {activeTab === "assets" && (

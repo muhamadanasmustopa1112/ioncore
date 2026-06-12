@@ -36,7 +36,7 @@ import { useReferrerCustomers } from "@/features/customers/api/customers-queries
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { paths } from "@/config/paths";
-import { useCreateLead } from "../api/leads-queries";
+import { useCreateLead, useSalesAdminUsers } from "../api/leads-queries";
 import { getLeadMutationErrorMessage } from "../api/map-lead-mutation-error";
 import type { CustomerSubType, LeadSource, LeadStatus, LeadType } from "../types/leads-api";
 
@@ -112,6 +112,7 @@ export function CreateLeadPage() {
   const [status, setStatus] = useState<LeadStatus>("new");
   const [referrerCustomerId, setReferrerCustomerId] = useState("");
   const [branchId, setBranchId] = useState("");
+  const [assignedSalesId, setAssignedSalesId] = useState("");
   const [nik, setNik] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [lat, setLat] = useState(INSTALL_DEFAULT[0]);
@@ -127,6 +128,7 @@ export function CreateLeadPage() {
     source === "referral" ? { search: customerSearch || undefined, size: 20, status: "active" } : {}
   );
   const createLead = useCreateLead();
+  const { users: salesAdminUsers, isLoading: salesAdminsLoading } = useSalesAdminUsers(branchId || undefined);
 
   const activeBranches = useMemo(
     () => branches.filter((b) => b.active && (b.level === "area" || b.level === "sub_area")),
@@ -167,6 +169,7 @@ export function CreateLeadPage() {
         ...(nik.trim() ? { nik: nik.trim() } : {}),
         ...(phoneNumber.trim() ? { phone_number: phoneNumber.trim() } : {}),
         ...(pinMoved ? { latitude: lat, longitude: lng } : {}),
+        ...(assignedSalesId ? { assigned_sales_id: assignedSalesId } : {}),
       });
       router.push(paths.dashboard.crmAndSales.leads.root.getHref());
     } catch (err) {
@@ -332,7 +335,10 @@ export function CreateLeadPage() {
               <FieldRow label={t("customers.branch")} required>
                 <Select
                   value={branchId}
-                  onValueChange={setBranchId}
+                  onValueChange={(v) => {
+                    setBranchId(v);
+                    setAssignedSalesId("");
+                  }}
                   disabled={branchesLoading}
                 >
                   <SelectTrigger>
@@ -360,6 +366,36 @@ export function CreateLeadPage() {
                 </Select>
               </FieldRow>
 
+              <FieldRow label={t("leads.assignedSales", "Assigned Sales")}>
+                <Select
+                  value={assignedSalesId || "none"}
+                  onValueChange={(v) => setAssignedSalesId(v === "none" ? "" : v)}
+                  disabled={!branchId || salesAdminsLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        !branchId
+                          ? t("leads.selectBranchFirst", "Select branch first")
+                          : salesAdminsLoading
+                            ? t("common.loading")
+                            : t("leads.selectAssignedSales", "Select sales admin")
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t("leads.noAssignedSales", "Not assigned")}</SelectItem>
+                    {salesAdminUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                        {user.email ? (
+                          <span className="ml-1 text-xs text-muted-foreground">({user.email})</span>
+                        ) : null}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FieldRow>
 
               <FieldRow label={t("common.status")} required>
                 <Select value={status} onValueChange={(v) => setStatus(v as LeadStatus)}>

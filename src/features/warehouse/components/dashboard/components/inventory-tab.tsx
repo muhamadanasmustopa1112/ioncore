@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
+import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardHeading, CardToolbar } from "@/components/ui/card";
 import {
   Table,
@@ -12,36 +12,61 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ShoppingCart, AlertCircle } from "lucide-react";
-import { MobileTableCard } from "./mobile-table-card";
-import type { LowStockAlertData } from "../../../types";
+import { AlertCircle, Package } from "lucide-react";
+import type { StockItemResponse } from "../../../types/stock-item";
 
 interface InventoryTabProps {
-  filteredAssets: LowStockAlertData[];
+  items: StockItemResponse[];
+  isLoading?: boolean;
   isMobile: boolean;
-  onReorder?: (item: { name: string; sku: string }) => void;
 }
 
-export function InventoryTab({ filteredAssets, isMobile, onReorder }: InventoryTabProps) {
+function InventoryMobileCard({ item }: { item: StockItemResponse }) {
+  return (
+    <div className="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-100 dark:border-slate-800 hover:shadow-md transition-all">
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <span className="font-semibold text-slate-900 dark:text-white text-sm truncate">
+          {item.name}
+        </span>
+        <Badge
+          variant={item.active ? "success" : "secondary"}
+          appearance="light"
+          className="font-bold text-[9px] px-1.5 py-0.5 rounded-full uppercase shrink-0"
+        >
+          {item.active ? "Active" : "Inactive"}
+        </Badge>
+      </div>
+      <div className="text-[10px] text-slate-400 font-mono mb-2">
+        SKU: {item.sku} • {item.category_code}
+      </div>
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-slate-600 dark:text-slate-300">
+          {item.brand} {item.model}
+        </span>
+        <span className="text-slate-400">{item.unit}</span>
+      </div>
+    </div>
+  );
+}
+
+export function InventoryTab({ items, isLoading, isMobile }: InventoryTabProps) {
   const { t } = useTranslation();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (isMobile) {
     return (
       <div className="space-y-3">
-        {filteredAssets.map((item, index) => (
-          <MobileTableCard
-            key={index}
-            name={item.name}
-            sku={item.sku}
-            category={item.category}
-            stock={item.units}
-            uom={item.uom}
-            threshold={item.threshold}
-            status={item.status}
-            onAction={onReorder ? () => onReorder({ name: item.name, sku: item.sku }) : undefined}
-          />
+        {items.map((item) => (
+          <InventoryMobileCard key={item.id} item={item} />
         ))}
-        {filteredAssets.length === 0 && (
+        {items.length === 0 && (
           <div className="text-center py-8 text-slate-400 text-sm">
             <AlertCircle className="size-8 mx-auto mb-2 opacity-50" />
             {t("warehouse.noInventoryAlert", "No inventory items found")}
@@ -51,55 +76,63 @@ export function InventoryTab({ filteredAssets, isMobile, onReorder }: InventoryT
     );
   }
 
+  const activeCount = items.filter((item) => item.active).length;
+
   return (
     <Card>
       <CardHeader>
         <CardHeading>{t("warehouse.inventoryStock", "Inventory Stock & Alerts")}</CardHeading>
         <CardToolbar>
-          <Badge variant="destructive" appearance="light">
-            {filteredAssets.filter((a) => a.status === "Critical").length} Critical
+          <Badge variant="success" appearance="light">
+            {activeCount} {t("common.active", "Active")}
           </Badge>
         </CardToolbar>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("warehouse.itemName", "Item Name")}</TableHead>
-              <TableHead>SKU</TableHead>
-              <TableHead>{t("warehouse.category", "Category")}</TableHead>
-              <TableHead className="text-right">{t("warehouse.stock", "Stock")}</TableHead>
-              <TableHead className="text-right">{t("warehouse.threshold", "Threshold")}</TableHead>
-              <TableHead>{t("warehouse.status", "Status")}</TableHead>
-              <TableHead>{t("warehouse.actions", "Actions")}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredAssets.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">{item.name}</TableCell>
-                <TableCell className="font-mono text-xs">{item.sku}</TableCell>
-                <TableCell>{item.category}</TableCell>
-                <TableCell className="text-right font-bold">{item.units} {item.uom}</TableCell>
-                <TableCell className="text-right">{item.threshold} {item.uom}</TableCell>
-                <TableCell>
-                  <Badge
-                    variant={item.status === "Critical" ? "destructive" : "warning"}
-                    appearance="light"
-                  >
-                    {item.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => onReorder?.({ name: item.name, sku: item.sku })}>
-                    <ShoppingCart className="size-3.5 mr-1" />
-                    {t("warehouse.reorder", "Reorder")}
-                  </Button>
-                </TableCell>
+        {items.length === 0 ? (
+          <div className="text-center py-8 text-slate-400 text-sm">
+            <Package className="size-8 mx-auto mb-2 opacity-50" />
+            {t("warehouse.noInventoryAlert", "No inventory items found")}
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("warehouse.itemName", "Item Name")}</TableHead>
+                <TableHead>SKU</TableHead>
+                <TableHead>{t("warehouse.category", "Category")}</TableHead>
+                <TableHead>{t("warehouse.brandModel", "Brand / Model")}</TableHead>
+                <TableHead>{t("warehouse.unit", "Unit")}</TableHead>
+                <TableHead>{t("warehouse.valuationMethod", "Valuation")}</TableHead>
+                <TableHead>{t("warehouse.activeStatus", "Status")}</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell className="font-mono text-xs">{item.sku}</TableCell>
+                  <TableCell>{item.category_code}</TableCell>
+                  <TableCell>
+                    {item.brand} {item.model}
+                  </TableCell>
+                  <TableCell>{item.unit}</TableCell>
+                  <TableCell>{item.valuation_method}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={item.active ? "success" : "secondary"}
+                      appearance="light"
+                    >
+                      {item.active
+                        ? t("common.active", "Active")
+                        : t("common.inactive", "Inactive")}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );

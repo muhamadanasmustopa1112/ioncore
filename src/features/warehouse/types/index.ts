@@ -511,6 +511,7 @@ export type { Category, CategoriesListResponse } from "./categories";
 export type {
   CreateStockItemPayload,
   StockItemResponse,
+  StockItemsListParams,
   StockItemsListResponse,
 } from "./stock-item";
 export type {
