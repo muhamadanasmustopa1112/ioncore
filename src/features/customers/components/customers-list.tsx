@@ -85,7 +85,7 @@ export function CustomersList() {
   const [searchInput, setSearchInput] = useState(search);
   const router = useRouter();
 
-  const { isBranchScoped, branchIds, showBranchFilter } = useBranchScope("customer");
+  const { isBranchScoped, scopedBranchIds, showBranchFilter } = useBranchScope("customer");
 
   useEffect(() => {
     if (isBranchScoped && branchFilter) {
@@ -111,7 +111,7 @@ export function CustomersList() {
   );
 
   const { data: scopedData, isLoading: isScopedLoading } = useCustomerListByBranches(
-    branchIds,
+    scopedBranchIds,
     listParams,
     isBranchScoped,
   );

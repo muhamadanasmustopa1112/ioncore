@@ -58,9 +58,16 @@ export function useBranchScope(resource: BranchScopeResource) {
     return meUser?.active_branch_id ?? branchIds[0] ?? undefined;
   }, [meUser?.active_branch_id, branchIds]);
 
+  // Branch-scoped users: fetch only the active branch (navbar switch), not every assigned branch.
+  const scopedBranchIds = useMemo(() => {
+    if (primaryBranchId) return [primaryBranchId];
+    return branchIds;
+  }, [primaryBranchId, branchIds]);
+
   return {
     isBranchScoped,
     branchIds,
+    scopedBranchIds,
     showBranchFilter,
     canReadAll,
     primaryBranchId,

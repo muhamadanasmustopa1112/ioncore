@@ -121,7 +121,7 @@ export function LeadsList() {
   const router = useRouter();
   const [rerouteLead, setRerouteLead] = useState<LeadDto | null>(null);
 
-  const { isBranchScoped, branchIds, showBranchFilter } = useBranchScope("lead");
+  const { isBranchScoped, scopedBranchIds, showBranchFilter } = useBranchScope("lead");
   const { canRoute } = useResourceActions("lead");
 
   useEffect(() => {
@@ -151,7 +151,7 @@ export function LeadsList() {
   );
 
   const { data: scopedLeadsData, isLoading: isScopedLeadsLoading } = useAdminLeadsByBranches(
-    branchIds,
+    scopedBranchIds,
     leadListParams,
     isBranchScoped,
   );
