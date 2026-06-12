@@ -61,6 +61,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { paths } from "@/config/paths";
+import { APPROVAL_CENTER_PERMISSIONS } from "@/config/approval-permissions";
 import { PERMISSIONS } from "@/config/permissions";
 import { MenuConfig } from "@/config/types";
 // Menu untuk halaman /docs (documentation/development)
@@ -571,6 +572,13 @@ const ADMINISTRATION_ITEMS = [
         permission: PERMISSIONS.permission.manage,
       },
     ],
+  },
+  {
+    title: "Approval Center",
+    path: paths.dashboard.administration.approvals.getHref(),
+    heading: 'Administration',
+    icon: ClipboardCheck,
+    permission: [...APPROVAL_CENTER_PERMISSIONS],
   },
   {
     title: "Schema Builder",
