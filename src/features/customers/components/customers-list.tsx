@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { parseAsInteger, parseAsString, useQueryState } from "nuqs";
 import { Plus, Search, Settings2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -27,6 +27,13 @@ import { DataGridPagination } from "@/components/ui/data-grid-pagination";
 import { DataGridTable } from "@/components/ui/data-grid-table";
 import { Input } from "@/components/ui/input";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageBreadcrumb } from "@/components/common/page-breadcrumb";
 import {
   Toolbar,
@@ -35,7 +42,11 @@ import {
   ToolbarTitle,
 } from "@/components/common/toolbar";
 import { paths } from "@/config/paths";
-import { useCustomerList } from "../api/customers-queries";
+import { PERMISSIONS } from "@/config/permissions";
+import { Can, PageGuard } from "@/lib/permissions";
+import { useBranchList } from "@/features/administration/branch/api/branch-queries";
+import { useBranchScope } from "@/hooks/use-branch-scope";
+import { useCustomerList, useCustomerListByBranches } from "../api/customers-queries";
 import type { CustomerDto, CustomerStatus } from "../types/customers-api";
 import "@/i18n";
 
@@ -70,14 +81,43 @@ export function CustomersList() {
   const { t } = useTranslation();
   const [page, setPage] = useQueryState("page", parseAsInteger.withDefault(1));
   const [search, setSearch] = useQueryState("search", parseAsString.withDefault(""));
+  const [branchFilter, setBranchFilter] = useQueryState("branch_id", parseAsString.withDefault(""));
   const [searchInput, setSearchInput] = useState(search);
   const router = useRouter();
 
-  const { data, isLoading } = useCustomerList({
+  const { isBranchScoped, branchIds, showBranchFilter } = useBranchScope("customer");
+
+  useEffect(() => {
+    if (isBranchScoped && branchFilter) {
+      void setBranchFilter("");
+    }
+  }, [isBranchScoped, branchFilter, setBranchFilter]);
+
+  const { data: branchesData } = useBranchList({ per_page: 200 });
+  const areaBranches = (branchesData ?? []).filter((b) => b.level === "area");
+
+  const listParams = {
     search: search || undefined,
     page,
     size: PAGE_SIZE,
-  });
+  };
+
+  const { data: defaultData, isLoading: isDefaultLoading } = useCustomerList(
+    {
+      ...listParams,
+      branch_id: branchFilter || undefined,
+    },
+    !isBranchScoped,
+  );
+
+  const { data: scopedData, isLoading: isScopedLoading } = useCustomerListByBranches(
+    branchIds,
+    listParams,
+    isBranchScoped,
+  );
+
+  const data = isBranchScoped ? scopedData : defaultData;
+  const isLoading = isBranchScoped ? isScopedLoading : isDefaultLoading;
 
   const items = data?.items ?? [];
   const total = data?.meta?.total ?? 0;
@@ -202,6 +242,7 @@ export function CustomersList() {
   };
 
   return (
+    <PageGuard permission={PERMISSIONS.customer.read}>
     <div className="flex flex-col gap-5 p-4">
       <PageBreadcrumb
         items={[
@@ -216,12 +257,14 @@ export function CustomersList() {
             {t("customers.title")}
           </ToolbarTitle>
         </ToolbarHeading>
-        {/* <ToolbarActions>
-          <Button variant="primary" onClick={() => router.push(paths.dashboard.crmAndSales.customer.create.getHref())} className="font-semibold">
-            <Plus className="size-4" />
-            Create Customer
-          </Button>
-        </ToolbarActions> */}
+        <ToolbarActions>
+          <Can permission={PERMISSIONS.customer.create}>
+            <Button variant="primary" onClick={() => router.push(paths.dashboard.crmAndSales.customer.create.getHref())} className="font-semibold">
+              <Plus className="size-4" />
+              {t("customers.createCustomer")}
+            </Button>
+          </Can>
+        </ToolbarActions>
       </Toolbar>
 
       <DataGrid table={table} isLoading={isLoading} recordCount={total}>
@@ -229,24 +272,47 @@ export function CustomersList() {
           <Card>
             <CardHeader>
               <CardHeading>
-                <div className="relative">
-                  <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder={t("customers.searchByName")}
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && applySearch()}
-                    className="ps-9 w-60"
-                  />
-                  {searchInput && (
-                    <Button
-                      mode="icon"
-                      variant="ghost"
-                      className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
-                      onClick={() => { setSearchInput(""); void setSearch(""); void setPage(1); }}
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder={t("customers.searchByName")}
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && applySearch()}
+                      className="ps-9 w-60"
+                    />
+                    {searchInput && (
+                      <Button
+                        mode="icon"
+                        variant="ghost"
+                        className="absolute end-1.5 top-1/2 h-6 w-6 -translate-y-1/2"
+                        onClick={() => { setSearchInput(""); void setSearch(""); void setPage(1); }}
+                      >
+                        <X />
+                      </Button>
+                    )}
+                  </div>
+                  {showBranchFilter && (
+                    <Select
+                      value={branchFilter || "all"}
+                      onValueChange={(v) => {
+                        void setBranchFilter(v === "all" ? "" : v);
+                        void setPage(1);
+                      }}
                     >
-                      <X />
-                    </Button>
+                      <SelectTrigger className="h-9 w-40">
+                        <SelectValue placeholder={t("leads.allBranches")} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">{t("leads.allBranches")}</SelectItem>
+                        {areaBranches.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>
+                            {b.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
                 </div>
               </CardHeading>
@@ -266,5 +332,6 @@ export function CustomersList() {
       </DataGrid>
 
     </div>
+    </PageGuard>
   );
 }

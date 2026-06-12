@@ -5,6 +5,8 @@ import { Loader2, Network } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PERMISSIONS } from "@/config/permissions";
+import { Can } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useApproveCrossAreaRequest, useRejectCrossAreaRequest } from "../../api/cross-area";
 import type { CrossAreaRequest, CrossAreaRequestStatus } from "../../types/technician-api";
@@ -55,43 +57,45 @@ function CrossAreaRow({ req }: { req: CrossAreaRequest }) {
       </div>
 
       {req.status === "pending" && (
-        <div className="flex gap-2">
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() =>
-              approveMutation.mutate({
-                id: req.id,
-                data: {
-                  approved_technician_ids: Array.isArray(req.candidate_technician_ids)
-                    ? req.candidate_technician_ids
-                    : [],
-                },
-              })
-            }
-            disabled={approveMutation.isPending || rejectMutation.isPending}
-            className="text-[10px] uppercase font-bold"
-          >
-            {approveMutation.isPending && <Loader2 className="size-3 animate-spin mr-1" />}
-            {t("workOrder.teamPairing.approveAll")}
-          </Button>
-          <Button
-            variant="destructive"
-            appearance="ghost"
-            size="sm"
-            onClick={() =>
-              rejectMutation.mutate({
-                id: req.id,
-                data: { note: t("workOrder.teamPairing.rejectedByLeader") },
-              })
-            }
-            disabled={approveMutation.isPending || rejectMutation.isPending}
-            className="text-[10px] uppercase font-bold"
-          >
-            {rejectMutation.isPending && <Loader2 className="size-3 animate-spin mr-1" />}
-            {t("workOrder.teamPairing.reject")}
-          </Button>
-        </div>
+        <Can permission={PERMISSIONS.technician.manage}>
+          <div className="flex gap-2">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() =>
+                approveMutation.mutate({
+                  id: req.id,
+                  data: {
+                    approved_technician_ids: Array.isArray(req.candidate_technician_ids)
+                      ? req.candidate_technician_ids
+                      : [],
+                  },
+                })
+              }
+              disabled={approveMutation.isPending || rejectMutation.isPending}
+              className="text-[10px] uppercase font-bold"
+            >
+              {approveMutation.isPending && <Loader2 className="size-3 animate-spin mr-1" />}
+              {t("workOrder.teamPairing.approveAll")}
+            </Button>
+            <Button
+              variant="destructive"
+              appearance="ghost"
+              size="sm"
+              onClick={() =>
+                rejectMutation.mutate({
+                  id: req.id,
+                  data: { note: t("workOrder.teamPairing.rejectedByLeader") },
+                })
+              }
+              disabled={approveMutation.isPending || rejectMutation.isPending}
+              className="text-[10px] uppercase font-bold"
+            >
+              {rejectMutation.isPending && <Loader2 className="size-3 animate-spin mr-1" />}
+              {t("workOrder.teamPairing.reject")}
+            </Button>
+          </div>
+        </Can>
       )}
     </div>
   );

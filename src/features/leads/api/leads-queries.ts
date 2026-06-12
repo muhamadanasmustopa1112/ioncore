@@ -15,13 +15,14 @@ import {
   updateLeadCableDistance,
   updateLeadStatus,
 } from "./leads-api";
+import { PERMISSIONS } from "@/config/permissions";
 import { listUsers } from "@/features/user-service/api/users";
 import { userServiceKeys } from "@/features/user-service/api/keys";
 import type { AuthUser } from "@/features/user-service/types";
+import { userHasPermission } from "@/lib/permissions";
 import { sendNotification } from "@/features/administration/notification/api/send-notification";
 import { getLeadMutationErrorMessage } from "./map-lead-mutation-error";
 import { listSales } from "./sales-api";
-import { isSalesAdminRole } from "../utils/is-sales-admin";
 import { buildSalesLeadDetailDeeplink } from "../utils/sales-deeplink";
 import type { SalesListParams } from "./sales-api";
 import type {
@@ -61,7 +62,10 @@ export function useSalesAdminUsers(branchId?: string) {
       return (data?.data ?? []).filter(
         (user: AuthUser) =>
           user.is_active !== false &&
-          isSalesAdminRole(user.roles) &&
+          userHasPermission(
+            (user.permissions ?? []).map((permission) => permission.name),
+            PERMISSIONS.lead.read,
+          ) &&
           userBelongsToBranch(user, branchId),
       );
     },

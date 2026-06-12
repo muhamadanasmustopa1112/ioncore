@@ -32,9 +32,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useBranchScope } from "@/hooks/use-branch-scope";
 import { useWorkOrderList } from "../api/work-order-queries";
 import { useWorkOrderStore } from "../store/work-order";
-import { useAuthStore } from "@/store/auth-store";
 import { useRegionalList, useAreaList } from "@/features/administration/branch/api/branch-queries";
 import type { WorkOrder, WoType, WoStatus } from "../types/work-order";
 import {
@@ -56,24 +56,16 @@ export function WorkOrderList() {
   const { data: regionals } = useRegionalList();
   const { data: areas } = useAreaList(areaFilter !== "all" ? areaFilter : "");
 
-  const { rawUser } = useAuthStore();
-  const isLeader = useMemo(() =>
-    rawUser?.roles?.some((r: any) => {
-      const name = typeof r === "object" ? r.name : r;
-      return name?.toUpperCase().includes("LEADER");
-    }),
-    [rawUser?.roles]
-  );
+  const { showBranchFilter } = useBranchScope("work_orders");
 
   const filters = useMemo(
     () => ({
       status: statusFilter !== "all" ? (statusFilter as WoStatus) : undefined,
       type: typeFilter !== "all" ? (typeFilter as WoType) : undefined,
-      branch_id: isLeader ? (rawUser?.active_branch_id ?? undefined) : undefined,
-      area_id: areaFilter !== "all" ? areaFilter : undefined,
-      sub_area_id: subAreaFilter !== "all" ? subAreaFilter : undefined,
+      area_id: showBranchFilter && areaFilter !== "all" ? areaFilter : undefined,
+      sub_area_id: showBranchFilter && subAreaFilter !== "all" ? subAreaFilter : undefined,
     }),
-    [statusFilter, typeFilter, isLeader, rawUser?.active_branch_id, areaFilter, subAreaFilter]
+    [statusFilter, typeFilter, showBranchFilter, areaFilter, subAreaFilter],
   );
 
   const { data, isLoading, isError, refetch } = useWorkOrderList(filters);

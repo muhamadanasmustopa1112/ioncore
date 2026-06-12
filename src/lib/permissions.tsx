@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import type { MenuConfig, MenuItem } from "@/config/types";
 import { paths } from "@/config/paths";
+import {
+  buildPermissionSetFromNames,
+  heldMatchesPermission,
+  normalizePermissionName,
+} from "@/lib/permission-aliases";
 
 export type PermissionInput = string | string[] | undefined | null;
 
@@ -14,22 +19,33 @@ export interface PermissionCheckOptions {
 
 const SUPER_ROLE_NAMES = ["super admin", "superadmin", "super_admin"];
 
-function normalize(name: string) {
-  return name.trim().toLowerCase();
-}
-
 export function getUserPermissionSet(): Set<string> {
   const raw = useAuthStore.getState().rawUser;
   const names = (raw?.permissions || [])
-    .map((p) => (p?.name ? normalize(p.name) : ""))
+    .map((p) => (p?.name ? normalizePermissionName(p.name) : ""))
     .filter(Boolean);
-  return new Set(names);
+  return buildPermissionSetFromNames(names);
 }
 
 export function isSuperAdminUser(): boolean {
   const raw = useAuthStore.getState().rawUser;
   const roles = raw?.roles || [];
-  return roles.some((r) => SUPER_ROLE_NAMES.includes(normalize(r.name || "")));
+  return roles.some((r) =>
+    SUPER_ROLE_NAMES.includes(normalizePermissionName(r.name || "")),
+  );
+}
+
+export function userHasPermission(
+  permissionNames: Array<string | undefined | null>,
+  required: PermissionInput,
+  options: PermissionCheckOptions = {},
+): boolean {
+  const held = buildPermissionSetFromNames(
+    permissionNames
+      .filter((name): name is string => !!name)
+      .map(normalizePermissionName),
+  );
+  return checkPermission(required, held, options);
 }
 
 export function checkPermission(
@@ -40,11 +56,11 @@ export function checkPermission(
   if (!required) return true;
   const list = Array.isArray(required) ? required : [required];
   if (list.length === 0) return true;
-  const needles = list.map(normalize);
+  const needles = list.map(normalizePermissionName);
   if (options.requireAll) {
-    return needles.every((n) => held.has(n));
+    return needles.every((n) => heldMatchesPermission(held, n));
   }
-  return needles.some((n) => held.has(n));
+  return needles.some((n) => heldMatchesPermission(held, n));
 }
 
 // ── React hooks ────────────────────────────────────────
@@ -52,9 +68,9 @@ export function usePermissionSet(): Set<string> {
   const rawUser = useAuthStore((s) => s.rawUser);
   return useMemo(() => {
     const names = (rawUser?.permissions || [])
-      .map((p) => (p?.name ? normalize(p.name) : ""))
+      .map((p) => (p?.name ? normalizePermissionName(p.name) : ""))
       .filter(Boolean);
-    return new Set(names);
+    return buildPermissionSetFromNames(names);
   }, [rawUser?.permissions]);
 }
 
@@ -63,7 +79,7 @@ export function useIsSuperAdmin(): boolean {
   return useMemo(() => {
     const roles = rawUser?.roles || [];
     return roles.some((r) =>
-      SUPER_ROLE_NAMES.includes(normalize(r.name || "")),
+      SUPER_ROLE_NAMES.includes(normalizePermissionName(r.name || "")),
     );
   }, [rawUser?.roles]);
 }

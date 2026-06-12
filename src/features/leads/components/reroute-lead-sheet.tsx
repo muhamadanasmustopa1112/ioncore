@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { RiArrowRightUpLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -21,7 +22,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
-import { useRerouteLead } from "../api/leads-queries";
+import { useRerouteLead, useSalesAdminUsers } from "../api/leads-queries";
 import type { LeadDto } from "../types/leads-api";
 
 interface Props {
@@ -31,27 +32,51 @@ interface Props {
 }
 
 export function RerouteLeadSheet({ lead, open, onClose }: Props) {
+  const { t } = useTranslation();
   const [branchId, setBranchId] = useState("");
+  const [assignedSalesId, setAssignedSalesId] = useState("");
 
-  const { data: branches = [], isLoading: branchesLoading } = useBranchList();
+  const { data: branches = [], isLoading: branchesLoading } = useBranchList({
+    branch_type: "office",
+    per_page: 200,
+  });
+  const { users: salesAdminUsers, isLoading: salesAdminsLoading } = useSalesAdminUsers(
+    branchId || undefined,
+  );
 
   const reroute = useRerouteLead(lead?.id ?? "");
 
+  const activeBranches = useMemo(
+    () =>
+      branches.filter(
+        (b) =>
+          b.active &&
+          (b.level === "area" || b.level === "sub_area") &&
+          b.branchType === "office",
+      ),
+    [branches],
+  );
+
   useEffect(() => {
-    if (open) {
-      setBranchId(lead?.branch_id ?? "");
-    }
-  }, [open, lead]);
+    if (!open) return;
+
+    const currentBranchId = lead?.branch_id ?? "";
+    const canKeepCurrentBranch = activeBranches.some((b) => b.id === currentBranchId);
+
+    setBranchId(canKeepCurrentBranch ? currentBranchId : "");
+    setAssignedSalesId(canKeepCurrentBranch ? (lead?.assigned_sales_id ?? "") : "");
+  }, [open, lead, activeBranches]);
 
   const handleSubmit = () => {
     if (!lead || !branchId) return;
     reroute.mutate(
-      { branch_id: branchId },
+      {
+        branch_id: branchId,
+        ...(assignedSalesId ? { assigned_sales_id: assignedSalesId } : {}),
+      },
       { onSuccess: onClose }
     );
   };
-
-  const activeBranches = branches.filter((b) => b.active && (b.level === "area" || b.level === "sub_area"));
 
   const canSubmit = !!branchId && !reroute.isPending;
 
@@ -83,7 +108,10 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
                 </Label>
                 <Select
                   value={branchId}
-                  onValueChange={setBranchId}
+                  onValueChange={(v) => {
+                    setBranchId(v);
+                    setAssignedSalesId("");
+                  }}
                   disabled={branchesLoading}
                 >
                   <SelectTrigger>
@@ -107,6 +135,37 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
                         </SelectItem>
                       );
                     })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  {t("leads.assignedSales", "Assigned Sales")}
+                </Label>
+                <Select
+                  value={assignedSalesId || "none"}
+                  onValueChange={(v) => setAssignedSalesId(v === "none" ? "" : v)}
+                  disabled={!branchId || salesAdminsLoading}
+                >
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        !branchId
+                          ? t("leads.selectBranchFirst", "Select branch first")
+                          : salesAdminsLoading
+                            ? t("common.loading")
+                            : t("leads.selectAssignedSales", "Select sales admin")
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">{t("leads.noAssignedSales", "Not assigned")}</SelectItem>
+                    {salesAdminUsers.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

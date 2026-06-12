@@ -1,11 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { Loader2, AlertCircle, RefreshCw, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { PERMISSIONS } from "@/config/permissions";
+import { useBranchScope } from "@/hooks/use-branch-scope";
+import { Can, PageGuard } from "@/lib/permissions";
 import { useTeamLeaderDashboard } from "../../api/team-leader";
 import { useTechnicianLatestLocations } from "../../api/dashboard";
 import { useAuthStore } from "@/store/auth-store";
@@ -45,57 +48,40 @@ export function TeamPairingDashboard() {
   const [pairingTarget, setPairingTarget] = useState<WorkOrderDashboardItem | null>(null);
 
   const { rawUser } = useAuthStore();
-  const branchId = rawUser?.active_branch_id || "";
-
-  const isLeader = useMemo(() =>
-    rawUser?.roles?.some((r: any) => {
-      const roleName = (r?.name || r || "").toString().toLowerCase();
-      return roleName.includes("leader");
-    }),
-    [rawUser?.roles]
-  );
+  const { isBranchScoped, primaryBranchId } = useBranchScope("work_orders");
+  const branchId = isBranchScoped ? primaryBranchId : undefined;
 
   const { data, isLoading, isError, refetch, isFetching } = useTeamLeaderDashboard({
     params: {
       date,
       ...(selectedState ? { state: selectedState } : {}),
       ...(selectedType ? { type: selectedType } : {}),
-      ...(isLeader && branchId ? { branch_id: branchId } : {}),
+      ...(branchId ? { branch_id: branchId } : {}),
     },
     queryConfig: { enabled: !!rawUser },
   });
 
   const { data: latestLocations, refetch: refetchMap } = useTechnicianLatestLocations(
-    isLeader ? branchId : undefined,
-    { 
+    branchId,
+    {
       enabled: !!rawUser,
-      refetchInterval: 60000
-    }
+      refetchInterval: 60000,
+    },
   );
 
-  if (isLoading || !rawUser) {
-    return (
+  return (
+    <PageGuard permission={PERMISSIONS.technician.manage}>
+    {isLoading || !rawUser ? (
       <div className="flex-1 p-6 flex items-center justify-center min-h-[60vh]">
         <Loader2 className="size-8 animate-spin text-primary" />
       </div>
-    );
-  }
-
-  if (isError) {
-    return (
+    ) : isError ? (
       <div className="flex-1 p-6 flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <AlertCircle className="size-10 text-rose-500" />
         <p className="text-sm text-slate-600">{t("workOrder.teamPairing.failedToLoad")}</p>
         <Button variant="outline" size="sm" onClick={() => refetch()}>{t("workOrder.noc.retry")}</Button>
       </div>
-    );
-  }
-
-  if (!data) {
-    return null;
-  }
-
-  return (
+    ) : !data ? null : (
     <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-background min-h-screen">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -154,16 +140,18 @@ export function TeamPairingDashboard() {
             {isFetching ? <Loader2 className="size-3 animate-spin mr-1" /> : <RefreshCw className="size-3 mr-1" />}
             {t("workOrder.noc.refresh")}
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowAutoAssign(true)}
-            disabled={isLeader && !data?.auto_assign_enabled}
-            className="text-[10px] uppercase font-bold"
-          >
-            <Zap className="size-3 mr-1" />
-            {t("workOrder.detail.autoAssign")}
-          </Button>
+          <Can permission={PERMISSIONS.technician.manage}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setShowAutoAssign(true)}
+              disabled={isBranchScoped && !data?.auto_assign_enabled}
+              className="text-[10px] uppercase font-bold"
+            >
+              <Zap className="size-3 mr-1" />
+              {t("workOrder.detail.autoAssign")}
+            </Button>
+          </Can>
         </div>
       </div>
 
@@ -217,5 +205,7 @@ export function TeamPairingDashboard() {
         />
       )}
     </div>
+    )}
+    </PageGuard>
   );
 }

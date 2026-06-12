@@ -12,7 +12,7 @@ import {
   usePairingRecommendation,
 } from "../../../api/team-leader";
 import { useTechnicianList } from "../../../api/dashboard";
-import { useAuthStore } from "@/store/auth-store";
+import { useBranchScope } from "@/hooks/use-branch-scope";
 import type {
   AssignedTechnician,
   DispatchCandidate,
@@ -149,12 +149,11 @@ export function PairingModal({
   const recommendMutation = usePairingRecommendation();
   const mutation = isReassign ? updateMutation : assignMutation;
 
-  const { rawUser } = useAuthStore();
-  const isLeader = rawUser?.roles?.some((r) => (r.name || "").toLowerCase() === "team_leader");
+  const { isBranchScoped } = useBranchScope("work_orders");
 
   const { data: allTechnicians = [], isLoading: isTechListLoading } = useTechnicianList({
     params: {
-      ...(isLeader ? { branch_id: branchId, team_leader_id: teamLeaderId } : {}),
+      ...(isBranchScoped ? { branch_id: branchId, team_leader_id: teamLeaderId } : {}),
     },
   });
 

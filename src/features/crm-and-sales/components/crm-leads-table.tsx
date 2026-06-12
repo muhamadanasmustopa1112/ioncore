@@ -19,9 +19,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAdminLeads } from "@/features/leads/api/leads-queries";
-import type { LeadStatus } from "@/features/leads/types/leads-api";
 import { paths } from "@/config/paths";
+import { useAdminLeads, useAdminLeadsByBranches } from "@/features/leads/api/leads-queries";
+import type { LeadStatus } from "@/features/leads/types/leads-api";
+import { useBranchScope } from "@/hooks/use-branch-scope";
 
 const STATUS_VARIANT: Record<
   LeadStatus,
@@ -38,10 +39,27 @@ const STATUS_VARIANT: Record<
 
 export function CrmLeadsTable() {
   const { t } = useTranslation();
-  const { data, isLoading, isError } = useAdminLeads({
-    sort_by: "created_at",
-    sort_dir: "desc",
-  });
+  const { isBranchScoped, branchIds } = useBranchScope("lead");
+
+  const listParams = {
+    sort_by: "created_at" as const,
+    sort_dir: "desc" as const,
+    per_page: 5,
+    page: 1,
+  };
+
+  const { data: defaultData, isLoading: isDefaultLoading, isError: isDefaultError } =
+    useAdminLeads(listParams, !isBranchScoped);
+
+  const { data: scopedData, isLoading: isScopedLoading } = useAdminLeadsByBranches(
+    branchIds,
+    listParams,
+    isBranchScoped,
+  );
+
+  const data = isBranchScoped ? scopedData : defaultData;
+  const isLoading = isBranchScoped ? isScopedLoading : isDefaultLoading;
+  const isError = isBranchScoped ? false : isDefaultError;
 
   const leads = data?.leads ?? [];
 
@@ -90,7 +108,7 @@ export function CrmLeadsTable() {
                 </TableCell>
               </TableRow>
             )}
-            {leads.slice(0, 5).map((lead) => (
+            {leads.map((lead) => (
               <TableRow key={lead.id}>
                 <TableCell className="font-medium">{lead.lead_name}</TableCell>
                 <TableCell className="text-muted-foreground capitalize">{lead.source}</TableCell>

@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useQueries, useQuery } from "@tanstack/react-query";
 
 import { services } from "@/config/constants";
 import { userServiceApi } from "@/features/user-service/api/client";
@@ -17,6 +18,36 @@ import type {
   TechnicianLatestLocationsResponse,
 } from "../types/technician-api";
 import { TECHNICIAN_KEYS } from "./keys";
+
+const BRANCH_SCOPED_FETCH_SIZE = 100;
+
+const EMPTY_SUMMARY: WorkOrderDashboardSummary = {
+  total: 0,
+  by_state: {} as WorkOrderDashboardSummary["by_state"],
+  by_type: {} as WorkOrderDashboardSummary["by_type"],
+};
+
+function mergeSummaries(summaries: WorkOrderDashboardSummary[]): WorkOrderDashboardSummary {
+  const merged: WorkOrderDashboardSummary = {
+    total: 0,
+    by_state: {} as WorkOrderDashboardSummary["by_state"],
+    by_type: {} as WorkOrderDashboardSummary["by_type"],
+  };
+
+  for (const summary of summaries) {
+    merged.total += summary.total ?? 0;
+    for (const [state, count] of Object.entries(summary.by_state ?? {})) {
+      merged.by_state[state as keyof WorkOrderDashboardSummary["by_state"]] =
+        (merged.by_state[state as keyof WorkOrderDashboardSummary["by_state"]] ?? 0) + count;
+    }
+    for (const [type, count] of Object.entries(summary.by_type ?? {})) {
+      merged.by_type[type as keyof WorkOrderDashboardSummary["by_type"]] =
+        (merged.by_type[type as keyof WorkOrderDashboardSummary["by_type"]] ?? 0) + count;
+    }
+  }
+
+  return merged;
+}
 
 interface ResponseEnvelope<T> {
   message: string;
@@ -107,17 +138,13 @@ export const useWorkOrderList = ({
       const res = await getWorkOrders(params);
       return {
         items: res.data?.items ?? [],
-        summary: res.data?.summary ?? {
-          total: 0,
-          by_state: {} as never,
-          by_type: {} as never,
-        },
+        summary: res.data?.summary ?? EMPTY_SUMMARY,
         metadata: res.metadata,
       };
     },
     placeholderData: {
       items: [],
-      summary: { total: 0, by_state: {} as never, by_type: {} as never },
+      summary: EMPTY_SUMMARY,
       metadata: { count: 0, page: 1, per_page: 10 },
     } as any,
     retry: false,
@@ -125,6 +152,66 @@ export const useWorkOrderList = ({
     ...queryConfig,
   });
 };
+
+export function useWorkOrderListByBranches(
+  branchIds: string[],
+  params: WorkOrderListParams = {},
+  enabled = true,
+  queryConfig?: UseWorkOrderListOptions["queryConfig"],
+) {
+  const fetchParams: WorkOrderListParams = {
+    ...params,
+    page: 1,
+    per_page: BRANCH_SCOPED_FETCH_SIZE,
+  };
+
+  const queries = useQueries({
+    queries: branchIds.map((branch_id) => ({
+      queryKey: TECHNICIAN_KEYS.workOrders({ ...fetchParams, branch_id }),
+      queryFn: async () => {
+        const res = await getWorkOrders({ ...fetchParams, branch_id });
+        return {
+          items: res.data?.items ?? [],
+          summary: res.data?.summary ?? EMPTY_SUMMARY,
+          metadata: res.metadata,
+        };
+      },
+      enabled: enabled && branchIds.length > 0,
+      retry: false,
+      meta: { suppressGlobalError: true },
+    })),
+  });
+
+  return useMemo(() => {
+    const isLoading = enabled && (branchIds.length === 0 || queries.some((q) => q.isLoading));
+    const byId = new Map<string, WorkOrderDashboardItem>();
+
+    for (const query of queries) {
+      for (const item of query.data?.items ?? []) {
+        byId.set(item.id, item);
+      }
+    }
+
+    const allItems = Array.from(byId.values());
+
+    const page = params.page ?? 1;
+    const perPage = params.per_page ?? 10;
+    const start = (page - 1) * perPage;
+
+    return {
+      data: {
+        items: allItems.slice(start, start + perPage),
+        summary: mergeSummaries(queries.map((q) => q.data?.summary ?? EMPTY_SUMMARY)),
+        metadata: {
+          count: allItems.length,
+          page,
+          per_page: perPage,
+        },
+      },
+      isLoading,
+    };
+  }, [branchIds.length, enabled, params.page, params.per_page, queries]);
+}
 
 type UseTechnicianListOptions = {
   params?: ListTechniciansParams;

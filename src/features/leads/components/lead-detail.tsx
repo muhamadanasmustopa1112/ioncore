@@ -29,6 +29,9 @@ import {
   ToolbarTitle,
 } from "@/components/common/toolbar";
 import { paths } from "@/config/paths";
+import { PERMISSIONS } from "@/config/permissions";
+import { useResourceActions } from "@/hooks/use-resource-actions";
+import { Can } from "@/lib/permissions";
 import {
   useCreateLeadActivity,
   useLead,
@@ -73,6 +76,7 @@ export function LeadDetail() {
   const updateCable = useUpdateLeadCableDistance(id);
   const updateAcceptance = useUpdateLeadCableAcceptance(id);
   const addActivity = useCreateLeadActivity(id);
+  const { canUpdate, canRoute } = useResourceActions("lead");
 
   useEffect(() => {
     if (lead?.status) setStatusDraft(lead.status);
@@ -114,11 +118,13 @@ export function LeadDetail() {
           </div>
         </ToolbarHeading>
         <ToolbarActions>
-          <Button variant="outline" size="sm" onClick={() => setRerouteOpen(true)} className="gap-1.5">
-            <RiArrowRightUpLine className="size-4" />
-            {t("leads.reroute", "Reroute")}
-          </Button>
-          {lead.status !== "converted" && (
+          <Can permission={PERMISSIONS.lead.route}>
+            <Button variant="outline" size="sm" onClick={() => setRerouteOpen(true)} className="gap-1.5">
+              <RiArrowRightUpLine className="size-4" />
+              {t("leads.reroute", "Reroute")}
+            </Button>
+          </Can>
+          {lead.status !== "converted" && canUpdate && (
             <Button variant="primary" size="sm" onClick={() => router.push(paths.dashboard.crmAndSales.leads.convert.getHref(id))} className="gap-1.5">
               <RiUserAddLine className="size-4" />
               {t("leads.convert", "Convert")}
@@ -179,7 +185,7 @@ export function LeadDetail() {
                   </div>
                 </div>
               );
-            })() : (
+            })() : canUpdate ? (
               <>
                 <Select value={statusDraft} onValueChange={(v) => setStatusDraft(v as LeadStatus)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -217,6 +223,10 @@ export function LeadDetail() {
                   {t("common.save", "Save")}
                 </Button>
               </>
+            ) : (
+              <Badge variant={STATUS_VARIANT[lead.status]} appearance="light" size="md" className="w-fit">
+                {t(`common.chartLabels.${lead.status}`, { defaultValue: lead.status })}
+              </Badge>
             )}
           </CardContent>
         </Card>

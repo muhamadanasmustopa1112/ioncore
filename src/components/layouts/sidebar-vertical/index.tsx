@@ -1,16 +1,12 @@
 'use client';
 
-import { Metadata } from "next";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import { Wrapper } from "./components/wrapper";
 import { LayoutProvider } from "@/components/layouts/context/layout-context";
 import { LayoutProvider as SidebarLayoutProvider } from "./components/context";
-import { MAIN_NAV } from "@/config/layout-15.config";
-import { DOCS_MENU, DASHBOARD_MENU, SALES_ADMIN_MENU, TECHNICIAN_MENU } from "@/config/menu";
-import { isSalesAdminRole } from "@/features/leads/utils/is-sales-admin";
+import { DOCS_MENU, DASHBOARD_MENU } from "@/config/menu";
 import { useFilteredMenu } from "@/lib/permissions";
-import { useAuthStore } from "@/store/auth-store";
 
 // Generate metadata for the layout
 // export async function generateMetadata(): Promise<Metadata> {
@@ -29,31 +25,13 @@ export function SidebarVerticalLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  
-  const rawUser = useAuthStore((s) => s.rawUser);
-  
-  // Tentukan menu berdasarkan pathname dan role user
+
   const baseMenu = useMemo(() => {
-    if (pathname.startsWith('/docs')) {
+    if (pathname.startsWith("/docs")) {
       return DOCS_MENU;
     }
-
-    if (isSalesAdminRole(rawUser?.roles)) {
-      return SALES_ADMIN_MENU;
-    }
-
-    // Explicit routing untuk role Technician/Field Staff
-    const isRestricted = rawUser?.roles?.some((r) => {
-      const rn = (r.name || "").toLowerCase();
-      return rn.includes("technician") || rn.includes("leader");
-    });
-
-    if (isRestricted) {
-      return TECHNICIAN_MENU;
-    }
-
     return DASHBOARD_MENU;
-  }, [pathname, rawUser]);
+  }, [pathname]);
 
   const currentMenu = useFilteredMenu(baseMenu);
 

@@ -24,6 +24,8 @@ import { CrmLeadsTable } from "./crm-leads-table";
 import { CrmSalesTable } from "./crm-sales-table";
 import { CrmWorkOrdersTable } from "./crm-work-orders-table";
 import { paths } from "@/config/paths";
+import { PERMISSIONS } from "@/config/permissions";
+import { Can, PageGuard } from "@/lib/permissions";
 // ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
@@ -34,6 +36,7 @@ export function CrmAndSales() {
     to: new Date(2026, 3, 30),
   });
   return (
+    <PageGuard permission={PERMISSIONS.crm.read}>
     <div className="flex flex-col gap-5 p-4">
       {/* Breadcrumb — sits directly below the header navbar */}
       <Breadcrumb>
@@ -91,11 +94,18 @@ export function CrmAndSales() {
       <CrmLeadsChart />
       {/* Bottom Tables 2×2 grid */}
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-        <CrmCustomersTable />
-        <CrmLeadsTable />
+        <Can permission={PERMISSIONS.customer.read}>
+          <CrmCustomersTable />
+        </Can>
+        <Can permission={PERMISSIONS.lead.read}>
+          <CrmLeadsTable />
+        </Can>
         <CrmSalesTable />
-        <CrmWorkOrdersTable />
+        <Can permission={PERMISSIONS.work_orders.read_all}>
+          <CrmWorkOrdersTable />
+        </Can>
       </div>
     </div>
+    </PageGuard>
   );
 }

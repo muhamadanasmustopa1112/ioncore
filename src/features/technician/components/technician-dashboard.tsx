@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { Plus } from "lucide-react";
@@ -14,7 +14,10 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { paths } from "@/config/paths";
-import { useWorkOrderList } from "../api/dashboard";
+import { PERMISSIONS } from "@/config/permissions";
+import { useBranchScope } from "@/hooks/use-branch-scope";
+import { Can, PageGuard } from "@/lib/permissions";
+import { useWorkOrderList, useWorkOrderListByBranches } from "../api/dashboard";
 import { useAuthStore } from "@/store/auth-store";
 import type { WorkOrderListParams, WorkOrderState, WorkOrderType } from "../types/technician-api";
 import { TechnicianKpiCards } from "./technician-kpi-cards";
@@ -56,23 +59,33 @@ export function TechnicianDashboard() {
   });
 
   const { rawUser } = useAuthStore();
-  const isLeader = useMemo(() =>
-    rawUser?.roles?.some((r: any) => {
-      const roleName = (r?.name || r || "").toString().toLowerCase();
-      return roleName.includes("team_leader");
-    }),
-    [rawUser?.roles]
+  const { isBranchScoped, branchIds, showBranchFilter, primaryBranchId } =
+    useBranchScope("work_orders");
+
+  const resolvedBranchId = isBranchScoped
+    ? appliedFilters.branch_id || primaryBranchId
+    : appliedFilters.branch_id || undefined;
+
+  const listParams = {
+    ...appliedFilters,
+    branch_id: resolvedBranchId,
+  };
+
+  const useMultiBranchFetch = isBranchScoped && branchIds.length > 1 && !appliedFilters.branch_id;
+
+  const { data: defaultData, isLoading: isDefaultLoading } = useWorkOrderList({
+    params: listParams,
+    queryConfig: { enabled: !!rawUser && !useMultiBranchFetch },
+  });
+
+  const { data: scopedData, isLoading: isScopedLoading } = useWorkOrderListByBranches(
+    branchIds,
+    appliedFilters,
+    !!rawUser && useMultiBranchFetch,
   );
 
-  const currentBranchId = isLeader ? (rawUser?.active_branch_id || undefined) : undefined;
-
-  const { data, isLoading } = useWorkOrderList({
-    params: {
-      ...appliedFilters,
-      branch_id: appliedFilters.branch_id || currentBranchId,
-    },
-    queryConfig: { enabled: !!rawUser }
-  });
+  const data = useMultiBranchFetch ? scopedData : defaultData;
+  const isLoading = useMultiBranchFetch ? isScopedLoading : isDefaultLoading;
 
   const setParams = useCallback((updates: Record<string, string | number | undefined>) => {
     const p = new URLSearchParams(searchParams.toString());
@@ -103,6 +116,7 @@ export function TechnicianDashboard() {
   }
 
   return (
+    <PageGuard permission={PERMISSIONS.technician.read}>
     <div className="flex flex-col gap-5 p-4">
       <Breadcrumb>
         <BreadcrumbList>
@@ -131,7 +145,7 @@ export function TechnicianDashboard() {
         filters={pendingFilters}
         onChange={setPendingFilters}
         onApply={handleApply}
-        hideSubArea={!!isLeader}
+        hideSubArea={!showBranchFilter}
       />
 
       <WorkOrdersTable
@@ -144,14 +158,17 @@ export function TechnicianDashboard() {
         onPerPageChange={handlePerPageChange}
       />
 
-      <div className="fixed bottom-6 right-6 group z-20">
-        <button className="h-12 w-12 rounded-full bg-primary text-white shadow-xl flex items-center justify-center hover:scale-110 transition-transform">
-          <Plus className="size-6" />
-        </button>
-        <span className="hidden sm:inline-block absolute right-14 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs py-1 px-3 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-          {t("workOrder.newWorkOrder")}
-        </span>
-      </div>
+      <Can permission={PERMISSIONS.technician.manage}>
+        <div className="fixed bottom-6 right-6 group z-20">
+          <button className="h-12 w-12 rounded-full bg-primary text-white shadow-xl flex items-center justify-center hover:scale-110 transition-transform">
+            <Plus className="size-6" />
+          </button>
+          <span className="hidden sm:inline-block absolute right-14 top-1/2 -translate-y-1/2 bg-slate-800 text-white text-xs py-1 px-3 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+            {t("workOrder.newWorkOrder")}
+          </span>
+        </div>
+      </Can>
     </div>
+    </PageGuard>
   );
 }

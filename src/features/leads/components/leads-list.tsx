@@ -49,12 +49,13 @@ import {
   ToolbarTitle,
 } from "@/components/common/toolbar";
 import { paths } from "@/config/paths";
+import { PERMISSIONS } from "@/config/permissions";
+import { useResourceActions } from "@/hooks/use-resource-actions";
+import { Can, PageGuard } from "@/lib/permissions";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
-import { useMyProfile } from "@/features/user-service/api/auth";
-import { useAuthStore } from "@/store/auth-store";
+import { useBranchScope } from "@/hooks/use-branch-scope";
 import { useAdminLeads, useAdminLeadsByBranches } from "../api/leads-queries";
 import type { LeadDto, LeadSource, LeadStatus } from "../types/leads-api";
-import { isSalesAdminRole } from "../utils/is-sales-admin";
 import { RerouteLeadSheet } from "./reroute-lead-sheet";
 
 const LEAD_STATUS_KEYS: { value: LeadStatus; key: string }[] = [
@@ -120,20 +121,14 @@ export function LeadsList() {
   const router = useRouter();
   const [rerouteLead, setRerouteLead] = useState<LeadDto | null>(null);
 
-  const rawUser = useAuthStore((s) => s.rawUser);
-  const { data: meResp } = useMyProfile();
-  const meUser = meResp?.data ?? rawUser;
-  const isSalesAdmin = isSalesAdminRole(meUser?.roles);
-  const salesAdminBranchIds = useMemo(
-    () => (meUser?.branches ?? []).map((branch) => branch.id).filter(Boolean),
-    [meUser?.branches],
-  );
+  const { isBranchScoped, branchIds, showBranchFilter } = useBranchScope("lead");
+  const { canRoute } = useResourceActions("lead");
 
   useEffect(() => {
-    if (isSalesAdmin && branchFilter) {
+    if (isBranchScoped && branchFilter) {
       void setBranchFilter("");
     }
-  }, [isSalesAdmin, branchFilter, setBranchFilter]);
+  }, [isBranchScoped, branchFilter, setBranchFilter]);
 
   const { data: branchesData } = useBranchList({ per_page: 200 });
   const branches = branchesData ?? [];
@@ -152,17 +147,17 @@ export function LeadsList() {
       ...leadListParams,
       branch_id: branchFilter || undefined,
     },
-    !isSalesAdmin,
+    !isBranchScoped,
   );
 
   const { data: scopedLeadsData, isLoading: isScopedLeadsLoading } = useAdminLeadsByBranches(
-    salesAdminBranchIds,
+    branchIds,
     leadListParams,
-    isSalesAdmin,
+    isBranchScoped,
   );
 
-  const data = isSalesAdmin ? scopedLeadsData : defaultLeadsData;
-  const isLoading = isSalesAdmin ? isScopedLeadsLoading : isDefaultLeadsLoading;
+  const data = isBranchScoped ? scopedLeadsData : defaultLeadsData;
+  const isLoading = isBranchScoped ? isScopedLeadsLoading : isDefaultLeadsLoading;
 
   const leads = data?.leads ?? [];
   const total = data?.metadata?.total ?? 0;
@@ -278,9 +273,11 @@ export function LeadsList() {
                   <Eye className="size-4 mr-2" /> {t("leads.actionDetail")}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setRerouteLead(row.original)}>
-                <RiArrowRightUpLine className="size-4 mr-2" /> {t("leads.actionReroute")}
-              </DropdownMenuItem>
+              {canRoute && (
+                <DropdownMenuItem onClick={() => setRerouteLead(row.original)}>
+                  <RiArrowRightUpLine className="size-4 mr-2" /> {t("leads.actionReroute")}
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -289,7 +286,7 @@ export function LeadsList() {
       enableSorting: false,
     },
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ], [t]);
+  ], [t, canRoute]);
 
   const table = useReactTable({
     columns,
@@ -318,6 +315,7 @@ export function LeadsList() {
   };
 
   return (
+    <PageGuard permission={PERMISSIONS.lead.read}>
     <div className="flex flex-col gap-5 p-4">
       <PageBreadcrumb
         items={[
@@ -333,10 +331,12 @@ export function LeadsList() {
           </ToolbarTitle>
         </ToolbarHeading>
         <ToolbarActions>
-          <Button variant="primary" onClick={() => router.push(paths.dashboard.crmAndSales.leads.create.getHref())} className="font-semibold">
-            <Plus className="size-4" />
-            {t("leads.createLead", "Create Lead")}
-          </Button>
+          <Can permission={PERMISSIONS.lead.create}>
+            <Button variant="primary" onClick={() => router.push(paths.dashboard.crmAndSales.leads.create.getHref())} className="font-semibold">
+              <Plus className="size-4" />
+              {t("leads.createLead", "Create Lead")}
+            </Button>
+          </Can>
         </ToolbarActions>
       </Toolbar>
 
@@ -377,7 +377,7 @@ export function LeadsList() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {!isSalesAdmin && (
+                  {showBranchFilter && (
                     <Select value={branchFilter || "all"} onValueChange={(v) => { void setBranchFilter(v === "all" ? "" : v); void setPage(1); }}>
                       <SelectTrigger className="h-9 w-40">
                         <SelectValue placeholder={t("leads.allBranches")} />
@@ -424,5 +424,6 @@ export function LeadsList() {
         onClose={() => setRerouteLead(null)}
       />
     </div>
+    </PageGuard>
   );
 }
