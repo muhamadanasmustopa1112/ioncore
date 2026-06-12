@@ -39,7 +39,7 @@ const STATUS_VARIANT: Record<
 
 export function CrmLeadsTable() {
   const { t } = useTranslation();
-  const { isBranchScoped, branchIds } = useBranchScope("lead");
+  const { isBranchScoped, scopedBranchIds } = useBranchScope("lead");
 
   const listParams = {
     sort_by: "created_at" as const,
@@ -52,7 +52,7 @@ export function CrmLeadsTable() {
     useAdminLeads(listParams, !isBranchScoped);
 
   const { data: scopedData, isLoading: isScopedLoading } = useAdminLeadsByBranches(
-    branchIds,
+    scopedBranchIds,
     listParams,
     isBranchScoped,
   );

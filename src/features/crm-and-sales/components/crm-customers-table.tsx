@@ -33,7 +33,7 @@ const STATUS_VARIANT: Record<CustomerStatus, "success" | "warning" | "destructiv
 
 export function CrmCustomersTable() {
   const { t } = useTranslation();
-  const { isBranchScoped, branchIds } = useBranchScope("customer");
+  const { isBranchScoped, scopedBranchIds } = useBranchScope("customer");
 
   const listParams = {
     order_by: "created_at" as const,
@@ -46,7 +46,7 @@ export function CrmCustomersTable() {
     useCustomerList(listParams, !isBranchScoped);
 
   const { data: scopedData, isLoading: isScopedLoading } = useCustomerListByBranches(
-    branchIds,
+    scopedBranchIds,
     listParams,
     isBranchScoped,
   );

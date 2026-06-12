@@ -53,6 +53,14 @@ export interface AuthUser {
   branches?: BranchRef[];
   roles?: RoleRef[];
   permissions?: PermissionRef[];
+  audiences?: string[];
+  is_sales?: boolean;
+  is_technician?: boolean;
+  principal?: {
+    permissions?: string[];
+    roles?: string[];
+    audiences?: string[];
+  };
   created_at?: string;
   updated_at?: string;
 }

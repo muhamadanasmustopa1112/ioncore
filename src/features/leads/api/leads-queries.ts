@@ -15,11 +15,10 @@ import {
   updateLeadCableDistance,
   updateLeadStatus,
 } from "./leads-api";
-import { PERMISSIONS } from "@/config/permissions";
 import { listUsers } from "@/features/user-service/api/users";
 import { userServiceKeys } from "@/features/user-service/api/keys";
 import type { AuthUser } from "@/features/user-service/types";
-import { userHasPermission } from "@/lib/permissions";
+import { normalizePermissionName } from "@/lib/permission-aliases";
 import { sendNotification } from "@/features/administration/notification/api/send-notification";
 import { getLeadMutationErrorMessage } from "./map-lead-mutation-error";
 import { listSales } from "./sales-api";
@@ -44,8 +43,27 @@ export const salesKeys = {
 };
 
 function userBelongsToBranch(user: AuthUser, branchId: string): boolean {
-  if (user.branches?.some((branch) => branch.id === branchId)) return true;
+  const branches = user.branches ?? [];
+  if (branches.length === 0) return true;
+  if (branches.some((branch) => branch.id === branchId)) return true;
   return user.home_branch_id === branchId || user.active_branch_id === branchId;
+}
+
+function isSalesAssignee(user: AuthUser): boolean {
+  if (user.is_sales === true) return true;
+
+  const audiences = [
+    ...(user.audiences ?? []),
+    ...(user.principal?.audiences ?? []),
+  ].map((audience) => normalizePermissionName(audience));
+  if (audiences.includes("sales")) return true;
+
+  const roleNames = [
+    ...(user.roles ?? []).map((role) => role.name),
+    ...(user.principal?.roles ?? []),
+  ].map((name) => normalizePermissionName(name));
+
+  return roleNames.some((name) => name.includes("sales"));
 }
 
 export function useSalesAdminUsers(branchId?: string) {
@@ -62,10 +80,7 @@ export function useSalesAdminUsers(branchId?: string) {
       return (data?.data ?? []).filter(
         (user: AuthUser) =>
           user.is_active !== false &&
-          userHasPermission(
-            (user.permissions ?? []).map((permission) => permission.name),
-            PERMISSIONS.lead.read,
-          ) &&
+          isSalesAssignee(user) &&
           userBelongsToBranch(user, branchId),
       );
     },

@@ -59,7 +59,7 @@ export function TechnicianDashboard() {
   });
 
   const { rawUser } = useAuthStore();
-  const { isBranchScoped, branchIds, showBranchFilter, primaryBranchId } =
+  const { isBranchScoped, scopedBranchIds, showBranchFilter, primaryBranchId } =
     useBranchScope("work_orders");
 
   const resolvedBranchId = isBranchScoped
@@ -71,7 +71,7 @@ export function TechnicianDashboard() {
     branch_id: resolvedBranchId,
   };
 
-  const useMultiBranchFetch = isBranchScoped && branchIds.length > 1 && !appliedFilters.branch_id;
+  const useMultiBranchFetch = isBranchScoped && scopedBranchIds.length > 1 && !appliedFilters.branch_id;
 
   const { data: defaultData, isLoading: isDefaultLoading } = useWorkOrderList({
     params: listParams,
@@ -79,7 +79,7 @@ export function TechnicianDashboard() {
   });
 
   const { data: scopedData, isLoading: isScopedLoading } = useWorkOrderListByBranches(
-    branchIds,
+    scopedBranchIds,
     appliedFilters,
     !!rawUser && useMultiBranchFetch,
   );
