@@ -224,10 +224,10 @@ export interface Permission extends PermissionRef {
 }
 
 export interface CreatePermissionRequest {
-  name?: string;
+  name: string;
   resource: string;
   action: string;
-  description?: string;
+  description: string;
 }
 
 // ── Access policies ────────────────────────────────────

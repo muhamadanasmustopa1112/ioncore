@@ -36,6 +36,8 @@ import { createLead } from "@/features/leads/api/leads-api";
 import type { LeadSource } from "@/features/leads/types/leads-api";
 import { uploadImageToS3 } from "@/lib/s3-upload";
 import { paths } from "@/config/paths";
+import { PERMISSIONS } from "@/config/permissions";
+import { PageGuard } from "@/lib/permissions";
 import { useCreateCustomer, useReferrerCustomers } from "../api/customers-queries";
 import type { CreateCustomerPayload, CustomerType } from "../types/customers-api";
 import "@/i18n";
@@ -253,6 +255,7 @@ export function CreateCustomer() {
       : t("customers.createCustomer");
 
   return (
+    <PageGuard permission={PERMISSIONS.customer.create}>
     <div className="flex flex-col">
       <div className="px-6 pt-4 pb-2">
         <Toolbar>
@@ -397,5 +400,6 @@ export function CreateCustomer() {
         </div>
       </div>
     </div>
+    </PageGuard>
   );
 }

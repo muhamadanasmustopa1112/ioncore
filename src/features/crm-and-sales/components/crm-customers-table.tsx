@@ -18,8 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCustomerList } from "@/features/customers/api/customers-queries";
+import { paths } from "@/config/paths";
+import { useCustomerList, useCustomerListByBranches } from "@/features/customers/api/customers-queries";
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
+import { useBranchScope } from "@/hooks/use-branch-scope";
 
 const STATUS_VARIANT: Record<CustomerStatus, "success" | "warning" | "destructive" | "secondary" | "primary"> = {
   active: "success",
@@ -31,20 +33,41 @@ const STATUS_VARIANT: Record<CustomerStatus, "success" | "warning" | "destructiv
 
 export function CrmCustomersTable() {
   const { t } = useTranslation();
-  const { data, isLoading, isError, error } = useCustomerList({
-    order_by: "created_at",
-    order_direction: "desc",
-    size: 5,
-  });
+  const { isBranchScoped, branchIds } = useBranchScope("customer");
 
-const customers = Array.isArray(data?.items) ? data.items : [];
+  const listParams = {
+    order_by: "created_at" as const,
+    order_direction: "desc" as const,
+    size: 5,
+    page: 1,
+  };
+
+  const { data: defaultData, isLoading: isDefaultLoading, isError: isDefaultError, error: defaultError } =
+    useCustomerList(listParams, !isBranchScoped);
+
+  const { data: scopedData, isLoading: isScopedLoading } = useCustomerListByBranches(
+    branchIds,
+    listParams,
+    isBranchScoped,
+  );
+
+  const data = isBranchScoped ? scopedData : defaultData;
+  const isLoading = isBranchScoped ? isScopedLoading : isDefaultLoading;
+  const isError = isBranchScoped ? false : isDefaultError;
+  const error = isBranchScoped ? undefined : defaultError;
+
+  const customers = Array.isArray(data?.items) ? data.items : [];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t("common.latestCustomersActivated")}</CardTitle>
         <CardToolbar>
-          <Button variant="ghost" mode="link">{t("common.viewAll")}</Button>
+          <Button variant="ghost" mode="link" asChild>
+            <Link href={paths.dashboard.crmAndSales.customer.root.getHref()}>
+              {t("common.viewAll")}
+            </Link>
+          </Button>
         </CardToolbar>
       </CardHeader>
       <CardTable>

@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { paths } from "@/config/paths";
+import { PERMISSIONS } from "@/config/permissions";
+import { Can, PageGuard } from "@/lib/permissions";
 import { useNOCQueue } from "../../api/noc";
 import { NOCApprovalModal } from "../technician-detail/modals";
 import type {
@@ -88,15 +90,17 @@ function QueueRow({
           <span>{t("workOrder.noc.submitted")}: {fmtDate(item.submitted_at)}</span>
         </div>
       </div>
-      <Button
-        variant="primary"
-        size="sm"
-        onClick={() => onApprove(item)}
-        className="shrink-0 gap-2"
-      >
-        <ShieldCheck className="size-4" />
-        {t("workOrder.noc.review")}
-      </Button>
+      <Can permission={PERMISSIONS.technician.manage}>
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => onApprove(item)}
+          className="shrink-0 gap-2"
+        >
+          <ShieldCheck className="size-4" />
+          {t("workOrder.noc.review")}
+        </Button>
+      </Can>
     </div>
   );
 }
@@ -110,28 +114,19 @@ export function NOCQueueDashboard() {
     params: { type: typeFilter || undefined },
   });
 
-  if (isLoading) {
-    return (
+  return (
+    <PageGuard permission={PERMISSIONS.technician.manage}>
+    {isLoading ? (
       <div className="flex-1 p-6 flex items-center justify-center min-h-[60vh]">
         <Loader2 className="size-8 animate-spin text-primary" />
       </div>
-    );
-  }
-
-  if (isError || !data) {
-    return (
+    ) : isError || !data ? (
       <div className="flex-1 p-6 flex flex-col items-center justify-center min-h-[60vh] gap-3">
         <AlertCircle className="size-10 text-rose-500" />
         <p className="text-sm text-slate-600">{t("workOrder.noc.failedToLoad")}</p>
         <Button variant="outline" size="sm" onClick={() => refetch()}>{t("workOrder.noc.retry")}</Button>
       </div>
-    );
-  }
-
-  const summary = data.summary;
-  const items = data.items ?? [];
-
-  return (
+    ) : (
     <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-background min-h-screen">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
@@ -149,10 +144,10 @@ export function NOCQueueDashboard() {
 
       {/* KPI summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <KpiTile label={t("workOrder.noc.total")} value={summary.total} />
-        <KpiTile label={t("workOrder.noc.installations")} value={summary.installations} />
-        <KpiTile label={t("workOrder.noc.maintenance")} value={summary.maintenance} />
-        <KpiTile label={t("workOrder.noc.terminations")} value={summary.terminations} />
+        <KpiTile label={t("workOrder.noc.total")} value={data.summary.total} />
+        <KpiTile label={t("workOrder.noc.installations")} value={data.summary.installations} />
+        <KpiTile label={t("workOrder.noc.maintenance")} value={data.summary.maintenance} />
+        <KpiTile label={t("workOrder.noc.terminations")} value={data.summary.terminations} />
       </div>
 
       {/* Filter */}
@@ -169,7 +164,7 @@ export function NOCQueueDashboard() {
           <option value="termination">{t("workOrder.types.termination")}</option>
         </select>
         <span className="text-xs text-slate-400">
-          {items.length} {items.length !== 1 ? t("workOrder.noc.items") : t("workOrder.noc.item")}
+          {data.items.length} {data.items.length !== 1 ? t("workOrder.noc.items") : t("workOrder.noc.item")}
         </span>
       </div>
 
@@ -181,10 +176,10 @@ export function NOCQueueDashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          {items.length === 0 ? (
+          {data.items.length === 0 ? (
             <p className="text-sm text-slate-400 italic p-6 text-center">{t("workOrder.noc.queueClear")}</p>
           ) : (
-            items.map((item) => (
+            data.items.map((item) => (
               <QueueRow key={item.work_order_id} item={item} onApprove={setActiveItem} />
             ))
           )}
@@ -200,5 +195,7 @@ export function NOCQueueDashboard() {
         />
       )}
     </div>
+    )}
+    </PageGuard>
   );
 }

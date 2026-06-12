@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Loader2, AlertCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { paths } from "@/config/paths";
+import { PERMISSIONS } from "@/config/permissions";
+import { Can, PageGuard } from "@/lib/permissions";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -77,6 +79,7 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
   const hasTeam = wo.assigned_team && wo.assigned_team.length > 0;
 
   return (
+    <PageGuard permission={PERMISSIONS.technician.read}>
     <div className="flex-1 p-4 sm:p-6 lg:p-8 bg-background min-h-screen">
       {/* Breadcrumb */}
       <Breadcrumb className="mb-4">
@@ -119,14 +122,16 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
             </p>
           </div>
           {!hasTeam && (
-            <Button
-              size="sm"
-              className={`shrink-0 shadow-sm uppercase text-xs font-bold ${false /* Forced FALSE */ ? "bg-rose-600 hover:bg-rose-700 text-white" : "bg-amber-600 hover:bg-amber-700 text-white"
-                }`}
-              onClick={() => setShowPairing(true)}
-            >
-              {t("workOrder.detail.assignPairingNow")}
-            </Button>
+            <Can permission={PERMISSIONS.technician.manage}>
+              <Button
+                size="sm"
+                className={`shrink-0 shadow-sm uppercase text-xs font-bold ${false /* Forced FALSE */ ? "bg-rose-600 hover:bg-rose-700 text-white" : "bg-amber-600 hover:bg-amber-700 text-white"
+                  }`}
+                onClick={() => setShowPairing(true)}
+              >
+                {t("workOrder.detail.assignPairingNow")}
+              </Button>
+            </Can>
           )}
         </div>
       )}
@@ -174,7 +179,7 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
                 </Badge>
               )}
               {!isDone && (
-                <>
+                <Can permission={PERMISSIONS.technician.manage}>
                   <Button variant="outline" size="sm" onClick={() => setShowPairing(true)} className="text-[10px] uppercase font-bold">
                     {hasTeam ? t("workOrder.detail.reassignPairing") : t("workOrder.detail.assignPairing")}
                   </Button>
@@ -193,7 +198,7 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
                   <Button variant="destructive" appearance="ghost" size="sm" onClick={() => setShowCancel(true)} className="text-[10px] uppercase font-bold">
                     {t("workOrder.detail.cancelWo")}
                   </Button>
-                </>
+                </Can>
               )}
             </div>
           </div>
@@ -253,5 +258,6 @@ export function TechnicianWorkOrderDetail({ id }: { id: string }) {
         />
       )}
     </div>
+    </PageGuard>
   );
 }

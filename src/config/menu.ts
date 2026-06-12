@@ -61,6 +61,7 @@ import {
   Receipt,
 } from "lucide-react";
 import { paths } from "@/config/paths";
+import { PERMISSIONS } from "@/config/permissions";
 import { MenuConfig } from "@/config/types";
 // Menu untuk halaman /docs (documentation/development)
 export const DOCS_MENU: MenuConfig = [
@@ -166,6 +167,7 @@ const DASHBOARD_ITEM = {
   path: paths.dashboard.root.getHref(),
   heading: 'General',
   icon: BarChart3,
+  permission: PERMISSIONS.dashboard.read,
 };
 
 const CRM_SALES_ITEM = {
@@ -173,6 +175,7 @@ const CRM_SALES_ITEM = {
   path: paths.dashboard.crmAndSales.root.getHref(),
   heading: 'General',
   icon: UserSearch,
+  permission: PERMISSIONS.crm.read,
   children: [
     {
       title: "Overview",
@@ -183,11 +186,13 @@ const CRM_SALES_ITEM = {
       title: "Customers",
       path: paths.dashboard.crmAndSales.customer.root.getHref(),
       icon: UserIcon,
+      permission: PERMISSIONS.customer.read,
     },
     {
       title: "Leads",
       path: paths.dashboard.crmAndSales.leads.root.getHref(),
       icon: Users,
+      permission: PERMISSIONS.lead.read,
     },
   ],
 };
@@ -197,6 +202,7 @@ const NETWORK_ORCHESTRATION_ITEM = {
   path: paths.dashboard.networkAndOrchestration.root.getHref(),
   heading: 'Infrastructure',
   icon: Network,
+  permission: PERMISSIONS.network.read,
   children: [
     {
       title: "ION Radius",
@@ -274,26 +280,31 @@ const TECHNICIAN_FIELD_ITEM = {
   path: paths.dashboard.technician.root.getHref(),
   heading: 'Infrastructure',
   icon: UserCog,
+  permission: PERMISSIONS.technician.read,
   children: [
     {
       title: "Dashboard",
       path: paths.dashboard.technician.dashboard.getHref(),
       icon: Gauge,
+      permission: PERMISSIONS.technician.manage,
     },
     {
       title: "Work Orders",
       path: paths.dashboard.technician.root.getHref(),
       icon: ClipboardList,
+      permission: PERMISSIONS.technician.read,
     },
     {
       title: "Team Pairing",
       path: paths.dashboard.technician.teamPairing.getHref(),
       icon: UserCheck2,
+      permission: PERMISSIONS.technician.manage,
     },
     {
       title: "NOC Queue",
       path: paths.dashboard.technician.nocQueue.getHref(),
       icon: ShieldCheck,
+      permission: PERMISSIONS.technician.manage,
     },
   ],
 };
@@ -303,37 +314,37 @@ const FINANCE_ITEM = {
   path: paths.dashboard.finance.root.getHref(),
   heading: 'Finance',
   icon: Wallet,
-  permission: "billing.read",
+  permission: PERMISSIONS.billing.read,
   children: [
     {
       title: "Invoices",
       path: paths.dashboard.finance.invoice.root.getHref(),
       icon: FileText,
-      permission: "billing.invoice.read",
+      permission: PERMISSIONS.billing.invoice.read,
     },
     {
       title: "Payments",
       path: paths.dashboard.finance.payment.root.getHref(),
       icon: CreditCard,
-      permission: "billing.payment.read",
+      permission: PERMISSIONS.billing.payment.read,
     },
     {
       title: "Suspensions",
       path: paths.dashboard.finance.suspension.root.getHref(),
       icon: ShieldOff,
-      permission: "billing.suspension.read",
+      permission: PERMISSIONS.billing.suspension.read,
     },
     {
       title: "Commissions",
       path: paths.dashboard.finance.commission.root.getHref(),
       icon: Users,
-      permission: "billing.commission.read",
+      permission: PERMISSIONS.billing.commission.read,
     },
     {
       title: "Reports",
       path: paths.dashboard.finance.report.root.getHref(),
       icon: FileBarChart,
-      permission: "billing.report.read",
+      permission: PERMISSIONS.billing.report.read,
     },
   ],
 };
@@ -343,6 +354,7 @@ const ORDERS_ITEM = {
   path: paths.dashboard.operations.orders.root.getHref(),
   heading: 'Strategic',
   icon: Package,
+  permission: [PERMISSIONS.orders.read_all, PERMISSIONS.orders.read],
 };
 
 const ENTERPRISE_SYSTEM_ITEM = {
@@ -350,7 +362,7 @@ const ENTERPRISE_SYSTEM_ITEM = {
   path: paths.dashboard.enterprise.root.getHref(),
   heading: 'Enterprise',
   icon: Presentation,
-  permission: "enterprise.read",
+  permission: PERMISSIONS.enterprise.read,
   children: [
     { title: "Dashboard", path: paths.dashboard.enterprise.dashboard.getHref(), icon: BarChart3 },
     { title: "Vendors", path: paths.dashboard.enterprise.vendors.root.getHref(), icon: Truck },
@@ -368,7 +380,7 @@ const WAR_ROOM_ITEM = {
   path: paths.dashboard.warRoom.root.getHref(),
   heading: 'Operations',
   icon: ShieldAlert,
-  permission: "warroom.read",
+  permission: PERMISSIONS.warroom.read,
   children: [
     { title: "Active Incidents", path: paths.dashboard.warRoom.root.getHref(), icon: ShieldAlert },
     { title: "Task Board", path: paths.dashboard.warRoom.tasks.getHref(), icon: SquareKanban },
@@ -382,6 +394,7 @@ const WAREHOUSE_ITEM = {
   path: paths.dashboard.warehouse.root.getHref(),
   heading: 'Strategic',
   icon: Warehouse,
+  permission: PERMISSIONS.warehouse.read,
   children: [
     {
       title: "Dashboard",
@@ -436,37 +449,37 @@ const OPERATIONS_ITEM = {
   path: paths.dashboard.operations.root.getHref(),
   heading: 'Operations',
   icon: Activity,
-  permission: "ops.read",
+  permission: PERMISSIONS.ops.read,
   children: [
     {
       title: "Planned Maintenance",
       path: paths.dashboard.operations.plannedMaintenance.root.getHref(),
       icon: Wrench,
-      permission: "ops.maintenance.read",
+      permission: PERMISSIONS.ops.maintenance.read,
     },
     {
       title: "Bulk Operations",
       path: paths.dashboard.operations.bulkOperations.root.getHref(),
       icon: Layers,
-      permission: "ops.bulk.read",
+      permission: PERMISSIONS.ops.bulk.read,
     },
     {
       title: "Calendar",
       path: paths.dashboard.operations.calendar.root.getHref(),
       icon: Calendar,
-      permission: "ops.calendar.read",
+      permission: PERMISSIONS.ops.calendar.read,
     },
     {
       title: "Announcements",
       path: paths.dashboard.operations.announcements.root.getHref(),
       icon: Megaphone,
-      permission: "ops.announcements.read",
+      permission: PERMISSIONS.ops.announcements.read,
     },
     {
       title: "SLA Monitoring",
       path: paths.dashboard.operations.slaMonitoring.root.getHref(),
       icon: Activity,
-      permission: "ops.sla.read",
+      permission: PERMISSIONS.ops.sla.read,
     },
   ],
 };
@@ -476,7 +489,7 @@ const CUSTOMER_SERVICE_ITEM = {
   path: paths.dashboard.customerService.root.getHref(),
   heading: 'Support',
   icon: Headset,
-  permission: "cs.read",
+  permission: PERMISSIONS.cs.read,
   children: [
     {
       title: "Dashboard",
@@ -487,13 +500,13 @@ const CUSTOMER_SERVICE_ITEM = {
       title: "Tickets",
       path: paths.dashboard.customerService.tickets.root.getHref(),
       icon: Ticket,
-      permission: "cs.tickets.read",
+      permission: PERMISSIONS.cs.tickets.read,
     },
     {
       title: "CSAT",
       path: paths.dashboard.customerService.csat.root.getHref(),
       icon: Star,
-      permission: "cs.csat.read",
+      permission: PERMISSIONS.cs.csat.read,
     },
   ],
 };
@@ -504,31 +517,31 @@ const ADMINISTRATION_ITEMS = [
     path: paths.dashboard.administration.branch.root.getHref(),
     heading: 'Administration',
     icon: Building2,
-    permission: ["master.read", "master.manage"],
+    permission: [PERMISSIONS.master.read, PERMISSIONS.master.manage],
     children: [
       {
         title: "Hierarchy",
         path: paths.dashboard.administration.branch.root.getHref(),
         icon: Building2,
-        permission: "master.read",
+        permission: PERMISSIONS.master.read,
       },
       {
         title: "Capability",
         path: paths.dashboard.administration.branch.capability.getHref(),
         icon: Settings,
-        permission: "master.manage",
+        permission: PERMISSIONS.master.manage,
       },
       {
         title: "Coverage",
         path: paths.dashboard.administration.branch.coverage.getHref(),
         icon: Map,
-        permission: "master.manage",
+        permission: PERMISSIONS.master.manage,
       },
       {
         title: "Policy",
         path: paths.dashboard.administration.branch.policy.getHref(),
         icon: ShieldCheck,
-        permission: "master.manage",
+        permission: PERMISSIONS.master.manage,
       },
     ],
   },
@@ -537,19 +550,25 @@ const ADMINISTRATION_ITEMS = [
     path: paths.dashboard.administration.users.root.getHref(),
     heading: 'Administration',
     icon: UserCog,
-    permission: ["user.manage", "role.manage"],
+    permission: [PERMISSIONS.user.manage, PERMISSIONS.role.manage, PERMISSIONS.permission.manage],
     children: [
       {
         title: "User Management",
         path: paths.dashboard.administration.users.root.getHref(),
         icon: UserIcon,
-        permission: "user.manage",
+        permission: PERMISSIONS.user.manage,
       },
       {
         title: "Role Management",
         path: paths.dashboard.administration.roles.root.getHref(),
         icon: ShieldCheck,
-        permission: "role.manage",
+        permission: PERMISSIONS.role.manage,
+      },
+      {
+        title: "Permissions",
+        path: paths.dashboard.administration.permissions.getHref(),
+        icon: KeyRound,
+        permission: PERMISSIONS.permission.manage,
       },
     ],
   },
@@ -558,35 +577,35 @@ const ADMINISTRATION_ITEMS = [
     path: paths.dashboard.administration.schema.root.getHref(),
     heading: 'Administration',
     icon: FileText,
-    permission: "master.manage",
+    permission: [PERMISSIONS.master.manage, PERMISSIONS.schema.approve],
   },
   {
     title: "Customer Types",
     path: paths.dashboard.administration.customerTypes.getHref(),
     heading: 'Administration',
     icon: Users2,
-    permission: "master.manage",
+    permission: PERMISSIONS.master.manage,
   },
   {
     title: "Products",
     path: paths.dashboard.administration.products.root.getHref(),
     heading: 'Administration',
     icon: Package,
-    permission: "master.manage",
+    permission: PERMISSIONS.master.manage,
   },
   {
     title: "Audit Log",
     path: paths.dashboard.administration.auditLog.getHref(),
     heading: 'Administration',
     icon: ScrollText,
-    permission: "audit.read",
+    permission: PERMISSIONS.audit.read,
   },
   {
     title: "Access Policies",
     path: paths.dashboard.administration.accessPolicies.getHref(),
     heading: 'Administration',
     icon: ShieldCheck,
-    permission: "access.read",
+    permission: PERMISSIONS.access.read,
   },
 ];
 
@@ -604,18 +623,6 @@ export const DASHBOARD_MENU: MenuConfig = [
   ENTERPRISE_SYSTEM_ITEM,
   WAR_ROOM_ITEM,
   ...ADMINISTRATION_ITEMS,
-];
-
-// Menu khusus untuk technician role
-export const TECHNICIAN_MENU: MenuConfig = [
-  // DASHBOARD_ITEM,
-  TECHNICIAN_FIELD_ITEM,
-];
-
-// Menu khusus untuk SALES_ADMIN — CRM & Sales + Orders saja
-export const SALES_ADMIN_MENU: MenuConfig = [
-  CRM_SALES_ITEM,
-  ORDERS_ITEM,
 ];
 
 // Export default untuk backward compatibility

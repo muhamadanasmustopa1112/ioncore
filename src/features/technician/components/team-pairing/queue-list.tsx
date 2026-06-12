@@ -5,6 +5,8 @@ import { format } from "date-fns";
 import { useTranslation } from "react-i18next";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PERMISSIONS } from "@/config/permissions";
+import { Can } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CalendarDays, ClipboardList, MapPin, User, Wrench } from "lucide-react";
 import { paths } from "@/config/paths";
@@ -157,14 +159,16 @@ export function QueueList({
                     )}
                   </div>
                   {(wo.state === "unassigned" || wo.state === "created") && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => onAssign(wo)}
-                      className="shrink-0 text-[10px] uppercase font-bold"
-                    >
-                      {t("workOrder.detail.assignPairing")}
-                    </Button>
+                    <Can permission={PERMISSIONS.technician.manage}>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        onClick={() => onAssign(wo)}
+                        className="shrink-0 text-[10px] uppercase font-bold"
+                      >
+                        {t("workOrder.detail.assignPairing")}
+                      </Button>
+                    </Can>
                   )}
                 </div>
               );

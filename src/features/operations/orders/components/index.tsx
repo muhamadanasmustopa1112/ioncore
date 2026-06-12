@@ -46,6 +46,9 @@ import {
   ToolbarActions,
 } from "@/components/common/toolbar";
 import { paths } from "@/config/paths";
+import { PERMISSIONS } from "@/config/permissions";
+import { useResourceActions } from "@/hooks/use-resource-actions";
+import { PageGuard } from "@/lib/permissions";
 import {
   useOrderList,
   useOrder,
@@ -92,6 +95,7 @@ function OrderDetailSheet({
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus | "">("");
 
   const transitions = order ? STATUS_TRANSITIONS[order.status] : [];
+  const { canMutateOrders } = useResourceActions("orders");
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
@@ -176,7 +180,7 @@ function OrderDetailSheet({
               </div>
             )}
 
-            {transitions.length > 0 && (
+            {transitions.length > 0 && canMutateOrders && (
               <div className="border-t pt-5">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Update Status</p>
                 <div className="flex gap-3">
@@ -354,6 +358,7 @@ export function OrdersPage() {
   });
 
   return (
+    <PageGuard permission={PERMISSIONS.orders.read}>
     <div className="flex flex-col gap-5 p-4">
       <PageBreadcrumb
         items={[
@@ -415,5 +420,6 @@ export function OrdersPage() {
         onClose={() => setSelectedOrderId(null)}
       />
     </div>
+    </PageGuard>
   );
 }

@@ -541,6 +541,10 @@ export const paths = {
         path: "/administration/access-policies",
         getHref: () => "/administration/access-policies",
       },
+      permissions: {
+        path: "/administration/permissions",
+        getHref: () => "/administration/permissions",
+      },
       compliance: {
         path: "/administration/compliance",
         getHref: () => "/administration/compliance",

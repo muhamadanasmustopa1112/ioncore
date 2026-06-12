@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Check, ChevronsUpDown, Loader2 } from "lucide-react";
@@ -32,13 +32,17 @@ import {
   ToolbarTitle,
 } from "@/components/common/toolbar";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
+import { useBranchScope } from "@/hooks/use-branch-scope";
 import { useReferrerCustomers } from "@/features/customers/api/customers-queries";
 import type { CustomerStatus } from "@/features/customers/types/customers-api";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { paths } from "@/config/paths";
+import { PERMISSIONS } from "@/config/permissions";
+import { PageGuard } from "@/lib/permissions";
 import { useCreateLead, useSalesAdminUsers } from "../api/leads-queries";
 import { getLeadMutationErrorMessage } from "../api/map-lead-mutation-error";
 import type { CustomerSubType, LeadSource, LeadStatus, LeadType } from "../types/leads-api";
+import { getPrimaryBranchFromMeUser, getPrimaryBranchIdFromMeUser } from "../utils/sales-admin-branch";
 
 const LEAD_TYPES: { value: LeadType; label: string }[] = [
   { value: "broadband", label: "Broadband" },
@@ -123,12 +127,33 @@ export function CreateLeadPage() {
 
   const pinMoved = lat !== INSTALL_DEFAULT[0] || lng !== INSTALL_DEFAULT[1];
 
+  const { isBranchScoped, meUser } = useBranchScope("lead");
+  const salesAdminBranch = useMemo(
+    () => getPrimaryBranchFromMeUser(meUser),
+    [meUser],
+  );
+  const salesAdminBranchId = useMemo(
+    () => getPrimaryBranchIdFromMeUser(meUser),
+    [meUser],
+  );
+
   const { data: branches = [], isLoading: branchesLoading } = useBranchList();
   const { data: customersData, isLoading: customersLoading } = useReferrerCustomers(
     source === "referral" ? { search: customerSearch || undefined, size: 20, status: "active" } : {}
   );
   const createLead = useCreateLead();
-  const { users: salesAdminUsers, isLoading: salesAdminsLoading } = useSalesAdminUsers(branchId || undefined);
+  const effectiveBranchId = isBranchScoped ? salesAdminBranchId : branchId;
+  const { users: salesAdminUsers, isLoading: salesAdminsLoading } = useSalesAdminUsers(
+    effectiveBranchId || undefined,
+  );
+
+  useEffect(() => {
+    if (!isBranchScoped) return;
+    setBranchId(salesAdminBranchId);
+    if (!salesAdminBranchId) {
+      setAssignedSalesId("");
+    }
+  }, [isBranchScoped, salesAdminBranchId]);
 
   const activeBranches = useMemo(
     () => branches.filter((b) => b.active && (b.level === "area" || b.level === "sub_area")),
@@ -147,7 +172,7 @@ export function CreateLeadPage() {
 
   const canSubmit =
     !!leadName.trim() &&
-    !!branchId &&
+    !!effectiveBranchId &&
     !createLead.isPending &&
     (source !== "referral" || !!referrerCustomerId);
 
@@ -163,7 +188,7 @@ export function CreateLeadPage() {
         customer_sub_type: subType,
         lead_name: leadName.trim(),
         source,
-        branch_id: branchId,
+        branch_id: effectiveBranchId,
         referrer_customer_id: source === "referral" && referrerCustomerId ? referrerCustomerId : null,
         status,
         ...(nik.trim() ? { nik: nik.trim() } : {}),
@@ -178,6 +203,7 @@ export function CreateLeadPage() {
   }
 
   return (
+    <PageGuard permission={PERMISSIONS.lead.create}>
     <div className="flex flex-col">
       <div className="px-6 pt-4 pb-2">
         <Toolbar>
@@ -332,50 +358,52 @@ export function CreateLeadPage() {
                 </FieldRow>
               )}
 
-              <FieldRow label={t("customers.branch")} required>
-                <Select
-                  value={branchId}
-                  onValueChange={(v) => {
-                    setBranchId(v);
-                    setAssignedSalesId("");
-                  }}
-                  disabled={branchesLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={branchesLoading ? t("common.loading") : t("customers.selectBranch")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activeBranches.map((b) => {
-                      const parentArea = b.level === "sub_area" ? branches.find((item) => item.id === b.parentId || item.id === b._areaId) : null;
-                      const parentName = parentArea?.name || b.parentName || b._areaName;
-                      return (
-                        <SelectItem key={b.id} value={b.id}>
-                          <span>{b.name}</span>
-                          {parentName && (
-                            <span className="ml-1 text-xs text-muted-foreground">
-                              ({parentName})
+              {!isBranchScoped && (
+                <FieldRow label={t("customers.branch")} required>
+                  <Select
+                    value={branchId}
+                    onValueChange={(v) => {
+                      setBranchId(v);
+                      setAssignedSalesId("");
+                    }}
+                    disabled={branchesLoading}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={branchesLoading ? t("common.loading") : t("customers.selectBranch")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeBranches.map((b) => {
+                        const parentArea = b.level === "sub_area" ? branches.find((item) => item.id === b.parentId || item.id === b._areaId) : null;
+                        const parentName = parentArea?.name || b.parentName || b._areaName;
+                        return (
+                          <SelectItem key={b.id} value={b.id}>
+                            <span>{b.name}</span>
+                            {parentName && (
+                              <span className="ml-1 text-xs text-muted-foreground">
+                                ({parentName})
+                              </span>
+                            )}
+                            <span className="ml-2 text-xs text-muted-foreground capitalize">
+                              {b.level.replace("_", " ")}
                             </span>
-                          )}
-                          <span className="ml-2 text-xs text-muted-foreground capitalize">
-                            {b.level.replace("_", " ")}
-                          </span>
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </FieldRow>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </FieldRow>
+              )}
 
               <FieldRow label={t("leads.assignedSales", "Assigned Sales")}>
                 <Select
                   value={assignedSalesId || "none"}
                   onValueChange={(v) => setAssignedSalesId(v === "none" ? "" : v)}
-                  disabled={!branchId || salesAdminsLoading}
+                  disabled={!effectiveBranchId || salesAdminsLoading}
                 >
                   <SelectTrigger>
                     <SelectValue
                       placeholder={
-                        !branchId
+                        !effectiveBranchId
                           ? t("leads.selectBranchFirst", "Select branch first")
                           : salesAdminsLoading
                             ? t("common.loading")
@@ -458,6 +486,9 @@ export function CreateLeadPage() {
                   {
                     label: t("customers.branch"),
                     value: (() => {
+                      if (isBranchScoped) {
+                        return salesAdminBranch?.name || salesAdminBranch?.code || null;
+                      }
                       const selectedBranch = activeBranches.find((b) => b.id === branchId);
                       if (!selectedBranch) return null;
                       const parentArea = selectedBranch.level === "sub_area" ? branches.find((item) => item.id === selectedBranch.parentId || item.id === selectedBranch._areaId) : null;
@@ -491,5 +522,6 @@ export function CreateLeadPage() {
         </div>
       </div>
     </div>
+    </PageGuard>
   );
 }

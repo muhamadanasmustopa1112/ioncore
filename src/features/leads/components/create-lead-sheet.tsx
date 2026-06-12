@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 import { RiUserAddLine } from "@remixicon/react";
@@ -32,6 +32,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useBranchList } from "@/features/administration/branch/api/branch-queries";
+import { useBranchScope } from "@/hooks/use-branch-scope";
 import { BranchCombobox } from "@/features/administration/branch/components/branch-combobox";
 import { InstallationSection, INSTALL_DEFAULT } from "@/features/customers/components/create-customer-installation-section";
 import { useReferrerCustomers } from "@/features/customers/api/customers-queries";
@@ -43,6 +44,7 @@ import type {
   LeadSource,
   LeadType,
 } from "../types/leads-api";
+import { getPrimaryBranchIdFromMeUser } from "../utils/sales-admin-branch";
 
 interface Props {
   open: boolean;
@@ -123,6 +125,12 @@ export function CreateLeadSheet({ open, onClose }: Props) {
   const [branchType, setBranchType] = useState("all");
   const [search, setSearch] = useState("");
 
+  const { isBranchScoped, meUser } = useBranchScope("lead");
+  const salesAdminBranchId = useMemo(
+    () => getPrimaryBranchIdFromMeUser(meUser),
+    [meUser],
+  );
+
   const { data: branches = [], isLoading: branchesLoading } = useBranchList({
     branch_type: branchType === "all" ? undefined : branchType,
     keyword: search || undefined,
@@ -131,7 +139,18 @@ export function CreateLeadSheet({ open, onClose }: Props) {
     source === "referral" ? { search: customerSearch || undefined, size: 500, status: "active" } : {}
   );
   const createLead = useCreateLead();
-  const { users: salesAdminUsers, isLoading: salesAdminsLoading } = useSalesAdminUsers(branchId || undefined);
+  const effectiveBranchId = isBranchScoped ? salesAdminBranchId : branchId;
+  const { users: salesAdminUsers, isLoading: salesAdminsLoading } = useSalesAdminUsers(
+    effectiveBranchId || undefined,
+  );
+
+  useEffect(() => {
+    if (!isBranchScoped) return;
+    setBranchId(salesAdminBranchId);
+    if (!salesAdminBranchId) {
+      setAssignedSalesId("");
+    }
+  }, [isBranchScoped, salesAdminBranchId]);
 
   const activeBranches = useMemo(
     () => branches.filter((b) => {
@@ -153,7 +172,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
 
   const canSubmit =
     !!leadName.trim() &&
-    !!branchId &&
+    !!effectiveBranchId &&
     !createLead.isPending &&
     (source !== "referral" || !!referrerCustomerId);
 
@@ -185,7 +204,7 @@ export function CreateLeadSheet({ open, onClose }: Props) {
       customer_sub_type: subType,
       lead_name: leadName.trim(),
       source,
-      branch_id: branchId,
+      branch_id: effectiveBranchId,
       referrer_customer_id:
         source === "referral" && referrerCustomerId ? referrerCustomerId : null,
       status: "new",
@@ -364,36 +383,38 @@ export function CreateLeadSheet({ open, onClose }: Props) {
                 onAddressChange={() => { }}
               />
 
-              <div className="space-y-2">
-                <Label className="text-xs">
-                  {t("customers.branch")} <span className="text-destructive">*</span>
-                </Label>
-                <BranchCombobox
-                  branches={activeBranches}
-                  value={branchId}
-                  onValueChange={(v) => {
-                    setBranchId(v);
-                    setAssignedSalesId("");
-                  }}
-                  branchType={branchType}
-                  onTypeChange={setBranchType}
-                  onSearchChange={setSearch}
-                  isLoading={branchesLoading}
-                  className="w-full"
-                />
-              </div>
+              {!isBranchScoped && (
+                <div className="space-y-2">
+                  <Label className="text-xs">
+                    {t("customers.branch")} <span className="text-destructive">*</span>
+                  </Label>
+                  <BranchCombobox
+                    branches={activeBranches}
+                    value={branchId}
+                    onValueChange={(v) => {
+                      setBranchId(v);
+                      setAssignedSalesId("");
+                    }}
+                    branchType={branchType}
+                    onTypeChange={setBranchType}
+                    onSearchChange={setSearch}
+                    isLoading={branchesLoading}
+                    className="w-full"
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label className="text-xs">{t("leads.assignedSales", "Assigned Sales")}</Label>
                 <Select
                   value={assignedSalesId || "none"}
                   onValueChange={(v) => setAssignedSalesId(v === "none" ? "" : v)}
-                  disabled={!branchId || salesAdminsLoading}
+                  disabled={!effectiveBranchId || salesAdminsLoading}
                 >
                   <SelectTrigger>
                     <SelectValue
                       placeholder={
-                        !branchId
+                        !effectiveBranchId
                           ? t("leads.selectBranchFirst", "Select branch first")
                           : salesAdminsLoading
                             ? t("common.loading")

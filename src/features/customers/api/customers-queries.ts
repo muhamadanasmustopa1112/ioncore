@@ -1,4 +1,5 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   createCustomer,
@@ -22,6 +23,7 @@ import type {
   CreateCustomerDocumentPayload,
   CreateCustomerFromLeadPayload,
   CreateCustomerPayload,
+  CustomerDto,
   CustomerListParams,
   UpdateCustomerAttributePayload,
   UpdateCustomerLocationPayload,
@@ -29,13 +31,15 @@ import type {
   ValidateCustomerDocumentPayload,
 } from "../types/customers-api";
 
+const BRANCH_SCOPED_FETCH_SIZE = 100;
+
 export const customerKeys = {
   all: ["customers"] as const,
   list: (params: CustomerListParams) => [...customerKeys.all, "list", params] as const,
   detail: (id: string) => [...customerKeys.all, "detail", id] as const,
 };
 
-export function useCustomerList(params: CustomerListParams = {}) {
+export function useCustomerList(params: CustomerListParams = {}, enabled = true) {
   return useQuery({
     queryKey: customerKeys.list(params),
     queryFn: async () => {
@@ -43,7 +47,63 @@ export function useCustomerList(params: CustomerListParams = {}) {
       return { items: res.data.customers ?? [], meta: res.data.metadata };
     },
     placeholderData: (prev) => prev,
+    enabled,
   });
+}
+
+export function useCustomerListByBranches(
+  branchIds: string[],
+  params: CustomerListParams = {},
+  enabled = true,
+) {
+  const fetchParams: CustomerListParams = {
+    ...params,
+    page: 1,
+    size: BRANCH_SCOPED_FETCH_SIZE,
+  };
+
+  const queries = useQueries({
+    queries: branchIds.map((branch_id) => ({
+      queryKey: customerKeys.list({ ...fetchParams, branch_id }),
+      queryFn: async () => {
+        const res = await listCustomers({ ...fetchParams, branch_id });
+        return { items: res.data.customers ?? [], meta: res.data.metadata };
+      },
+      enabled: enabled && branchIds.length > 0,
+      placeholderData: (prev: { items: CustomerDto[]; meta?: { page: number; size: number; total: number } }) => prev,
+    })),
+  });
+
+  return useMemo(() => {
+    const isLoading = enabled && (branchIds.length === 0 || queries.some((q) => q.isLoading));
+    const byId = new Map<string, CustomerDto>();
+
+    for (const query of queries) {
+      for (const customer of query.data?.items ?? []) {
+        byId.set(customer.id, customer);
+      }
+    }
+
+    const allCustomers = Array.from(byId.values()).sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+
+    const page = params.page ?? 1;
+    const size = params.size ?? 25;
+    const start = (page - 1) * size;
+
+    return {
+      data: {
+        items: allCustomers.slice(start, start + size),
+        meta: {
+          page,
+          size,
+          total: allCustomers.length,
+        },
+      },
+      isLoading,
+    };
+  }, [branchIds.length, enabled, params.page, params.size, queries]);
 }
 
 export function useReferrerCustomers(params: { search?: string; page?: number; size?: number; status?: string } = {}) {

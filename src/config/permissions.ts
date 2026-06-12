@@ -1,0 +1,68 @@
+/**
+ * Permission name constants — must match RBAC_PERMISSION_SEED / user-service records.
+ */
+export const PERMISSIONS = {
+  dashboard: { read: "dashboard.read" },
+  crm: { read: "crm.read" },
+  customer: {
+    read: "customer.read",
+    read_all: "customer.read_all",
+    create: "customer.create",
+    update: "customer.update",
+  },
+  lead: {
+    read: "lead.read",
+    read_all: "lead.read_all",
+    create: "lead.create",
+    update: "lead.update",
+    route: "lead.route",
+    approve: "lead.approve",
+  },
+  orders: {
+    read_all: "orders.read_all",
+    read: "orders.read",
+    create: "orders.create",
+    update: "orders.update",
+    approve: "orders.approve",
+  },
+  network: { read: "network.read", manage: "network.manage" },
+  technician: { read: "technician.read", manage: "technician.manage" },
+  warehouse: { read: "warehouse.read", manage: "warehouse.manage" },
+  billing: {
+    read: "billing.read",
+    invoice: { read: "billing.invoice.read" },
+    payment: { read: "billing.payment.read" },
+    suspension: { read: "billing.suspension.read" },
+    commission: { read: "billing.commission.read" },
+    report: { read: "billing.report.read" },
+  },
+  budget: {
+    read: "budget.read",
+    approve: "budget.approve",
+    validate: "budget.validate",
+  },
+  ops: {
+    read: "ops.read",
+    maintenance: { read: "ops.maintenance.read" },
+    bulk: { read: "ops.bulk.read" },
+    calendar: { read: "ops.calendar.read" },
+    announcements: { read: "ops.announcements.read" },
+    sla: { read: "ops.sla.read" },
+  },
+  cs: {
+    read: "cs.read",
+    tickets: { read: "cs.tickets.read" },
+    csat: { read: "cs.csat.read" },
+  },
+  enterprise: { read: "enterprise.read" },
+  warroom: { read: "warroom.read" },
+  master: { read: "master.read", manage: "master.manage" },
+  user: { manage: "user.manage" },
+  role: { manage: "role.manage" },
+  schema: { approve: "schema.approve" },
+  audit: { read: "audit.read" },
+  access: { read: "access.read" },
+  permission: { manage: "permission.manage" },
+  product: { manage: "product.manage", approve: "product.approve" },
+  work_orders: { read_all: "work_orders.read_all" },
+} as const;
