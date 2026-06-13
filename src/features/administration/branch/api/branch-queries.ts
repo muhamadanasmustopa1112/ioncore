@@ -122,12 +122,19 @@ export function flattenBranchTree(nodes: BranchTreeNode[]): BranchData[] {
 
 function mapBranchDetailToData(dto: BranchDetailDto): BranchData {
   const level = dto.level.toLowerCase() as BranchLevel;
+  const regionalId =
+    dto.branch_regional?.id ??
+    (level === "area" ? dto.branch_parent_id ?? undefined : undefined);
+  const areaId =
+    dto.branch_area?.id ??
+    (level === "sub_area" ? dto.branch_parent_id ?? undefined : undefined);
+
   return {
     id: dto.id,
     name: dto.name,
     code: dto.code,
     level,
-    parentId: dto.branch_area?.id ?? dto.branch_regional?.id ?? null,
+    parentId: areaId ?? regionalId ?? null,
     parentName: dto.branch_area?.branch_name ?? dto.branch_regional?.branch_name,
     branchType: dto.type as BranchType | undefined,
     address: dto.address,
@@ -138,8 +145,8 @@ function mapBranchDetailToData(dto: BranchDetailDto): BranchData {
     active: dto.is_active,
     createdAt: dto.created_at,
     updatedAt: dto.updated_at,
-    _regionalId: dto.branch_regional?.id,
-    _areaId: dto.branch_area?.id,
+    _regionalId: regionalId,
+    _areaId: areaId,
     _regionalName: dto.branch_regional?.branch_name,
     _areaName: dto.branch_area?.branch_name,
   };

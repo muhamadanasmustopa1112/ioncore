@@ -215,7 +215,8 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const isArea = level === "area";
 
   useEffect(() => {
-    if (isDetailMode) return;
+    // Auto-fill address from pin coordinates only when creating a new branch.
+    if (!isNewMode) return;
 
     if (lat == null || long == null) {
       setValue("address", "");
@@ -240,7 +241,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
     return () => {
       cancelled = true;
     };
-  }, [lat, long, isDetailMode, setValue]);
+  }, [lat, long, isNewMode, setValue]);
 
   const isLocked = isEditMode || isDetailMode;
   const clearParents = () => {
@@ -250,14 +251,19 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   };
 
   const onFormSubmit = (values: BranchFormValues) => {
+    const regionalId =
+      values.regionalId?.trim() ||
+      (isEditMode ? selectedBranch?._regionalId : undefined) ||
+      undefined;
+
     onSubmit?.({
       name: values.name,
       ...(isNewMode ? { code: values.code } : {}),
       is_active: values.active,
       type: values.type,
       level: values.level,
-      regionalId: isRegional ? undefined : values.regionalId,
-      areaId: isSubArea ? values.areaId : undefined,
+      regionalId: isRegional ? undefined : regionalId,
+      areaId: isSubArea ? (values.areaId?.trim() || selectedBranch?._areaId || undefined) : undefined,
       address: values.address?.trim() || undefined,
       geographic_polygon: parseGeographicPolygon(values.geographic_polygon),
       lat: values.lat,
@@ -521,7 +527,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground">
                 {t("administration.branch.form.address")}
-                {!isDetailMode && (
+                {isNewMode && (
                   <span className="ml-1.5 text-muted-foreground/60 font-normal">
                     {t("administration.branch.form.addressAutoHint")}
                   </span>
@@ -535,8 +541,8 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
                 }
                 className="min-h-[72px] resize-none bg-muted/40"
                 {...register("address")}
-                disabled
-                readOnly
+                disabled={isDetailMode}
+                readOnly={isDetailMode}
               />
             </div>
             <div className="space-y-2">

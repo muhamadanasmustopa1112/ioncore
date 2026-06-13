@@ -48,7 +48,7 @@ export function BranchFormSheet() {
     lat?: number;
     long?: number;
   }) => {
-    const branchPayload = {
+    const basePayload = {
       name: formData.name,
       ...(isNewMode ? { code: formData.code } : {}),
       is_active: formData.is_active,
@@ -60,6 +60,12 @@ export function BranchFormSheet() {
     };
 
     if (isNewMode) {
+      const branchPayload = {
+        ...basePayload,
+        ...(formData.level === "area" && formData.regionalId
+          ? { branch_parent_id: formData.regionalId }
+          : {}),
+      };
       createBranch.mutate(
         {
           level: formData.level,
@@ -70,11 +76,23 @@ export function BranchFormSheet() {
         { onSuccess: closeBranchFormSheet }
       );
     } else if (isEditMode && selectedBranch) {
+      const regionalParentId =
+        formData.regionalId?.trim() ||
+        detailBranch?._regionalId ||
+        selectedBranch._regionalId;
+
+      const branchPayload = {
+        ...basePayload,
+        ...(selectedBranch.level === "area" && regionalParentId
+          ? { branch_parent_id: regionalParentId }
+          : {}),
+      };
+
       updateBranch.mutate(
         {
           id: selectedBranch.id,
           level: selectedBranch.level,
-          regionalId: formData.regionalId,
+          regionalId: regionalParentId || formData.regionalId,
           areaId: formData.areaId,
           payload: branchPayload,
         },

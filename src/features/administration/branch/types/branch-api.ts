@@ -128,6 +128,7 @@ export interface BranchDetailDto {
   code: string;
   level: string;
   type?: string;
+  branch_parent_id?: string | null;
   is_active: boolean;
   address?: string;
   cable_route_factor?: number;
