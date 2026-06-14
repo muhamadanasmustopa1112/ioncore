@@ -23,11 +23,16 @@ import { useAreaList, useBranchCodesByType, useRegionalList } from "../../api/br
 import { BranchData, BranchLevel, GeographicPolygon } from "../../types";
 import {
   BRANCH_CODE_LENGTH,
-  generateUniqueBranchCode,
+  generateBranchCodeBase,
+  isDuplicateBranchCode,
 } from "../../utils/generate-branch-code";
 import { reverseGeocode } from "../../utils/reverse-geocode";
 
-function createBranchSchema(requireCode: boolean) {
+function createBranchSchema(
+  requireCode: boolean,
+  getExistingCodes: () => string[] = () => [],
+  duplicateCodeMessage = "Branch code already exists",
+) {
   return z
     .object({
       name: z.string().min(1, "Branch name is required"),
@@ -70,6 +75,12 @@ function createBranchSchema(requireCode: boolean) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: "Branch code is required",
+            path: ["code"],
+          });
+        } else if (isDuplicateBranchCode(code, getExistingCodes())) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: duplicateCodeMessage,
             path: ["code"],
           });
         }
@@ -132,9 +143,16 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const isDetailMode = formMode === "details";
   const isNewMode = formMode === "new";
 
+  const existingCodesRef = useRef<string[]>([]);
+
   const branchSchema = useMemo(
-    () => createBranchSchema(isNewMode),
-    [isNewMode],
+    () =>
+      createBranchSchema(
+        isNewMode,
+        () => existingCodesRef.current,
+        t("administration.branch.form.duplicateBranchCode"),
+      ),
+    [isNewMode, t],
   );
 
   const defaultValues = useMemo(
@@ -179,6 +197,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
     control,
     watch,
     setValue,
+    trigger,
     formState: { errors },
   } = useForm<BranchFormValues>({
     resolver: zodResolver(branchSchema),
@@ -197,6 +216,7 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
   const isSubArea = level === "sub_area";
 
   const { data: sameTypeCodes = [], isFetched: codesLoaded } = useBranchCodesByType(branchType);
+  existingCodesRef.current = sameTypeCodes;
 
   useEffect(() => {
     if (isEditMode || isDetailMode || isSubArea || !codesLoaded) return;
@@ -204,9 +224,14 @@ export function BranchForm({ onSubmit, branchData }: BranchFormProps) {
       setValue("code", "", { shouldValidate: false });
       return;
     }
-    const generated = generateUniqueBranchCode(name, sameTypeCodes);
-    setValue("code", generated, { shouldValidate: false });
-  }, [name, sameTypeCodes, codesLoaded, branchType, isSubArea, isEditMode, isDetailMode, setValue]);
+    const generated = generateBranchCodeBase(name);
+    setValue("code", generated, { shouldValidate: true });
+  }, [name, codesLoaded, branchType, isSubArea, isEditMode, isDetailMode, setValue]);
+
+  useEffect(() => {
+    if (!isNewMode || isSubArea || !codesLoaded) return;
+    void trigger("code");
+  }, [sameTypeCodes, codesLoaded, isNewMode, isSubArea, trigger]);
 
   const { data: regionals = [] } = useRegionalList(branchType);
   const { data: areas = [] } = useAreaList(regionalId, branchType);
