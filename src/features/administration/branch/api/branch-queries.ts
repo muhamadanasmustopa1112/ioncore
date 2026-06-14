@@ -189,7 +189,13 @@ export function useBranchCodesByType(branchType: string) {
         page += 1;
       }
 
-      return codes;
+      const seen = new Set<string>();
+      return codes.filter((code) => {
+        const normalized = code.trim().toUpperCase();
+        if (!normalized || seen.has(normalized)) return false;
+        seen.add(normalized);
+        return true;
+      });
     },
     enabled: !!branchType,
   });
