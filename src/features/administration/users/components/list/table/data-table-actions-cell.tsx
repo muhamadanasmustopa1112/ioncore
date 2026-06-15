@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslation } from "react-i18next";
-import { RiEditLine, RiEyeLine, RiLockLine, RiLockUnlockLine, RiUserFollowLine, RiUserForbidLine } from "@remixicon/react";
+import { RiEditLine, RiEyeLine, RiLockLine, RiLockPasswordLine, RiLockUnlockLine, RiUserFollowLine, RiUserForbidLine } from "@remixicon/react";
 import { Row } from "@tanstack/react-table";
 import { EllipsisVertical } from "lucide-react";
 import { toast } from "sonner";
@@ -19,7 +19,7 @@ import { useUserStore } from "../../../store/user";
 
 export function ActionsCell({ row }: { row: Row<UserData> }) {
   const { t } = useTranslation();
-  const { openUserFormSheet } = useUserStore();
+  const { openUserFormSheet, openChangePasswordSheet } = useUserStore();
   const { mutate: updateStatus, isPending } = useUpdateUserStatus();
   const { mutate: revokeSessions } = useRevokeUserSessions();
 
@@ -63,6 +63,10 @@ export function ActionsCell({ row }: { row: Row<UserData> }) {
         <DropdownMenuItem className="cursor-pointer" onClick={() => openUserFormSheet("details", row.original)}>
           <RiEyeLine />
           {t("administration.users.detail")}
+        </DropdownMenuItem>
+        <DropdownMenuItem className="cursor-pointer" onClick={() => openChangePasswordSheet(row.original)}>
+          <RiLockPasswordLine />
+          {t("administration.users.changePassword")}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {isActive ? (

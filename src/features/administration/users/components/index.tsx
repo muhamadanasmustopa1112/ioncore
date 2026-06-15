@@ -15,6 +15,7 @@ import {
 } from "@/components/common/toolbar";
 import { useUserStore } from "../store/user";
 import { UserFormSheet } from "./form/user-form-sheet";
+import { ChangeUserPasswordSheet } from "./form/change-user-password-sheet";
 import { UserList } from "./list/user-list";
 
 export function UserListPage() {
@@ -78,6 +79,7 @@ export function UserListPage() {
       </div>
 
       <UserFormSheet />
+      <ChangeUserPasswordSheet />
     </div>
   );
 }

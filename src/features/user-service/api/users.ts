@@ -121,8 +121,9 @@ export const useUpdateUserStatus = () => {
   });
 };
 
-export const useAdminResetUserPassword = () =>
-  useMutation({
+export const useAdminResetUserPassword = () => {
+  const qc = useQueryClient();
+  return useMutation({
     mutationFn: ({
       id,
       payload,
@@ -130,7 +131,9 @@ export const useAdminResetUserPassword = () =>
       id: string;
       payload: AdminResetPasswordRequest;
     }) => adminResetUserPassword(id, payload),
+    onSuccess: () => invalidateUsers(qc),
   });
+};
 
 export const useAssignUserRoles = () => {
   const qc = useQueryClient();

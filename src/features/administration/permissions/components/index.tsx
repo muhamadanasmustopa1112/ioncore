@@ -45,6 +45,7 @@ import {
 } from "@/features/user-service/api/permissions";
 import type { CreatePermissionRequest, Permission } from "@/features/user-service/types";
 import { getPageCount } from "@/lib/pagination";
+import { resolvePermissionDisplay } from "@/lib/permission-labels";
 
 const EMPTY_FORM: CreatePermissionRequest = {
   name: "",
@@ -78,11 +79,37 @@ export function PermissionsPage() {
   const columns = useMemo<ColumnDef<Permission>[]>(
     () => [
       {
+        id: "category",
+        accessorFn: (row) => resolvePermissionDisplay(row, t).categoryLabel,
+        header: t("permissions.colCategory", "Category"),
+        cell: ({ row }) => (
+          <Badge variant="secondary" appearance="light" className="text-[10px] font-medium">
+            {resolvePermissionDisplay(row.original, t).categoryLabel}
+          </Badge>
+        ),
+      },
+      {
+        id: "label",
+        accessorFn: (row) => resolvePermissionDisplay(row, t).title,
+        header: t("permissions.colLabel", "Label"),
+        cell: ({ row }) => {
+          const display = resolvePermissionDisplay(row.original, t);
+          return (
+            <div className="min-w-0">
+              <p className="text-sm font-medium">{display.title}</p>
+              {display.scopeHint && (
+                <p className="text-[10px] text-muted-foreground">{display.scopeHint}</p>
+              )}
+            </div>
+          );
+        },
+      },
+      {
         id: "name",
         accessorFn: (row) => row.name,
-        header: t("administration.permissions.colName", "Name"),
+        header: t("permissions.technicalName", "Technical name"),
         cell: ({ row }) => (
-          <span className="font-medium font-mono text-xs">{row.original.name}</span>
+          <span className="font-medium font-mono text-xs text-muted-foreground">{row.original.name}</span>
         ),
       },
       {
