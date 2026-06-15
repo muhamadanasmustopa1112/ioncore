@@ -46,6 +46,7 @@ import { useAccessPolicies, useCreateAccessPolicy } from "@/features/user-servic
 import { useRoles } from "@/features/user-service/api/roles";
 import { usePermissions } from "@/features/user-service/api/permissions";
 import type { AccessPolicy, CreateAccessPolicyRequest } from "@/features/user-service/types";
+import { resolvePermissionDisplay } from "@/lib/permission-labels";
 
 const _unusedColumns: ColumnDef<AccessPolicy>[] = [
   {
@@ -115,7 +116,19 @@ export function AccessPoliciesPage() {
     {
       id: "permission",
       header: t("administration.accessPoliciesPage.colPermission"),
-      accessorFn: (r) => r.permission?.name ?? "—",
+      accessorFn: (r) =>
+        r.permission ? resolvePermissionDisplay(r.permission, t).title : "—",
+      cell: ({ row }) => {
+        const perm = row.original.permission;
+        if (!perm) return <span>—</span>;
+        const display = resolvePermissionDisplay(perm, t);
+        return (
+          <div className="min-w-0">
+            <p className="text-sm font-medium">{display.title}</p>
+            <p className="text-[10px] font-mono text-muted-foreground">{display.technicalName}</p>
+          </div>
+        );
+      },
     },
     {
       id: "resource",
@@ -293,11 +306,17 @@ export function AccessPoliciesPage() {
                   <SelectValue placeholder={t("administration.accessPoliciesPage.placeholderPermission")} />
                 </SelectTrigger>
                 <SelectContent>
-                  {permissions.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name || `${p.resource}.${p.action}`}
-                    </SelectItem>
-                  ))}
+                  {permissions.map((p) => {
+                    const display = resolvePermissionDisplay(p, t);
+                    return (
+                      <SelectItem key={p.id} value={p.id}>
+                        <span className="block">{display.title}</span>
+                        <span className="block text-[10px] font-mono text-muted-foreground">
+                          {display.technicalName}
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { RiLockLine, RiEyeCloseLine, RiEyeLine } from "@remixicon/react";
+import { RiLockLine, RiEyeCloseLine, RiEyeLine, RiLockPasswordLine } from "@remixicon/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,8 @@ interface AccountSectionProps {
 
 export function AccountSection({ onPasswordChange }: AccountSectionProps) {
   const { t } = useTranslation();
-  const { form } = useUserStore();
-  const isDetailMode = form === "details";
+  const { form, selectedUser, openChangePasswordSheet } = useUserStore();
+  const isNewMode = form === "new";
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -26,42 +26,59 @@ export function AccountSection({ onPasswordChange }: AccountSectionProps) {
         <h3 className="text-sm font-semibold">{t("administration.users.account")}</h3>
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-xs font-medium text-muted-foreground">
-          {t("administration.users.password")}
-          {isDetailMode && <span className="ml-1 text-muted-foreground/60 font-normal">({t("administration.users.temporaryPassword")})</span>}
-        </Label>
-        <div className="relative">
-          <Input
-            type={showPassword ? "text" : "password"}
-            placeholder={t("administration.users.minChars")}
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-              onPasswordChange(e.target.value);
-            }}
-            disabled={isDetailMode}
-            className="pr-10"
-          />
-          <Button
-            type="button"
-            mode="icon"
-            variant="ghost"
-            className="absolute end-0.5 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? <RiEyeCloseLine /> : <RiEyeLine />}
-          </Button>
-        </div>
-        {!isDetailMode && (
+      {isNewMode ? (
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">
+            {t("administration.users.password")} <span className="text-red-500">*</span>
+          </Label>
+          <div className="relative">
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder={t("administration.users.minChars")}
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                onPasswordChange(e.target.value);
+              }}
+              className="pr-10"
+            />
+            <Button
+              type="button"
+              mode="icon"
+              variant="ghost"
+              className="absolute end-0.5 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <RiEyeCloseLine /> : <RiEyeLine />}
+            </Button>
+          </div>
           <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-0.5 text-[10px] text-muted-foreground">
             <span>{t("administration.users.minChars")}</span>
             <span>{t("administration.users.minUppercase")}</span>
             <span>{t("administration.users.minLowercase")}</span>
             <span>{t("administration.users.minSpecial")}</span>
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Label className="text-xs font-medium text-muted-foreground">
+            {t("administration.users.password")}
+          </Label>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full justify-start gap-2"
+            disabled={!selectedUser}
+            onClick={() => selectedUser && openChangePasswordSheet(selectedUser)}
+          >
+            <RiLockPasswordLine className="size-4 text-amber-500" />
+            {t("administration.users.changePassword")}
+          </Button>
+          <p className="text-[11px] text-muted-foreground">
+            {t("administration.users.changePasswordHint")}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

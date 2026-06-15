@@ -27,6 +27,11 @@ import {
   useCreateAccessPolicy,
 } from "@/features/user-service/api/access-policies";
 import type { Permission } from "@/features/user-service/types";
+import {
+  groupPermissions,
+  permissionMatchesSearch,
+  resolvePermissionDisplay,
+} from "@/lib/permission-labels";
 import { useRoleStore } from "../../store/role";
 
 type Effect = "allow" | "deny";
@@ -211,15 +216,10 @@ function PermissionsListUI({
   const [search, setSearch] = useState("");
   const filtered = useMemo(() => {
     if (!search.trim()) return permissions;
-    const q = search.toLowerCase();
-    return permissions.filter(
-      (p) =>
-        p.name?.toLowerCase().includes(q) ||
-        p.resource?.toLowerCase().includes(q) ||
-        p.action?.toLowerCase().includes(q) ||
-        p.description?.toLowerCase().includes(q),
-    );
-  }, [permissions, search]);
+    return permissions.filter((p) => permissionMatchesSearch(p, search, t));
+  }, [permissions, search, t]);
+
+  const grouped = useMemo(() => groupPermissions(filtered, t), [filtered, t]);
 
   const readOnly = !onSet;
 
@@ -252,69 +252,83 @@ function PermissionsListUI({
           {t("administration.roles.noPermissionsFound")}
         </div>
       ) : (
-        <ul className="divide-y border rounded-md max-h-[320px] overflow-auto">
-          {filtered.map((perm) => {
-            const current = effectOf(perm.id);
-            const allowKey = `${perm.id}:allow`;
-            const denyKey = `${perm.id}:deny`;
-            return (
-              <li key={perm.id} className="flex items-center gap-3 px-3 py-2 hover:bg-muted/40">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate">{perm.name}</p>
-                  {(perm.resource || perm.action) && (
-                    <p className="text-[11px] text-muted-foreground truncate">
-                      {perm.resource}
-                      {perm.action ? ` · ${perm.action}` : ""}
-                    </p>
-                  )}
-                </div>
-                {current && (
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      current === "allow"
-                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                    }`}
-                  >
-                    {current === "allow" ? "ALLOW" : "DENY"}
-                  </span>
-                )}
-                {!readOnly && (
-                  <div className="flex items-center gap-1">
-                    <Button
-                      size="sm"
-                      variant={current === "allow" ? "primary" : "outline"}
-                      className="h-7 px-2 text-[11px]"
-                      onClick={() => onSet!(perm.id, "allow")}
-                      disabled={disabled || current === "allow"}
-                    >
-                      {pendingKey === allowKey ? (
-                        <Loader2 className="size-3 animate-spin" />
-                      ) : (
-                        <Check className="size-3" />
+        <div className="border rounded-md max-h-[320px] overflow-auto divide-y">
+          {grouped.map((group) => (
+            <div key={group.category}>
+              <div className="sticky top-0 z-10 bg-muted/80 backdrop-blur px-3 py-2 border-b">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {group.label}
+                </p>
+              </div>
+              <ul className="divide-y">
+                {group.items.map((perm) => {
+                  const display = resolvePermissionDisplay(perm, t);
+                  const current = effectOf(perm.id);
+                  const allowKey = `${perm.id}:allow`;
+                  const denyKey = `${perm.id}:deny`;
+                  return (
+                    <li key={perm.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium leading-snug">{display.title}</p>
+                        <p className="text-[11px] text-muted-foreground truncate font-mono">
+                          {display.technicalName}
+                        </p>
+                        {display.scopeHint && (
+                          <p className="text-[10px] text-muted-foreground/80 mt-0.5">
+                            {display.scopeHint}
+                          </p>
+                        )}
+                      </div>
+                      {current && (
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 ${
+                            current === "allow"
+                              ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                          }`}
+                        >
+                          {current === "allow" ? "ALLOW" : "DENY"}
+                        </span>
                       )}
-                      {t("administration.roles.allow")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={current === "deny" ? "destructive" : "outline"}
-                      className="h-7 px-2 text-[11px]"
-                      onClick={() => onSet!(perm.id, "deny")}
-                      disabled={disabled || current === "deny"}
-                    >
-                      {pendingKey === denyKey ? (
-                        <Loader2 className="size-3 animate-spin" />
-                      ) : (
-                        <X className="size-3" />
+                      {!readOnly && (
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button
+                            size="sm"
+                            variant={current === "allow" ? "primary" : "outline"}
+                            className="h-7 px-2 text-[11px]"
+                            onClick={() => onSet!(perm.id, "allow")}
+                            disabled={disabled || current === "allow"}
+                          >
+                            {pendingKey === allowKey ? (
+                              <Loader2 className="size-3 animate-spin" />
+                            ) : (
+                              <Check className="size-3" />
+                            )}
+                            {t("administration.roles.allow")}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={current === "deny" ? "destructive" : "outline"}
+                            className="h-7 px-2 text-[11px]"
+                            onClick={() => onSet!(perm.id, "deny")}
+                            disabled={disabled || current === "deny"}
+                          >
+                            {pendingKey === denyKey ? (
+                              <Loader2 className="size-3 animate-spin" />
+                            ) : (
+                              <X className="size-3" />
+                            )}
+                            {t("administration.roles.deny")}
+                          </Button>
+                        </div>
                       )}
-                      {t("administration.roles.deny")}
-                    </Button>
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
       )}
 
       {footerNote && (
