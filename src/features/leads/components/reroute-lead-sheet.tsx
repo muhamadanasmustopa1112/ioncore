@@ -6,6 +6,7 @@ import { RiArrowRightUpLine } from "@remixicon/react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -35,6 +36,9 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
   const { t } = useTranslation();
   const [branchId, setBranchId] = useState("");
   const [assignedSalesId, setAssignedSalesId] = useState("");
+  const [notes, setNotes] = useState("");
+  const [notesError, setNotesError] = useState("");
+  const [assignedSalesError, setAssignedSalesError] = useState("");
 
   const { data: branches = [], isLoading: branchesLoading } = useBranchList({
     branch_type: "office",
@@ -65,20 +69,44 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
 
     setBranchId(canKeepCurrentBranch ? currentBranchId : "");
     setAssignedSalesId(canKeepCurrentBranch ? (lead?.assigned_sales_id ?? "") : "");
+    setNotes("");
+    setNotesError("");
+    setAssignedSalesError("");
   }, [open, lead, activeBranches]);
 
   const handleSubmit = () => {
     if (!lead || !branchId) return;
+
+    let hasError = false;
+
+    if (!assignedSalesId) {
+      setAssignedSalesError(t("leads.rerouteAssignedSalesRequired", "Assigned sales is required for reroute."));
+      hasError = true;
+    } else {
+      setAssignedSalesError("");
+    }
+
+    const trimmedNotes = notes.trim();
+    if (!trimmedNotes) {
+      setNotesError(t("leads.rerouteNotesRequired", "Notes are required for reroute."));
+      hasError = true;
+    } else {
+      setNotesError("");
+    }
+
+    if (hasError) return;
+
     reroute.mutate(
       {
         branch_id: branchId,
-        ...(assignedSalesId ? { assigned_sales_id: assignedSalesId } : {}),
+        assigned_sales_id: assignedSalesId,
+        notes: trimmedNotes,
       },
       { onSuccess: onClose }
     );
   };
 
-  const canSubmit = !!branchId && !reroute.isPending;
+  const canSubmit = !!branchId && !!assignedSalesId && !!notes.trim() && !reroute.isPending;
 
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -111,6 +139,7 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
                   onValueChange={(v) => {
                     setBranchId(v);
                     setAssignedSalesId("");
+                    setAssignedSalesError("");
                   }}
                   disabled={branchesLoading}
                 >
@@ -141,11 +170,14 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
 
               <div className="space-y-2">
                 <Label className="text-xs font-medium text-muted-foreground">
-                  {t("leads.assignedSales", "Assigned Sales")}
+                  {t("leads.assignedSales", "Assigned Sales")} <span className="text-red-500">*</span>
                 </Label>
                 <Select
-                  value={assignedSalesId || "none"}
-                  onValueChange={(v) => setAssignedSalesId(v === "none" ? "" : v)}
+                  value={assignedSalesId}
+                  onValueChange={(v) => {
+                    setAssignedSalesId(v);
+                    if (assignedSalesError) setAssignedSalesError("");
+                  }}
                   disabled={!branchId || salesAdminsLoading}
                 >
                   <SelectTrigger>
@@ -160,7 +192,6 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">{t("leads.noAssignedSales", "Not assigned")}</SelectItem>
                     {salesAdminUsers.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.name}
@@ -168,6 +199,27 @@ export function RerouteLeadSheet({ lead, open, onClose }: Props) {
                     ))}
                   </SelectContent>
                 </Select>
+                {assignedSalesError && (
+                  <p className="text-xs text-destructive">{assignedSalesError}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-muted-foreground">
+                  {t("leads.notes", "Notes")} <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                  value={notes}
+                  onChange={(e) => {
+                    setNotes(e.target.value);
+                    if (notesError) setNotesError("");
+                  }}
+                  placeholder={t("leads.rerouteNotesPlaceholder", "Reason for rerouting this lead...")}
+                  className="min-h-[96px] resize-none"
+                />
+                {notesError && (
+                  <p className="text-xs text-destructive">{notesError}</p>
+                )}
               </div>
             </div>
           </ScrollArea>

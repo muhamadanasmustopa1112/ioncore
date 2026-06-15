@@ -132,7 +132,8 @@ export interface CreateLeadActivityPayload {
 
 export interface RerouteLeadPayload {
   branch_id: string;
-  assigned_sales_id?: string;
+  assigned_sales_id: string;
+  notes: string;
 }
 
 export interface LeadListParams {
